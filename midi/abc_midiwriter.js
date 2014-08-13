@@ -1,10 +1,10 @@
 /*global window, document, setTimeout */
 
-if (!window.ABCJS)
-	window.ABCJS = {};
+if (!window.ABCXJS)
+	window.ABCXJS = {};
 
-if (!window.ABCJS.midi)
-	window.ABCJS.midi = {};
+if (!window.ABCXJS.midi)
+	window.ABCXJS.midi = {};
 
 (function() {
 function setAttributes(elm, attrs){
@@ -298,12 +298,19 @@ Midi.prototype.embed = function(parent, noplayer) {
 //   embedContainer.innerHTML = '<object id="embed1" classid="clsid:02BF25D5-8C17-4B23-BC80-D3488ABDDC6B" codebase="http://www.apple.com/qtactivex/qtplugin.cab"><param name="src" value="' + data + '"></param><param name="Autoplay" value="false"></param><embed name="embed1" src="' + data + '" autostart="false" enablejavascript="true" /></object>';
 //   embed = document["embed1"];
 
+  var form = setAttributes(document.createElement('form'), {
+    action: data
+    ,method: "get"
+    });  
   
-  var link = setAttributes(document.createElement('a'), {
-    href: data
+  var link = setAttributes(document.createElement('button'), {
+    style:'height: 22px; margin-top:5px;'
     });  
   link.innerHTML = "download midi";
-  parent.insertBefore(link,parent.firstChild);
+  
+  form.insertBefore(link,form.firstChild);
+  
+  parent.insertBefore(form,parent.firstChild);
 
   if (noplayer) return;
 
@@ -314,7 +321,7 @@ Midi.prototype.embed = function(parent, noplayer) {
 	autoplay : 'false', 
 	loop : 'false',
 	enablejavascript: 'true',
-	style:'display:block; height: 20px;'
+	style:'display:inline; height: 28px; float:left; padding:2px;'
 	});
   parent.insertBefore(embed,parent.firstChild);
 };
@@ -363,7 +370,7 @@ function toDurationHex(n) {
   return toHex(res, padding);
 }
 
-ABCJS.midi.MidiWriter = function(parent, options) {
+ABCXJS.midi.MidiWriter = function(parent, options) {
   options = options || {};
   this.parent = parent;
   this.scale = [0,2,4,5,7,9,11];
@@ -395,73 +402,77 @@ ABCJS.midi.MidiWriter = function(parent, options) {
   
 };
 
-ABCJS.midi.MidiWriter.prototype.addListener = function(listener) {
+ABCXJS.midi.MidiWriter.prototype.addListener = function(listener) {
   this.listeners.push(listener);
 };
 
-ABCJS.midi.MidiWriter.prototype.notifySelect = function (abcelem) {
+ABCXJS.midi.MidiWriter.prototype.notifySelect = function (abcelem) {
   for (var i=0; i<this.listeners.length;i++) {
     this.listeners[i].notifySelect(abcelem.abselem);
   }
 };
 
-ABCJS.midi.MidiWriter.prototype.getMark = function() {
+ABCXJS.midi.MidiWriter.prototype.getMark = function() {
   return {line:this.line, staff:this.staff, 
 	  voice:this.voice, pos:this.pos};
 };
 
-ABCJS.midi.MidiWriter.prototype.getMarkString = function(mark) {
+ABCXJS.midi.MidiWriter.prototype.getMarkString = function(mark) {
   mark = mark || this;
   return "line"+mark.line+"staff"+mark.staff+ 
 	  "voice"+mark.voice+"pos"+mark.pos;
 };
 
-ABCJS.midi.MidiWriter.prototype.goToMark = function(mark) {
+ABCXJS.midi.MidiWriter.prototype.goToMark = function(mark) {
   this.line=mark.line;
   this.staff=mark.staff;
   this.voice=mark.voice;
   this.pos=mark.pos;
 };
 
-ABCJS.midi.MidiWriter.prototype.markVisited = function() {
+ABCXJS.midi.MidiWriter.prototype.markVisited = function() {
   this.lastmark = this.getMarkString();
   this.visited[this.lastmark] = true;
 };
 
-ABCJS.midi.MidiWriter.prototype.isVisited = function() {
+ABCXJS.midi.MidiWriter.prototype.isVisited = function() {
   if (this.visited[this.getMarkString()]) return true;
   return false;
 };
 
-ABCJS.midi.MidiWriter.prototype.setJumpMark = function(mark) {
+ABCXJS.midi.MidiWriter.prototype.setJumpMark = function(mark) {
   this.visited[this.lastmark] = mark;
 };
 
-ABCJS.midi.MidiWriter.prototype.getJumpMark = function() {
+ABCXJS.midi.MidiWriter.prototype.getJumpMark = function() {
   return this.visited[this.getMarkString()];
 };
 
-ABCJS.midi.MidiWriter.prototype.getLine = function() {
+ABCXJS.midi.MidiWriter.prototype.hasTablature = function() {
+  return this.abctune.hasTablature;
+};
+
+ABCXJS.midi.MidiWriter.prototype.getLine = function() {
   return this.abctune.lines[this.line];
 };
 
-ABCJS.midi.MidiWriter.prototype.getStaff = function() {
+ABCXJS.midi.MidiWriter.prototype.getStaff = function() {
   try {
-  return this.getLine().staff[this.staff];
+  return this.getLine().staffs[this.staff];
   } catch (e) {
 
   }
 };
 
-ABCJS.midi.MidiWriter.prototype.getVoice = function() {
+ABCXJS.midi.MidiWriter.prototype.getVoice = function() {
   return this.getStaff().voices[this.voice];
 };
 
-ABCJS.midi.MidiWriter.prototype.getElem = function() {
+ABCXJS.midi.MidiWriter.prototype.getElem = function() {
   return this.getVoice()[this.pos];
 };
 
-ABCJS.midi.MidiWriter.prototype.writeABC = function(abctune) {
+ABCXJS.midi.MidiWriter.prototype.writeABC = function(abctune) {
   try {
     this.midi = (this.javamidi) ? new MidiProxy(new JavaMidi(this), new Midi()) : new Midi();
     this.baraccidentals = [];
@@ -497,6 +508,7 @@ ABCJS.midi.MidiWriter.prototype.writeABC = function(abctune) {
     
     // visit each voice completely in turn
     // "problematic" because it means visiting only one staff+voice for each line each time
+    // one more problem: we expect the last staff to be the tablature
     this.staffcount=1; // we'll know the actual number once we enter the code
     for(this.staff=0;this.staff<this.staffcount;this.staff++) {
       this.voicecount=1;
@@ -505,8 +517,8 @@ ABCJS.midi.MidiWriter.prototype.writeABC = function(abctune) {
 	this.restart = {line:0, staff:this.staff, voice:this.voice, pos:0};
 	this.next= null;
 	for(this.line=0; this.line<abctune.lines.length; this.line++) {
-	  var abcline = abctune.lines[this.line];
-	  if (this.getLine().staff) {
+          var s =this.getStaff();
+	  if (s.clef.type !== "accordionTab") {
 	    this.writeABCLine();
 	  }
 	}
@@ -520,29 +532,28 @@ ABCJS.midi.MidiWriter.prototype.writeABC = function(abctune) {
   }
 };
 
-ABCJS.midi.MidiWriter.prototype.writeABCLine = function() {
-  this.staffcount = this.getLine().staff.length;
+ABCXJS.midi.MidiWriter.prototype.writeABCLine = function() {
+  this.staffcount = this.getLine().staffs.length + (this.hasTablature()?-1:0);
   this.voicecount = this.getStaff().voices.length;
   this.setKeySignature(this.getStaff().key);
   this.writeABCVoiceLine();
 };
 
-ABCJS.midi.MidiWriter.prototype.writeABCVoiceLine = function () {
+ABCXJS.midi.MidiWriter.prototype.writeABCVoiceLine = function () {
   this.pos=0;
   while (this.pos<this.getVoice().length) {
     this.writeABCElement(this.getElem());
     if (this.next) {
       this.goToMark(this.next);
       this.next = null;
-      if (!this.getLine().staff) return;
+      //if (!this.getLine().staffs) return;
     } else {
       this.pos++;
     }
   }
 };
 
-ABCJS.midi.MidiWriter.prototype.writeABCElement = function(elem) {
-  var foo;
+ABCXJS.midi.MidiWriter.prototype.writeABCElement = function(elem) {
   switch (elem.el_type) {
   case "note":
     this.writeNote(elem);
@@ -564,7 +575,7 @@ ABCJS.midi.MidiWriter.prototype.writeABCElement = function(elem) {
 };
 
 
-ABCJS.midi.MidiWriter.prototype.writeNote = function(elem) {
+ABCXJS.midi.MidiWriter.prototype.writeNote = function(elem) {
 
   if (elem.startTriplet) {
 	  if (elem.startTriplet === 2)
@@ -632,7 +643,7 @@ ABCJS.midi.MidiWriter.prototype.writeNote = function(elem) {
 
 };
 
-ABCJS.midi.MidiWriter.prototype.handleBar = function (elem) {
+ABCXJS.midi.MidiWriter.prototype.handleBar = function (elem) {
   this.baraccidentals = [];
   
   
@@ -673,13 +684,13 @@ ABCJS.midi.MidiWriter.prototype.handleBar = function (elem) {
 
 };
 
-ABCJS.midi.MidiWriter.prototype.setKeySignature = function(elem) {
+ABCXJS.midi.MidiWriter.prototype.setKeySignature = function(elem) {
   this.accidentals = [0,0,0,0,0,0,0];
   if (this.abctune.formatting.bagpipes) {
     elem.accidentals=[{acc: 'natural', note: 'g'}, {acc: 'sharp', note: 'f'}, {acc: 'sharp', note: 'c'}];
   }
   if (!elem.accidentals) return;
-	window.ABCJS.parse.each(elem.accidentals, function(acc) {
+	window.ABCXJS.parse.each(elem.accidentals, function(acc) {
 		var d = (acc.acc === "sharp") ? 1 : (acc.acc === "natural") ?0 : -1;
 
 		var lowercase = acc.note.toLowerCase();
@@ -689,13 +700,13 @@ ABCJS.midi.MidiWriter.prototype.setKeySignature = function(elem) {
 
 };
 
-ABCJS.midi.MidiWriter.prototype.extractNote = function(pitch) {
+ABCXJS.midi.MidiWriter.prototype.extractNote = function(pitch) {
   pitch = pitch%7;
   if (pitch<0) pitch+=7;
   return pitch;
 };
 
-ABCJS.midi.MidiWriter.prototype.extractOctave = function(pitch) {
+ABCXJS.midi.MidiWriter.prototype.extractOctave = function(pitch) {
   return Math.floor(pitch/7);
 };
 })();

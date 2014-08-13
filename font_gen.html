@@ -2,16 +2,16 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
 	<title>abcjs: Font Generator</title>
-	<script src="raphael.js"></script>
+	<script src="font_generator/raphael_old.js"></script>
 	<script src="font_generator/Emmentaler_400.font.js"></script>
 	<script src="write/sprintf.js"></script>
 	<script src="font_generator/scalefontemmentaler.js"></script>
 
 	<script>
-		function doScale() {
+		function doFont() {
 			var paper = Raphael(document.getElementById("canvas"), 1000, 600);
 			var font = paper.getFont("Emmentaler", 500);
-			scale_font(font, 30, paper);
+			scale_font(font, 40, paper);
 		}
 
 		function showFont() {
@@ -24,8 +24,8 @@
 
 				try {
 					symb = paper.path(font.glyphs[glyph].d).attr({fill: "#000", stroke: "none"});
-					symb.scale(scale, scale, x + 30, y);
-//					symb.translate(x + 30, y);
+					symb.scale(scale, scale, 0, 0);
+					symb.translate(x + 30, y);
 					paper.text(x, y, glyph.charCodeAt(0).toString(16));
 				} catch (e) {
 
@@ -36,7 +36,9 @@
 		}
 	</script>
 </head>
-<body onload="showFont();">
+<body onload="doFont();">
+<!--textarea id="texto" cols="100" rows="20"></textarea-->   
 <div id="canvas"></div>
+
 </body>
 </html>

@@ -16,17 +16,17 @@
 
 /*global window */
 
-if (!window.ABCJS)
-	window.ABCJS = {};
+if (!window.ABCXJS)
+	window.ABCXJS = {};
 
-if (!window.ABCJS.parse)
-	window.ABCJS.parse = {};
+if (!window.ABCXJS.parse)
+	window.ABCXJS.parse = {};
 
 // this is a series of functions that get a particular element out of the passed stream.
 // the return is the number of characters consumed, so 0 means that the element wasn't found.
 // also returned is the element found. This may be a different length because spaces may be consumed that aren't part of the string.
 // The return structure for most calls is { len: num_chars_consumed, token: str }
-window.ABCJS.parse.tokenizer = function() {
+window.ABCXJS.parse.tokenizer = function() {
 	this.skipWhiteSpace = function(str) {
 		for (var i = 0; i < str.length; i++) {
 		  if (!this.isWhiteSpace(str.charAt(i)))
@@ -58,13 +58,6 @@ window.ABCJS.parse.tokenizer = function() {
 			case 'E':return {len: i+1, token: 'E'};
 			case 'F':return {len: i+1, token: 'F'};
 			case 'G':return {len: i+1, token: 'G'};
-//			case 'a':return {len: i+1, token: 'A'};
-//			case 'b':return {len: i+1, token: 'B'};
-//			case 'c':return {len: i+1, token: 'C'};
-//			case 'd':return {len: i+1, token: 'D'};
-//			case 'e':return {len: i+1, token: 'E'};
-//			case 'f':return {len: i+1, token: 'F'};
-//			case 'g':return {len: i+1, token: 'G'};
 		}
 		return {len: 0};
 	};
@@ -116,7 +109,7 @@ window.ABCJS.parse.tokenizer = function() {
 		// The word 'clef' is optional, but if it appears, a clef MUST appear
 		var needsClef = false;
 		var strClef = str.substring(i);
-		if (window.ABCJS.parse.startsWith(strClef, 'clef=')) {
+		if (window.ABCXJS.parse.startsWith(strClef, 'clef=')) {
 			needsClef = true;
 			strClef = strClef.substring(5);
 			i += 5;
@@ -132,29 +125,29 @@ window.ABCJS.parse.tokenizer = function() {
 			strClef = strClef.substring(j);
 		}
 		var name = null;
-		if (window.ABCJS.parse.startsWith(strClef, 'treble'))
+		if (window.ABCXJS.parse.startsWith(strClef, 'treble'))
 			name = 'treble';
-		else if (window.ABCJS.parse.startsWith(strClef, 'bass3'))
+		else if (window.ABCXJS.parse.startsWith(strClef, 'bass3'))
 			name = 'bass3';
-		else if (window.ABCJS.parse.startsWith(strClef, 'bass'))
+		else if (window.ABCXJS.parse.startsWith(strClef, 'bass'))
 			name = 'bass';
-		else if (window.ABCJS.parse.startsWith(strClef, 'tenor'))
+		else if (window.ABCXJS.parse.startsWith(strClef, 'tenor'))
 			name = 'tenor';
-		else if (window.ABCJS.parse.startsWith(strClef, 'alto2'))
+		else if (window.ABCXJS.parse.startsWith(strClef, 'alto2'))
 			name = 'alto2';
-		else if (window.ABCJS.parse.startsWith(strClef, 'alto1'))
+		else if (window.ABCXJS.parse.startsWith(strClef, 'alto1'))
 			name = 'alto1';
-		else if (window.ABCJS.parse.startsWith(strClef, 'alto'))
+		else if (window.ABCXJS.parse.startsWith(strClef, 'alto'))
 			name = 'alto';
-		else if (!bExplicitOnly && (needsClef && window.ABCJS.parse.startsWith(strClef, 'none')))
+		else if (!bExplicitOnly && (needsClef && window.ABCXJS.parse.startsWith(strClef, 'none')))
 			name = 'none';
-		else if (window.ABCJS.parse.startsWith(strClef, 'perc'))
+		else if (window.ABCXJS.parse.startsWith(strClef, 'perc'))
 			name = 'perc';
-		else if (!bExplicitOnly && (needsClef && window.ABCJS.parse.startsWith(strClef, 'C')))
+		else if (!bExplicitOnly && (needsClef && window.ABCXJS.parse.startsWith(strClef, 'C')))
 			name = 'tenor';
-		else if (!bExplicitOnly && (needsClef && window.ABCJS.parse.startsWith(strClef, 'F')))
+		else if (!bExplicitOnly && (needsClef && window.ABCXJS.parse.startsWith(strClef, 'F')))
 			name = 'bass';
-		else if (!bExplicitOnly && (needsClef && window.ABCJS.parse.startsWith(strClef, 'G')))
+		else if (!bExplicitOnly && (needsClef && window.ABCXJS.parse.startsWith(strClef, 'G')))
 			name = 'treble';
 		else
 			return {len: i+5, warn: "Unknown clef specified: " + strOrig};
@@ -206,6 +199,8 @@ window.ABCJS.parse.tokenizer = function() {
 										return {len: 3, token: "bar_right_repeat"};
 								}
 								break;
+							case ':':	// :|:
+								return {len: 3, token: "bar_dbl_repeat"};
 							case '|':	// :||
 								++i;
 								if (line.charAt(i) === ':')  return {len: 4, token: "bar_dbl_repeat"};
@@ -274,7 +269,7 @@ window.ABCJS.parse.tokenizer = function() {
 		var i = this.skipWhiteSpace(str);
 		if (finished(str, i))
 			return 0;
-		if (window.ABCJS.parse.startsWith(str.substring(i), match))
+		if (window.ABCXJS.parse.startsWith(str.substring(i), match))
 			return i+match.length;
 		return 0;
 	};
@@ -574,7 +569,7 @@ window.ABCJS.parse.tokenizer = function() {
 		var arr = str.split('\\');
 		if (arr.length === 1) return str;
 		var out = null;
-		window.ABCJS.parse.each(arr, function(s) {
+		window.ABCXJS.parse.each(arr, function(s) {
 			if (out === null)
 				out = s;
 			else {
@@ -648,9 +643,9 @@ window.ABCJS.parse.tokenizer = function() {
 	};
 
 	this.theReverser = function(str) {
-		if (window.ABCJS.parse.endsWith(str, ", The"))
+		if (window.ABCXJS.parse.endsWith(str, ", The"))
 			return "The " + str.substring(0, str.length-5);
-		if (window.ABCJS.parse.endsWith(str, ", A"))
+		if (window.ABCXJS.parse.endsWith(str, ", A"))
 			return "A " + str.substring(0, str.length-3);
 		return str;
 	};
@@ -658,8 +653,8 @@ window.ABCJS.parse.tokenizer = function() {
 	this.stripComment = function(str) {
 		var i = str.indexOf('%');
 		if (i >= 0)
-			return window.ABCJS.parse.strip(str.substring(0, i));
-		return window.ABCJS.parse.strip(str);
+			return window.ABCXJS.parse.strip(str.substring(0, i));
+		return window.ABCXJS.parse.strip(str);
 	};
 
 	this.getInt = function(str) {

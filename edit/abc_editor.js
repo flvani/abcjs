@@ -1,9 +1,9 @@
 // abc_editor.js
-// window.ABCJS.Editor is the interface class for the area that contains the ABC text. It is responsible for
+// window.ABCXJS.Editor is the interface class for the area that contains the ABC text. It is responsible for
 // holding the text of the tune and calling the parser and the rendering engines.
 //
 // EditArea is an example of using a textarea as the control that is shown to the user. As long as
-// the same interface is used, window.ABCJS.Editor can use a different type of object.
+// the same interface is used, window.ABCXJS.Editor can use a different type of object.
 //
 // EditArea:
 // - constructor(textareaid)
@@ -29,26 +29,102 @@
 /*global document, window, clearTimeout, setTimeout */
 /*global Raphael */
 
-if (!window.ABCJS)
-	window.ABCJS = {};
+if (!window.ABCXJS)
+	window.ABCXJS = {};
 
-if (!window.ABCJS.edit)
-	window.ABCJS.edit = {};
+if (!window.ABCXJS.edit)
+	window.ABCXJS.edit = {};
+    
 
-window.ABCJS.edit.EditArea = function(textareaid) {
+window.ABCXJS.edit.KeySelector = function(id) {
+
+    this.selector = document.getElementById(id);
+    this.cromaticLength = 12;
+    if (this.selector) {
+        this.populate(0);
+    }
+
+};
+
+window.ABCXJS.edit.KeySelector.prototype.populate = function(offSet) {
+    
+    var transposer = new window.ABCXJS.parse.Transposer(0);
+
+    while( this.selector.options.length > 0 ) {
+        this.selector.remove(0);
+    }            
+        
+    for (var i = this.cromaticLength+offSet; i >= -this.cromaticLength+2+offSet; i--) {
+        var opt = document.createElement('option');
+        if(i-1 > offSet) 
+            opt.innerHTML = transposer.number2keysharp[(i+this.cromaticLength-1)%this.cromaticLength] ;
+        else
+            opt.innerHTML = transposer.number2key[(i+this.cromaticLength-1)%this.cromaticLength] ;
+        opt.value = (i+this.cromaticLength-1)
+        this.selector.appendChild(opt);
+    }
+    this.oldValue = offSet+this.cromaticLength;
+    this.selector.value = offSet+this.cromaticLength;
+};
+
+window.ABCXJS.edit.KeySelector.prototype.set = function(value) {
+    this.populate(value);
+    
+};
+
+window.ABCXJS.edit.KeySelector.prototype.addChangeListener = function(editor) {
+  this.selector.onchange = function() {
+    editor.fireChanged( this.value - editor.keySelector.oldValue, "force" );
+  };
+};
+
+window.ABCXJS.edit.AccordionSelector = function(id, accordion) {
+  this.selector = document.getElementById(id);
+  this.accordion = accordion;
+};
+
+window.ABCXJS.edit.AccordionSelector.prototype.updateAccordionList = function() {
+    while(this.selector.options.length > 0){                
+        this.selector.remove(0);
+    }    
+    this.populate();
+};
+
+window.ABCXJS.edit.AccordionSelector.prototype.addChangeListener = function(editor) {
+  this.selector.onchange = function() {
+    editor.accordion.load(parseInt(this.value));
+    editor.fireChanged( 0, "force" );
+  };
+};
+    
+window.ABCXJS.edit.AccordionSelector.prototype.populate = function() {
+    for (var i = 0; i < this.accordion.accordions.length; i++) {
+        var opt = document.createElement('option');
+        opt.innerHTML = this.accordion.accordions[i].getName();
+        opt.value = i;
+        this.selector.appendChild(opt);
+    }
+};
+
+window.ABCXJS.edit.AccordionSelector.prototype.set = function(val) {
+    this.selector.value = val;
+};
+
+window.ABCXJS.edit.EditArea = function(textareaid) {
   this.textarea = document.getElementById(textareaid);
   this.initialText = this.textarea.value;
   this.isDragging = false;
-}
+  this.changeListener;
+};
 
-window.ABCJS.edit.EditArea.prototype.addSelectionListener = function(listener) {
+window.ABCXJS.edit.EditArea.prototype.addSelectionListener = function(listener) {
   this.textarea.onmousemove = function(ev) {
 	  if (this.isDragging)
 	    listener.fireSelectionChanged();
   };
 };
 
-window.ABCJS.edit.EditArea.prototype.addChangeListener = function(listener) {
+window.ABCXJS.edit.EditArea.prototype.addChangeListener = function(listener) {
   this.changelistener = listener;
   this.textarea.onkeyup = function() {
     listener.fireChanged();
@@ -67,11 +143,11 @@ window.ABCJS.edit.EditArea.prototype.addChangeListener = function(listener) {
 };
 
 //TODO won't work under IE?
-window.ABCJS.edit.EditArea.prototype.getSelection = function() {
+window.ABCXJS.edit.EditArea.prototype.getSelection = function() {
   return {start: this.textarea.selectionStart, end: this.textarea.selectionEnd};
 };
 
-window.ABCJS.edit.EditArea.prototype.setSelection = function(start, end) {
+window.ABCXJS.edit.EditArea.prototype.setSelection = function(start, end) {
 	if(this.textarea.setSelectionRange)
 	   this.textarea.setSelectionRange(start, end);
 	else if(this.textarea.createTextRange) {
@@ -85,24 +161,37 @@ window.ABCJS.edit.EditArea.prototype.setSelection = function(start, end) {
   this.textarea.focus();
 };
 
-window.ABCJS.edit.EditArea.prototype.getString = function() {
+window.ABCXJS.edit.EditArea.prototype.getString = function() {
   return this.textarea.value;
 };
 
-window.ABCJS.edit.EditArea.prototype.setString = function(str) {
+window.ABCXJS.edit.EditArea.prototype.setString = function(str, noRefresh ) {
   this.textarea.value = str;
   this.initialText = this.getString();
-  if (this.changelistener) {
+  if (this.changelistener && typeof( noRefresh ) === 'undefined' ) {
     this.changelistener.fireChanged();
   }
 };
 
-window.ABCJS.edit.EditArea.prototype.getElem = function() {
+window.ABCXJS.edit.EditArea.prototype.appendString = function(str, noRefresh ) {
+  //retira \n ao final  
+  while( this.textarea.value.charAt(this.textarea.value.length-1) === '\n' ) {
+    this.textarea.value = this.textarea.value.substr(0,this.textarea.value.length-1);
+  }
+      
+  this.textarea.value += str;
+  this.initialText = this.getString();
+  if (this.changelistener && typeof( noRefresh ) === 'undefined' ) {
+    this.changelistener.fireChanged();
+  }
+};
+
+window.ABCXJS.edit.EditArea.prototype.getElem = function() {
   return this.textarea;
 };
 
 //
-// window.ABCJS.Editor:
+// window.ABCXJS.Editor:
 //
 // constructor(editarea, params)
 //		if editarea is a string, then it is an HTML id of a textarea control.
@@ -136,11 +225,11 @@ window.ABCJS.edit.EditArea.prototype.getElem = function() {
 //		Called internally by fireChanged()
 //		returns true if there has been a change since last call.
 // - updateSelection()
-//		Called when the user has changed the selection. This calls the engraver_controller to show the selection.
+//		Called when the user has changed the selection. This calls the printer to show the selection.
 // - fireSelectionChanged()
 //		Called by the textarea object when the user has changed the selection.
-// - paramChanged(engraverparams)
-//		Called to signal that the engraver params have changed, so re-rendering should occur.
+// - paramChanged(printerparams)
+//		Called to signal that the printer params have changed, so re-rendering should occur.
 // - fireChanged()
 //		Called by the textarea object when the user has changed something.
 // - setNotDirty()
@@ -148,19 +237,39 @@ window.ABCJS.edit.EditArea.prototype.getElem = function() {
 // - isDirty()
 //		Returns true or false, whether the textarea contains the same text that it started with.
 // - highlight(abcelem)
-//		Called by the engraver_controller to highlight an area.
+//		Called by the printer to highlight an area.
 // - pause(bool)
 //		Stops the automatic rendering when the user is typing.
 //
 
-window.ABCJS.Editor = function(editarea, params) {
-	if (params.indicate_changed)
-		this.indicate_changed = true;
+window.ABCXJS.Editor = function(editarea, params) {
+  if (params.indicate_changed)
+    this.indicate_changed = true;
+
   if (typeof editarea === "string") {
-    this.editarea = new window.ABCJS.edit.EditArea(editarea);
+    this.editarea = new window.ABCXJS.edit.EditArea(editarea);
   } else {
     this.editarea = editarea;
   }
+
+  if (params.abcText && typeof params.abcText === "string") {
+     this.editarea.setString(params.abcText, "noRefresh" ) ;
+  }
+
+  if(params.refreshController_id)  
+    this.refreshController = document.getElementById(params.refreshController_id);
+
+  if(params.accordionSelector_id)  {
+    this.accordion = new window.ABCXJS.tablature.Accordion({id: undefined, accordionMaps: params.accordionMaps});
+    this.accordionSelector = new window.ABCXJS.edit.AccordionSelector(params.accordionSelector_id, this.accordion);
+    this.accordionSelector.populate();
+    this.accordionSelector.addChangeListener(this);
+  }
+  if(params.keySelector_id) {  
+    this.keySelector = new window.ABCXJS.edit.KeySelector(params.keySelector_id);
+    this.keySelector.addChangeListener(this);
+  }  
+
   this.editarea.addSelectionListener(this);
   this.editarea.addChangeListener(this);
 
@@ -191,18 +300,17 @@ window.ABCJS.Editor = function(editarea, params) {
   
   this.parserparams = params.parser_options || {};
   this.midiparams = params.midi_options || {};
+  
   this.onchangeCallback = params.onchange;
 
-  this.engraverparams = params.render_options || {};
+  this.printerparams = params.render_options || {};
   
   if (params.gui) {
     this.target = document.getElementById(editarea);
-    this.engraverparams.editable = true;
+    this.printerparams.editable = true;
   } 
   this.oldt = "";
   this.bReentry = false;
-  this.parseABC();
-  this.modelChanged();
 
   this.addClassName = function(element, className) {
     var hasClassName = function(element, className) {
@@ -217,7 +325,7 @@ window.ABCJS.Editor = function(editarea, params) {
   };
 
   this.removeClassName = function(element, className) {
-    element.className = window.ABCJS.parse.strip(element.className.replace(
+    element.className = window.ABCXJS.parse.strip(element.className.replace(
       new RegExp("(^|\\s+)" + className + "(\\s+|$)"), ' '));
     return element;
   };
@@ -233,65 +341,84 @@ window.ABCJS.Editor = function(editarea, params) {
 	  this.removeClassName(el, readonlyClass);
     }
   };
+  
+  if( this.parseABC(0) ) {
+      this.showUp();
+  }
+
 };
 
-window.ABCJS.Editor.prototype.renderTune = function(abc, params, div) {
-  var tunebook = new ABCJS.TuneBook(abc);
-  var abcParser = window.ABCJS.parse.Parse();
+window.ABCXJS.Editor.prototype.getString = function() {
+    return this.editarea.getString();
+};
+
+window.ABCXJS.Editor.prototype.setString = function(text, noRefresh) {
+    this.editarea.setString( text, noRefresh );
+};
+
+window.ABCXJS.Editor.prototype.showUp = function() {
+  this.modelChanged();
+};
+
+window.ABCXJS.Editor.prototype.renderTune = function(abc, params, div) {
+
+  var tunebook = new ABCXJS.TuneBook(abc);
+  var abcParser = new window.ABCXJS.parse.Parse(this.transposer, this.accordion);
   abcParser.parse(tunebook.tunes[0].abc, params); //TODO handle multiple tunes
   var tune = abcParser.getTune();
   var paper = Raphael(div, 800, 400);
-  var engraver_controller = new ABCJS.write.Printer(paper, this.engraverparams);
-  engraver_controller.printABC(tune);
+  var printer = new ABCXJS.write.Printer(paper, {});// TODO: handle printer params
+  printer.printABC(tune);
+ 
 };
 
-window.ABCJS.Editor.prototype.modelChanged = function() {
-  if (this.tunes === undefined) {
-    if (this.mididiv !== undefined && this.mididiv !== this.div)
-		this.mididiv.innerHTML = "";
-    this.div.innerHTML = "";
-	return;
-  }
+window.ABCXJS.Editor.prototype.modelChanged = function() {
+    if (this.tunes === undefined) {
+        if (this.mididiv !== undefined && this.mididiv !== this.div)
+            this.mididiv.innerHTML = "";
+        this.div.innerHTML = "";
+        return;
+    }
 
-  if (this.bReentry)
-    return; // TODO is this likely? maybe, if we rewrite abc immediately w/ abc2abc
-  this.bReentry = true;
-  this.timerId = null;
-  this.div.innerHTML = "";
-  var paper = Raphael(this.div, 800, 400);
-  this.engraver_controller = new ABCJS.write.Printer(paper, this.engraverparams);
-  this.engraver_controller.printABC(this.tunes);
-	this.tunes[0].engraver = this.engraver_controller;	// TODO-PER: We actually want an output object for each tune, not the entire controller. When refactoring, don't save data in the controller.
-  if (ABCJS.midi.MidiWriter && this.mididiv) {
-    if (this.mididiv !== this.div)
-		this.mididiv.innerHTML = "";
-    var midiwriter = new ABCJS.midi.MidiWriter(this.mididiv,this.midiparams);
-    midiwriter.addListener(this.engraver_controller);
-    midiwriter.writeABC(this.tunes[0]); //TODO handle multiple tunes
-  }
-  if (this.warningsdiv) {
-    this.warningsdiv.innerHTML = (this.warnings) ? this.warnings.join("<br />") : "No errors";
-  } 
-  if (this.target) {
-    var textprinter = new window.ABCJS.transform.TextPrinter(this.target, true);
-    textprinter.printABC(this.tunes[0]); //TODO handle multiple tunes
-  }
-  this.engraver_controller.addSelectListener(this);
-  this.updateSelection();
-  this.bReentry = false;
+    if (this.bReentry)
+        return; // TODO is this likely? maybe, if we rewrite abc immediately w/ abc2abc
+    this.bReentry = true;
+    this.timerId = null;
+    this.div.innerHTML = "";
+    var paper = Raphael(this.div, 1100, 700);
+    this.printer = new ABCXJS.write.Printer(paper, this.printerparams );
+    this.printer.printABC(this.tunes);
+    
+    if (ABCXJS.midi && ABCXJS.midi.MidiWriter && this.mididiv) {
+        if (this.mididiv !== this.div)
+            this.mididiv.innerHTML = "";
+        var midiwriter = new ABCXJS.midi.MidiWriter(this.mididiv, this.midiparams);
+        midiwriter.addListener(this.printer);
+        midiwriter.writeABC(this.tunes[0]); //TODO handle multiple tunes
+    }
+    if (this.warningsdiv) {
+        this.warningsdiv.innerHTML = (this.warnings) ? this.warnings.join("<br />") : "No errors";
+    }
+    if (this.target) {
+        var textprinter = new window.ABCXJS.transform.TextPrinter(this.target, true);
+        textprinter.printABC(this.tunes[0]); //TODO handle multiple tunes
+    }
+    this.printer.addSelectListener(this);
+    this.updateSelection();
+    this.bReentry = false;
 };
 
 // Call this to reparse in response to the printing parameters changing
-window.ABCJS.Editor.prototype.paramChanged = function(engraverparams) {
-	this.engraverparams = engraverparams;
+window.ABCXJS.Editor.prototype.paramChanged = function(printerparams) {
+	this.printerparams = printerparams;
 	this.oldt = "";
 	this.fireChanged();
 };
 
 // return true if the model has changed
-window.ABCJS.Editor.prototype.parseABC = function() {
+window.ABCXJS.Editor.prototype.parseABC = function(transpose, force ) {
   var t = this.editarea.getString();
-  if (t===this.oldt) {
+  if ( (t.length === 0 || t===this.oldt ) && typeof(force) === "undefined" ) {
     this.updateSelection();
     return false;
   }
@@ -302,14 +429,38 @@ window.ABCJS.Editor.prototype.parseABC = function() {
 	this.warnings = "";
 	return true;
   }
-  var tunebook = new ABCJS.TuneBook(t);
+  
+  var tunebook = new ABCXJS.TuneBook(t);
   
   this.tunes = [];
   this.warnings = [];
+  
+  if(typeof transpose !== "undefined") {
+      if( this.transposer )
+        this.transposer.reset(transpose);
+      else
+        this.transposer = new window.ABCXJS.parse.Transposer( transpose );
+  }
+  
   for (var i=0; i<tunebook.tunes.length; i++) {
-    var abcParser = new window.ABCJS.parse.Parse();
-    abcParser.parse(tunebook.tunes[i].abc, this.parserparams); //TODO handle multiple tunes
+    var abcParser = new window.ABCXJS.parse.Parse( this.transposer, this.accordion );
+    abcParser.parse(tunebook.tunes[i].abc, this.parserparams ); //TODO handle multiple tunes
     this.tunes[i] = abcParser.getTune();
+    
+    if( this.transposer ) { 
+        if( this.transposer.offSet !== 0 ) {
+          var lines = abcParser.tuneHouseKeeping(tunebook.tunes[i].abc);
+          this.editarea.setString( this.transposer.updateEditor( lines ), "norefresh" );
+        }
+        if(this.keySelector) 
+            this.keySelector.set( this.transposer.keyToNumber( this.transposer.getKeyVoice(0) ) );       
+    }
+    
+    if( this.accordion ) { 
+        // obtem possiveis linhas inferidas para tablatura
+        this.editarea.appendString( this.accordion.updateEditor() );
+    }
+    
     var warnings = abcParser.getWarnings() || [];
     for (var j=0; j<warnings.length; j++) {
       this.warnings.push(warnings[j]);
@@ -318,18 +469,18 @@ window.ABCJS.Editor.prototype.parseABC = function() {
   return true;
 };
 
-window.ABCJS.Editor.prototype.updateSelection = function() {
+window.ABCXJS.Editor.prototype.updateSelection = function() {
   var selection = this.editarea.getSelection();
   try {
-    this.engraver_controller.rangeHighlight(selection.start, selection.end);
+    this.printer.rangeHighlight(selection.start, selection.end);
   } catch (e) {} // maybe printer isn't defined yet?
 };
 
-window.ABCJS.Editor.prototype.fireSelectionChanged = function() {
+window.ABCXJS.Editor.prototype.fireSelectionChanged = function() {
   this.updateSelection();
 };
 
-window.ABCJS.Editor.prototype.setDirtyStyle = function(isDirty) {
+window.ABCXJS.Editor.prototype.setDirtyStyle = function(isDirty) {
 	if (this.indicate_changed === undefined)
 		return;
   var addClassName = function(element, className) {
@@ -345,7 +496,7 @@ window.ABCJS.Editor.prototype.setDirtyStyle = function(isDirty) {
   };
 
   var removeClassName = function(element, className) {
-    element.className = window.ABCJS.parse.strip(element.className.replace(
+    element.className = window.ABCXJS.parse.strip(element.className.replace(
       new RegExp("(^|\\s+)" + className + "(\\s+|$)"), ' '));
     return element;
   };
@@ -360,10 +511,14 @@ window.ABCJS.Editor.prototype.setDirtyStyle = function(isDirty) {
 };
 
 // call when abc text is changed and needs re-parsing
-window.ABCJS.Editor.prototype.fireChanged = function() {
+window.ABCXJS.Editor.prototype.fireChanged = function(transpose, force) {
+    
+  if( typeof(force) ==="undefined" && this.refreshController && ! this.refreshController.checked ) 
+      return;
+    
   if (this.bIsPaused)
     return;
-  if (this.parseABC()) {
+  if (this.parseABC(transpose, force)) {
     var self = this;
     if (this.timerId)	// If the user is still typing, cancel the update
       clearTimeout(this.timerId);
@@ -380,29 +535,29 @@ window.ABCJS.Editor.prototype.fireChanged = function() {
 	  }
 };
 
-window.ABCJS.Editor.prototype.setNotDirty = function() {
+window.ABCXJS.Editor.prototype.setNotDirty = function() {
 	this.editarea.initialText = this.editarea.getString();
 	this.wasDirty = false;
 	this.setDirtyStyle(false);
 };
 
-window.ABCJS.Editor.prototype.isDirty = function() {
+window.ABCXJS.Editor.prototype.isDirty = function() {
 	if (this.indicate_changed === undefined)
 		return false;
 	return this.editarea.initialText !== this.editarea.getString();
 };
 
-window.ABCJS.Editor.prototype.highlight = function(abcelem) {
+window.ABCXJS.Editor.prototype.highlight = function(abcelem) {
   this.editarea.setSelection(abcelem.startChar, abcelem.endChar);
 };
 
-window.ABCJS.Editor.prototype.pause = function(shouldPause) {
+window.ABCXJS.Editor.prototype.pause = function(shouldPause) {
 	this.bIsPaused = shouldPause;
 	if (!shouldPause)
-		this.fireChanged();
+		this.updateRendering();
 };
 
-window.ABCJS.Editor.prototype.pauseMidi = function(shouldPause) {
+window.ABCXJS.Editor.prototype.pauseMidi = function(shouldPause) {
 	if (shouldPause && this.mididiv) {
 		this.mididivSave = this.mididiv;
 		this.addClassName(this.mididiv, 'hidden');

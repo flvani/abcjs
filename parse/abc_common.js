@@ -16,49 +16,84 @@
 
 /*global window */
 
-if (!window.ABCJS)
-	window.ABCJS = {};
+if (!window.ABCXJS)
+	window.ABCXJS = {};
 
-if (!window.ABCJS.parse)
-	window.ABCJS.parse = {};
+if (!window.ABCXJS.parse)
+	window.ABCXJS.parse = {};
 
-window.ABCJS.parse.clone = function(source) {
-	var destination = {};
-	for (var property in source)
-		if (source.hasOwnProperty(property))
-			destination[property] = source[property];
-	return destination;
+// implemented below a more secure form o copy
+//window.ABCXJS.parse.clone = function(source) {
+//     
+//      var destination = {};
+//	for (var property in source)
+//		if (source.hasOwnProperty(property))
+//			destination[property] = source[property];
+//	return destination;
+//};
+
+// implemented below a more secure form o copy
+window.ABCXJS.parse.clone = function(obj) {
+    // Handle the 3 simple types, and null or undefined
+    if (null === obj || "object" !== typeof obj) return obj;
+
+    // Handle Date
+    if (obj instanceof Date) {
+        var copy = new Date();
+        copy.setTime(obj.getTime());
+        return copy;
+    }
+
+    // Handle Array
+    if (obj instanceof Array) {
+        var copy = [];
+        for (var i = 0, len = obj.length; i < len; i++) {
+            copy[i] = window.ABCXJS.parse.clone(obj[i]);
+        }
+        return copy;
+    }
+    
+    // Handle Object
+    if (obj instanceof Object) {
+        var copy = {};
+        for (var attr in obj) {
+            if (obj.hasOwnProperty(attr)) copy[attr] = window.ABCXJS.parse.clone(obj[attr]);
+        }
+        return copy;
+    }
+    
+    throw new Error("Unable to copy obj! Its type isn't supported.");
 };
 
-window.ABCJS.parse.gsub = function(source, pattern, replacement) {
+window.ABCXJS.parse.gsub = function(source, pattern, replacement) {
 	return source.split(pattern).join(replacement);
 };
 
-window.ABCJS.parse.strip = function(str) {
+window.ABCXJS.parse.strip = function(str) {
 	return str.replace(/^\s+/, '').replace(/\s+$/, '');
 };
 
-window.ABCJS.parse.startsWith = function(str, pattern) {
+window.ABCXJS.parse.startsWith = function(str, pattern) {
 	return str.indexOf(pattern) === 0;
 };
 
-window.ABCJS.parse.endsWith = function(str, pattern) {
+window.ABCXJS.parse.endsWith = function(str, pattern) {
 	var d = str.length - pattern.length;
 	return d >= 0 && str.lastIndexOf(pattern) === d;
 };
 
-window.ABCJS.parse.each = function(arr, iterator, context) {
+window.ABCXJS.parse.each = function(arr, iterator, context) {
 	for (var i = 0, length = arr.length; i < length; i++)
 	  iterator.apply(context, [arr[i],i]);
 };
 
-window.ABCJS.parse.last = function(arr) {
+window.ABCXJS.parse.last = function(arr) {
 	if (arr.length === 0)
 		return null;
 	return arr[arr.length-1];
 };
 
-window.ABCJS.parse.compact = function(arr) {
+window.ABCXJS.parse.compact = function(arr) {
 	var output = [];
 	for (var i = 0; i < arr.length; i++) {
 		if (arr[i])
@@ -67,7 +102,7 @@ window.ABCJS.parse.compact = function(arr) {
 	return output;
 };
 
-window.ABCJS.parse.detect = function(arr, iterator) {
+window.ABCXJS.parse.detect = function(arr, iterator) {
 	for (var i = 0; i < arr.length; i++) {
 		if (iterator(arr[i]))
 			return true;

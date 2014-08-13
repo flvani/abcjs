@@ -21,13 +21,13 @@
 
 //function str_repeat(i, m) { for (var o = []; m > 0; o[--m] = i); return(o.join('')); }
 
-if (!window.ABCJS)
-	window.ABCJS = {};
+if (!window.ABCXJS)
+	window.ABCXJS = {};
 
-if (!window.ABCJS.write)
-	window.ABCJS.write = {};
+if (!window.ABCXJS.write)
+	window.ABCXJS.write = {};
 
-ABCJS.write.sprintf = function() {
+ABCXJS.write.sprintf = function() {
   var i = 0, a, f = arguments[i++], o = [], m, p, c, x;
   while (f) {
     if (m = /^[^\x25]+/.exec(f)) o.push(m[0]);

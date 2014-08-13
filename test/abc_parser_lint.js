@@ -64,13 +64,13 @@
 // Expanded:
 // MIDI is now { cmd, param }
 
-if (!window.ABCJS)
-	window.ABCJS = {};
+if (!window.ABCXJS)
+	window.ABCXJS = {};
 
-if (!window.ABCJS.test)
-	window.ABCJS.test = {};
+if (!window.ABCXJS.test)
+	window.ABCXJS.test = {};
 
-window.ABCJS.test.ParserLint = function() {
+window.ABCXJS.test.ParserLint = function() {
 	var decorationList = { type: 'array', optional: true, items: { type: 'string', Enum: [
 		"trill", "lowermordent", "uppermordent", "mordent", "pralltriller", "accent",
 		"fermata", "invertedfermata", "tenuto", "0", "1", "2", "3", "4", "5", "+", "wedge",
@@ -92,7 +92,7 @@ window.ABCJS.test.ParserLint = function() {
 	};
 
 	var appendPositioning = function(properties) {
-		var ret = window.ABCJS.parse.clone(properties);
+		var ret = window.ABCXJS.parse.clone(properties);
 		ret.startChar = { type: 'number' }; //, output: 'hidden' };
 		ret.endChar = { type: 'number' }; //, output: 'hidden' };
 		return ret;
@@ -107,10 +107,7 @@ window.ABCJS.test.ParserLint = function() {
 
 	var fontType = {
 		type: 'object', optional: true, properties: {
-			face: { type: 'string', optional: true },
-			weight: { type: 'string', Enum: [ 'bold', 'normal' ], optional: true },
-			style: { type: 'string',Enum: [ 'italic', 'normal' ],  optional: true },
-			decoration: { type: 'string', Enum: [ 'underline', 'none' ], optional: true },
+			font: { type: 'string', optional: true },
 			size: { type: 'number', optional: true }
 		}
 	};
@@ -201,7 +198,7 @@ window.ABCJS.test.ParserLint = function() {
 				}
 		}},
 		rest: { type: 'object',  optional: true, prohibits: [ 'pitches', 'lyric' ], properties: {
-			type: { type: 'string', Enum: [ 'invisible', 'spacer', 'rest', 'multimeasure', 'whole' ] },	// multimeasure requires duration to be the number of measures.
+			type: { type: 'string', Enum: [ 'invisible', 'spacer', 'rest', 'multimeasure' ] },	// multimeasure requires duration to be the number of measures.
 			endTie: { type: 'boolean', Enum: [ true ], optional: true },
 			startTie: tieProperties
 		}},
@@ -423,7 +420,7 @@ window.ABCJS.test.ParserLint = function() {
 	};
 
 	var addProhibits = function(obj, arr) {
-		var ret = window.ABCJS.parse.clone(obj);
+		var ret = window.ABCXJS.parse.clone(obj);
 		ret.prohibits = arr;
 		return ret;
 	};
@@ -540,16 +537,16 @@ window.ABCJS.test.ParserLint = function() {
 	};
 
 	this.lint = function(tune, warnings) {
-		var ret = window.ABCJS.test.JSONSchema.validate(tune, musicSchema);
+		var ret = window.ABCXJS.test.JSONSchema.validate(tune, musicSchema);
 		var err = "";
-		window.ABCJS.parse.each(ret.errors, function(e) {
+		window.ABCXJS.parse.each(ret.errors, function(e) {
 			err += e.property + ": " + e.message + "\n";
 		});
 		var out = ret.output.join("\n");
 
 		var warn = warnings === undefined ? "No errors" : warnings.join('\n');
-		warn = window.ABCJS.parse.gsub(warn, '<span style="text-decoration:underline;font-size:1.3em;font-weight:bold;">', '$$$$');
-		warn = window.ABCJS.parse.gsub(warn, '</span>', '$$$$');
+		warn = window.ABCXJS.parse.gsub(warn, '<span style="text-decoration:underline;font-size:1.3em;font-weight:bold;">', '$$$$');
+		warn = window.ABCXJS.parse.gsub(warn, '</span>', '$$$$');
 		return "Error:------\n" + err + "\nObj:-------\n" + out + "\nWarn:------\n" + warn;
 	};
 };

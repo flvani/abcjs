@@ -1,26 +1,26 @@
 /*global window */
 
-if (!window.ABCJS)
-	window.ABCJS = {};
+if (!window.ABCXJS)
+	window.ABCXJS = {};
 
-if (!window.ABCJS.parse)
-	window.ABCJS.parse = {};
+if (!window.ABCXJS.parse)
+	window.ABCXJS.parse = {};
 
-window.ABCJS.parse.parseKeyVoice = {};
+window.ABCXJS.parse.parseKeyVoice = {};
 
 (function() {
 	var tokenizer;
 	var warn;
 	var multilineVars;
 	var tune;
-	window.ABCJS.parse.parseKeyVoice.initialize = function(tokenizer_, warn_, multilineVars_, tune_) {
+	window.ABCXJS.parse.parseKeyVoice.initialize = function(tokenizer_, warn_, multilineVars_, tune_) {
 		tokenizer = tokenizer_;
 		warn = warn_;
 		multilineVars = multilineVars_;
 		tune = tune_;
 	};
 
-	window.ABCJS.parse.parseKeyVoice.standardKey = function(keyName) {
+	window.ABCXJS.parse.parseKeyVoice.standardKey = function(keyName) {
 		var key1sharp = {acc: 'sharp', note: 'f'};
 		var key2sharp = {acc: 'sharp', note: 'c'};
 		var key3sharp = {acc: 'sharp', note: 'g'};
@@ -171,6 +171,7 @@ window.ABCJS.parse.parseKeyVoice = {};
 	};
 
 	var clefLines = {
+		'accordionTab': { clef: 'accordionTab', pitch: 11, mid: 0 },
 		'treble': { clef: 'treble', pitch: 4, mid: 0 },
 		'treble+8': { clef: 'treble+8', pitch: 4, mid: 0 },
 		'treble-8': { clef: 'treble-8', pitch: 4, mid: 0 },
@@ -213,7 +214,7 @@ window.ABCJS.parse.parseKeyVoice = {};
 		return mid+oct;
 	};
 
-	window.ABCJS.parse.parseKeyVoice.fixClef = function(clef) {
+	window.ABCXJS.parse.parseKeyVoice.fixClef = function(clef) {
 		var value = clefLines[clef.type];
 		if (value) {
 			clef.clefPos = value.pitch;
@@ -221,34 +222,34 @@ window.ABCJS.parse.parseKeyVoice = {};
 		}
 	};
 
-	window.ABCJS.parse.parseKeyVoice.deepCopyKey = function(key) {
+	window.ABCXJS.parse.parseKeyVoice.deepCopyKey = function(key) {
 		var ret = { accidentals: [], root: key.root, acc: key.acc, mode: key.mode };
-		window.ABCJS.parse.each(key.accidentals, function(k) {
-		ret.accidentals.push(window.ABCJS.parse.clone(k));
+		window.ABCXJS.parse.each(key.accidentals, function(k) {
+		ret.accidentals.push(window.ABCXJS.parse.clone(k));
 		});
 		return ret;
 	};
 
 	var pitches = {A: 5, B: 6, C: 0, D: 1, E: 2, F: 3, G: 4, a: 12, b: 13, c: 7, d: 8, e: 9, f: 10, g: 11};
 
-	window.ABCJS.parse.parseKeyVoice.addPosToKey = function(clef, key) {
+	window.ABCXJS.parse.parseKeyVoice.addPosToKey = function(clef, key) {
 		// Shift the key signature from the treble positions to whatever position is needed for the clef.
 		// This may put the key signature unnaturally high or low, so if it does, then shift it.
 		var mid = clef.verticalPos;
-		window.ABCJS.parse.each(key.accidentals, function(acc) {
+		window.ABCXJS.parse.each(key.accidentals, function(acc) {
 			var pitch = pitches[acc.note];
 			pitch = pitch - mid;
 			acc.verticalPos = pitch;
 		});
 		if (key.impliedNaturals)
-			window.ABCJS.parse.each(key.impliedNaturals, function(acc) {
+			window.ABCXJS.parse.each(key.impliedNaturals, function(acc) {
 				var pitch = pitches[acc.note];
 				pitch = pitch - mid;
 				acc.verticalPos = pitch;
 			});
 
 		if (mid < -10) {
-			window.ABCJS.parse.each(key.accidentals, function(acc) {
+			window.ABCXJS.parse.each(key.accidentals, function(acc) {
 				acc.verticalPos -= 7;
 				if (acc.verticalPos >= 11 || (acc.verticalPos === 10 && acc.acc === 'flat'))
 					acc.verticalPos -= 7;
@@ -258,7 +259,7 @@ window.ABCJS.parse.parseKeyVoice = {};
 					acc.verticalPos -=7;
 			});
 			if (key.impliedNaturals)
-				window.ABCJS.parse.each(key.impliedNaturals, function(acc) {
+				window.ABCXJS.parse.each(key.impliedNaturals, function(acc) {
 					acc.verticalPos -= 7;
 					if (acc.verticalPos >= 11 || (acc.verticalPos === 10 && acc.acc === 'flat'))
 						acc.verticalPos -= 7;
@@ -268,31 +269,31 @@ window.ABCJS.parse.parseKeyVoice = {};
 						acc.verticalPos -=7;
 				});
 		} else if (mid < -4) {
-			window.ABCJS.parse.each(key.accidentals, function(acc) {
+			window.ABCXJS.parse.each(key.accidentals, function(acc) {
 				acc.verticalPos -= 7;
 				if (mid === -8 && (acc.note === 'f' || acc.note === 'g') && acc.acc === 'sharp' )
 					acc.verticalPos -=7;
 			});
 			if (key.impliedNaturals)
-				window.ABCJS.parse.each(key.impliedNaturals, function(acc) {
+				window.ABCXJS.parse.each(key.impliedNaturals, function(acc) {
 					acc.verticalPos -= 7;
 					if (mid === -8 && (acc.note === 'f' || acc.note === 'g') && acc.acc === 'sharp' )
 						acc.verticalPos -=7;
 				});
 		} else if (mid >= 7) {
-			window.ABCJS.parse.each(key.accidentals, function(acc) {
+			window.ABCXJS.parse.each(key.accidentals, function(acc) {
 				acc.verticalPos += 7;
 			});
 			if (key.impliedNaturals)
-				window.ABCJS.parse.each(key.impliedNaturals, function(acc) {
+				window.ABCXJS.parse.each(key.impliedNaturals, function(acc) {
 					acc.verticalPos += 7;
 				});
 		}
 	};
 
-	window.ABCJS.parse.parseKeyVoice.fixKey = function(clef, key) {
-		var fixedKey = window.ABCJS.parse.clone(key);
-		window.ABCJS.parse.parseKeyVoice.addPosToKey(clef, fixedKey);
+	window.ABCXJS.parse.parseKeyVoice.fixKey = function(clef, key) {
+		var fixedKey = window.ABCXJS.parse.clone(key);
+		window.ABCXJS.parse.parseKeyVoice.addPosToKey(clef, fixedKey);
 		return fixedKey;
 	};
 
@@ -327,7 +328,7 @@ window.ABCJS.parse.parseKeyVoice = {};
 		}
 	};
 
-	window.ABCJS.parse.parseKeyVoice.parseKey = function(str)	// (and clef)
+	window.ABCXJS.parse.parseKeyVoice.parseKey = function( str, transposer, line, lineNumber )	
 	{
 		// returns:
 		//		{ foundClef: true, foundKey: true }
@@ -355,13 +356,13 @@ window.ABCJS.parse.parseKeyVoice = {};
 		// first the key
 		switch (tokens[0].token) {
 			case 'HP':
-				window.ABCJS.parse.parseDirective.addDirective("bagpipes");
+				window.ABCXJS.parse.parseDirective.addDirective("bagpipes");
 				multilineVars.key = { root: "HP", accidentals: [], acc: "", mode: "" };
 				ret.foundKey = true;
 				tokens.shift();
 				break;
 			case 'Hp':
-				window.ABCJS.parse.parseDirective.addDirective("bagpipes");
+				window.ABCXJS.parse.parseDirective.addDirective("bagpipes");
 				multilineVars.key = { root: "Hp", accidentals: [{acc: 'natural', note: 'g'}, {acc: 'sharp', note: 'f'}, {acc: 'sharp', note: 'c'}], acc: "", mode: "" };
 				ret.foundKey = true;
 				tokens.shift();
@@ -373,6 +374,13 @@ window.ABCJS.parse.parseKeyVoice = {};
 				tokens.shift();
 				break;
 			default:
+                                if( transposer ) {
+                                   if( transposer.offSet !== 0 ) 
+                                     tokens = transposer.transposeKey( tokenizer, str, line, lineNumber);
+                                   else 
+                                     transposer.registerKey( tokenizer, str);  
+                                } 
+                                
 				var retPitch = tokenizer.getKeyPitch(tokens[0].token);
 				if (retPitch.len > 0) {
 					ret.foundKey = true;
@@ -405,8 +413,8 @@ window.ABCJS.parse.parseKeyVoice = {};
 						}
 					}
 					// We need to do a deep copy because we are going to modify it
-					var oldKey = window.ABCJS.parse.parseKeyVoice.deepCopyKey(multilineVars.key);
-					multilineVars.key = window.ABCJS.parse.parseKeyVoice.deepCopyKey({accidentals: window.ABCJS.parse.parseKeyVoice.standardKey(key)});
+					var oldKey = window.ABCXJS.parse.parseKeyVoice.deepCopyKey(multilineVars.key);
+					multilineVars.key = window.ABCXJS.parse.parseKeyVoice.deepCopyKey({accidentals: window.ABCXJS.parse.parseKeyVoice.standardKey(key)});
 					multilineVars.key.root = retPitch.token;
 					multilineVars.key.acc = acc;
 					multilineVars.key.mode = mode;
@@ -543,6 +551,7 @@ window.ABCJS.parse.parseKeyVoice = {};
 					if (tokens.length === 0) { warn("Expected parameter after clef=", str, 0); return ret; }
 					//break; yes, we want to fall through. That allows "clef=" to be optional.
 				case "treble":
+                                case "accordionTab":
 				case "bass":
 				case "alto":
 				case "tenor":
@@ -557,6 +566,7 @@ window.ABCJS.parse.parseKeyVoice = {};
 						case 'perc':
 						case 'none':
 							break;
+						case 'accordionTab': clef.token = 'accordionTab'; break;
 						case 'C': clef.token = 'alto'; break;
 						case 'F': clef.token = 'bass'; break;
 						case 'G': clef.token = 'treble'; break;
@@ -592,7 +602,7 @@ window.ABCJS.parse.parseKeyVoice = {};
 		tune.setCurrentVoice(multilineVars.currentVoice.staffNum, multilineVars.currentVoice.index);
 	};
 
-	window.ABCJS.parse.parseKeyVoice.parseVoice = function(line, i, e) {
+	window.ABCXJS.parse.parseKeyVoice.parseVoice = function(line, i, e) {
 		//First truncate the string to the first non-space character after V: through either the
 		//end of the line or a % character. Then remove trailing spaces, too.
 		var ret = tokenizer.getMeat(line, i, e);
@@ -609,7 +619,7 @@ window.ABCJS.parse.parseKeyVoice = {};
 		if (multilineVars.voices[id] === undefined) {
 			multilineVars.voices[id] = {};
 			isNew = true;
-			if (multilineVars.score_is_present)
+			if (multilineVars.score_is_present && id.toLowerCase().substr(0,3) !== "tab")
 				warn("Can't have an unknown V: id when the %score directive is present", line, start);
 		}
 		start += id.length;
@@ -654,7 +664,7 @@ window.ABCJS.parse.parseKeyVoice = {};
 					case 'cl':
 						addNextTokenToStaffInfo('clef');
 						// TODO-PER: check for a legal clef; do octavizing
-						var oct = 0;
+						var oct = 0;    
 	//							for (var ii = 0; ii < staffInfo.clef.length; ii++) {
 	//								if (staffInfo.clef[ii] === ',') oct -= 7;
 	//								else if (staffInfo.clef[ii] === "'") oct += 7;
@@ -668,6 +678,7 @@ window.ABCJS.parse.parseKeyVoice = {};
 							staffInfo.verticalPos = calcMiddle(staffInfo.clef, oct);
 						}
 						break;
+                                        case 'accordionTab':
 					case 'treble':
 					case 'bass':
 					case 'tenor':

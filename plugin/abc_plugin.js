@@ -17,10 +17,10 @@
 
 //    requires: abcjs, raphael, jquery
 
-if (!window.ABCJS)
-	window.ABCJS = {};
+if (!window.ABCXJS)
+	window.ABCXJS = {};
 
-window.ABCJS.Plugin = function() {
+window.ABCXJS.Plugin = function() {
 	var is_user_script = false;
 	try {
 		is_user_script = abcjs_is_user_script;
@@ -39,7 +39,7 @@ window.ABCJS.Plugin = function() {
   //this.hide_text = "hide score for: ";
 };
 
-window.ABCJS.Plugin.prototype.start = function(jq) {
+window.ABCXJS.Plugin.prototype.start = function(jq) {
 	this.$ = jq;
 	var body = jq("body");
   this.errors="";
@@ -55,7 +55,7 @@ window.ABCJS.Plugin.prototype.start = function(jq) {
 };
 
 // returns a jquery set of the descendants (including self) of elem which have a text node which matches "X:"
-window.ABCJS.Plugin.prototype.getABCContainingElements = function(elem) {
+window.ABCXJS.Plugin.prototype.getABCContainingElements = function(elem) {
   var results = this.$();
   var includeself = false; // whether self is already included (no need to include it again)
   var self = this;
@@ -79,7 +79,7 @@ window.ABCJS.Plugin.prototype.getABCContainingElements = function(elem) {
 // (and it is not in a subelem)
 // for each abc piece, we surround it with a div, store the abctext in the 
 // div's data("abctext") and return an array 
-window.ABCJS.Plugin.prototype.convertToDivs = function (elem) {
+window.ABCXJS.Plugin.prototype.convertToDivs = function (elem) {
   var self = this;
   var contents = this.$(elem).contents();
   var abctext = "";
@@ -128,7 +128,7 @@ window.ABCJS.Plugin.prototype.convertToDivs = function (elem) {
   return results.get();
 };
 
-window.ABCJS.Plugin.prototype.render = function (contextnode, abcstring) {
+window.ABCXJS.Plugin.prototype.render = function (contextnode, abcstring) {
   var abcdiv = this.$("<div class='"+this.render_classname+"'></div>");
   if (this.render_before) {
     this.$(contextnode).before(abcdiv);
@@ -137,31 +137,31 @@ window.ABCJS.Plugin.prototype.render = function (contextnode, abcstring) {
   }
   var self = this;
   try {
-    var tunebook = new ABCJS.TuneBook(abcstring);
-    var abcParser = new ABCJS.parse.Parse();
+    var tunebook = new ABCXJS.TuneBook(abcstring);
+    var abcParser = new ABCXJS.parse.Parse();
     abcParser.parse(tunebook.tunes[0].abc);
     var tune = abcParser.getTune();
 
     var doPrint = function() {
 	try {
 	  var paper = Raphael(abcdiv.get(0), 800, 400);
-	  var engraver_controller = new ABCJS.write.Printer(paper,self.render_options);
-	  engraver_controller.printABC(tune);
+	  var printer = new ABCXJS.write.Printer(paper,self.render_options);
+	  printer.printABC(tune);
 	} catch (ex) { // f*** internet explorer doesn't like innerHTML in weird situations
 	  // can't remember why we don't do this in the general case, but there was a good reason
 	  abcdiv.remove();
 	  abcdiv = this.$("<div class='"+self.render_classname+"'></div>");
 	  paper = Raphael(abcdiv.get(0), 800, 400);
-	  engraver_controller = new ABCJS.write.Printer(paper);
-	  engraver_controller.printABC(tune);
+	  printer = new ABCXJS.write.Printer(paper);
+	  printer.printABC(tune);
 	  if (self.render_before) {
 	    this.$(contextnode).before(abcdiv);
 	  } else {
 	    this.$(contextnode).after(abcdiv);
 	  }
 	}
-	if (ABCJS.MidiWriter && self.show_midi) {
-	  var midiwriter = new ABCJS.midi.MidiWriter(abcdiv.get(0),self.midi_options);
+	if (ABCXJS.MidiWriter && self.show_midi) {
+	  var midiwriter = new ABCXJS.midi.MidiWriter(abcdiv.get(0),self.midi_options);
 	  midiwriter.writeABC(tune);
 	}
       };
@@ -185,7 +185,7 @@ window.ABCJS.Plugin.prototype.render = function (contextnode, abcstring) {
    }
 };
 
-window.ABCJS.plugin = new window.ABCJS.Plugin();
+window.ABCXJS.plugin = new window.ABCXJS.Plugin();
 
 // There may be a variable defined which controls whether to automatically run the script. If it isn't
 // there then it will throw an exception, so we'll catch it here.
@@ -197,5 +197,5 @@ $(document).ready(function() {
 		// It's ok to fail, and we don't have to do anything.
 	}
 	if (autostart)
-		jQuery(document).ready(ABCJS.plugin.start(jQuery));
+		jQuery(document).ready(ABCXJS.plugin.start(jQuery));
 })();

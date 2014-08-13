@@ -26,13 +26,13 @@ empty list will be returned. A validation error will have two properties:
  * added stringorarray, which allows either a string, or the array specified.
  */
 
-if (!window.ABCJS)
-	window.ABCJS = {};
+if (!window.ABCXJS)
+	window.ABCXJS = {};
 
-if (!window.ABCJS.test)
-	window.ABCJS.test = {};
+if (!window.ABCXJS.test)
+	window.ABCXJS.test = {};
 
-window.ABCJS.test.JSONSchema = {
+window.ABCXJS.test.JSONSchema = {
 	validate : function(/*Any*/instance,/*Object*/schema) {
 		// Summary:
 		//  	To use the validator call JSONSchema.validate with an instance object and an optional schema object.
