@@ -346,11 +346,11 @@ return (this.currKey[idx]?this.currKey[idx]:"C");
 };
 
 window.ABCXJS.parse.Transposer.prototype.normalizeAcc = function ( cKey ) {
-    return cKey.replace(/#/g,'♯').replace(/b/g,'♭');
+    return cKey.replace(/([ABCDEFG])#/g,'$1♯').replace(/([ABCDEFG])b/g,'$1♭');
 };
 
 window.ABCXJS.parse.Transposer.prototype.denormalizeAcc = function ( cKey ) {
-    return cKey.replace(/♯/g,'#').replace(/♭/g,'b');
+    return cKey.replace(/([ABCDEFG])#/g,'$1#').replace(/([ABCDEFG])b/g,'$1b');
 };
 
 window.ABCXJS.parse.Transposer.prototype.getKeyAccOffset = function(note, keyAcc)
