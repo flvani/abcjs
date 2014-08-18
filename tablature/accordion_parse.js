@@ -50,9 +50,10 @@ ABCXJS.tablature.Parse = function( str, vars ) {
     this.durSyms = "0123456789/.";
     this.belSyms = "+-";
     this.barSyms = ":]|";
+    this.accSyms = "♭♯";
     this.i = 0;
     this.xi = 0;
-
+    
     this.warn = function(str) {
         var bad_char = this.line.charAt(this.i);
         if (bad_char === ' ')
@@ -234,6 +235,10 @@ ABCXJS.tablature.Parse.prototype.getSingleBassNote = function() {
   } else {
     note = this.line.charAt(this.i);
     this.i++;
+    if( this.accSyms.indexOf(this.line.charAt(this.i)) >= 0 ) {
+      note += this.line.charAt(this.i);
+      this.i++;
+    }
   }
   return note;
 };
