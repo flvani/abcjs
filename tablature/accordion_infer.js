@@ -52,6 +52,39 @@ ABCXJS.tablature.Infer.prototype.abcElem2TabElem = function(elem, bass) {
     return cp;
 };
 
+ABCXJS.tablature.Infer.prototype.checkSlur = function(elem) {
+    var ini = (elem.startSlur && typeof(elem.startSlur) !== undefined) || false;
+    var end = (elem.endSlur && typeof(elem.endSlur) !== undefined) || false;
+    if( elem.pitches ) {
+       for( var p = 0; p < elem.pitches.length; p ++) {
+           if(elem.pitches[p].startSlur || ini ) {
+             elem.pitches[p].slur = 1;  
+             this.inSlur[p] = ABCXJS.parse.clone(elem.pitches[p]);
+             ini = true;
+           }
+           if(elem.pitches[p].endSlur || end ) {
+             end = true;
+           }
+       }
+    }
+    if( (! ini ) || end ) {
+        for( var s = 0; s < this.inSlur.length; s ++) {
+            if(this.inSlur[s] && this.inSlur[s] !== undefined ) {
+                for( var p = 0; p < elem.pitches.length; p ++) {
+                    if( elem.pitches[p].pitch === this.inSlur[s].pitch  ) {
+                        elem.pitches.splice(p,1);
+                    }
+                }
+                  elem.pitches.splice(s,0,ABCXJS.parse.clone(this.inSlur[s]));
+                  elem.pitches[s].slur = 2;  
+            }
+            if( end ) {
+              this.inSlur[s] = undefined;
+            }
+        }
+    }
+};
+
 ABCXJS.tablature.Infer.prototype.inferTabVoice = function(line) {
     
     if( this.tune.tabStaffPos < 1 || 
@@ -66,6 +99,7 @@ ABCXJS.tablature.Infer.prototype.inferTabVoice = function(line) {
     
     this.bassBarAcc = [];
     this.trebBarAcc = [];
+    this.inSlur = [];
     
     var balance = 0; // só faz sentido quando há duas vozes: baixo e melodia
     var trebDuration  = 0;
@@ -99,7 +133,7 @@ ABCXJS.tablature.Infer.prototype.inferTabVoice = function(line) {
                 idxTreb++;
                 continue;
             }  
-            trebDuration += abcTrebElem.duration|| 0;
+            trebDuration += abcTrebElem.duration||0;
             leu = true;
         }
         if (bassVoice && idxBass < bassVoice.length && balance <= 0 ) {
@@ -119,6 +153,7 @@ ABCXJS.tablature.Infer.prototype.inferTabVoice = function(line) {
         }
         if (!bassVoice || !abcBassElem ) {
             idxTreb++;
+            this.checkSlur(abcTrebElem);
             this.addTABChild(abcTrebElem, inTieTreb, inTieBass);
             if(abcTrebElem.el_type === 'bar')
                     this.trebBarAcc = [];
@@ -147,6 +182,7 @@ ABCXJS.tablature.Infer.prototype.inferTabVoice = function(line) {
                         for (var c = 0; c < abcBassElem.pitches.length; c++) {
                             abcTrebElem.pitches.splice( c, 0, abcBassElem.pitches[c] );
                         }
+                        this.checkSlur(abcTrebElem);
                         this.addTABChild(abcTrebElem, inTieTreb, inTieBass);
                     }    
                 } else if( bassDuration < trebDuration) {
@@ -170,7 +206,11 @@ ABCXJS.tablature.Infer.prototype.inferTabVoice = function(line) {
                 } else {
                     for (var c = 0; c < abcTrebElem.pitches.length; c++) {
                         abcBassElem.pitches.push(abcTrebElem.pitches[c]);
+                        if(abcTrebElem.endSlur){
+                            abcBassElem.endSlur = ABCXJS.parse.clone(abcTrebElem.endSlur);
+                        }
                     }
+                    this.checkSlur(abcBassElem);
                     this.addTABChild(abcBassElem, inTieTreb, inTieBass);
                 }
             } else if (balance > 0) {
@@ -205,6 +245,7 @@ ABCXJS.tablature.Infer.prototype.inferTabVoice = function(line) {
                             abcTrebElem.pitches.splice( c, 0, ABCXJS.parse.clone(remainingBass.pitches[c]) );
                         }
                     }
+                    this.checkSlur(abcTrebElem);
                     this.addTABChild(abcTrebElem, inTieTreb, inTieBass || remaining );
                 }
                 idxTreb++;
@@ -342,6 +383,7 @@ ABCXJS.tablature.Infer.prototype.addTABChild = function(child, inTieTreb, inTieB
     var allClose = true;
     var baixoClose = true;
     var baixoOpen = true;
+    var inSlur = false;
 
     child.inTieTreb = inTieTreb;
     child.inTieBass = inTieBass;
@@ -349,6 +391,7 @@ ABCXJS.tablature.Infer.prototype.addTABChild = function(child, inTieTreb, inTieB
     var qtdBass = 0;
     
     for (var c = 0; c < column.length; c++) {
+        inSlur = inSlur || (column[c].slur && column[c].slur>1);
         qtdBass += column[c].bass ? 1 : 0;
     }
 
@@ -399,7 +442,7 @@ ABCXJS.tablature.Infer.prototype.addTABChild = function(child, inTieTreb, inTieB
                 baixoOpen = typeof (item.buttons.open) !== "undefined";
                 baixoClose = typeof (item.buttons.close) !== "undefined";
             } else {
-                if (inTieTreb)
+                if (inTieTreb || (item.slur && item.slur> 1) )
                     item.c = '--->';
                 allOpen = allOpen ? typeof (item.buttons.open) !== "undefined" : false;
                 allClose = allClose ? typeof (item.buttons.close) !== "undefined" : false;
@@ -410,7 +453,7 @@ ABCXJS.tablature.Infer.prototype.addTABChild = function(child, inTieTreb, inTieB
     // verifica tudo: baixo e melodia
     if ((this.closing && baixoClose && allClose) || (!this.closing && baixoOpen && allOpen)) {
         // manteve o rumo, mas verifica o fole, virando se necessario (e possivel)
-        if (inTieTreb || inTieBass || this.count < this.limit) {
+        if (inTieTreb || inTieBass || inSlur || this.count < this.limit) {
             this.count++;
         } else {
             // neste caso só muda se é possível manter baixo e melodia    
@@ -428,7 +471,7 @@ ABCXJS.tablature.Infer.prototype.addTABChild = function(child, inTieTreb, inTieB
         if ((this.closing && ((bass && baixoClose) || allClose)) || (!this.closing && ((bass && baixoOpen) || allOpen))) {
             this.count++;
         } else if ((!this.closing && ((bass && baixoClose) || allClose)) || (this.closing && ((bass && baixoOpen) || allOpen))) {
-            if (inTieTreb || (bass && inTieBass) || this.count < this.limit) {
+            if (inTieTreb || inSlur || (bass && inTieBass) || this.count < this.limit) {
                 this.count++;
             } else {
                 // neste caso só muda se é possível manter baixo ou melodia    
@@ -454,7 +497,7 @@ ABCXJS.tablature.Infer.prototype.addTABChild = function(child, inTieTreb, inTieB
             if (/*item.c.substr(0, 4) === "dots" ||*/ item.type === "rest") {
                 this.registerLine('z');
             } else {
-                if (!inTieTreb) {
+                if (! (inTieTreb || (item.slur && item.slur> 1) ) ) {
                     item.c = this.elegeBotao(this.closing ? item.buttons.close : item.buttons.open);
                     this.registerLine(this.button2Hex(item.c));
                 } else {

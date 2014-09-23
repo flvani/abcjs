@@ -97,60 +97,39 @@
         <!--applet id="MIDIPlugin" code="MIDIPlugin.class" name="MIDIPlugin" archive="MIDIPlugin.jar" height="2" width="1"></applet-->
         <!--textarea id="target" cols="80" rows="15"></textarea-->
 
-<div id="editControl" style="display:true; float:left;"> 
-           
-       
+<div id="editControl" style="display:inline-block;"> 
+      
 <textarea id="abc" cols="120" rows="10" >
-X:1007
-%%barnumbers 1
-%%papersize A4
-T:Parabéns Crioulo
-T:Parabéns Gaúcho
-C:Dimas Costa e Eleu Salvador
-N:Transcrito por Flávio (versão Club)
-M:C
-L:1/4
-Q:120
-V:1 clef=treble
-V:2 clef=bass
-K:F
-[V:1]| z3 A1/2B1/4=B1/4|: c z2 f3/4e1/4                 | d z2              g | 
-w:Pa-ra- - béns!  Pa-ra-béns! Sa-
-[V:2]| z4              |: z [F,A,C] [F,A,C] z | z [B,,D,F,] [B,,D,F,] z |
-[V:1]| e c z1/2 c1/2d1/2e1/2         | g f2 f3/4f1/4      | f3/2 d1/2 d3/4d1/4 f3/4f1/4  |
-w:ú- de, fe-li-ci-da-de! Que tu co-lhas, sem-pre, to-do
-[V:2]| C, [C,E,G,] C, [C,E,G,] | F,, [F,A,C] F,, z | B,, [B,,D,F,] B,, [B,,D,F,] |
-[V:1]| f c  c3/4c1/4 c3/4c1/4    | d3/4d1/4 d3/4d1/4 e3/4e1/4 d3/4c1/4  |1 g f2 A1/2B1/4=B1/4 :|
-w: di-a, paz e a-le-gri-a na la-vou-ra da ami-za-de Pa-ra-
-[V:2]| F,, [F,A,C] F,, [F,A,C] | B,, [B,,D,F,] C, [C,E,G,]        |1 F,, [F,A,C] F,, z :|
-[V:1]|2 f c  c3/4c1/4 c3/4c1/4    | d3/4d1/4 d3/4d1/4 e3/4e1/4 d3/4c1/4  | g f2-f             |]
-w: za de, paz e a-le-gri-a na la-vou-ra da ami-za-de!
-[V:2]|2 F,, [F,A,C] F,, [F,A,C] | B,, [B,,D,F,] C, [C,E,G,]        | F,, [F,A,C] F,, [F,A,C] |]
-V:Tab
-K:none accordionTab
-| z+z3 z+5'0.5 z+2''0.25 z-70.25 |: z-6' f+z f+z z+7'0.75 z+80.25 | z+5'' b♭-z b♭-z z-8' |
-| C+8 c+7 C+z0.5 >+70.5 c+5''0.5 >+80.5 | F+9 f+7' F+> z-90.75 z-90.25 | B♭-9 b♭->0.5 >-80.5 B♭-80.75 >-80.25 b♭-90.75 >-90.25 |
-| F+7' f+7 F+70.75 >+70.25 f+70.75 >+70.25 | B♭-80.75 >-80.25 b♭-80.75 >-80.25 C-7'0.75 >-7'0.25 c+5''0.75 >+6'0.25 |1 F+9 f+7' F+> z-60.5 z-5'0.25 z-70.25 :|
-|2 F+7' f+7 F+70.75 >+70.25 f+70.75 >+70.25 | B♭-80.75 >-80.25 b♭-80.75 >-80.25 C-7'0.75 >-7'0.25 c+5''0.75 >+6'0.25 | F+9 f+7' F+> f+> |]
+X:1009
+M:2/4
+L:1/16
+Q:140
+V:1
+| D2(FD [DF]2)[CE]2 |
+V:2 bass
+| D,,3[D,F,A,] D,,2[D,F,A,]2 |
+V:3
+K:accordionTab
 </textarea>
-        <div id="outrosControles" style="display:true; float:left;">
-                <select id="selGaitas" ></select>
-            <select id="selKey" ></select>
-            <input type="submit" id="maisOitava" value="+ Oitava" onclick="javascript:doTranspose(12);" />
-            <!--input type="submit" id="maisMeioTom" value="+ 1/2 Tom" onclick="javascript:doTranspose(1);" />
-            <input type="submit"  id="nenosMeioTom" value="- 1/2 Tom" onclick="javascript:doTranspose(-1);" /-->
-            <input type="submit" id="menosOitava" value="- Oitava" onclick="javascript:doTranspose(-12);" />
-            <input type="button" id="printBtn" value="Print Preview" />
-            <input type="submit" id="forceRefresh" value="Refresh" onclick="javascript:doForceRefresh();" />
-            <input type="checkbox" id="chkAutoRefresh" />Auto refresh 
-            <input type="checkbox" id="chkDebug" onclick="javascript:doCheckDebug();" />Debug
-        
-            <div id="warnings"></div>
-            <div id="midi"></div>
-        </div>
-    
-     </div>
-     <div id="canvas" style="overflow-y: scroll; float:left;"></div>
+ </div>
+    <div id="outrosControles">
+            <select id="selGaitas" ></select>
+        <select id="selKey" ></select>
+        <input type="submit" id="maisOitava" value="+ Oitava" onclick="javascript:doTranspose(12);" />
+        <!--input type="submit" id="maisMeioTom" value="+ 1/2 Tom" onclick="javascript:doTranspose(1);" />
+        <input type="submit"  id="nenosMeioTom" value="- 1/2 Tom" onclick="javascript:doTranspose(-1);" /-->
+        <input type="submit" id="menosOitava" value="- Oitava" onclick="javascript:doTranspose(-12);" />
+        <input type="button" id="printBtn" value="Print Preview" />
+        <input type="submit" id="forceRefresh" value="Refresh" onclick="javascript:doForceRefresh();" />
+        <input type="checkbox" id="chkAutoRefresh" />Auto refresh 
+        <input type="checkbox" id="chkDebug" onclick="javascript:doCheckDebug();" />Debug
+
+    </div>
+    <hr>
+    <div id="warnings">warns</div>
+    <!--div id="midi"></div-->
+    <hr>
+    <div id="canvas" style="overflow-y: scroll; float:inline;"> </div>
         
         <script type="text/javascript">
             window.myEditor = {};
