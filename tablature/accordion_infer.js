@@ -17,6 +17,7 @@ ABCXJS.tablature.Infer = function( accordion, tune, strTune, vars ) {
     this.tune = tune;
     this.tuneCurrLine = 0;
     this.voice = [];
+    this.countSlur = 0;
 };
 
 ABCXJS.tablature.Infer.prototype.abcElem2TabElem = function(elem, bass) {
@@ -53,13 +54,16 @@ ABCXJS.tablature.Infer.prototype.abcElem2TabElem = function(elem, bass) {
 };
 
 ABCXJS.tablature.Infer.prototype.checkSlur = function(elem) {
+    //TODO: implementar ligaduras aninhadas
     var ini = (elem.startSlur && typeof(elem.startSlur) !== undefined) || false;
     var end = (elem.endSlur && typeof(elem.endSlur) !== undefined) || false;
     if( elem.pitches ) {
        for( var p = 0; p < elem.pitches.length; p ++) {
-           if(elem.pitches[p].startSlur || ini ) {
+           if( elem.pitches[p].startSlur || ini ) {
+             if( elem.pitches[p].bass ) continue;
              elem.pitches[p].slur = 1;  
-             this.inSlur[p] = ABCXJS.parse.clone(elem.pitches[p]);
+             this.inSlur[this.countSlur] = ABCXJS.parse.clone(elem.pitches[p]);
+             this.countSlur ++;
              ini = true;
            }
            if(elem.pitches[p].endSlur || end ) {
@@ -68,19 +72,30 @@ ABCXJS.tablature.Infer.prototype.checkSlur = function(elem) {
        }
     }
     if( (! ini ) || end ) {
-        for( var s = 0; s < this.inSlur.length; s ++) {
+        for( var s = 0; s < this.countSlur; s ++) {
             if(this.inSlur[s] && this.inSlur[s] !== undefined ) {
+                var countBass = 0;
                 for( var p = 0; p < elem.pitches.length; p ++) {
-                    if( elem.pitches[p].pitch === this.inSlur[s].pitch  ) {
+                    if(elem.pitches[p].bass) {
+                        countBass++;
+                    }
+
+                    if(  countBass <= p && elem.pitches[p].pitch === this.inSlur[s].pitch  ) {
                         elem.pitches.splice(p,1);
                     }
                 }
-                  elem.pitches.splice(s,0,ABCXJS.parse.clone(this.inSlur[s]));
-                  elem.pitches[s].slur = 2;  
+                elem.pitches.splice(s+countBass,0,ABCXJS.parse.clone(this.inSlur[s]));
+                if( (s+countBass) < elem.pitches.length ) {
+                        elem.pitches[s+countBass].slur = 2;  
+                } else {
+                    console.log( 'erro' );
+                }
+                    
             }
-            if( end ) {
-              this.inSlur[s] = undefined;
-            }
+        }
+        if( end ) {
+          this.countSlur = 0 ;
+          this.inSlur = [];
         }
     }
 };
