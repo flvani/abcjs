@@ -108,7 +108,7 @@ ABCXJS.tablature.Infer.prototype.inferTabVoice = function(line) {
     this.tuneCurrLine = line;
     this.producedLine = "";
     this.count = 0;
-    this.limit = 5; // inverte o movimento do fole - deveria ser baseado no tempo das notas.
+    this.limit = 7; // inverte o movimento do fole - deveria ser baseado no tempo das notas.
     this.lastButton = -1;
     this.closing = true;
     
