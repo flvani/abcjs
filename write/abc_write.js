@@ -243,7 +243,7 @@ ABCXJS.write.Printer.prototype.printStem = function (x, dx, y1, y2) {
 ABCXJS.write.Printer.prototype.printTabText = function (x, offset, text, size, anchor) {
   anchor = anchor || "start";
   size = size || 14;
-  if(text==="--->") anchor = "middle";
+  if(text==="-->") anchor = "middle";
   var ret = this.paper.text(x*this.scale, this.calcY(offset)*this.scale, text).attr({"text-anchor":anchor, "font-size":size*this.scale});
   return ret;
 };

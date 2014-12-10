@@ -19,25 +19,7 @@
         ,"open":[["a1:m","A1","f1","F1"],["d2","D2","g1","G1"]]
      }
     }
-  ,"songPathList":
-    [
-       "songs/mercedita.abcx"
-      ,"songs/primeira.valsinha.abcx"
-      ,"songs/hino.do.gremio.abcx"
-      ,"songs/valsa.sertaneja.abcx"
-      ,"songs/canto.alegretense.abcx"
-      ,"songs/parabens.crioulo.abcx"
-    ]
-,"practicePathList":
-    [
-       "practices/exercicio4.abcx"
-      ,"practices/exercicio2.abcx"
-      ,"practices/exercicio3.abcx"
-      ,"practices/exercicio1.abcx"
-    ]
-,"chordPathList":
-    [
-       "chords/acordes.abcx"
-      ,"chords/didatica.abcx"
-    ]
+  ,"songPathList": []
+  ,"practicePathList":[]
+  ,"chordPathList":[]
 }

@@ -144,7 +144,7 @@ ABCXJS.tablature.Parse.prototype.formatToken = function(token) {
 
 ABCXJS.tablature.Parse.prototype.getTabSymbol = function(text) {
     switch(text) {
-        case '>': return '--->';
+        case '>': return '-->';
         default: return text;
     }
 };

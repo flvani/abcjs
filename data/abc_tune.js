@@ -683,6 +683,10 @@ window.ABCXJS.data.Tune = function() {
                 This.lines[This.lineNum].staffs[This.staffNum].brace = params.brace;
             if (params.connectBarLines)
                 This.lines[This.lineNum].staffs[This.staffNum].connectBarLines = params.connectBarLines;
+            if(params.clef.type === 'accordionTab') {
+                        This.hasTablature = true;
+                        This.tabStaffPos = This.staffNum;
+            }
             // Some stuff just happens for the first voice
             createVoice(params);
             if (params.part)

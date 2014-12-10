@@ -144,7 +144,7 @@ ABCXJS.tablature.Infer.prototype.inferTabVoice = function(line) {
         
         if (idxTreb < trebVoice.length && balance >= 0 ) {
             abcTrebElem = this.abcElem2TabElem(trebVoice[idxTreb], false);
-            if(abcTrebElem.title){
+            if(abcTrebElem.title || abcTrebElem.direction ){
                 idxTreb++;
                 continue;
             }  
@@ -452,13 +452,13 @@ ABCXJS.tablature.Infer.prototype.addTABChild = function(child, inTieTreb, inTieB
             if (item.bass) {
                 bass = item;
                 if (inTieBass)
-                    item.c = '--->';
-                this.registerLine(item.c === '--->' ? '>' : item.c);
+                    item.c = '-->';
+                this.registerLine(item.c === '-->' ? '>' : item.c);
                 baixoOpen = typeof (item.buttons.open) !== "undefined";
                 baixoClose = typeof (item.buttons.close) !== "undefined";
             } else {
                 if (inTieTreb || (item.slur && item.slur> 1) )
-                    item.c = '--->';
+                    item.c = '-->';
                 allOpen = allOpen ? typeof (item.buttons.open) !== "undefined" : false;
                 allClose = allClose ? typeof (item.buttons.close) !== "undefined" : false;
             }

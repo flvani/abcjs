@@ -340,12 +340,12 @@ window.ABCXJS.parse.parseKeyVoice = {};
 		//			style
 		//
 		// The format is:
-		// K: [⟨key⟩] [⟨modifiers⟩*]
+		// K: [<key>] [<modifiers>*]
 		// modifiers are any of the following in any order:
-		//  [⟨clef⟩] [middle=⟨pitch⟩] [transpose=[-]⟨number⟩] [stafflines=⟨number⟩] [staffscale=⟨number⟩][style=⟨style⟩]
-		// key is none|HP|Hp|⟨specified_key⟩
-		// clef is [clef=] [⟨clef type⟩] [⟨line number⟩] [+8|-8]
-		// specified_key is ⟨pitch⟩[#|b][mode(first three chars are significant)][accidentals*]
+		//  [<clef>] [middle=<pitch>] [transpose=[-]<number>] [stafflines=<number>] [staffscale=<number>][style=<style>]
+		// key is none|HP|Hp|<specified_key>
+		// clef is [clef=] [<clef type>] [<line number>] [+8|-8]
+		// specified_key is <pitch>[#|b][mode(first three chars are significant)][accidentals*]
 		if (str.length === 0) {
 			// an empty K: field is the same as K:none
 			str = 'none';
@@ -556,7 +556,7 @@ window.ABCXJS.parse.parseKeyVoice = {};
 				case "alto":
 				case "tenor":
 				case "perc":
-					// clef is [clef=] [⟨clef type⟩] [⟨line number⟩] [+8|-8]
+					// clef is [clef=] [clef type] [line number] [+8|-8]
 					var clef = tokens.shift();
 					switch (clef.token) {
 						case 'treble':
@@ -565,8 +565,8 @@ window.ABCXJS.parse.parseKeyVoice = {};
 						case 'bass':
 						case 'perc':
 						case 'none':
+						case 'accordionTab':
 							break;
-						case 'accordionTab': clef.token = 'accordionTab'; break;
 						case 'C': clef.token = 'alto'; break;
 						case 'F': clef.token = 'bass'; break;
 						case 'G': clef.token = 'treble'; break;
@@ -710,8 +710,11 @@ window.ABCXJS.parse.parseKeyVoice = {};
 	//								if (token.token[iii] === ',') oct2 -= 7;
 	//								else if (token.token[iii] === "'") oct2 += 7;
 	//							}
-											  staffInfo.clef = token.token.replace(/[',]/g, ""); //'//comment for emacs formatting of regexp
+						staffInfo.clef = token.token.replace(/[',]/g, ""); //'//comment for emacs formatting of regexp
 						staffInfo.verticalPos = calcMiddle(staffInfo.clef, oct2);
+                                                multilineVars.clef = {type: staffInfo.clef, verticalPos: staffInfo.verticalPos};
+                                                // flavio - linha acima idem  - ret.foundClef = true;
+                                        
 						break;
 					case 'staves':
 					case 'stave':
