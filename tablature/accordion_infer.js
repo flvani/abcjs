@@ -104,6 +104,47 @@ ABCXJS.tablature.Infer.prototype.inferTabVoice = function(line) {
     
     if( this.tune.tabStaffPos < 1 || 
         ! this.tune.lines[line].staffs    ) return; // we expect to find at least the melody line above tablature, otherwise, we cannot infer it.
+
+    this.tuneCurrLine = line;
+    this.producedLine = "";
+    this.count = 0;
+    this.limit = 7; // inverte o movimento do fole - deveria ser baseado no tempo das notas.
+    this.lastButton = -1;
+    this.closing = true;
+    
+    this.bassBarAcc = [];
+    this.trebBarAcc = [];
+    this.inSlur = [];
+    
+    var balance = 0; // só faz sentido quando há duas vozes: baixo e melodia
+    var trebDuration  = 0;
+    var bassDuration  = 0;
+    var idxTreb       = this.voice.length;
+    var idxBass       = this.voice.length;
+    var remainingBass = undefined;
+    var remainingTreb = undefined;
+    var inTieBass     = false;
+    var inTieTreb     = false;
+    
+    var trebStaff  = this.tune.lines[this.tuneCurrLine].staffs[0];
+    var trebVoices = trebStaff.voices;
+    this.accTrebKey = trebStaff.key.accidentals;
+    this.vposTrebStave = trebStaff.clef.verticalPos;
+    
+    if( this.tune.tabStaffPos === 2 ) {
+      var bassStaff  = this.tune.lines[this.tuneCurrLine].staffs[1];
+      var bassVoices = bassStaff.voices;
+      this.accBassKey = bassStaff.key.accidentals;
+      this.vposBassStave = bassStaff.clef.verticalPos;
+    }  
+    
+    return this.voice;
+};
+
+ABCXJS.tablature.Infer.prototype.inferTabVoice2 = function(line) {
+    
+    if( this.tune.tabStaffPos < 1 || 
+        ! this.tune.lines[line].staffs    ) return; // we expect to find at least the melody line above tablature, otherwise, we cannot infer it.
     
     this.tuneCurrLine = line;
     this.producedLine = "";
