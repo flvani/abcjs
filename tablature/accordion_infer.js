@@ -126,19 +126,85 @@ ABCXJS.tablature.Infer.prototype.inferTabVoice = function(line) {
     var inTieBass     = false;
     var inTieTreb     = false;
     
+    var maxIdx = 0;
+    var voices = [];
+     
     var trebStaff  = this.tune.lines[this.tuneCurrLine].staffs[0];
     var trebVoices = trebStaff.voices;
     this.accTrebKey = trebStaff.key.accidentals;
     this.vposTrebStave = trebStaff.clef.verticalPos;
+    for( var i = 0; i < trebVoices.length; i ++ ) {
+        voices[maxIdx] = { voz:trebVoices[i], pos:-1, st:'wait for data', bass:false };
+        maxIdx++;
+    }
     
     if( this.tune.tabStaffPos === 2 ) {
-      var bassStaff  = this.tune.lines[this.tuneCurrLine].staffs[1];
-      var bassVoices = bassStaff.voices;
-      this.accBassKey = bassStaff.key.accidentals;
-      this.vposBassStave = bassStaff.clef.verticalPos;
+        var bassStaff  = this.tune.lines[this.tuneCurrLine].staffs[1];
+        var bassVoices = bassStaff.voices;
+        this.accBassKey = bassStaff.key.accidentals;
+        this.vposBassStave = bassStaff.clef.verticalPos;
+        for( var i = 0; i < bassVoices.length; i ++ ) {
+            voices[maxIdx] = { voz:bassVoices[i], pos:-1, st:'wait for data', bass:true };
+            maxIdx++;
+        }
     }  
+    var dest = [];
+    var st = 2; // 0 - fim; 1 - barra; 2 dados;
+    while( st > 0 ) {
+        for( var j = 0; j < voices.length; j ++ ) {
+            try {
+              st = Math.min(this.read( dest, voices, j ), st);
+            } catch(e) {
+                
+            }
+        }
+        switch(st){
+            case 1:
+                abcTrebElem = this.abcElem2TabElem(dest[0], false)                
+                for( var i = 0; i < voices.length; i ++ ) {
+                    voices[i].st = 'wait for data';
+                }
+                break;
+            case 2:
+                for( var i = 0; i < voices.length; i ++ ) {
+                    voices[i].st = 'wait for data';
+                }
+                break;
+
+        }
+    } 
     
     return this.voice;
+};
+
+ABCXJS.tablature.Infer.prototype.read = function(dest, p_source, item) {
+    var source = p_source[item];
+    switch( source.st ) {
+        case "wait for data":
+            source.pos ++;
+            break;
+        case "closed":
+            return 0;
+            break;
+        case "processing":
+            return 2;
+            break;
+               
+    }
+    
+    while( source.voz[source.pos] && (source.voz[source.pos].direction || source.voz[source.pos].title) &&  source.pos < source.voz.length) {
+       source.pos ++;
+    }
+    
+    if( source.pos < source.voz.length ) {
+        dest[item] = ABCXJS.parse.clone(source.voz[source.pos]);
+        source.st = "processing";
+        return (dest[item].el_type && dest[item].el_type === "bar") ? 1 : 2;
+    } else {
+        source.st = "closed";
+        return 0;
+    }
+        
 };
 
 ABCXJS.tablature.Infer.prototype.inferTabVoice2 = function(line) {
