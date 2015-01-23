@@ -15,9 +15,9 @@
 
            barra ::=  "|", "||", ":|", "|:", ":|:", ":||:", "::", ":||", ":||", "[|", "|]", "|[|", "|]|" [endings]
         
-           coluna ::=  [<singleBassNote>]<bellows><note>[<duration>] 
+           coluna ::=  [<bassNote>]<bellows><note>[<duration>] 
         
-           singleBassNote ::=  { "abcdefgABCDEFG>xz" }
+           bassNote ::=  { "abcdefgABCDEFG>xz" }*
           
            bellows ::= "-"|"+" 
         
@@ -109,17 +109,26 @@ ABCXJS.tablature.Parse.prototype.formatToken = function(token) {
   el.pitches = [];
   el.duration = token.duration * this.vars.default_length;
   el.bellows = token.bellows;
-  if(token.bassNote) {
-    if(token.bassNote === "z")
-      el.pitches[0] = { bass:true, type: "rest", c: '', pitch: 18};
-    else
-      el.pitches[0] = { bass:true, type: "tabText", c: this.getTabSymbol(token.bassNote), pitch: 17.5};
+  
+  var pitchBase = 18;
+  var tt = "tabText";
+  
+  if(token.bassNote.length>1) {
+     pitchBase = 21.3;
+     tt = "tabText2";
   }
+  for( var b = 0; b < token.bassNote.length; ++ b ) {
+    if(token.bassNote[b] === "z")
+      el.pitches[b] = { bass:true, type: "rest", c: '', pitch: pitchBase - (b*3)};
+    else
+      el.pitches[b] = { bass:true, type: tt, c: this.getTabSymbol(token.bassNote[b]), pitch: pitchBase -(b*3) - 0.5};
+  }
+
   var qtd = token.buttons.length;
   var d = qtd;
   
   var tie = true;
-  var slur = false;
+  //var slur = false;
 
   for(var i = 0; i < token.buttons.length; i ++ ) {
     d--;
@@ -225,9 +234,10 @@ ABCXJS.tablature.Parse.prototype.getBarLine = function() {
 
 ABCXJS.tablature.Parse.prototype.getColumn = function() {
     var token = {el_type: "note", type: "note", bassNote: undefined, bellows: "", buttons: [], duration: 1};
-
-    if (this.belSyms.indexOf(this.line.charAt(this.i)) < 0) {
-        token.bassNote = this.getSingleBassNote();
+    token.bassNote = [];
+    
+    while (this.belSyms.indexOf(this.line.charAt(this.i)) < 0 ) {
+      token.bassNote[token.bassNote.length] = this.getBassNote();
     }
     token.bellows = this.getBelows();
     token.buttons = this.getNote();
@@ -237,7 +247,7 @@ ABCXJS.tablature.Parse.prototype.getColumn = function() {
 
 };
 
-ABCXJS.tablature.Parse.prototype.getSingleBassNote = function() {
+ABCXJS.tablature.Parse.prototype.getBassNote = function() {
   var note = "";
   if( this.bassNoteSyms.indexOf(this.line.charAt(this.i)) < 0 ) {
     this.warn( "Expected Bass Note but found " + this.line.charAt(this.i) );

@@ -206,7 +206,7 @@ ABCXJS.write.StaffGroupElement.prototype.draw = function(printer, groupNumber) {
     }
 
     for (i = 0; i < this.voices.length; i++) {
-        if (this.voices[i].stave.numLines === 0)
+        if (this.voices[i].stave.numLines === 0 || this.voices[i].duplicate)
             continue;
         printer.y = this.voices[i].stave.y;
         if( typeof(debug) !== 'undefined' && debug ) {

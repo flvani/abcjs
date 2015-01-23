@@ -119,6 +119,7 @@ V:4 bass
 [V:3]| G,,3[G,B,D] G,,2[G,B,D]2 | D,,3[D,F,A,] D,,2[D,F,A,]2 | D,,3[D,F,A,] D,,2[D,F,A,]2 |
 [V:4]| x3 G,, x2 G,,2 | x8 |x8 |
 V:5 accordionTab
+%| G+[57]2 >+[4'6'] Gg+[>>] G+[57]2 Gg+82 |
 </textarea>
 
 <textarea id="x" cols="120" rows="10" style="display: none;" >
@@ -154,9 +155,9 @@ V:2 bass
 [V:2]| D,,3[D,F,A,] D,,2[D,F,A,]2 | D,,3[D,F,A,] D,,2[D,F,A,]2 | G,,3[G,B,D] G,,2[G,B,D]2 | G,,3[G,B,D] G,,2[G,B,D]2 |
 V:3 accordionTab
 </textarea>
- </div>
-    <div id="outrosControles">
-            <select id="selGaitas" ></select>
+   </div>
+    <div id="outrosControles" style="display:inherit;">
+        <select id="selGaitas" ></select>
         <select id="selKey" ></select>
         <input type="submit" id="maisOitava" value="+ Oitava" onclick="javascript:doTranspose(12);" />
         <!--input type="submit" id="maisMeioTom" value="+ 1/2 Tom" onclick="javascript:doTranspose(1);" />
@@ -166,13 +167,11 @@ V:3 accordionTab
         <input type="submit" id="forceRefresh" value="Refresh" onclick="javascript:doForceRefresh();" />
         <input type="checkbox" id="chkAutoRefresh" />Auto refresh 
         <input type="checkbox" id="chkDebug" onclick="javascript:doCheckDebug();" />Debug
-
     </div>
-    <hr>
-    <div id="warnings">warns</div>
+    <hr>    
+    <div id="warnings">warnings</div>
     <!--div id="midi"></div-->
-    <hr>
-    <div id="canvas" style="overflow-y: scroll; float:inline;"> </div>
+    <div id="canvas" style="overflow-y: scroll; float:left;"> </div>
         
         <script type="text/javascript">
             window.myEditor = {};
@@ -231,8 +230,10 @@ V:3 accordionTab
                         
                 printButton.addEventListener("click", function() {
                     document.getElementById("editControl").style.display = "none";
+                    document.getElementById("outrosControles").style.display = "none";
                     window.print();
                     document.getElementById("editControl").style.display = "inline";
+                    document.getElementById("outrosControles").style.display = "inherit";
                 }, false);
                 
             }

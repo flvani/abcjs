@@ -155,65 +155,53 @@ ABCXJS.write.Printer.prototype.printStave = function (startx, endx, staff ) {
     if(staff.numLines === 4) {
       // para 3 elementos  
       this.printStaveLine(startx,endx,2); // 2
-      this.printStaveLine(startx,endx,8.5); // 8.5
+      this.printStaveLine(startx,endx,8.5, {stroke:"#666666", strokeDashArray:'.', strokeWidth:0.3, fill:"white"}); // 8.5
       
       // para 1 ou 2 elementos
       //this.printStaveLine(startx,endx,0); 
       //this.printStaveLine(startx,endx,5); 
       
-      this.printStaveLine(startx,endx,15); // 15
-      this.printStaveLine(startx,endx,19.5); // 19.5
+      this.printStaveLine(startx,endx,15, {stroke:"black", strokeDashArray:'.', strokeWidth:1, fill:"black"}); // 15
+      this.printStaveLine(startx,endx,19.5, {stroke:"#666666", strokeDashArray:'.', strokeWidth:0.3, fill:"white"}); // 19.5
     } else {
       for (var i = 0; i < staff.numLines; i++) {
         this.printStaveLine(startx,endx,(i+1)*2);
       }
     }
 };
-ABCXJS.write.Printer.prototype.printLedger = function (x1,x2, pitch) {
-    x = this.abctune;
-    return  this.doPrintStaveLine(x1,x2,pitch, true);
-};
-
-ABCXJS.write.Printer.prototype.printStaveLine = function (x1,x2, pitch) {
-    return  this.doPrintStaveLine(x1,x2,pitch, false);
-};
 
 ABCXJS.write.Printer.prototype.printDebugLine = function (x1,x2, y, fill ) {
-  var dy = 0.35;
-  var pathString = ABCXJS.write.sprintf("M %f %f L %f %f L %f %f L %f %f z", x1, y-dy, x2, y-dy, x2, y+dy, x1, y+dy);
-  var ret = this.paper.path().attr({path:pathString, stroke:"none", fill:fill}).toBack();
-    
-  if (this.scale!==1) {
-    ret.scale(this.scale, this.scale, 0, 0);
-  }
-  return ret;
-    
+   this.doPrintStaveLine(x1,x2, y, {fill:fill} ) ; 
 };
 
-ABCXJS.write.Printer.prototype.doPrintStaveLine = function (x1,x2, pitch, isLedger ) {
-  var isIE=/*@cc_on!@*/false;//IE detector
-  var dy = 0.35;
-  var fill = "#000000";
-  if (isIE) {
-    dy = 1;
-    fill = "#666666";
-  }
+ABCXJS.write.Printer.prototype.printStaveLine = function (x1,x2, pitch, attrs) {
+    return  this.doPrintStaveLine(x1, x2, this.calcY(pitch), attrs || {} );
+};
+
+ABCXJS.write.Printer.prototype.printLedger = function (x1, x2, pitch, attrs) {
+    if( pitch < 2 || pitch > 10 ) {
+      return this.doPrintStaveLine(x1, x2, this.calcY(pitch), attrs || {stroke:"black", strokeDashArray:'--', strokeWidth:0.3, fill:"white"} );
+    } else {
+      return null;
+    }  
+};
+
+ABCXJS.write.Printer.prototype.doPrintStaveLine = function (x1,x2, y, attrs ) {
+  var dy = .3;
+  var fill = attrs.fill || "#000000";
+  var stroke = attrs.stroke || "none";
+  var strokeWidth = attrs.strokeWidth || 1;
+  var strokeDashArray = attrs.strokeDashArray || "";
   
-  var y = this.calcY(pitch);
+  //var y = this.calcY(pitch);
   var pathString = ABCXJS.write.sprintf("M %f %f L %f %f L %f %f L %f %f z", x1, y-dy, x2, y-dy, x2, y+dy, x1, y+dy);
-  var ret;
-  if( (!isLedger /*&& ( pitch >= 2 && pitch <= 10 )*/ ) || ( isLedger && (pitch < 2 || pitch > 10) ) ) {
-    ret = this.paper.path().attr({path:pathString, stroke:"none", fill:fill}).toBack();
-  } else {
-    ret = null;
-  }
+  var ret = this.paper.path().attr({path:pathString, fill:fill, stroke: stroke, 'stroke-width':strokeWidth, 'stroke-dasharray':strokeDashArray}).toBack();
 
   if (this.scale!==1) {
     ret.scale(this.scale, this.scale, 0, 0);
   }
   return ret;
 };
-
 
 ABCXJS.write.Printer.prototype.printStem = function (x, dx, y1, y2) {
   if (dx<0) { // correct path "handedness" for intersection with other elements
@@ -241,14 +229,15 @@ ABCXJS.write.Printer.prototype.printStem = function (x, dx, y1, y2) {
 };
 
 ABCXJS.write.Printer.prototype.printTabText = function (x, offset, text, size, anchor) {
-  anchor = anchor || "start";
+  //anchor = anchor || "start"; 
+  anchor = anchor || "middle";
   size = size || 14;
   if(text==="-->") anchor = "middle";
   var ret = this.paper.text(x*this.scale, this.calcY(offset)*this.scale, text).attr({"text-anchor":anchor, "font-size":size*this.scale});
   return ret;
 };
 
-ABCXJS.write.Printer.prototype.printTabText2 = function (x, offset, text, size, anchor) {
+    ABCXJS.write.Printer.prototype.printTabText2 = function (x, offset, text, size, anchor) {
     return this.printTabText(x, offset, text, 12, anchor);
 };
 
