@@ -306,12 +306,12 @@ ABCXJS.write.sortPitch = function(elem) {
   var sorted;
   do {
     sorted = true;
-    for (var p = 0; p<elem.pitches.length-1; p++) {
-      if (elem.pitches[p].pitch>elem.pitches[p+1].pitch) {
+    for (var p = 0; p<elem.length-1; p++) {
+      if (elem[p].pitch>elem[p+1].pitch) {
 	sorted = false;
-	var tmp = elem.pitches[p];
-	elem.pitches[p] = elem.pitches[p+1];
-	elem.pitches[p+1] = tmp;
+	var tmp = elem[p];
+	elem[p] = elem[p+1];
+	elem[p+1] = tmp;
       }     
     }
   } while (!sorted);
@@ -370,7 +370,7 @@ ABCXJS.write.Layout.prototype.printNote = function(elem, nostem, dontDraw) { //s
         this.roomtakenright = Math.max(this.roomtakenright, this.dotshiftx);
 
     } else {
-        ABCXJS.write.sortPitch(elem);
+        ABCXJS.write.sortPitch(elem.pitches);
 
         // determine averagepitch, minpitch, maxpitch and stem direction
         var sum = 0;

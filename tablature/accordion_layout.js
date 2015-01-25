@@ -67,7 +67,11 @@ ABCXJS.tablature.Layout.prototype.printTABElement = function() {
 
 ABCXJS.tablature.Layout.prototype.printTabNote = function(elem) {
     var p, pp;
+    
+// flavio    if(  elem.pitches.length === 0 )
+//        return;
 
+    
     var duration = ABCXJS.write.getDuration(elem);
     if (duration === 0) {
         duration = 0.25;

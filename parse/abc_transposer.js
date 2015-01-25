@@ -323,8 +323,8 @@ window.ABCXJS.parse.Transposer.prototype.transposeKey = function ( tokenizer, st
     
     this.changedLines[ this.changedLines.length ] = { line:lineNumber, text: newLine };
 
-    this.oldKeyAcc = window.ABCXJS.parse.parseKeyVoice.standardKey(cKey);
-    this.newKeyAcc = window.ABCXJS.parse.parseKeyVoice.standardKey(cNewKey);
+    this.oldKeyAcc = window.ABCXJS.parse.parseKeyVoice.standardKey(this.denormalizeAcc(cKey));
+    this.newKeyAcc = window.ABCXJS.parse.parseKeyVoice.standardKey(this.denormalizeAcc(cNewKey));
     
     return tokenizer.tokenize(newStr, 0, newStr.length);
 };
@@ -350,7 +350,7 @@ window.ABCXJS.parse.Transposer.prototype.normalizeAcc = function ( cKey ) {
 };
 
 window.ABCXJS.parse.Transposer.prototype.denormalizeAcc = function ( cKey ) {
-    return cKey.replace(/([ABCDEFG])#/g,'$1#').replace(/([ABCDEFG])b/g,'$1b');
+    return cKey.replace(/([ABCDEFG])♯/g,'$1#').replace(/([ABCDEFG])♭/g,'$1b');
 };
 
 window.ABCXJS.parse.Transposer.prototype.getKeyAccOffset = function(note, keyAcc)

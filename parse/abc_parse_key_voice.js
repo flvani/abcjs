@@ -21,6 +21,7 @@ window.ABCXJS.parse.parseKeyVoice = {};
 	};
 
 	window.ABCXJS.parse.parseKeyVoice.standardKey = function(keyName) {
+            
 		var key1sharp = {acc: 'sharp', note: 'f'};
 		var key2sharp = {acc: 'sharp', note: 'c'};
 		var key3sharp = {acc: 'sharp', note: 'g'};

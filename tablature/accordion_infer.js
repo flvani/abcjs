@@ -15,12 +15,620 @@ ABCXJS.tablature.Infer = function( accordion, tune, strTune, vars ) {
     this.abcText = strTune;
     this.vars = vars;
     this.tune = tune;
-    this.tuneCurrLine = 0;
-    this.voice = [];
-    this.countSlur = 0;
+    this.limit = 7; // inverte o movimento do fole - deveria ser baseado no tempo das notas.
+    
+    this.reset();
+    
 };
 
-ABCXJS.tablature.Infer.prototype.abcElem2TabElem = function(elem, bass) {
+ABCXJS.tablature.Infer.prototype.reset = function() {
+    this.tuneCurrLine = 0;
+    this.voice = [];
+    this.bassBarAcc = [];
+    this.trebBarAcc = [];
+    this.producedLine = "";
+    this.count = 0;
+    this.lastButton = -1;
+    this.closing = true;
+};
+
+ABCXJS.tablature.Infer.prototype.inferTabVoice = function(line) {
+    
+    if( this.tune.tabStaffPos < 1 || ! this.tune.lines[line].staffs ) 
+        return; // we expect to find at least the melody line above tablature, otherwise, we cannot infer it.
+    
+    this.reset();
+    this.tuneCurrLine = line;
+    
+    var maxIdx = 0;
+    var voices = [];
+     
+    var trebStaff  = this.tune.lines[this.tuneCurrLine].staffs[0];
+    var trebVoices = trebStaff.voices;
+    this.accTrebKey = trebStaff.key.accidentals;
+    for( var i = 0; i < trebVoices.length; i ++ ) {
+        voices[maxIdx] = { voz:trebVoices[i], pos:-1, st:'wait for data', bass:false, wi: {}, ties:[] }; // wi - work item
+        maxIdx++;
+    }
+    
+    if( this.tune.tabStaffPos === 2 ) {
+        var bassStaff  = this.tune.lines[this.tuneCurrLine].staffs[1];
+        var bassVoices = bassStaff.voices;
+        this.accBassKey = bassStaff.key.accidentals;
+        for( var i = 0; i < bassVoices.length; i ++ ) {
+            voices[maxIdx] = { voz:bassVoices[i], pos:-1, st:'wait for data', bass:true, wi: {}, ties:[] }; // wi - work item
+            maxIdx++;
+        }
+    }  
+    var st = 1; // 0 - fim; 1 - barra; 2 dados; - 1 para garantir a entrada
+    while( st > 0 ) {
+        //try {
+            st = 0; // 0 para garantir a saida, caso não haja nada para ler
+            for( var j = 0; j < voices.length; j ++ ) {
+                try {
+                  st = Math.max(this.read( voices, j ), st);
+                } catch(e) {
+
+                }
+            }
+            switch(st){
+                case 1: // incluir a barra na tablatura
+                    // neste caso, todas as vozes são "bar", mesmo que algumas já terminaram 
+                    var i = 0;
+                    while ( i < voices.length) {
+                        if(voices[i].wi.el_type && voices[i].wi.el_type === "bar" )     {
+                            this.addTABChild(ABCXJS.parse.clone(voices[i].wi));
+                            i = voices.length;
+                        } else {
+                            i++;
+                        }
+                    }
+
+                    for( var i = 0; i < voices.length; i ++ ) {
+                        if(voices[i].st === 'processing')
+                          voices[i].st = 'wait for data';
+                    }
+                    this.bassBarAcc = [];
+                    this.trebBarAcc = [];
+
+                    break;
+                case 2:
+                    this.addTABChild(this.extraiIntervalo(voices));
+                    break;
+            }
+        //} catch (err) {
+        //    if (err !== "normal_abort")
+        //        throw err;
+        //}
+    } 
+    
+    this.accordion.setTabLine(this.producedLine);
+    return this.voice;
+};
+
+ABCXJS.tablature.Infer.prototype.read = function(p_source, item) {
+    var source = p_source[item];
+    switch( source.st ) {
+        case "wait for data":
+            source.pos ++;
+            break;
+        case "closed":
+            return 0;
+            break;
+        case "processing":
+            return 2;
+            break;
+               
+    }
+    
+    while( source.voz[source.pos] && (source.voz[source.pos].direction || source.voz[source.pos].title) &&  source.pos < source.voz.length) {
+       source.pos ++;
+    }
+    
+    if( source.pos < source.voz.length ) {
+        source.wi = ABCXJS.parse.clone(source.voz[source.pos]);
+        this.checkTies(source);
+        source.st = "processing";
+        return (source.wi.el_type && source.wi.el_type === "bar") ? 1 : 2;
+    } else {
+        source.st = "closed";
+        return 0;
+    }
+       
+};
+
+ABCXJS.tablature.Infer.prototype.checkTies = function(voice) {
+    if(voice.wi.el_type && voice.wi.el_type === "note" && voice.wi.pitches )  {
+        for( var j = 0; j < voice.wi.pitches.length; j ++  ) {
+            voice.wi.pitches[j].inTie = voice.ties[100+voice.wi.pitches[j].pitch]?2:0;
+        }
+    }    
+};
+
+ABCXJS.tablature.Infer.prototype.setTies = function(voice) {
+    // add 100 to avoid negative values
+    if(voice.wi.el_type && voice.wi.el_type === "note" && voice.wi.pitches )  {
+        for( var j = 0; j < voice.wi.pitches.length; j ++  ) {
+            if( voice.wi.pitches[j].endSlur || voice.wi.pitches[j].endTie )
+                voice.ties.splice( 100+voice.wi.pitches[j].pitch, 1);
+            if( voice.wi.pitches[j].startSlur || voice.wi.pitches[j].startTie )
+                voice.ties[100+voice.wi.pitches[j].pitch] = true;
+        }
+    }
+};
+
+ABCXJS.tablature.Infer.prototype.extraiIntervalo = function(voices) {
+    var minDur = 100;
+    
+    for( var i = 0; i < voices.length; i ++ ) {
+        if( voices[i].wi.duration && voices[i].wi.duration > 0  && voices[i].wi.duration < minDur ) {
+            minDur = voices[i].wi.duration;
+        }
+    }
+    
+    var wf = { el_type: 'note', duration: minDur, startChar: 0, endChar: 0, pitches:[], bassNote: [] }; // wf - final working item
+    
+    for( var i = 0; i < voices.length; i ++ ) {
+        var elem = voices[i].wi;
+        if( elem.rest ) {
+            switch (elem.rest.type) {
+                case "rest":
+                    if(this.vars.restsintab) {
+                        wf.pitches[wf.pitches.length] = ABCXJS.parse.clone(elem.rest);
+                        wf.pitches[wf.pitches.length-1].bass = voices[i].bass;
+                        //wf.pitches[wf.pitches.length-1].type = "invisible";
+                    }    
+                case "invisible":
+                case "spacer":
+                    break;
+            }        
+        }else if( elem.pitches ) {
+            if( voices[i].bass ) {
+                //todo: tratar adequadamente os acordes
+                var isChord = elem.pitches.length>1;
+                ABCXJS.write.sortPitch(elem.pitches);
+                elem.pitches.splice(1, elem.pitches.length - 1);
+                elem.pitches[0].chord=isChord;
+                wf.bassNote[wf.bassNote.length] = ABCXJS.parse.clone(elem.pitches[0]);
+            } else {
+                for( var j = 0; j < elem.pitches.length; j ++  ) {
+                    wf.pitches[wf.pitches.length] = ABCXJS.parse.clone(elem.pitches[j]);
+                }
+            }
+        }
+        
+        this.setTies(voices[i]);
+        
+        if( voices[i].wi.duration ) {
+            voices[i].wi.duration -= minDur;
+            if( voices[i].wi.duration <= 0 ) {
+               voices[i].st = 'wait for data';
+            } else {
+                if(voices[i].wi.pitches) {
+                    for( var j = 0; j < voices[i].wi.pitches.length; j ++  ) {
+                        voices[i].wi.pitches[j].inTie = 2;
+                    }
+                }
+            }
+        }
+    }
+    
+    return wf;
+    
+};
+
+
+ABCXJS.tablature.Infer.prototype.addTABChild = function(token) {
+
+    if (token.el_type !== "note") {
+        var xi = this.getXi();
+        var xf = this.registerLine(this.abcText.substr(token.startChar, token.endChar - token.startChar) + " ");
+        this.add(token, xi, xf - 1 );
+        return;
+    }
+    
+    var child = {
+         el_type: token.el_type 
+        ,startChar: 0
+        ,endChar: 0
+        ,pitches: []
+        ,duration: token.duration
+        ,bellows: ""
+    };
+
+
+    var bass = token.bassNote.length>0;
+    var column = token.pitches;
+    var allOpen = true;
+    var allClose = true;
+    var baixoClose = true;
+    var baixoOpen = true;
+    var inSlur = false;
+    var inTie = false;
+
+    var qtd = column.length;
+    var offset = (qtd===3?-3.6:-6.4); // inicialmente as notas estão na posição "fechando". Se precisar alterar para "abrindo" este é offset da altura
+
+    var pitchBase = 18;
+    var tt = "tabText";
+
+    if(token.bassNote.length>1) {
+       pitchBase = 21.3;
+       tt = "tabText2";
+       ABCXJS.write.sortPitch(token.bassNote);
+    }
+    
+    for (var b = 0; b < token.bassNote.length; ++b) {
+        inTie = ((token.bassNote.inTie && token.bassNote.inTie> 1)|| inTie);
+        switch(token.bassNote[b].type) {
+            case 'rest':
+            case 'invisible':
+            case 'spacer':
+                child.pitches[b] = {bass: true, type: "rest", c: '', pitch: pitchBase - (b * 3)};
+                this.registerLine('z');
+                break
+            default:
+                child.pitches[b] = this.getBassNote(token.bassNote[b], tt, pitchBase - (b * 3) - 0.5);
+                this.registerLine(child.pitches[b].c === '-->' ? '>' : child.pitches[b].c);
+                baixoOpen  = baixoOpen  ? typeof (child.pitches[b].buttons.open) !== "undefined" : false;
+                baixoClose = baixoClose ? typeof (child.pitches[b].buttons.close) !== "undefined" : false;
+        }
+    }
+
+
+    var d = qtd; // pela organização da accordion as notas graves ficam melhor se impressas antes, admitindo que foi escrito em ordem crescente no arquivo abc
+    var xi = this.getXi();
+    for (var c = 0; c < column.length; c++) {
+        var item = column[c];
+        inTie = ((item.inTie &&item.inTie> 1) || inTie);
+        switch(item.type) {
+            case 'rest':
+            case 'invisible':
+            case 'spacer':
+                item.pitch = 12.2;
+                break
+            default:
+                var note = this.getNoteName(item, this.accTrebKey, this.trebBarAcc);
+                d--;
+                item.buttons = this.accordion.getButtons(note, false);
+                item.note = note;
+                item.c = (item.inTie && item.inTie > 1 )? '-->' :  note;
+                item.pitch = (qtd === 1 ? 11.7 : 13 -( d * 2.8));
+                item.type = "tabText" + (qtd > 1 ? 2 : "");
+
+                allOpen = allOpen ? typeof (item.buttons.open) !== "undefined" : false;
+                allClose = allClose ? typeof (item.buttons.close) !== "undefined" : false;
+        }
+        
+        child.pitches[child.pitches.length] = item;
+    }
+
+    // verifica tudo: baixo e melodia
+    if ((this.closing && baixoClose && allClose) || (!this.closing && baixoOpen && allOpen)) {
+        // manteve o rumo, mas verifica o fole, virando se necessario (e possivel)
+        if ( inTie || inSlur || this.count < this.limit) {
+            this.count++;
+        } else {
+            // neste caso só muda se é possível manter baixo e melodia    
+            if ((!this.closing && baixoClose && allClose) || (this.closing && baixoOpen && allOpen)) {
+                this.count = 1;
+                this.closing = !this.closing;
+            }
+        }
+    } else if ((!this.closing && baixoClose && allClose) || (this.closing && baixoOpen && allOpen)) {
+        //mudou o rumo, mantendo baixo e melodia
+        this.count = 1;
+        this.closing = !this.closing;
+    } else {
+        // não tem teclas de melodia e baixo simultaneamente: privilegia o baixo, se houver.
+        if ((this.closing && ((bass && baixoClose) || allClose)) || (!this.closing && ((bass && baixoOpen) || allOpen))) {
+            this.count++;
+        } else if ((!this.closing && ((bass && baixoClose) || allClose)) || (this.closing && ((bass && baixoOpen) || allOpen))) {
+            if (  inTie || inSlur || this.count < this.limit) {
+                this.count++;
+            } else {
+                // neste caso só muda se é possível manter baixo ou melodia    
+                if ((!this.closing && (bass && baixoClose) && allClose) || (this.closing && (bass && baixoOpen) && allOpen)) {
+                    this.count = 1;
+                    this.closing = !this.closing;
+                }
+            }
+        }
+    }
+
+    child.bellows = this.closing ? "+" : "-";
+    this.registerLine(child.bellows);
+    this.registerLine(qtd > 1 ? "[" : "");
+
+    // segunda passada: altera o que será exibido, conforme definições da primeira passada
+    column = child.pitches;
+    for (var c = 0; c < column.length; c++) {
+        var item = column[c];
+        if (!item.bass) {
+            if (!this.closing)
+                item.pitch += offset;
+            if (/*item.c.substr(0, 4) === "dots" ||*/ item.type === "rest" || item.type === "invisible"|| item.type === "spacer") {
+                this.registerLine('z');
+            } else {
+                if (! (item.inTie && item.inTie> 1) ) {
+                    item.c = this.elegeBotao(this.closing ? item.buttons.close : item.buttons.open);
+                    this.registerLine(this.button2Hex(item.c));
+                } else {
+                    this.registerLine('>');
+                }
+            }
+        }
+    }
+    var dur = child.duration / this.vars.default_length;
+    var xf = this.registerLine((qtd > 1 ? "]" : "") + (dur !== 1 ? dur.toString() : "") + " ");
+    this.add(child, xi, xf-1);
+};
+
+ABCXJS.tablature.Infer.prototype.getBassNote = function(token, tt, pitch) {
+    var item = { bass:true, type: tt, c: "", pitch: pitch, inTie: token.inTie || 0 };
+    
+    var note = this.getNoteName(token, this.accBassKey, this.bassBarAcc);
+    if (token.chord)
+        note = note.toLowerCase();
+    // retira a oitava, mas deveria incluir complementos, tais como menor, 7th, etc.
+    item.buttons = this.accordion.getButtons(note, true);
+    note = note.substr(0, note.length - 1);
+    item.note = note;
+    item.c = (item.inTie && item.inTie > 1 )? '-->' :  note;
+    
+    return item;
+};
+
+ABCXJS.tablature.Infer.prototype.getNoteName = function(item, keyAcc, barAcc ) {
+    // mapeia 
+    //  de: nota da pauta + acidentes (tanto da clave, quanto locais)
+    //  para: valor da nota cromatica (com oitava)
+
+    var n = this.accordion.transposer.staffNoteToCromatic(this.accordion.transposer.extractStaffNote(item.pitch));
+    var oitava = this.accordion.transposer.extractStaffOctave(item.pitch);
+    var staffNote = this.accordion.transposer.numberToKey(n);
+    
+    if(item.accidental) {
+        barAcc[item.pitch] = this.accordion.transposer.getAccOffset(item.accidental);
+        n += barAcc[item.pitch];
+    } else {
+        if(typeof(barAcc[item.pitch]) !== "undefined") {
+          n += barAcc[item.pitch];
+        } else {
+          n += this.accordion.transposer.getKeyAccOffset(staffNote, keyAcc);
+        }
+    }
+    
+    oitava += (n < 0 ? -1 : (n > 11 ? 1 : 0 ));
+    n       = (n < 0 ? 12+n : (n > 11 ? n%12 : n ) );
+    
+    return this.accordion.transposer.numberToKey(n) + oitava;
+};
+
+ABCXJS.tablature.Infer.prototype.getXi = function() {
+  return this.producedLine.length;
+};
+
+ABCXJS.tablature.Infer.prototype.registerLine = function(appendStr) {
+  this.producedLine += appendStr;
+  return this.producedLine.length;
+};
+
+ABCXJS.tablature.Infer.prototype.add = function(child, xi, xf) {
+  child.startChar = this.vars.iChar+xi;
+  child.endChar = this.vars.iChar+xf;
+  this.voice.push(child);
+};
+
+ABCXJS.tablature.Infer.prototype.button2Hex = function( b ) {
+    if(b === 'x') return b;
+    var p = parseInt( isNaN(b.substr(0,2)) || b.length === 1 ? 1 : 2 );
+    var n = b.substr(0, p);
+    return (+n).toString(16) + b.substr(p);
+};
+// tenta encontrar o botão mais próximo do último
+ABCXJS.tablature.Infer.prototype.elegeBotao = function( array ) {
+    if(typeof(array) === "undefined" ) return "x";
+
+    var b     = array[0];
+    var v,l,i = b.indexOf("'");
+    
+    if( i >= 0 ) {
+        v = b.substr(0, i);
+        l = b.length - i;
+    } else {
+        v = parseInt(b);
+        l = 0;
+    }
+    
+    var min  = Math.abs((l>1?v+12:v)-this.lastButton);
+    
+    for( var a = 1; a < array.length; a ++ ) {
+        i = array[a].indexOf("'");
+
+        if( i >= 0 ) {
+            v = array[a].substr(0, i);
+            l = array[a].length - i;
+        } else {
+            v = parseInt(array[a]);
+            l = 0;
+        }
+        
+        if( Math.abs((l>1?v+12:v)-this.lastButton) < min ) {
+           b = array[a];
+           min = Math.abs((l>1?v+12:v)-this.lastButton);
+        }
+    }
+    this.lastButton = parseInt(isNaN(b.substr(0,2))? b.substr(0,1): b.substr(0,2));
+    return b;
+};
+
+//ABCXJS.tablature.Infer.prototype.identifyChord = function (children, aNotes, verticalPos, acc, keyAcc, transpose) {
+//TODO: tratar adequadamente os acordes (de baixo)      
+//    var note = this.onvertToCromaticNote(children[aNotes[0]].pitch, verticalPos, acc, keyAcc, transpose );
+//    return children.length > 1 ? note.toLowerCase() : note;
+//};
+
+ABCXJS.tablature.Infer.prototype.addTABChildUnused = function(child, inTieTreb, inTieBass) {
+
+    if (child.el_type !== "note") {
+        var xi = this.getXi();
+        var xf = this.registerLine(this.abcText.substr(child.startChar, child.endChar - child.startChar) + " ");
+        this.add(child, xi, xf - 1);
+        return;
+    }
+
+    var offset = -6.4; // inicialmente as notas estão na posição "fechando". Se precisar alterar para "abrindo" este é offset da altura
+
+    var bass;
+    var item;
+    var column = child.pitches;
+    var allOpen = true;
+    var allClose = true;
+    var baixoClose = true;
+    var baixoOpen = true;
+    var inSlur = false;
+
+    child.inTieTreb = inTieTreb;
+    child.inTieBass = inTieBass;
+
+    var qtdBass = 0;
+    
+    for (var c = 0; c < column.length; c++) {
+        inSlur = inSlur || (column[c].slur && column[c].slur>1);
+        qtdBass += column[c].bass ? 1 : 0;
+    }
+
+    var qtd = column.length - qtdBass;
+
+    var d = qtd; // pela organização da accordion as notas graves ficam melhor se impressas antes, admitindo que foi escrito em ordem crescente no arquivo abc
+    var xi = this.getXi();
+    for (var c = 0; c < column.length; c++) {
+        item = column[c];
+        bass = bass ? bass : item.bass;
+        if (item.type === "rest") {
+            item.pitch = item.bass ? 18 : 12.2;
+        } else {
+            if (item.bass) {
+                //merda...preciso do valor e também da letra
+                var note = this.getNoteName(item, this.accBassKey, this.bassBarAcc);
+                if (item.chord)
+                    note = note.toLowerCase();
+                // retira a oitava, mas deveria incluir complementos, tais como menor, 7th, etc.
+                item.buttons = this.accordion.getButtons(note, true);
+                note = note.substr(0, note.length - 1);
+                item.note = note;
+                item.c = note;
+                item.pitch = 17.5;
+                item.type = 'tabText';
+            } else {
+                var note = this.getNoteName(item, this.accTrebKey, this.trebBarAcc);
+                d--;
+                item.buttons = this.accordion.getButtons(note, false);
+                item.note = note;
+                item.c = note;
+                item.pitch = ((qtd === 1 ? 11.7 : (qtd === 2 ? 10.6 + d * 2.5 : 9.7 + d * 2.1)));
+                item.type = "tabText" + (qtd > 1 ? qtd : "");
+            }
+        }
+
+        if (item.type === "rest") {
+            if (item.bass) {
+                bass = item;
+                this.registerLine('z');
+            }
+        } else if (item.type.indexOf("tabText") >=0) {
+            if (item.bass) {
+                bass = item;
+                if (inTieBass)
+                    item.c = '-->';
+                this.registerLine(item.c === '-->' ? '>' : item.c);
+                baixoOpen = typeof (item.buttons.open) !== "undefined";
+                baixoClose = typeof (item.buttons.close) !== "undefined";
+            } else {
+                if (inTieTreb || (item.slur && item.slur> 1) )
+                    item.c = '-->';
+                allOpen = allOpen ? typeof (item.buttons.open) !== "undefined" : false;
+                allClose = allClose ? typeof (item.buttons.close) !== "undefined" : false;
+            }
+        }
+    }
+
+    // verifica tudo: baixo e melodia
+    if ((this.closing && baixoClose && allClose) || (!this.closing && baixoOpen && allOpen)) {
+        // manteve o rumo, mas verifica o fole, virando se necessario (e possivel)
+        if (inTieTreb || inTieBass || inSlur || this.count < this.limit) {
+            this.count++;
+        } else {
+            // neste caso só muda se é possível manter baixo e melodia    
+            if ((!this.closing && baixoClose && allClose) || (this.closing && baixoOpen && allOpen)) {
+                this.count = 1;
+                this.closing = !this.closing;
+            }
+        }
+    } else if ((!this.closing && baixoClose && allClose) || (this.closing && baixoOpen && allOpen)) {
+        //mudou o rumo, mantendo baixo e melodia
+        this.count = 1;
+        this.closing = !this.closing;
+    } else {
+        // não tem teclas de melodia e baixo simultaneamente: privilegia o baixo, se houver.
+        if ((this.closing && ((bass && baixoClose) || allClose)) || (!this.closing && ((bass && baixoOpen) || allOpen))) {
+            this.count++;
+        } else if ((!this.closing && ((bass && baixoClose) || allClose)) || (this.closing && ((bass && baixoOpen) || allOpen))) {
+            if (inTieTreb || inSlur || (bass && inTieBass) || this.count < this.limit) {
+                this.count++;
+            } else {
+                // neste caso só muda se é possível manter baixo ou melodia    
+                if ((!this.closing && (bass && baixoClose) && allClose) || (this.closing && (bass && baixoOpen) && allOpen)) {
+                    this.count = 1;
+                    this.closing = !this.closing;
+                }
+            }
+        }
+    }
+
+    var qtNotes = bass ? column.length - 1 : column.length;
+    this.registerLine(this.closing ? "+" : "-");
+    this.registerLine(qtNotes > 1 ? "[" : "");
+    child.bellows = this.closing ? "+" : "-";
+
+    // segunda passada: altera o que será exibido, conforme definições da primeira passada
+    for (var c = 0; c < column.length; c++) {
+        item = column[c];
+        if (!item.bass) {
+            if (!this.closing)
+                item.pitch += offset;
+            if (/*item.c.substr(0, 4) === "dots" ||*/ item.type === "rest") {
+                this.registerLine('z');
+            } else {
+                if (! (inTieTreb || (item.slur && item.slur> 1) ) ) {
+                    item.c = this.elegeBotao(this.closing ? item.buttons.close : item.buttons.open);
+                    this.registerLine(this.button2Hex(item.c));
+                } else {
+                    this.registerLine('>');
+                }
+            }
+        }
+    }
+    var dur = child.duration / this.vars.default_length;
+    var xf = this.registerLine((qtNotes > 1 ? "]" : "") + (dur !== 1 ? dur.toString() : "") + " ");
+    this.add(child, xi, xf-1);
+};
+
+// tentativa de tornar iguais os compassos da melodia e do baixo, para a tablatura ficar melhor
+ABCXJS.tablature.Infer.prototype.addMissingRestUnused = function(p_duration) {
+    var the_elem = {
+        duration: p_duration,
+        el_type: 'note',
+        endChar: 0,
+        rest: {type: 'rest'},
+        startChar: 0
+    };
+
+    return the_elem;
+};
+
+ABCXJS.tablature.Infer.prototype.abcElem2TabElemUnused = function(elem, bass) {
     var cp = ABCXJS.parse.clone(elem);
     if (cp.rest ) {
         if(!cp.pitches) {
@@ -44,7 +652,7 @@ ABCXJS.tablature.Infer.prototype.abcElem2TabElem = function(elem, bass) {
         if( cp.pitches.length > 1 ) {
           // TODO: keep track of minor chords (and 7th)
           // note = this.accordion.identifyChord(abselem.children, aNotes, verticalPos, acc, keyAcc, -7); /*transpose -1 octave for better apresentation */
-          ABCXJS.write.sortPitch(cp);
+          ABCXJS.write.sortPitch(cp.pitches);
           cp.pitches.splice(1, cp.pitches.length - 1);
           cp.pitches[0].chord=true;
         }
@@ -53,7 +661,7 @@ ABCXJS.tablature.Infer.prototype.abcElem2TabElem = function(elem, bass) {
     return cp;
 };
 
-ABCXJS.tablature.Infer.prototype.checkSlur = function(elem) {
+ABCXJS.tablature.Infer.prototype.checkSlurUnused = function(elem) {
     //TODO: implementar ligaduras aninhadas
     var ini = (elem.startSlur && typeof(elem.startSlur) !== undefined) || false;
     var end = (elem.endSlur && typeof(elem.endSlur) !== undefined) || false;
@@ -100,191 +708,7 @@ ABCXJS.tablature.Infer.prototype.checkSlur = function(elem) {
     }
 };
 
-ABCXJS.tablature.Infer.prototype.inferTabVoice = function(line) {
-    
-    if( this.tune.tabStaffPos < 1 || 
-        ! this.tune.lines[line].staffs    ) return; // we expect to find at least the melody line above tablature, otherwise, we cannot infer it.
-
-    this.tuneCurrLine = line;
-    this.producedLine = "";
-    this.count = 0;
-    this.limit = 7; // inverte o movimento do fole - deveria ser baseado no tempo das notas.
-    this.lastButton = -1;
-    this.closing = true;
-    
-    this.bassBarAcc = [];
-    this.trebBarAcc = [];
-    this.inSlur = [];
-    
-    var inTieBass     = false;
-    var inTieTreb     = false;
-    
-    var maxIdx = 0;
-    var voices = [];
-     
-    var trebStaff  = this.tune.lines[this.tuneCurrLine].staffs[0];
-    var trebVoices = trebStaff.voices;
-    this.accTrebKey = trebStaff.key.accidentals;
-    for( var i = 0; i < trebVoices.length; i ++ ) {
-        voices[maxIdx] = { voz:trebVoices[i], pos:-1, st:'wait for data', bass:false, wi: {} }; // wi - work item
-        maxIdx++;
-    }
-    
-    if( this.tune.tabStaffPos === 2 ) {
-        var bassStaff  = this.tune.lines[this.tuneCurrLine].staffs[1];
-        var bassVoices = bassStaff.voices;
-        this.accBassKey = bassStaff.key.accidentals;
-        for( var i = 0; i < bassVoices.length; i ++ ) {
-            voices[maxIdx] = { voz:bassVoices[i], pos:-1, st:'wait for data', bass:true, wi: {} }; // wi - work item
-            maxIdx++;
-        }
-    }  
-    var st = 1; // 0 - fim; 1 - barra; 2 dados; - 1 para garantir a entrada
-    while( st > 0 ) {
-        try {
-            st = 0; // 0 para garantir a saida, caso não haja nada para ler
-            for( var j = 0; j < voices.length; j ++ ) {
-                try {
-                  st = Math.max(this.read( voices, j ), st);
-                } catch(e) {
-
-                }
-            }
-            switch(st){
-                case 1: // incluir a barra na tablatura
-                    // neste caso, todas as vozes são "bar", mesmo que algumas já terminaram 
-                    var i = 0;
-                    while ( i < voices.length) {
-                        if(voices[i].wi.el_type && voices[i].wi.el_type === "bar" )     {
-                            this.addTABChild(ABCXJS.parse.clone(voices[i].wi), inTieTreb, inTieBass);
-                            i = voices.length;
-                        } else {
-                            i++;
-                        }
-                    }
-
-                    for( var i = 0; i < voices.length; i ++ ) {
-                        if(voices[i].st === 'processing')
-                          voices[i].st = 'wait for data';
-                    }
-                    this.bassBarAcc = [];
-                    this.trebBarAcc = [];
-
-                    break;
-                case 2:
-                    this.addTABChild(this.extraiIntervalo(voices), inTieTreb, inTieBass);
-                    break;
-            }
-        } catch (err) {
-            if (err !== "normal_abort")
-                throw err;
-        }
-    } 
-    
-    this.accordion.setTabLine(this.producedLine);
-    return this.voice;
-};
-
-ABCXJS.tablature.Infer.prototype.extraiIntervalo = function(voices) {
-    var minDur = 100;
-    
-    for( var i = 0; i < voices.length; i ++ ) {
-        if( voices[i].wi.duration && voices[i].wi.duration > 0  && voices[i].wi.duration < minDur ) {
-            minDur = voices[i].wi.duration;
-        }
-    }
-    
-    var wf = { el_type: 'note', duration: minDur, startChar: 0, endChar: 0, pitches:[] }; // final working item
-    
-    for( var i = 0; i < voices.length; i ++ ) {
-        var elem = voices[i].wi;
-        if( elem.rest ) {
-            switch (elem.rest.type) {
-                case "rest":
-                    wf.pitches[wf.pitches.length] = ABCXJS.parse.clone(elem.rest);
-                    wf.pitches[wf.pitches.length-1].bass = voices[i].bass;
-                    break;
-                case "invisible":
-                case "spacer":
-            }        
-        }else if( elem.pitches ) {
-            if(voices[i].bass && elem.pitches.length > 1 ) {
-                ABCXJS.write.sortPitch(elem);
-                elem.pitches.splice(1, elem.pitches.length - 1);
-                elem.pitches[0].chord=true;
-                wf.pitches[wf.pitches.length] = ABCXJS.parse.clone(elem.pitches[0]);
-                wf.pitches[wf.pitches.length-1].bass = true;
-            } else {
-                for( var j = 0; j < elem.pitches.length; j ++  ) {
-                    wf.pitches[wf.pitches.length] = ABCXJS.parse.clone(elem.pitches[j]);
-                    wf.pitches[wf.pitches.length-1].bass = voices[i].bass;
-                }
-            }
-        }
-        if( voices[i].wi.duration ) {
-            voices[i].wi.duration -= minDur;
-            if( voices[i].wi.duration <= 0 )
-               voices[i].st = 'wait for data';
-        }
-    }
-    
-    return wf;
-    
-// --- devo usar isso para tratar pausas
-//        if (elem.rest) {
-//        switch(
-//        var restpitch = 7;
-//        if (this.stemdir === "down")
-//            restpitch = 3;
-//        if (this.stemdir === "up")
-//            restpitch = 11;
-//        switch (elem.rest.type) {
-//            case "rest":
-//                c = ABCXJS.write.chartable.rest[-durlog];
-//                elem.averagepitch = restpitch;
-//                elem.minpitch = restpitch;
-//                elem.maxpitch = restpitch;
-//                break;
-//            case "invisible":
-//            case "spacer":
-//                c = "";
-//        }
-    
-    
-};
-
-
-ABCXJS.tablature.Infer.prototype.read = function(p_source, item) {
-    var source = p_source[item];
-    switch( source.st ) {
-        case "wait for data":
-            source.pos ++;
-            break;
-        case "closed":
-            return 0;
-            break;
-        case "processing":
-            return 2;
-            break;
-               
-    }
-    
-    while( source.voz[source.pos] && (source.voz[source.pos].direction || source.voz[source.pos].title) &&  source.pos < source.voz.length) {
-       source.pos ++;
-    }
-    
-    if( source.pos < source.voz.length ) {
-        source.wi = ABCXJS.parse.clone(source.voz[source.pos]);
-        source.st = "processing";
-        return (source.wi.el_type && source.wi.el_type === "bar") ? 1 : 2;
-    } else {
-        source.st = "closed";
-        return 0;
-    }
-        
-};
-
-ABCXJS.tablature.Infer.prototype.inferTabVoice2 = function(line) {
+ABCXJS.tablature.Infer.prototype.inferTabVoiceUnused = function(line) {
     
     if( this.tune.tabStaffPos < 1 || 
         ! this.tune.lines[line].staffs    ) return; // we expect to find at least the melody line above tablature, otherwise, we cannot infer it.
@@ -515,400 +939,3 @@ ABCXJS.tablature.Infer.prototype.inferTabVoice2 = function(line) {
     return this.voice;
 };
 
-//ABCXJS.tablature.Infer.prototype.identifyChord = function (children, aNotes, verticalPos, acc, keyAcc, transpose) {
-//TODO: tratar adequadamente os acordes (de baixo)      
-//    var note = this.onvertToCromaticNote(children[aNotes[0]].pitch, verticalPos, acc, keyAcc, transpose );
-//    return children.length > 1 ? note.toLowerCase() : note;
-//};
-
-ABCXJS.tablature.Infer.prototype.getNoteName = function(item, keyAcc, barAcc ) {
-    // mapeia 
-    //  de: nota da pauta + acidentes (tanto da clave, quanto locais)
-    //  para: valor da nota cromatica (com oitava)
-
-    var n = this.accordion.transposer.staffNoteToCromatic(this.accordion.transposer.extractStaffNote(item.pitch));
-    var oitava = this.accordion.transposer.extractStaffOctave(item.pitch);
-    var staffNote = this.accordion.transposer.numberToKey(n);
-    
-    if(item.accidental) {
-        barAcc[item.pitch] = this.accordion.transposer.getAccOffset(item.accidental);
-        n += barAcc[item.pitch];
-    } else {
-        if(typeof(barAcc[item.pitch]) !== "undefined") {
-          n += barAcc[item.pitch];
-        } else {
-          n += this.accordion.transposer.getKeyAccOffset(staffNote, keyAcc);
-        }
-    }
-    
-    oitava += (n < 0 ? -1 : (n > 11 ? 1 : 0 ));
-    n       = (n < 0 ? 12+n : (n > 11 ? n%12 : n ) );
-    
-    return this.accordion.transposer.numberToKey(n) + oitava;
-};
-
-ABCXJS.tablature.Infer.prototype.getXi = function() {
-  return this.producedLine.length;
-};
-
-ABCXJS.tablature.Infer.prototype.registerLine = function(appendStr) {
-  this.producedLine += appendStr;
-  return this.producedLine.length;
-};
-
-ABCXJS.tablature.Infer.prototype.add = function(child, xi, xf) {
-  child.startChar = this.vars.iChar+xi;
-  child.endChar = this.vars.iChar+xf;
-  this.voice.push(child);
-};
-
-
-ABCXJS.tablature.Infer.prototype.addTABChild = function(child, inTieTreb, inTieBass) {
-
-    if (child.el_type !== "note") {
-        var xi = this.getXi();
-        var xf = this.registerLine(this.abcText.substr(child.startChar, child.endChar - child.startChar) + " ");
-        this.add(child, xi, xf - 1);
-        return;
-    }
-
-    var offset = -6.4; // inicialmente as notas estão na posição "fechando". Se precisar alterar para "abrindo" este é offset da altura
-
-    var bass;
-    var item;
-    var column = child.pitches;
-    var allOpen = true;
-    var allClose = true;
-    var baixoClose = true;
-    var baixoOpen = true;
-    var inSlur = false;
-
-    child.inTieTreb = inTieTreb;
-    child.inTieBass = inTieBass;
-
-    var qtdBass = 0;
-    
-    for (var c = 0; c < column.length; c++) {
-        inSlur = inSlur || (column[c].slur && column[c].slur>1);
-        qtdBass += column[c].bass ? 1 : 0;
-    }
-
-    var qtd = column.length - qtdBass;
-
-    var d = qtd; // pela organização da accordion as notas graves ficam melhor se impressas antes, admitindo que foi escrito em ordem crescente no arquivo abc
-    var xi = this.getXi();
-    for (var c = 0; c < column.length; c++) {
-        item = column[c];
-        bass = bass ? bass : item.bass;
-        if (item.type === "rest") {
-            item.pitch = item.bass ? 18 : 12.2;
-        } else {
-            if (item.bass) {
-                //merda...preciso do valor e também da letra
-                var note = this.getNoteName(item, this.accBassKey, this.bassBarAcc);
-                if (item.chord)
-                    note = note.toLowerCase();
-                // retira a oitava, mas deveria incluir complementos, tais como menor, 7th, etc.
-                item.buttons = this.accordion.getButtons(note, true);
-                note = note.substr(0, note.length - 1);
-                item.note = note;
-                item.c = note;
-                item.pitch = 17.5;
-                item.type = 'tabText';
-            } else {
-                var note = this.getNoteName(item, this.accTrebKey, this.trebBarAcc);
-                d--;
-                item.buttons = this.accordion.getButtons(note, false);
-                item.note = note;
-                item.c = note;
-                item.pitch = ((qtd === 1 ? 11.7 : (qtd === 2 ? 10.6 + d * 2.5 : 9.7 + d * 2.1)));
-                item.type = "tabText" + (qtd > 1 ? qtd : "");
-            }
-        }
-
-        if (item.type === "rest") {
-            if (item.bass) {
-                bass = item;
-                this.registerLine('z');
-            }
-        } else if (item.type.indexOf("tabText") >=0) {
-            if (item.bass) {
-                bass = item;
-                if (inTieBass)
-                    item.c = '-->';
-                this.registerLine(item.c === '-->' ? '>' : item.c);
-                baixoOpen = typeof (item.buttons.open) !== "undefined";
-                baixoClose = typeof (item.buttons.close) !== "undefined";
-            } else {
-                if (inTieTreb || (item.slur && item.slur> 1) )
-                    item.c = '-->';
-                allOpen = allOpen ? typeof (item.buttons.open) !== "undefined" : false;
-                allClose = allClose ? typeof (item.buttons.close) !== "undefined" : false;
-            }
-        }
-    }
-
-    // verifica tudo: baixo e melodia
-    if ((this.closing && baixoClose && allClose) || (!this.closing && baixoOpen && allOpen)) {
-        // manteve o rumo, mas verifica o fole, virando se necessario (e possivel)
-        if (inTieTreb || inTieBass || inSlur || this.count < this.limit) {
-            this.count++;
-        } else {
-            // neste caso só muda se é possível manter baixo e melodia    
-            if ((!this.closing && baixoClose && allClose) || (this.closing && baixoOpen && allOpen)) {
-                this.count = 1;
-                this.closing = !this.closing;
-            }
-        }
-    } else if ((!this.closing && baixoClose && allClose) || (this.closing && baixoOpen && allOpen)) {
-        //mudou o rumo, mantendo baixo e melodia
-        this.count = 1;
-        this.closing = !this.closing;
-    } else {
-        // não tem teclas de melodia e baixo simultaneamente: privilegia o baixo, se houver.
-        if ((this.closing && ((bass && baixoClose) || allClose)) || (!this.closing && ((bass && baixoOpen) || allOpen))) {
-            this.count++;
-        } else if ((!this.closing && ((bass && baixoClose) || allClose)) || (this.closing && ((bass && baixoOpen) || allOpen))) {
-            if (inTieTreb || inSlur || (bass && inTieBass) || this.count < this.limit) {
-                this.count++;
-            } else {
-                // neste caso só muda se é possível manter baixo ou melodia    
-                if ((!this.closing && (bass && baixoClose) && allClose) || (this.closing && (bass && baixoOpen) && allOpen)) {
-                    this.count = 1;
-                    this.closing = !this.closing;
-                }
-            }
-        }
-    }
-
-    var qtNotes = bass ? column.length - 1 : column.length;
-    this.registerLine(this.closing ? "+" : "-");
-    this.registerLine(qtNotes > 1 ? "[" : "");
-    child.bellows = this.closing ? "+" : "-";
-
-    // segunda passada: altera o que será exibido, conforme definições da primeira passada
-    for (var c = 0; c < column.length; c++) {
-        item = column[c];
-        if (!item.bass) {
-            if (!this.closing)
-                item.pitch += offset;
-            if (/*item.c.substr(0, 4) === "dots" ||*/ item.type === "rest") {
-                this.registerLine('z');
-            } else {
-                if (! (inTieTreb || (item.slur && item.slur> 1) ) ) {
-                    item.c = this.elegeBotao(this.closing ? item.buttons.close : item.buttons.open);
-                    this.registerLine(this.button2Hex(item.c));
-                } else {
-                    this.registerLine('>');
-                }
-            }
-        }
-    }
-    var dur = child.duration / this.vars.default_length;
-    var xf = this.registerLine((qtNotes > 1 ? "]" : "") + (dur !== 1 ? dur.toString() : "") + " ");
-    this.add(child, xi, xf-1);
-};
-
-
-ABCXJS.tablature.Infer.prototype.addTABChild2 = function(child, inTieTreb, inTieBass) {
-
-    if (child.el_type !== "note") {
-        var xi = this.getXi();
-        var xf = this.registerLine(this.abcText.substr(child.startChar, child.endChar - child.startChar) + " ");
-        this.add(child, xi, xf - 1);
-        return;
-    }
-
-    var offset = -6.4; // inicialmente as notas estão na posição "fechando". Se precisar alterar para "abrindo" este é offset da altura
-
-    var bass;
-    var item;
-    var column = child.pitches;
-    var allOpen = true;
-    var allClose = true;
-    var baixoClose = true;
-    var baixoOpen = true;
-    var inSlur = false;
-
-    child.inTieTreb = inTieTreb;
-    child.inTieBass = inTieBass;
-
-    var qtdBass = 0;
-    
-    for (var c = 0; c < column.length; c++) {
-        inSlur = inSlur || (column[c].slur && column[c].slur>1);
-        qtdBass += column[c].bass ? 1 : 0;
-    }
-
-    var qtd = column.length - qtdBass;
-
-    var d = qtd; // pela organização da accordion as notas graves ficam melhor se impressas antes, admitindo que foi escrito em ordem crescente no arquivo abc
-    var xi = this.getXi();
-    for (var c = 0; c < column.length; c++) {
-        item = column[c];
-        bass = bass ? bass : item.bass;
-        if (item.type === "rest") {
-            item.pitch = item.bass ? 18 : 12.2;
-        } else {
-            if (item.bass) {
-                //merda...preciso do valor e também da letra
-                var note = this.getNoteName(item, this.accBassKey, this.bassBarAcc);
-                if (item.chord)
-                    note = note.toLowerCase();
-                // retira a oitava, mas deveria incluir complementos, tais como menor, 7th, etc.
-                item.buttons = this.accordion.getButtons(note, true);
-                note = note.substr(0, note.length - 1);
-                item.note = note;
-                item.c = note;
-                item.pitch = 17.5;
-                item.type = 'tabText';
-            } else {
-                var note = this.getNoteName(item, this.accTrebKey, this.trebBarAcc);
-                d--;
-                item.buttons = this.accordion.getButtons(note, false);
-                item.note = note;
-                item.c = note;
-                item.pitch = ((qtd === 1 ? 11.7 : (qtd === 2 ? 10.6 + d * 2.5 : 9.7 + d * 2.1)));
-                item.type = "tabText" + (qtd > 1 ? qtd : "");
-            }
-        }
-
-        if (item.type === "rest") {
-            if (item.bass) {
-                bass = item;
-                this.registerLine('z');
-            }
-        } else if (item.type.indexOf("tabText") >=0) {
-            if (item.bass) {
-                bass = item;
-                if (inTieBass)
-                    item.c = '-->';
-                this.registerLine(item.c === '-->' ? '>' : item.c);
-                baixoOpen = typeof (item.buttons.open) !== "undefined";
-                baixoClose = typeof (item.buttons.close) !== "undefined";
-            } else {
-                if (inTieTreb || (item.slur && item.slur> 1) )
-                    item.c = '-->';
-                allOpen = allOpen ? typeof (item.buttons.open) !== "undefined" : false;
-                allClose = allClose ? typeof (item.buttons.close) !== "undefined" : false;
-            }
-        }
-    }
-
-    // verifica tudo: baixo e melodia
-    if ((this.closing && baixoClose && allClose) || (!this.closing && baixoOpen && allOpen)) {
-        // manteve o rumo, mas verifica o fole, virando se necessario (e possivel)
-        if (inTieTreb || inTieBass || inSlur || this.count < this.limit) {
-            this.count++;
-        } else {
-            // neste caso só muda se é possível manter baixo e melodia    
-            if ((!this.closing && baixoClose && allClose) || (this.closing && baixoOpen && allOpen)) {
-                this.count = 1;
-                this.closing = !this.closing;
-            }
-        }
-    } else if ((!this.closing && baixoClose && allClose) || (this.closing && baixoOpen && allOpen)) {
-        //mudou o rumo, mantendo baixo e melodia
-        this.count = 1;
-        this.closing = !this.closing;
-    } else {
-        // não tem teclas de melodia e baixo simultaneamente: privilegia o baixo, se houver.
-        if ((this.closing && ((bass && baixoClose) || allClose)) || (!this.closing && ((bass && baixoOpen) || allOpen))) {
-            this.count++;
-        } else if ((!this.closing && ((bass && baixoClose) || allClose)) || (this.closing && ((bass && baixoOpen) || allOpen))) {
-            if (inTieTreb || inSlur || (bass && inTieBass) || this.count < this.limit) {
-                this.count++;
-            } else {
-                // neste caso só muda se é possível manter baixo ou melodia    
-                if ((!this.closing && (bass && baixoClose) && allClose) || (this.closing && (bass && baixoOpen) && allOpen)) {
-                    this.count = 1;
-                    this.closing = !this.closing;
-                }
-            }
-        }
-    }
-
-    var qtNotes = bass ? column.length - 1 : column.length;
-    this.registerLine(this.closing ? "+" : "-");
-    this.registerLine(qtNotes > 1 ? "[" : "");
-    child.bellows = this.closing ? "+" : "-";
-
-    // segunda passada: altera o que será exibido, conforme definições da primeira passada
-    for (var c = 0; c < column.length; c++) {
-        item = column[c];
-        if (!item.bass) {
-            if (!this.closing)
-                item.pitch += offset;
-            if (/*item.c.substr(0, 4) === "dots" ||*/ item.type === "rest") {
-                this.registerLine('z');
-            } else {
-                if (! (inTieTreb || (item.slur && item.slur> 1) ) ) {
-                    item.c = this.elegeBotao(this.closing ? item.buttons.close : item.buttons.open);
-                    this.registerLine(this.button2Hex(item.c));
-                } else {
-                    this.registerLine('>');
-                }
-            }
-        }
-    }
-    var dur = child.duration / this.vars.default_length;
-    var xf = this.registerLine((qtNotes > 1 ? "]" : "") + (dur !== 1 ? dur.toString() : "") + " ");
-    this.add(child, xi, xf-1);
-};
-
-ABCXJS.tablature.Infer.prototype.button2Hex = function( b ) {
-    if(b === 'x') return b;
-    var p = parseInt( isNaN(b.substr(0,2)) || b.length === 1 ? 1 : 2 );
-    var n = b.substr(0, p);
-    return (+n).toString(16) + b.substr(p);
-};
-// tenta encontrar o botão mais próximo do último
-ABCXJS.tablature.Infer.prototype.elegeBotao = function( array ) {
-    if(typeof(array) === "undefined" ) return "x";
-
-    var b     = array[0];
-    var v,l,i = b.indexOf("'");
-    
-    if( i >= 0 ) {
-        v = b.substr(0, i);
-        l = b.length - i;
-    } else {
-        v = parseInt(b);
-        l = 0;
-    }
-    
-    var min  = Math.abs((l>1?v+12:v)-this.lastButton);
-    
-    for( var a = 1; a < array.length; a ++ ) {
-        i = array[a].indexOf("'");
-
-        if( i >= 0 ) {
-            v = array[a].substr(0, i);
-            l = array[a].length - i;
-        } else {
-            v = parseInt(array[a]);
-            l = 0;
-        }
-        
-        if( Math.abs((l>1?v+12:v)-this.lastButton) < min ) {
-           b = array[a];
-           min = Math.abs((l>1?v+12:v)-this.lastButton);
-        }
-    }
-    this.lastButton = parseInt(isNaN(b.substr(0,2))? b.substr(0,1): b.substr(0,2));
-    return b;
-};
-
-// tentativa de tornar iguais os compassos da melodia e do baixo, para a tablatura ficar melhor
-ABCXJS.tablature.Infer.prototype.addMissingRest = function(p_duration)
-{
-    var the_elem = {
-        duration: p_duration,
-        el_type: 'note',
-        endChar: 0,
-        rest: {type: 'rest'},
-        startChar: 0
-    };
-
-    return the_elem;
-};
