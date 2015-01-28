@@ -426,6 +426,7 @@ ABCXJS.tablature.Infer.prototype.button2Hex = function( b ) {
     var n = b.substr(0, p);
     return (+n).toString(16) + b.substr(p);
 };
+
 // tenta encontrar o botão mais próximo do último
 ABCXJS.tablature.Infer.prototype.elegeBotao = function( array ) {
     if(typeof(array) === "undefined" ) return "x";
