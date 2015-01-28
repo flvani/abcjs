@@ -4,6 +4,15 @@
  * and open the template in the editor.
  */
 
+/*
+ * TODO:
+ *   - inverter o movimento do fole baseado no tempo do compasso
+ *   - acertar a posição dos elementos de pausa (quando presentes na tablatura)
+ *   - garantir que não ocorra erro quando as pausas não forem incluídas na tablatura, mas a pausa é a única nota do intervalo.
+ *   - tratar ligaduras de expressão 
+ *
+ */
+
 if (!window.ABCXJS)
 	window.ABCXJS = {};
 
@@ -19,6 +28,11 @@ ABCXJS.tablature.Infer = function( accordion, tune, strTune, vars ) {
     
     this.reset();
     
+    this.addWarning = function(str) {
+        if (!this.vars.warnings) this.vars.warnings = [];
+        this.vars.warnings.push(str);
+    };
+    
 };
 
 ABCXJS.tablature.Infer.prototype.reset = function() {
@@ -30,7 +44,9 @@ ABCXJS.tablature.Infer.prototype.reset = function() {
     this.count = 0;
     this.lastButton = -1;
     this.closing = true;
+    this.currInterval = 0;
 };
+
 
 ABCXJS.tablature.Infer.prototype.inferTabVoice = function(line) {
     
@@ -47,7 +63,7 @@ ABCXJS.tablature.Infer.prototype.inferTabVoice = function(line) {
     var trebVoices = trebStaff.voices;
     this.accTrebKey = trebStaff.key.accidentals;
     for( var i = 0; i < trebVoices.length; i ++ ) {
-        voices[maxIdx] = { voz:trebVoices[i], pos:-1, st:'wait for data', bass:false, wi: {}, ties:[] }; // wi - work item
+        voices[maxIdx] = { voz:trebVoices[i], pos:-1, st:'waiting for data', bass:false, wi: {}, ties:[] }; // wi - work item
         maxIdx++;
     }
     
@@ -56,7 +72,7 @@ ABCXJS.tablature.Infer.prototype.inferTabVoice = function(line) {
         var bassVoices = bassStaff.voices;
         this.accBassKey = bassStaff.key.accidentals;
         for( var i = 0; i < bassVoices.length; i ++ ) {
-            voices[maxIdx] = { voz:bassVoices[i], pos:-1, st:'wait for data', bass:true, wi: {}, ties:[] }; // wi - work item
+            voices[maxIdx] = { voz:bassVoices[i], pos:-1, st:'waiting for data', bass:true, wi: {}, ties:[] }; // wi - work item
             maxIdx++;
         }
     }  
@@ -71,6 +87,14 @@ ABCXJS.tablature.Infer.prototype.inferTabVoice = function(line) {
 
                 }
             }
+            for( var j = 0; j < voices.length-1; j ++ ) {
+                if( voices[j].st !== voices[j+1].st ) {
+                    var n = parseInt(this.currInterval)-1;
+                    this.addWarning('Possível falta de sincronismo no compasso ' + n + '.' ) ;
+                    j = voices.length;
+                }
+            }
+            
             switch(st){
                 case 1: // incluir a barra na tablatura
                     // neste caso, todas as vozes são "bar", mesmo que algumas já terminaram 
@@ -85,8 +109,8 @@ ABCXJS.tablature.Infer.prototype.inferTabVoice = function(line) {
                     }
 
                     for( var i = 0; i < voices.length; i ++ ) {
-                        if(voices[i].st === 'processing')
-                          voices[i].st = 'wait for data';
+                        if(voices[i].st !== 'closed')
+                          voices[i].st = 'waiting for data';
                     }
                     this.bassBarAcc = [];
                     this.trebBarAcc = [];
@@ -109,8 +133,11 @@ ABCXJS.tablature.Infer.prototype.inferTabVoice = function(line) {
 ABCXJS.tablature.Infer.prototype.read = function(p_source, item) {
     var source = p_source[item];
     switch( source.st ) {
-        case "wait for data":
+        case "waiting for data":
             source.pos ++;
+            break;
+        case "waiting end of interval":
+            return 1;
             break;
         case "closed":
             return 0;
@@ -127,8 +154,11 @@ ABCXJS.tablature.Infer.prototype.read = function(p_source, item) {
     
     if( source.pos < source.voz.length ) {
         source.wi = ABCXJS.parse.clone(source.voz[source.pos]);
+        if( source.wi.barNumber && source.wi.barNumber !== this.currInterval ) {
+            this.currInterval = source.wi.barNumber;
+        }
         this.checkTies(source);
-        source.st = "processing";
+        source.st = (source.wi.el_type && source.wi.el_type === "bar") ? "waiting end of interval" : "processing";
         return (source.wi.el_type && source.wi.el_type === "bar") ? 1 : 2;
     } else {
         source.st = "closed";
@@ -161,7 +191,7 @@ ABCXJS.tablature.Infer.prototype.extraiIntervalo = function(voices) {
     var minDur = 100;
     
     for( var i = 0; i < voices.length; i ++ ) {
-        if( voices[i].wi.duration && voices[i].wi.duration > 0  && voices[i].wi.duration < minDur ) {
+        if( voices[i].st === 'processing' && voices[i].wi.duration && voices[i].wi.duration > 0  && voices[i].wi.duration < minDur ) {
             minDur = voices[i].wi.duration;
         }
     }
@@ -169,17 +199,18 @@ ABCXJS.tablature.Infer.prototype.extraiIntervalo = function(voices) {
     var wf = { el_type: 'note', duration: minDur, startChar: 0, endChar: 0, pitches:[], bassNote: [] }; // wf - final working item
     
     for( var i = 0; i < voices.length; i ++ ) {
+        if(voices[i].st !== 'processing' ) continue;
         var elem = voices[i].wi;
         if( elem.rest ) {
             switch (elem.rest.type) {
                 case "rest":
+                case "invisible":
+                case "spacer":
                     if(this.vars.restsintab) {
                         wf.pitches[wf.pitches.length] = ABCXJS.parse.clone(elem.rest);
                         wf.pitches[wf.pitches.length-1].bass = voices[i].bass;
                         //wf.pitches[wf.pitches.length-1].type = "invisible";
                     }    
-                case "invisible":
-                case "spacer":
                     break;
             }        
         }else if( elem.pitches ) {
@@ -202,7 +233,7 @@ ABCXJS.tablature.Infer.prototype.extraiIntervalo = function(voices) {
         if( voices[i].wi.duration ) {
             voices[i].wi.duration -= minDur;
             if( voices[i].wi.duration <= 0 ) {
-               voices[i].st = 'wait for data';
+               voices[i].st = 'waiting for data';
             } else {
                 if(voices[i].wi.pitches) {
                     for( var j = 0; j < voices[i].wi.pitches.length; j ++  ) {
@@ -264,7 +295,7 @@ ABCXJS.tablature.Infer.prototype.addTABChild = function(token) {
             case 'rest':
             case 'invisible':
             case 'spacer':
-                child.pitches[b] = {bass: true, type: "rest", c: '', pitch: pitchBase - (b * 3)};
+                child.pitches[b] = {bass: true, type: token.bassNote[b].type, c: '', pitch: pitchBase - (b * 3)};
                 this.registerLine('z');
                 break
             default:
@@ -280,11 +311,12 @@ ABCXJS.tablature.Infer.prototype.addTABChild = function(token) {
     var xi = this.getXi();
     for (var c = 0; c < column.length; c++) {
         var item = column[c];
-        inTie = ((item.inTie &&item.inTie> 1) || inTie);
+        inTie = ((item.inTie && item.inTie> 1) || inTie);
         switch(item.type) {
-            case 'rest':
             case 'invisible':
             case 'spacer':
+                item.c = '';
+            case 'rest':
                 item.pitch = 12.2;
                 break
             default:

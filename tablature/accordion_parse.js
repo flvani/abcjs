@@ -42,7 +42,6 @@ if (!window.ABCXJS.tablature)
 ABCXJS.tablature.Parse = function( str, vars ) {
     this.invalid = false;
     this.finished = false;
-    this.warnings = [];
     this.line = str;
     this.vars = vars;
     this.bassNoteSyms = "abcdefgABCDEFG>xz";
@@ -65,9 +64,10 @@ ABCXJS.tablature.Parse = function( str, vars ) {
     };
     
     this.addWarning = function(str) {
-        this.warnings.push(str);
+        if (!this.vars.warnings) this.vars.warnings = [];
+        this.vars.warnings.push(str);
     };
-    
+
     this.encode = function(str) {
         var ret = window.ABCXJS.parse.gsub(str, '\x12', ' ');
         ret = window.ABCXJS.parse.gsub(ret, '&', '&amp;');
