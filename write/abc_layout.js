@@ -131,7 +131,7 @@ ABCXJS.write.Layout.prototype.layoutABCLine = function( abctune, line ) {
                 (abcstaff.meter) && this.voice.addChild(this.printTimeSignature(abcstaff.meter));
                 this.printABCVoice();
             } else {
-                var p = new ABCXJS.tablature.Layout(this.tuneCurrVoice, this.tuneCurrStaff, abcstaff, this.glyphs );
+                var p = new ABCXJS.tablature.Layout(this.tuneCurrVoice, this.tuneCurrStaff, abcstaff, this.glyphs, this.tune.restsInTab );
                 this.voice = p.printTABVoice();
             }
             

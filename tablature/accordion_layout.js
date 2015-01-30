@@ -11,7 +11,7 @@ if (!window.ABCXJS)
 if (!window.ABCXJS.tablature)
 	window.ABCXJS.tablature = {};
     
-ABCXJS.tablature.Layout = function( tuneCurrVoice, tuneCurrStaff, abcstaff, glyphs ) {
+ABCXJS.tablature.Layout = function( tuneCurrVoice, tuneCurrStaff, abcstaff, glyphs, restsInTab ) {
    this.pos = 0;
    this.voice = {};
    this.currvoice = [];
@@ -19,6 +19,7 @@ ABCXJS.tablature.Layout = function( tuneCurrVoice, tuneCurrStaff, abcstaff, glyp
    this.tuneCurrStaff = tuneCurrStaff;
    this.abcstaff = abcstaff;
    this.glyphs = glyphs;
+   this.restsInTab = restsInTab;
 };
 
 ABCXJS.tablature.Layout.prototype.getElem = function() {
@@ -68,10 +69,6 @@ ABCXJS.tablature.Layout.prototype.printTABElement = function() {
 ABCXJS.tablature.Layout.prototype.printTabNote = function(elem) {
     var p, pp;
     
-// flavio    if(  elem.pitches.length === 0 )
-//        return;
-
-    
     var duration = ABCXJS.write.getDuration(elem);
     if (duration === 0) {
         duration = 0.25;
@@ -81,8 +78,11 @@ ABCXJS.tablature.Layout.prototype.printTabNote = function(elem) {
 
     // determine averagepitch, minpitch, maxpitch and stem direction
     var sum = 0;
+    var allRests = true;
+    
     for (p = 0, pp = elem.pitches.length; p < pp; p++) {
         sum += elem.pitches[p].verticalPos;
+        allRests = (elem.pitches[p].type === 'rest' && allRests);
     }
 
     elem.averagepitch = sum / elem.pitches.length;
@@ -92,9 +92,13 @@ ABCXJS.tablature.Layout.prototype.printTabNote = function(elem) {
     for (p = 0; p < elem.pitches.length; p++) {
         var curr = elem.pitches[p];
         var rel = new ABCXJS.write.RelativeElement(null, 0, 0, curr.pitch);
-        if (curr.type === "rest") {
-            rel.c = ABCXJS.write.chartable.rest[-durlog];
+        if (curr.type === "rest" ) {
             rel.type = "symbol";
+            if(this.restsInTab || (allRests && p === (elem.pitches.length-1))) {
+                rel.c = ABCXJS.write.chartable.rest[-durlog];
+            } else {
+                rel.c = '';
+            }
         } else {
             rel.c = curr.c;
             rel.note = curr.note;

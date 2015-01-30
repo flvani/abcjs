@@ -834,6 +834,9 @@ window.ABCXJS.parse.Parse = function(transporter_, accordion_) {
             params.part = multilineVars.partForNextLine;
         params.clef = multilineVars.currentVoice && multilineVars.staves[multilineVars.currentVoice.staffNum].clef !== undefined ? window.ABCXJS.parse.clone(multilineVars.staves[multilineVars.currentVoice.staffNum].clef) : window.ABCXJS.parse.clone(multilineVars.clef);
         params.key = window.ABCXJS.parse.parseKeyVoice.deepCopyKey(multilineVars.key);
+        if(params.clef.type === 'accordionTab' ) {
+            params.restsInTab = multilineVars.restsintab;
+        }
         window.ABCXJS.parse.parseKeyVoice.addPosToKey(params.clef, params.key);
         if (multilineVars.meter !== null) {
             if (multilineVars.currentVoice) {
@@ -1481,6 +1484,7 @@ window.ABCXJS.parse.Parse = function(transporter_, accordion_) {
                     var voice = this.accordion.parseTabVoice(ret.str, this.getMultilineVars(), this.getTune());
                     if (voice.length > 0) {
                         startNewLine();
+                        tune.restsInTab = multilineVars.restsintab || false;
                         for (var i = 0; i < voice.length; i++) {
                             tune.appendElement(voice[i].el_type, startOfLine + voice[i].startChar, startOfLine + voice[i].endChar, voice[i]);
                         }
@@ -1498,7 +1502,7 @@ window.ABCXJS.parse.Parse = function(transporter_, accordion_) {
         if (ret.newline && multilineVars.continueall === undefined)
             startNewLine();
         if (ret.words)
-            addWords(tune.getCurrentStaff(), tune.getCurrentVoice(), line.substring(2));
+        addWords(tune.getCurrentStaff(), tune.getCurrentVoice(), line.substring(2));
         if (ret.symbols)
             addSymbols(tune.getCurrentVoice(), line.substring(2));
         if (ret.recurse)
@@ -1609,6 +1613,7 @@ window.ABCXJS.parse.Parse = function(transporter_, accordion_) {
                               var voice = this.accordion.inferTabVoice(t, tune, strTune, multilineVars);
                               if (voice.length > 0) {
                                   tune.lines[t].staffs[tune.tabStaffPos].voices[0] = voice;
+                                  tune.restsInTab = multilineVars.restsintab || false;
                               }
                            }  
                         }
