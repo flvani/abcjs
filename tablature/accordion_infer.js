@@ -6,8 +6,8 @@
 
 /*
  * TODO:
- *   - inverter o movimento do fole baseado no tempo do compasso
- *   - tratar ligaduras de expressão 
+ *   - OK inverter o movimento do fole baseado no tempo do compasso
+ *   - OK tratar ligaduras de expressão (como se fossem ligaduras de articulacao)
  *   - OK acertar a posição dos elementos de pausa (quando presentes na tablatura)
  *   - OK garantir que não ocorra erro quando as pausas não forem incluídas na tablatura, mas a pausa é a única nota do intervalo.
  *
@@ -24,7 +24,6 @@ ABCXJS.tablature.Infer = function( accordion, tune, strTune, vars ) {
     this.abcText = strTune;
     this.vars = vars;
     this.tune = tune;
-    this.limit = 7; // inverte o movimento do fole - deveria ser baseado no tempo das notas.
     
     this.reset();
     
@@ -44,6 +43,17 @@ ABCXJS.tablature.Infer.prototype.reset = function() {
     this.lastButton = -1;
     this.closing = true;
     this.currInterval = 0;
+    
+    // limite para inversão o movimento do fole - baseado no tempo de um compasso
+    if( this.tune.lines &&
+        this.tune.lines[0].staffs &&      
+        this.tune.lines[0].staffs[0].meter.type === 'specified' ) {
+        var ritmo = this.tune.lines[0].staffs[0].meter.value[0];
+        this.limit = ritmo.num / ritmo.den;
+    } else {
+      this.limit = 1; 
+    }
+    
 };
 
 
@@ -62,7 +72,7 @@ ABCXJS.tablature.Infer.prototype.inferTabVoice = function(line) {
     var trebVoices = trebStaff.voices;
     this.accTrebKey = trebStaff.key.accidentals;
     for( var i = 0; i < trebVoices.length; i ++ ) {
-        voices[maxIdx] = { voz:trebVoices[i], pos:-1, st:'waiting for data', bass:false, wi: {}, ties:[] }; // wi - work item
+        voices[maxIdx] = { voz:trebVoices[i], pos:-1, st:'waiting for data', bass:false, wi: {}, ties:[], slurs:[] }; // wi - work item
         maxIdx++;
     }
     
@@ -71,7 +81,7 @@ ABCXJS.tablature.Infer.prototype.inferTabVoice = function(line) {
         var bassVoices = bassStaff.voices;
         this.accBassKey = bassStaff.key.accidentals;
         for( var i = 0; i < bassVoices.length; i ++ ) {
-            voices[maxIdx] = { voz:bassVoices[i], pos:-1, st:'waiting for data', bass:true, wi: {}, ties:[] }; // wi - work item
+            voices[maxIdx] = { voz:bassVoices[i], pos:-1, st:'waiting for data', bass:true, wi: {}, ties:[], slurs:[] }; // wi - work item
             maxIdx++;
         }
     }  
@@ -147,7 +157,8 @@ ABCXJS.tablature.Infer.prototype.read = function(p_source, item) {
                
     }
     
-    while( source.voz[source.pos] && (source.voz[source.pos].direction || source.voz[source.pos].title) &&  source.pos < source.voz.length) {
+    while( source.voz[source.pos] &&  source.pos < source.voz.length 
+            && (source.voz[source.pos].direction || source.voz[source.pos].title) ) {
        source.pos ++;
     }
     
@@ -157,6 +168,7 @@ ABCXJS.tablature.Infer.prototype.read = function(p_source, item) {
             this.currInterval = source.wi.barNumber;
         }
         this.checkTies(source);
+        this.checkSlurs(source);
         source.st = (source.wi.el_type && source.wi.el_type === "bar") ? "waiting end of interval" : "processing";
         return (source.wi.el_type && source.wi.el_type === "bar") ? 1 : 2;
     } else {
@@ -164,26 +176,6 @@ ABCXJS.tablature.Infer.prototype.read = function(p_source, item) {
         return 0;
     }
        
-};
-
-ABCXJS.tablature.Infer.prototype.checkTies = function(voice) {
-    if(voice.wi.el_type && voice.wi.el_type === "note" && voice.wi.pitches )  {
-        for( var j = 0; j < voice.wi.pitches.length; j ++  ) {
-            voice.wi.pitches[j].inTie = voice.ties[100+voice.wi.pitches[j].pitch];
-        }
-    }    
-};
-
-ABCXJS.tablature.Infer.prototype.setTies = function(voice) {
-    // add 100 to avoid negative values
-    if(voice.wi.el_type && voice.wi.el_type === "note" && voice.wi.pitches )  {
-        for( var j = 0; j < voice.wi.pitches.length; j ++  ) {
-            if( /*voice.wi.pitches[j].endSlur ||*/ voice.wi.pitches[j].endTie )
-                voice.ties[100+voice.wi.pitches[j].pitch] = false;
-            if( /*voice.wi.pitches[j].startSlur || */voice.wi.pitches[j].startTie )
-                voice.ties[100+voice.wi.pitches[j].pitch] = true;
-        }
-    }
 };
 
 ABCXJS.tablature.Infer.prototype.extraiIntervalo = function(voices) {
@@ -228,6 +220,7 @@ ABCXJS.tablature.Infer.prototype.extraiIntervalo = function(voices) {
         }
         
         this.setTies(voices[i]);
+        this.setSlurs(voices[i]);
         
         if( voices[i].wi.duration ) {
             voices[i].wi.duration -= minDur;
@@ -243,13 +236,71 @@ ABCXJS.tablature.Infer.prototype.extraiIntervalo = function(voices) {
         }
     }
     
-    //trata intervalo vazio (quando há pausa em todas as vozes)
-    // e %%restsintab não está presente
+    //trata intervalo vazio (quando há pausa em todas as vozes e não são visíveis)
     if(wf.pitches.length === 0 && wf.bassNote.length === 0 )
         wf.pitches[0] = {type:'rest'}; 
     
     return wf;
     
+};
+
+ABCXJS.tablature.Infer.prototype.setTies = function(voice) {
+    // add 100 to avoid negative values
+    if(voice.wi.el_type && voice.wi.el_type === "note" && voice.wi.pitches )  {
+        for( var j = 0; j < voice.wi.pitches.length; j ++  ) {
+            if( voice.wi.endTie || voice.wi.pitches[j].endTie )
+                voice.ties[100+voice.wi.pitches[j].pitch] = false;
+            if( voice.wi.startTie || voice.wi.pitches[j].startTie )
+                voice.ties[100+voice.wi.pitches[j].pitch] = true;
+        }
+    }
+};
+
+ABCXJS.tablature.Infer.prototype.checkTies = function(voice) {
+    if(voice.wi.el_type && voice.wi.el_type === "note" && voice.wi.pitches )  {
+        for( var j = 0; j < voice.wi.pitches.length; j ++  ) {
+            voice.wi.pitches[j].inTie = voice.ties[100+voice.wi.pitches[j].pitch];
+        }
+    }    
+};
+
+ABCXJS.tablature.Infer.prototype.setSlurs = function(voice) {
+    // add 100 to avoid negative values
+    if(voice.wi.el_type && voice.wi.el_type === "note" && voice.wi.pitches )  {
+        for( var j = 0; j < voice.wi.pitches.length; j ++  ) {
+            if( voice.wi.endSlur || voice.wi.pitches[j].endSlur )
+                voice.slurs[100+voice.wi.pitches[j].pitch] = false;
+            if( voice.wi.startSlur || voice.wi.pitches[j].startSlur )
+                voice.slurs[100+voice.wi.pitches[j].pitch] = true;
+        }
+    }
+};
+
+ABCXJS.tablature.Infer.prototype.checkSlurs = function(voice) {
+    var adds = [];
+    if(voice.wi.el_type && voice.wi.el_type === "note" && voice.wi.pitches && voice.slurs.length > 0)  {
+      voice.slurs.forEach(function(vlr, idx) {
+         if(!vlr) return;
+         var pitch = (idx%100);
+         var found = false;
+         for( var j = 0; j < voice.wi.pitches.length; j ++  ) {
+            if( voice.wi.pitches[j].pitch === pitch ) {
+                found = true;
+                voice.wi.pitches[j].inTie = vlr;
+            }
+         }
+         if( !found && vlr ) {
+             adds.push(pitch);
+         }
+      });
+      if(adds.length > 0 ) {
+        adds.forEach(function(ptch) {
+           var n = voice.wi.pitches.length; 
+           var vp = voice.wi.pitches[0].verticalPos;
+           voice.wi.pitches[n] = { pitch: ptch, verticalPos: vp, inTie: true};
+        });
+      }
+    }    
 };
 
 
@@ -342,29 +393,29 @@ ABCXJS.tablature.Infer.prototype.addTABChild = function(token) {
     if ((this.closing && baixoClose && allClose) || (!this.closing && baixoOpen && allOpen)) {
         // manteve o rumo, mas verifica o fole, virando se necessario (e possivel)
         if ( inTie || /*inSlur ||*/ this.count < this.limit) {
-            this.count++;
+            this.count += child.duration;
         } else {
             // neste caso só muda se é possível manter baixo e melodia    
             if ((!this.closing && baixoClose && allClose) || (this.closing && baixoOpen && allOpen)) {
-                this.count = 1;
+                this.count = child.duration;
                 this.closing = !this.closing;
             }
         }
     } else if ((!this.closing && baixoClose && allClose) || (this.closing && baixoOpen && allOpen)) {
         //mudou o rumo, mantendo baixo e melodia
-        this.count = 1;
+        this.count = child.duration;
         this.closing = !this.closing;
     } else {
         // não tem teclas de melodia e baixo simultaneamente: privilegia o baixo, se houver.
         if ((this.closing && ((bass && baixoClose) || allClose)) || (!this.closing && ((bass && baixoOpen) || allOpen))) {
-            this.count++;
+            this.count += child.duration;
         } else if ((!this.closing && ((bass && baixoClose) || allClose)) || (this.closing && ((bass && baixoOpen) || allOpen))) {
             if (  inTie || /*inSlur ||*/ this.count < this.limit) {
-                this.count++;
+                this.count += child.duration;
             } else {
                 // neste caso só muda se é possível manter baixo ou melodia    
                 if ((!this.closing && (bass && baixoClose) && allClose) || (this.closing && (bass && baixoOpen) && allOpen)) {
-                    this.count = 1;
+                    this.count = child.duration;
                     this.closing = !this.closing;
                 }
             }
