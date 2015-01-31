@@ -1583,16 +1583,6 @@ window.ABCXJS.parse.Parse = function(transporter_, accordion_) {
             
             tune.cleanUp(multilineVars.barsperstaff, multilineVars.staffnonote);
             
-            // flavio - verifica se a linha zero tem tablatura para accordion
-            //if(tune.lines.length > 0) {
-            //    for (var r = 0; r < tune.lines[0].staffs.length; r++) {
-            //        if (tune.lines[0].staffs[r].clef.type === "accordionTab") {
-            //            tune.hasTablature = true;
-            //            tune.tabStaffPos = r;
-            //        }
-            //    }
-            //}
-            
             if (tune.hasTablature) {
                 // necessário inferir a tablatura
                 if (tune.lines[0].staffs[tune.tabStaffPos].voices[0].length === 0) {

@@ -532,8 +532,13 @@ window.ABCXJS.data.Tune = function() {
         // If this is a clef type, then we replace the working clef on the line. This is kept separate from
         // the clef in case there is an inline clef field. We need to know what the current position for
         // the note is.
-        if (type === 'clef')
+        if (type === 'clef') {
             this.lines[this.lineNum].staffs[this.staffNum].workingClef = hashParams;
+            if(hashParams.type === 'accordionTab') {
+                this.hasTablature = true;
+                this.tabStaffPos = this.staffNum;
+            }
+        }    
 
         // If this is the first item in this staff, then we might have to initialize the staff, first.
         if (this.lines[this.lineNum].staffs.length <= this.staffNum) {
@@ -623,14 +628,6 @@ window.ABCXJS.data.Tune = function() {
         return false;
     };
 
-//	anyVoiceContainsNotes: function(line) {
-//		for (var i = 0; i < line.staffs.voices.length; i++) {
-//			if (this.containsNotes(line.staffs.voices[i]))
-//				return true;
-//		}
-//		return false;
-//	},
-
     this.startNewLine = function(params) {
         // If the pointed to line doesn't exist, just create that. If the line does exist, but doesn't have any music on it, just use it.
         // If it does exist and has music, then increment the line number. If the new element doesn't exist, create it.
@@ -684,8 +681,8 @@ window.ABCXJS.data.Tune = function() {
             if (params.connectBarLines)
                 This.lines[This.lineNum].staffs[This.staffNum].connectBarLines = params.connectBarLines;
             if(params.clef.type === 'accordionTab') {
-                        This.hasTablature = true;
-                        This.tabStaffPos = This.staffNum;
+                This.hasTablature = true;
+                This.tabStaffPos = This.staffNum;
             }
             // Some stuff just happens for the first voice
             createVoice(params);

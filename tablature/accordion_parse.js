@@ -131,9 +131,6 @@ ABCXJS.tablature.Parse.prototype.formatChild = function(token) {
   var qtd = token.buttons.length;
   var d = qtd;
   
-  //var tie = true;
-  //var slur = false;
-
   for(var i = 0; i < token.buttons.length; i ++ ) {
     d--;
     var n = child.pitches.length;
@@ -144,15 +141,7 @@ ABCXJS.tablature.Parse.prototype.formatChild = function(token) {
       child.pitches[n] = { c: this.getTabSymbol(token.buttons[i]), type: "tabText"+(qtd>1?"2":""), pitch: p };
     } 
     
-    
-    //if(token.buttons[i] === ">" ) {
-    //    token.buttons[i].slur = 2;
-    //} else {
-    //    tie = false;
-    //}
   }
-  //if(token.bassNote  === ">" )  el.inTieBass = true;
- //el.inTieTreb = tie ;
   
   return child;
 };

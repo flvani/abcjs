@@ -566,9 +566,8 @@ window.ABCXJS.parse.parseKeyVoice = {};
 						case 'bass':
 						case 'perc':
 						case 'none':
-						case 'accordionTab':
 							break;
-						case 'C': clef.token = 'alto'; break;
+                                                case 'accordionTab': clef.token = 'accordionTab'; break;						case 'C': clef.token = 'alto'; break;
 						case 'F': clef.token = 'bass'; break;
 						case 'G': clef.token = 'treble'; break;
 						case 'c': clef.token = 'alto'; break;
@@ -707,15 +706,9 @@ window.ABCXJS.parse.parseKeyVoice = {};
 					case 'none,,':
 						// TODO-PER: handle the octave indicators on the clef by changing the middle property
 						var oct2 = 0;
-	//							for (var iii = 0; iii < token.token.length; iii++) {
-	//								if (token.token[iii] === ',') oct2 -= 7;
-	//								else if (token.token[iii] === "'") oct2 += 7;
-	//							}
 						staffInfo.clef = token.token.replace(/[',]/g, ""); //'//comment for emacs formatting of regexp
 						staffInfo.verticalPos = calcMiddle(staffInfo.clef, oct2);
                                                 multilineVars.clef = {type: staffInfo.clef, verticalPos: staffInfo.verticalPos};
-                                                // flavio - linha acima idem  - ret.foundClef = true;
-                                        
 						break;
 					case 'staves':
 					case 'stave':
