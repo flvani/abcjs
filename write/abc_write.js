@@ -153,14 +153,8 @@ ABCXJS.write.Printer.prototype.endGroup = function () {
 
 ABCXJS.write.Printer.prototype.printStave = function (startx, endx, staff ) {
     if(staff.numLines === 4) {
-      // para 3 elementos  
-      this.printStaveLine(startx,endx,2); // 2
-      this.printStaveLine(startx,endx,8.5, {stroke:"#666666", strokeDashArray:'.', strokeWidth:0.3, fill:"white"}); // 8.5
-      
-      // para 1 ou 2 elementos
-      //this.printStaveLine(startx,endx,0); 
-      //this.printStaveLine(startx,endx,5); 
-      
+      this.printStaveLine(startx,endx,0); // 2
+      this.printStaveLine(startx,endx,7.5, {stroke:"#666666", strokeDashArray:'.', strokeWidth:0.3, fill:"white"}); // 8.5
       this.printStaveLine(startx,endx,15, {stroke:"black", strokeDashArray:'.', strokeWidth:1, fill:"black"}); // 15
       this.printStaveLine(startx,endx,19.5, {stroke:"#666666", strokeDashArray:'.', strokeWidth:0.3, fill:"white"}); // 19.5
     } else {

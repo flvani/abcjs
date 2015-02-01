@@ -148,44 +148,82 @@ ABCXJS.write.StaffGroupElement.prototype.layout = function(spacing, printer, deb
     }
 };
 
-// flavio - desenha os elementos da partitura
+ABCXJS.write.StaffGroupElement.prototype.calcShiftAbove = function(voz) {
+  var abv = Math.max( voz.stave.highest, ABCXJS.write.spacing.TOPNOTE) - ABCXJS.write.spacing.TOPNOTE;
+  return (abv+2) * ABCXJS.write.spacing.STEP;
+};
+
+ABCXJS.write.StaffGroupElement.prototype.calcHeight = function(voz) {
+    // calculo da altura da pauta + uma pequena folga
+    var h = (1+voz.stave.highest-voz.stave.lowest) * ABCXJS.write.spacing.STEP;
+    // inclui espaço para as linhas de texto
+    h += ABCXJS.write.spacing.STEP * 6 * voz.stave.lyricsRows;
+    return h;
+};
+
 ABCXJS.write.StaffGroupElement.prototype.draw = function(printer, groupNumber) {
 
     var y = printer.y;
     this.y = y;
     this.height = 0;
-
+    var shiftabove = 0;
     
-    for (i = 0; i < this.voices.length; i++) {
+    for (var i = 0; i < this.voices.length; i++) {
 
-        var shiftabove = Math.max( this.voices[i].stave.highest, ABCXJS.write.spacing.TOPNOTE) 
-                            - ABCXJS.write.spacing.TOPNOTE + 4; 
         var h = 0;
         
         if( this.voices[i].stave.lyricsRows === 0 )
             this.voices[i].stave.lowest -=2;
         
-        if (groupNumber > 0 && i === 0 && this.voices[i].stave.subtitle) {
-            y += 5 * printer.scale;
-        }
-
-        this.voices[i].stave.top = y;
-        this.voices[i].stave.y = y + shiftabove * ABCXJS.write.spacing.STEP;
-        // calculo da altura da stave
-        h += (this.voices[i].stave.highest - this.voices[i].stave.lowest +4) * ABCXJS.write.spacing.STEP;
-        // inclui espaço para as linhas de texto
-        h += ABCXJS.write.spacing.STEP * 7 * this.voices[i].stave.lyricsRows;
-
-        //this.height += (this.voices[i].duplicate? 0:h);
-        if( this.voices[i].duplicate ) {
-            this.voices[i].stave.y = this.voices[i-1].stave.y;
-            this.voices[i].stave.bottom = this.voices[i-1].stave.bottom;
-        } else {
-           this.height += h;
-           y += h;
-           this.voices[i].stave.bottom = y;
-        }
+        shiftabove = this.calcShiftAbove( this.voices[i] );
         
+        if( this.voices[i].duplicate ) {
+            
+            var above = this.voices[i-1].stave.y - this.voices[i-1].stave.top;
+            var lastH = this.voices[i-1].stave.bottom - this.voices[i-1].stave.top;
+
+            this.voices[i].stave.top = this.voices[i-1].stave.top;
+            
+            if( shiftabove > above ) {
+                this.voices[i-1].stave.y += (shiftabove-above);
+            }
+
+            this.voices[i].stave.y = this.voices[i-1].stave.y;
+            
+            var x = Math.min(this.voices[i].stave.lowest,this.voices[i-1].stave.lowest);
+            this.voices[i].stave.lowest = x;
+            this.voices[i-1].stave.lowest = x;
+
+            var x = Math.max(this.voices[i].stave.highest,this.voices[i-1].stave.highest);
+            this.voices[i].stave.highest = x;
+            this.voices[i-1].stave.highest = x;
+            
+            h = this.calcHeight(this.voices[i]);
+
+            if( h > lastH ) {
+                this.height += (h-lastH);
+                y += (h-lastH);
+            }
+            
+            this.voices[i-1].stave.bottom = y;
+            this.voices[i].stave.bottom = y;
+           
+        } else {
+            
+            if (groupNumber > 0 && i === 0 && this.voices[i].stave.subtitle) {
+                y += 5 * printer.scale;
+            }
+
+            h = this.calcHeight(this.voices[i]);
+
+            this.voices[i].stave.top = y;
+            this.voices[i].stave.y = y + shiftabove;
+
+            this.height += h;
+            y += h;
+            
+            this.voices[i].stave.bottom = y;
+        }
     }
     
     for (i = 0; i < this.voices.length; i++) {
@@ -198,8 +236,8 @@ ABCXJS.write.StaffGroupElement.prototype.draw = function(printer, groupNumber) {
 
     if (this.voices.length > 1) {
         var top = this.voices[0].stave.y;
-        var bottom = this.voices[this.voices.length - 1].stave.top;
-        var bottom = printer.calcY(2);
+        var clef = this.voices[this.voices.length - 1].stave.clef.type;
+        var bottom = printer.calcY(clef==="accordionTab"?0:2);
         printer.printStem(this.startx, 0.6, top, bottom);
         printer.printStem(this.w-1, 0.6, top, bottom);
 
@@ -259,8 +297,8 @@ ABCXJS.write.VoiceElement = function(voicenumber, staffnumber, abcstaff) {
        ,clef: abcstaff.clef
        ,subtitle: abcstaff.subtitle
        ,lyricsRows: abcstaff.lyricsRows
-       ,highest: (abcstaff.clef.type === "accordionTab" ) ? 19.5 : 10
-       ,lowest: (abcstaff.clef.type === "accordionTab" ) ? 0 : 0
+       ,lowest: (abcstaff.clef.type === "accordionTab" ) ? -2 : 0
+       ,highest: (abcstaff.clef.type === "accordionTab" ) ? 21.5 : 10
        ,numLines: (abcstaff.clef.type === "accordionTab" ) ? 4 : abcstaff.clef.staffLines || 5
     };
 };
@@ -555,7 +593,9 @@ ABCXJS.write.RelativeElement.prototype.draw = function(printer, x, staveInfo ) {
             this.graphelem = printer.printDebugMsg(this.x, staveInfo.highest+2, this.c);
             break;
         case "lyrics":
-            this.graphelem = printer.printLyrics(this.x, staveInfo.lowest-(4*staveInfo.lyricsRows)+(staveInfo.lyricsRows-1), this.c);
+            var y = staveInfo.lowest-ABCXJS.write.spacing.STEP*staveInfo.lyricsRows;
+            y += (staveInfo.lyricsRows-0.5);
+            this.graphelem = printer.printLyrics(this.x, y, this.c);
             break;
         case "text":
             this.graphelem = printer.printText(this.x, this.pitch, this.c);
@@ -681,8 +721,8 @@ ABCXJS.write.EndingElem.prototype.draw = function(printer, linestartx, lineendx,
 
     if (this.anchor2) {
         lineendx = this.anchor2.x;
-        pathString = ABCXJS.write.sprintf("M %f %f L %f %f", lineendx, y, lineendx, y + 10*scale);
-        printer.printPath({path: pathString, stroke: "#000000", fill: "#000000"});
+        //pathString = ABCXJS.write.sprintf("M %f %f L %f %f", lineendx, y, lineendx, y + 10*scale);
+        //printer.printPath({path: pathString, stroke: "#000000", fill: "#000000"});
     }
 
     pathString = ABCXJS.write.sprintf("M %f %f L %f %f", linestartx, y, lineendx, y);

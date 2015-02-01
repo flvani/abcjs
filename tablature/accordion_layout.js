@@ -110,12 +110,21 @@ ABCXJS.tablature.Layout.prototype.printTabNote = function(elem) {
     return abselem;
 };
 
+ABCXJS.tablature.Layout.prototype.printClef = function(elem) {
+  var clef = "clefs.tab";
+  var dx = 8;
+  var abselem = new ABCXJS.write.AbsoluteElement(elem,0,10);
+  abselem.addRight(new ABCXJS.write.RelativeElement(clef, dx, this.glyphs.getSymbolWidth(clef), elem.clefPos, {scalex:0.9, scaley:0.9})); 
+  return abselem;
+};
+
 ABCXJS.tablature.Layout.prototype.printTablatureSignature= function(elem) {
   var abselem = new ABCXJS.write.AbsoluteElement(elem,0,20);
+  var dx = 2;
   
-  abselem.addRight(new ABCXJS.write.RelativeElement('Bass', 0, 15, 17.5, {type:"tabText"} ) );
-  abselem.addRight(new ABCXJS.write.RelativeElement('>><<', 0, 15, 11.4, {type:"tabText"} ) );
-  abselem.addRight(new ABCXJS.write.RelativeElement('<<>>', 0, 15,  5.2, {type:"tabText"} ) );
+  abselem.addRight(new ABCXJS.write.RelativeElement('Bass', dx, 15, 17.5, {type:"tabText"} ) );
+  abselem.addRight(new ABCXJS.write.RelativeElement('>><<', dx, 15, 10.8, {type:"tabText"} ) );
+  abselem.addRight(new ABCXJS.write.RelativeElement('<<>>', dx, 15,  3.7, {type:"tabText"} ) );
   
   this.startlimitelem = abselem; // limit ties here
   return abselem;
@@ -156,12 +165,12 @@ ABCXJS.tablature.Layout.prototype.printBarLine = function (elem) {
   }
 
   if (firstthin) {
-    anchor = new ABCXJS.write.RelativeElement(null, dx, 1, 2, {"type": "bar", "pitch2":topbar, linewidth:0.6});
+    anchor = new ABCXJS.write.RelativeElement(null, dx, 1, 0, {"type": "bar", "pitch2":topbar, linewidth:0.6});
     abselem.addRight(anchor);
   }
 
   if (elem.type==="bar_invisible") {
-    anchor = new ABCXJS.write.RelativeElement(null, dx, 1, 2, {"type": "none", "pitch2":topbar, linewidth:0.6});
+    anchor = new ABCXJS.write.RelativeElement(null, dx, 1, 0, {"type": "none", "pitch2":topbar, linewidth:0.6});
     abselem.addRight(anchor);
   }
 
@@ -171,7 +180,7 @@ ABCXJS.tablature.Layout.prototype.printBarLine = function (elem) {
 
   if (thick) {
     dx+=4; //3 hardcoded;    
-    anchor = new ABCXJS.write.RelativeElement(null, dx, 4, 2, {"type": "bar", "pitch2":topbar, linewidth:4});
+    anchor = new ABCXJS.write.RelativeElement(null, dx, 4, 0, {"type": "bar", "pitch2":topbar, linewidth:4});
     abselem.addRight(anchor);
     dx+=5;
   }
@@ -183,7 +192,7 @@ ABCXJS.tablature.Layout.prototype.printBarLine = function (elem) {
 
   if (secondthin) {
     dx+=3; //3 hardcoded;
-    anchor = new ABCXJS.write.RelativeElement(null, dx, 1, 2, {"type": "bar", "pitch2":topbar, linewidth:0.6});
+    anchor = new ABCXJS.write.RelativeElement(null, dx, 1, 0, {"type": "bar", "pitch2":topbar, linewidth:0.6});
     abselem.addRight(anchor); // 3 is hardcoded
   }
 
@@ -200,13 +209,4 @@ ABCXJS.tablature.Layout.prototype.printBarLine = function (elem) {
 
   return abselem;	
 
-};
-
-
-ABCXJS.tablature.Layout.prototype.printClef = function(elem) {
-  var clef = "clefs.tab";
-  var dx =10;
-  var abselem = new ABCXJS.write.AbsoluteElement(elem,0,10);
-  abselem.addRight(new ABCXJS.write.RelativeElement(clef, dx, this.glyphs.getSymbolWidth(clef), elem.clefPos)); 
-  return abselem;
 };

@@ -52,6 +52,7 @@ ABCXJS.tablature.Parse = function( str, vars ) {
     this.accSyms = "♭♯";
     this.i = 0;
     this.xi = 0;
+    this.offset = 8;
     
     this.warn = function(str) {
         var bad_char = this.line.charAt(this.i);
@@ -123,7 +124,7 @@ ABCXJS.tablature.Parse.prototype.formatChild = function(token) {
   }
   for( var b = 0; b < token.bassNote.length; ++ b ) {
     if(token.bassNote[b] === "z")
-      child.pitches[b] = { bass:true, type: "rest", c: '', pitch: pitchBase - (b*3)};
+      child.pitches[b] = { bass:true, type: "rest", c: '', pitch: 0.7 + pitchBase - (b*3)};
     else
       child.pitches[b] = { bass:true, type: tt, c: this.getTabSymbol(token.bassNote[b]), pitch: pitchBase -(b*3) - 0.5};
   }
@@ -135,9 +136,9 @@ ABCXJS.tablature.Parse.prototype.formatChild = function(token) {
     d--;
     var n = child.pitches.length;
     if(token.buttons[i] === "z")
-      child.pitches[n] = { c: "", type: "rest", pitch: token.bellows === "+"? 12.2 : 12.2-6.4 };
+      child.pitches[n] = { c: "", type: "rest", pitch: token.bellows === "+"? 13.2 : 13.2-this.offset };
     else {
-      var p = (qtd === 1 ? 11.7 : 13-( d * 2.8)) + (token.bellows === "+"? 0 : (qtd===3?-3.6:-6.4));
+      var p = (qtd === 1 ? 11.7 : 13-( d * 2.8)) + (token.bellows === "+"? 0 : (qtd===3?-5.6:-this.offset));
       child.pitches[n] = { c: this.getTabSymbol(token.buttons[i]), type: "tabText"+(qtd>1?"2":""), pitch: p };
     } 
     

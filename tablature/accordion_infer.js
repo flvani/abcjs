@@ -26,7 +26,7 @@ ABCXJS.tablature.Infer = function( accordion, tune, strTune, vars ) {
     this.abcText = strTune;
     this.vars = vars;
     this.tune = tune;
-    
+    this.offset = 8;
     this.reset();
     
     this.addWarning = function(str) {
@@ -321,11 +321,10 @@ ABCXJS.tablature.Infer.prototype.addTABChild = function(token) {
     var allClose = true;
     var baixoClose = true;
     var baixoOpen = true;
-    //var inSlur = false;
     var inTie = false;
 
     var qtd = column.length;
-    var offset = (qtd===3?-3.6:-6.4); // inicialmente as notas estão na posição "fechando". Se precisar alterar para "abrindo" este é offset da altura
+    var offset = (qtd===3?-5.6:-this.offset); // inicialmente as notas estão na posição "fechando". Se precisar alterar para "abrindo" este é offset da altura
 
     var pitchBase = 18;
     var tt = "tabText";
@@ -342,7 +341,7 @@ ABCXJS.tablature.Infer.prototype.addTABChild = function(token) {
             case 'rest':
             case 'invisible':
             case 'spacer':
-                child.pitches[b] = {bass: true, type: token.bassNote[b].type, c: '', pitch: pitchBase - (b * 3)};
+                child.pitches[b] = {bass: true, type: token.bassNote[b].type, c: '', pitch: 0.7 + pitchBase - (b * 3)};
                 this.registerLine('z');
                 break;
             default:
@@ -364,7 +363,7 @@ ABCXJS.tablature.Infer.prototype.addTABChild = function(token) {
             case 'spacer':
             case 'rest':
                 item.c = '';
-                item.pitch = 12.2;
+                item.pitch = 13.2;
                 break
             default:
                 var note = this.getNoteName(item, this.accTrebKey, this.trebBarAcc);
