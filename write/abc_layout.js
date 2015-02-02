@@ -73,13 +73,13 @@ ABCXJS.write.Layout.prototype.getCurrentVoiceId = function() {
 ABCXJS.write.Layout.prototype.pushCrossLineElems = function() {
   this.slursbyvoice[this.getCurrentVoiceId()] = this.slurs;
   this.tiesbyvoice[this.getCurrentVoiceId()] = this.ties;
-  this.endingsbyvoice[this.getCurrentVoiceId()] = this.partstartelem;
+  //this.endingsbyvoice[this.getCurrentVoiceId()] = this.partstartelem;
 };
 
 ABCXJS.write.Layout.prototype.popCrossLineElems = function() {
   this.slurs = this.slursbyvoice[this.getCurrentVoiceId()] || {};
   this.ties = this.tiesbyvoice[this.getCurrentVoiceId()] || [];
-  this.partstartelem = this.endingsbyvoice[this.getCurrentVoiceId()];
+  //this.partstartelem = this.endingsbyvoice[this.getCurrentVoiceId()];
 };
 
 ABCXJS.write.Layout.prototype.getElem = function() {

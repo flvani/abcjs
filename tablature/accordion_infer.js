@@ -26,7 +26,7 @@ ABCXJS.tablature.Infer = function( accordion, tune, strTune, vars ) {
     this.abcText = strTune;
     this.vars = vars;
     this.tune = tune;
-    this.offset = 8;
+    this.offset = 8.5;
     this.reset();
     
     this.addWarning = function(str) {

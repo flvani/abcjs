@@ -52,7 +52,7 @@ ABCXJS.tablature.Parse = function( str, vars ) {
     this.accSyms = "♭♯";
     this.i = 0;
     this.xi = 0;
-    this.offset = 8;
+    this.offset = 8.5;
     
     this.warn = function(str) {
         var bad_char = this.line.charAt(this.i);
@@ -341,4 +341,3 @@ ABCXJS.tablature.Parse.prototype.getButton = function() {
         
     return c + row;
 };
-
