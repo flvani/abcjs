@@ -6,6 +6,8 @@
 
 /*
  * TODO:
+ *   - Tratar notas muito longas (midiparser)
+ *   - Tratar inversões de fole e inTie (+/-)
  *   - Verificar currInterval e suas implicações quando se está no último compasso
  *   - Tratar adequadamente os acordes de baixo
  *   - OK inverter o movimento do fole baseado no tempo do compasso
@@ -380,35 +382,44 @@ ABCXJS.tablature.Infer.prototype.addTABChild = function(token) {
         
         child.pitches[child.pitches.length] = item;
     }
-
-    // verifica tudo: baixo e melodia
-    if ((this.closing && baixoClose && allClose) || (!this.closing && baixoOpen && allOpen)) {
-        // manteve o rumo, mas verifica o fole, virando se necessario (e possivel)
-        if ( inTie || /*inSlur ||*/ this.count < this.limit) {
-            this.count += child.duration;
-        } else {
-            // neste caso só muda se é possível manter baixo e melodia    
-            if ((!this.closing && baixoClose && allClose) || (this.closing && baixoOpen && allOpen)) {
-                this.count = child.duration;
-                this.closing = !this.closing;
-            }
-        }
-    } else if ((!this.closing && baixoClose && allClose) || (this.closing && baixoOpen && allOpen)) {
-        //mudou o rumo, mantendo baixo e melodia
-        this.count = child.duration;
-        this.closing = !this.closing;
+    
+    if( inTie ) {
+        // inversão impossível
+        this.count += child.duration;
     } else {
-        // não tem teclas de melodia e baixo simultaneamente: privilegia o baixo, se houver.
-        if ((this.closing && ((bass && baixoClose) || allClose)) || (!this.closing && ((bass && baixoOpen) || allOpen))) {
-            this.count += child.duration;
-        } else if ((!this.closing && ((bass && baixoClose) || allClose)) || (this.closing && ((bass && baixoOpen) || allOpen))) {
-            if (  inTie || /*inSlur ||*/ this.count < this.limit) {
+        // verifica tudo: baixo e melodia
+        if ((this.closing && baixoClose && allClose) || (!this.closing && baixoOpen && allOpen)) {
+            // manteve o rumo, mas verifica o fole, virando se necessario (e possivel)
+            if ( this.count < this.limit) {
                 this.count += child.duration;
             } else {
-                // neste caso só muda se é possível manter baixo ou melodia    
-                if ((!this.closing && (bass && baixoClose) && allClose) || (this.closing && (bass && baixoOpen) && allOpen)) {
+                // neste caso só muda se é possível manter baixo e melodia    
+                if ((!this.closing && baixoClose && allClose) || (this.closing && baixoOpen && allOpen)) {
                     this.count = child.duration;
                     this.closing = !this.closing;
+                } else {
+                    this.count += child.duration;
+                }
+            }
+        } else if ((!this.closing && baixoClose && allClose) || (this.closing && baixoOpen && allOpen)) {
+            //mudou o rumo, mantendo baixo e melodia
+            this.count = child.duration;
+            this.closing = !this.closing;
+        } else {
+            // não tem teclas de melodia e baixo simultaneamente: privilegia o baixo, se houver.
+            if ((this.closing && ((bass && baixoClose) || allClose)) || (!this.closing && ((bass && baixoOpen) || allOpen))) {
+                this.count += child.duration;
+            } else if ((!this.closing && ((bass && baixoClose) || allClose)) || (this.closing && ((bass && baixoOpen) || allOpen))) {
+                if (  this.count < this.limit) {
+                    this.count += child.duration;
+                } else {
+                    // neste caso só muda se é possível manter baixo ou melodia    
+                    if ((!this.closing && (bass && baixoClose) && allClose) || (this.closing && (bass && baixoOpen) && allOpen)) {
+                        this.count = child.duration;
+                        this.closing = !this.closing;
+                    } else {
+                        this.count += child.duration;
+                    }
                 }
             }
         }
