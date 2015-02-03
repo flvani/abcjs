@@ -419,7 +419,7 @@ ABCXJS.write.VoiceElement.prototype.draw = function(printer) {
     });
 
     window.ABCXJS.parse.each(this.otherchildren, function(child) {
-        child.draw(printer, ve.startx + 10, width, ve.stave, ve.staffnumber );
+        child.draw(printer, ve.startx + 10, width, ve.stave, ve.staffnumber, ve.voicenumber );
     });
 
 };
@@ -705,8 +705,8 @@ ABCXJS.write.EndingElem = function(text, anchor1, anchor2) {
     this.anchor2 = anchor2; // must have a .x property or be null (means ends at the end of the line)
 };
 
-ABCXJS.write.EndingElem.prototype.draw = function(printer, linestartx, lineendx, staveInfo, staffnumber) {
-    if(staffnumber > 0 ) return;
+ABCXJS.write.EndingElem.prototype.draw = function(printer, linestartx, lineendx, staveInfo, staffnumber, voicenumber) {
+    if(staffnumber > 0  || voicenumber > 0)  return;
 
     var pathString;
     var y = printer.calcY(staveInfo.highest + 4);
