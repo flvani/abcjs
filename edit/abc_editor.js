@@ -290,9 +290,12 @@ window.ABCXJS.Editor = function(editarea, params) {
     }
   }
   
-  this.parserparams = params.parser_options || {};
-  this.midiparams = params.midi_options || {};
+  if( params.generate_midi ) {
+      this.midiParser = new ABCXJS.midi.Parse(this.gaita, params.midi_options || {});
+  }
   
+  this.parserparams = params.parser_options || {};
+
   this.onchangeCallback = params.onchange;
 
   this.printerparams = params.render_options || {};
@@ -366,15 +369,15 @@ window.ABCXJS.Editor.prototype.renderTune = function(abc, params, div) {
 };
 
 window.ABCXJS.Editor.prototype.modelChanged = function() {
+    
     if (this.tunes === undefined) {
-        if (this.mididiv !== undefined && this.mididiv !== this.div)
-            this.mididiv.innerHTML = "";
         this.div.innerHTML = "";
         return;
     }
 
     if (this.bReentry)
         return; // TODO is this likely? maybe, if we rewrite abc immediately w/ abc2abc
+    
     this.bReentry = true;
     this.timerId = null;
     this.div.innerHTML = "";
@@ -382,13 +385,6 @@ window.ABCXJS.Editor.prototype.modelChanged = function() {
     this.printer = new ABCXJS.write.Printer(paper, this.printerparams );
     this.printer.printABC(this.tunes);
     
-    if (ABCXJS.midi && ) {
-        if (this.mididiv !== this.div)
-            this.mididiv.innerHTML = "";
-        var midiwriter = new ABCXJS.midi.MidiWriter(this.mididiv, this.midiparams);
-        midiwriter.addListener(this.printer);
-        midiwriter.writeABC(this.tunes[0]); //TODO handle multiple tunes
-    }
     if (this.warningsdiv) {
         this.warningsdiv.innerHTML = (this.warnings) ? this.warnings.join("<br />") : "No errors";
     }
@@ -396,6 +392,12 @@ window.ABCXJS.Editor.prototype.modelChanged = function() {
         var textprinter = new window.ABCXJS.transform.TextPrinter(this.target, true);
         textprinter.printABC(this.tunes[0]); //TODO handle multiple tunes
     }
+    if ( this.midiParser ) {
+//        var midiwriter = new ABCXJS.midi.MidiWriter(this.mididiv, this.midiparams);
+//        midiwriter.addListener(this.printer);
+//        midiwriter.writeABC(this.tunes[0]); //TODO handle multiple tunes
+    }
+    
     this.printer.addSelectListener(this);
     this.updateSelection();
     this.bReentry = false;
