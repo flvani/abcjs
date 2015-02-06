@@ -146,7 +146,7 @@ ABCXJS.write.Layout.prototype.layoutABCLine = function( abctune, line ) {
 ABCXJS.write.Layout.prototype.layoutStaffGroup = function() {
     var newspace = this.printer.space;
 
-    for (var it = 0; it < 2; it++) { // TODO shouldn't need this triple pass any more
+    for (var it = 0; it < 3; it++) { // TODO shouldn't need this triple pass any more
         this.staffgroup.layout(newspace, this.printer, false);
         if (this.tuneCurrLine && this.tuneCurrLine === this.tune.lines.length - 1 &&
                 this.staffgroup.w / this.width < 0.66

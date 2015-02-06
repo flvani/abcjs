@@ -6,7 +6,7 @@
 
 /*
  * TODO:
- *   - Tratar notas muito longas (midiparser)
+ *   - Bug quando ligaduras de expressão estão presentes
  *   - Tratar inversões de fole e inTie (+/-)
  *   - Verificar currInterval e suas implicações quando se está no último compasso
  *   - Tratar adequadamente os acordes de baixo
@@ -200,10 +200,10 @@ ABCXJS.tablature.Infer.prototype.extraiIntervalo = function(voices) {
                     break;
             }        
         }else if( elem.pitches ) {
+            ABCXJS.write.sortPitch(elem.pitches);
             if( voices[i].bass ) {
                 //todo: tratar adequadamente os acordes
                 var isChord = elem.pitches.length>1;
-                ABCXJS.write.sortPitch(elem.pitches);
                 elem.pitches.splice(1, elem.pitches.length - 1);
                 elem.pitches[0].chord=isChord;
                 wf.bassNote[wf.bassNote.length] = ABCXJS.parse.clone(elem.pitches[0]);
@@ -253,8 +253,15 @@ ABCXJS.tablature.Infer.prototype.setTies = function(voice) {
 
 ABCXJS.tablature.Infer.prototype.checkTies = function(voice) {
     if(voice.wi.el_type && voice.wi.el_type === "note" && voice.wi.pitches )  {
+        var found = false;
         for( var j = 0; j < voice.wi.pitches.length; j ++  ) {
-            voice.wi.pitches[j].inTie = voice.ties[100+voice.wi.pitches[j].pitch];
+            if(voice.ties[100+voice.wi.pitches[j].pitch]) {
+                found = true;
+                voice.wi.pitches[j].inTie = true;
+            }
+        }
+        if( voice.ties.length && ! found) {
+            this.addWarning('Ligaduras de expressão não implementadas.' ) ;
         }
     }    
 };

@@ -64,7 +64,7 @@
 
         <script type="text/javascript" src="data/abc_tune.js" ></script>
 	<script type="text/javascript" src="api/abc_tunebook.js" ></script>
-        <script type="text/javascript" src="midi/abc_midiwriter.js" ></script>
+        <!--script type="text/javascript" src="midi/abc_midiwriter.js" ></script-->
 
         <script type="text/javascript" src="write/raphael.js" ></script>
 	<script type="text/javascript" src="write/sprintf.js" ></script>
@@ -100,6 +100,28 @@
 <div id="editControl" style="display:inline-block;"> 
 
 <textarea id="abc" cols="120" rows="10" >
+X:2
+%%barnumbers 1
+%score( 1 2) 3 4
+%%restsintab
+%%papersize legal
+T:Vanera Grossa teste
+M:2/4
+L:1/4
+Q:80
+K:G
+V:1 treble stem=down
+%[V:1]|  C-E [CE]-[CE] ([CE] [CE]) (FD [DF]2) |
+[V:1]| C-[CE]
+V:3 accordionTab
+
+%[V:1]| D2F-[DF-] [DF]2[CE]2          | B,2D-[B,D-] [B,D]2[A,C]2      | G,2(EC [CE]2)[B,D]2      | G,2(EC [CE]2)
+%[V:2]| D,,3[D,F,A,] D,,2[D,F,A,]2 | D,,3[D,F,A,] D,,2[D,F,A,]2 | G,,3[G,B,D] G,,2[G,B,D]2 | G,,3[G,B,D] G,,2[G,B,D]2 |
+%V:3 accordionTab
+%V:4 accordionTab
+</textarea>
+    
+<textarea id="abcx" cols="120" rows="10" style="display: none;" >
 X:1
 %%papersize A4
 %%barnumbers 0
@@ -115,10 +137,7 @@ V:3 bass
 [V:1]| x8 | d8- | d8 | d8- | d8 | d8- | d8 |
 [V:2]|[DB]2[Ec]2[DB]2d2 |[A,]2C2 A,A,CC | [D]2CC  B,B,A,A, |[G,]2D2 B,B,DD | [E]ED2 C2B,B, |[A,]2C2 A,A,CC |[D]2C2B,2A,2  | 
 [V:3]| G,,3[G,B,D] G,,2[G,B,D]2 | D,,3[D,F,A,] D,,2[D,F,A,]2 | D,,3[D,F,A,] D,,2[D,F,A,]2 | G,,3[G,B,D] G,,2[G,B,D]2 | G,,3[G,B,D] G,,2[G,B,D]2 | D,,3[D,F,A,] D,,2[D,F,A,]2 | D,,3[D,F,A,] D,,2[D,F,A,]2 |
-V:4 accordionTab
-</textarea>
-    
-<textarea id="abcx" cols="120" rows="10" style="display: none;" >
+
 X:1003
 %%papersize A4
 %%barnumbers 1
@@ -148,13 +167,7 @@ L:1/16
 Q:80
 K:G
 V:1 treble stem=down
-V:2 treble stem=down
-V:3 bass
-%[V:1]| D2(FD [DF]2)[CE]2 |
-[V:1]| D2xD D2[CE]2 |
-[V:2]| z2F2-F2x2 |
-[V:3]| D,,3[D,F,A,] D,,2[D,F,A,]2 |
-V:4 accordionTab
+[V:1]| (CD)2(FD [DF]2)[CE]2 |
 </textarea>
     
 <textarea id="abcz" cols="120" rows="10"  style="display: none;" >
@@ -274,13 +287,14 @@ V:3 accordionTab
 
                 myEditor = new ABCXJS.Editor(
                         "abc", {
-                            canvas_id: "canvas"
-                            //,midi_id: "midi"
+                             canvas_id: "canvas"
                             ,warnings_id: "warnings"
                             ,refreshController_id: "chkAutoRefresh"
                             ,accordionSelector_id: "selGaitas"
                             ,accordionMaps: window.accordionMaps
                             ,keySelector_id: "selKey"
+                            ,generate_midi: true
+                            ,generate_warnings: false
                             ,midi_options: {program: 21, qpm: 150, type: "qt"}
                             ,render_options: {}
                             ,gui: false

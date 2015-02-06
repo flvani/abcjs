@@ -282,14 +282,6 @@ window.ABCXJS.Editor = function(editarea, params) {
     this.editarea.getElem().parentNode.insertBefore(this.div, this.editarea.getElem());
   }
   
-  if (params.generate_midi || params.midi_id) {
-    if (params.midi_id) {
-      this.mididiv = document.getElementById(params.midi_id);
-    } else {
-      this.mididiv = this.div;
-    }
-  }
-  
   if (params.generate_warnings || params.warnings_id) {
     if (params.warnings_id) {
       this.warningsdiv = document.getElementById(params.warnings_id);
@@ -309,6 +301,7 @@ window.ABCXJS.Editor = function(editarea, params) {
     this.target = document.getElementById(editarea);
     this.printerparams.editable = true;
   } 
+  
   this.oldt = "";
   this.bReentry = false;
 
@@ -389,7 +382,7 @@ window.ABCXJS.Editor.prototype.modelChanged = function() {
     this.printer = new ABCXJS.write.Printer(paper, this.printerparams );
     this.printer.printABC(this.tunes);
     
-    if (ABCXJS.midi && ABCXJS.midi.MidiWriter && this.mididiv) {
+    if (ABCXJS.midi && ) {
         if (this.mididiv !== this.div)
             this.mididiv.innerHTML = "";
         var midiwriter = new ABCXJS.midi.MidiWriter(this.mididiv, this.midiparams);
@@ -555,16 +548,4 @@ window.ABCXJS.Editor.prototype.pause = function(shouldPause) {
 	this.bIsPaused = shouldPause;
 	if (!shouldPause)
 		this.updateRendering();
-};
-
-window.ABCXJS.Editor.prototype.pauseMidi = function(shouldPause) {
-	if (shouldPause && this.mididiv) {
-		this.mididivSave = this.mididiv;
-		this.addClassName(this.mididiv, 'hidden');
-		this.mididiv = null;
-	} else if (!shouldPause && this.mididivSave) {
-		this.mididiv = this.mididivSave;
-		this.removeClassName(this.mididiv, 'hidden');
-		this.mididivSave = null;
-	}
 };

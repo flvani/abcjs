@@ -3,6 +3,12 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
+
+/*
+ * TODO:
+ * - Verificar porque no caso de slur a ordem dos elementos não está sendo respeitada
+*/
+
 /*
  
             Definição da sintaxe para tablatura
