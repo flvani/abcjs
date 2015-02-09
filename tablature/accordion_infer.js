@@ -78,10 +78,14 @@ ABCXJS.tablature.Infer.prototype.inferTabVoice = function(line) {
     
     if( this.tune.tabStaffPos === 2 ) {
         var bassStaff  = this.tune.lines[this.tuneCurrLine].staffs[1];
-        var bassVoices = bassStaff.voices;
-        this.accBassKey = bassStaff.key.accidentals;
-        for( var i = 0; i < bassVoices.length; i ++ ) {
-            voices.push({ voz:bassVoices[i], pos:-1, st:'waiting for data', bass:true, wi: {}, ties:[], slurs:[] } ); // wi - work item
+        if(bassStaff) { 
+            var bassVoices = bassStaff.voices;
+            this.accBassKey = bassStaff.key.accidentals;
+            for( var i = 0; i < bassVoices.length; i ++ ) {
+                voices.push({ voz:bassVoices[i], pos:-1, st:'waiting for data', bass:true, wi: {}, ties:[], slurs:[] } ); // wi - work item
+            }
+        } else {
+            this.addWarning('Possível falta da definição da linha de baixos.') ;
         }
     }  
     var st = 1; // 0 - fim; 1 - barra; 2 dados; - 1 para garantir a entrada
@@ -95,7 +99,7 @@ ABCXJS.tablature.Infer.prototype.inferTabVoice = function(line) {
 
         for( var j = 0; j < voices.length-1; j ++ ) {
             if( voices[j].st !== voices[j+1].st ) {
-                var n = parseInt(this.currInterval)-1;
+                var n = parseInt(this.currInterval);
                 this.addWarning('Possível falta de sincronismo no compasso ' + n + '.' ) ;
                 j = voices.length;
             }

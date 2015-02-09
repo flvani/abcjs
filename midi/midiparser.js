@@ -122,6 +122,7 @@ ABCXJS.midi.Parse.prototype.writeABCLine = function() {
     
     if ( this.abctune.lines[this.line].staffs ) {
         this.staffcount = this.getLine().staffs.length;
+        if( ! this.getStaff() ) return;
         this.voicecount = this.getStaff().voices.length;
         this.setKeySignature(this.getStaff().key);
         this.writeABCVoiceLine();
