@@ -12,19 +12,33 @@
  *   - implementar: segno, coda, capo e fine
  */
 
-if (!window.DIATONIC)
-    window.DIATONIC = {};
+if (!window.ABCXJS)
+    window.ABCXJS = {};
 
 if (!window.ABCXJS.midi) 
     window.ABCXJS.midi = {baseduration: 1920 }; // nice and divisible, equals 1 whole note
 
-ABCXJS.midi.Parse = function( gaita ) {
-    this.gaita = gaita;
+ABCXJS.midi.Parse = function( map, options  ) {
+    this.map = map;
+    this.gaita = map? map.gaita : null;
+    this.options =  options || {};
+    this.vars = { warnings: [] };
     this.scale = [0, 2, 4, 5, 7, 9, 11];
+    
     this.reset();
+    
+    this.addWarning = function(str) {
+        this.vars.warnings.push(str);
+    };
+    
+    this.getWarnings = function() {
+        return this.vars.warnings;    
+    };
 };
 
 ABCXJS.midi.Parse.prototype.reset = function() {
+    
+    this.vars.warnings = [];
     
     this.multiplier = 1;
     this.timecount = 0;
@@ -48,7 +62,7 @@ ABCXJS.midi.Parse.prototype.reset = function() {
     }; 
 };
 
-ABCXJS.midi.Parse.prototype.parse = function(tune, printer) {
+ABCXJS.midi.Parse.prototype.parse = function(tune) {
     
     var self = this;
     var currBar = 0;
@@ -57,11 +71,10 @@ ABCXJS.midi.Parse.prototype.parse = function(tune, printer) {
 
     this.abctune = tune;
     
-    if (printer) {
-        this.midiTune.printer = printer;
-    }
+    this.midiTune.map = this.map;
+    this.midiTune.gaita = this.gaita;
 
-    if (tune.metaText.tempo) {
+    if ( tune.metaText && tune.metaText.tempo) {
         var bpm = tune.metaText.tempo.bpm || 160;
         var duration = tune.metaText.tempo.duration[0] || 0.25;
         this.midiTune.tempo = bpm * duration * 16;
@@ -80,7 +93,7 @@ ABCXJS.midi.Parse.prototype.parse = function(tune, printer) {
         }
     }
     
-    //cria a playlist a partir dos elementos analisados  
+    //cria a playlist a partir dos elementos obtidos acima  
     this.parsedElements.forEach( function( item, time ) {
         
         if( item[0].pitches.length + item[0].abcelems.length + item[0].buttons.length > 0 ) {
@@ -99,6 +112,8 @@ ABCXJS.midi.Parse.prototype.parse = function(tune, printer) {
             }
         }
     });
+    
+    tune.midi = this.midiTune;
     
     return this.midiTune;
 };
@@ -254,7 +269,7 @@ ABCXJS.midi.Parse.prototype.endTies = function(midipitch, mididuration, endElem,
         this.endNote(endElem, this.timecount + mididuration);
         delete this.startTieElem[midipitch];
     } else {
-        console.log( 'Ligaduras de expressão não implementadas!');
+        this.addWarning( 'Ligaduras de expressão não implementadas!');
         this.clearTies();
         this.startNote(endElem, this.timecount, midipitch );
         this.endNote(endElem, this.timecount + mididuration, midipitch );
@@ -337,13 +352,13 @@ ABCXJS.midi.Parse.prototype.endNote = function(abcelem, endTime, pitch ) {
 ABCXJS.midi.Parse.prototype.startButton = function( abcelem, button, startTime ) {
     this.initParsedElements(startTime);
     this.parsedElements[startTime][1].abcelems.push({abcelem:abcelem,channel:this.channel});
-    this.parsedElements[startTime][1].buttons.push({button:button,abcelem:abcelem});
+    if (button) this.parsedElements[startTime][1].buttons.push({button:button,abcelem:abcelem});
 };
  
 ABCXJS.midi.Parse.prototype.endButton = function( abcelem, button, endTime ) {
     this.initParsedElements(endTime);
     this.parsedElements[endTime][0].abcelems.push({abcelem:abcelem});
-    this.parsedElements[endTime][0].buttons.push({button:button});
+    if (button) this.parsedElements[endTime][0].buttons.push({button:button});
  };
 
 ABCXJS.midi.Parse.prototype.getMark = function() {
@@ -436,9 +451,7 @@ ABCXJS.midi.Parse.prototype.setKeySignature = function(elem) {
 
 ABCXJS.midi.Parse.prototype.extractNote = function(pitch) {
     pitch = pitch % 7;
-    if (pitch < 0)
-        pitch += 7;
-    return pitch;
+    return (pitch < 0)? pitch+7 : pitch;
 };
 
 ABCXJS.midi.Parse.prototype.extractOctave = function(pitch) {
@@ -446,7 +459,7 @@ ABCXJS.midi.Parse.prototype.extractOctave = function(pitch) {
 };
 
 ABCXJS.midi.Parse.prototype.getBassButton = function( bellows, b ) {
-    if(b === '-->') return null;
+    if( b === '-->' || !this.gaita ) return null;
     var kb = this.gaita.keyboard;
     var nota = this.gaita.parseNote(b, true );
     for( var j = kb.length; j > kb.length - 2; j-- ) {
@@ -463,7 +476,7 @@ ABCXJS.midi.Parse.prototype.getBassButton = function( bellows, b ) {
 };
 
 ABCXJS.midi.Parse.prototype.getButton = function( b ) {
-    if(b === 'x') return null;
+    if( b === 'x' || !this.gaita ) return null;
     var p = parseInt( isNaN(b.substr(0,2)) || b.length === 1 ? 1 : 2 );
     var button = b.substr(0, p) -1;
     var row = b.length - p;

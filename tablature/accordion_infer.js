@@ -26,9 +26,9 @@ if (!window.ABCXJS.tablature)
 ABCXJS.tablature.Infer = function( accordion, tune, strTune, vars ) {
     this.accordion = accordion;
     this.abcText = strTune;
-    this.vars = vars;
+    this.vars = vars || {} ;
     this.tune = tune;
-    this.offset = 8.5;
+    this.offset = 8.9;
     this.reset();
     
     this.addWarning = function(str) {
@@ -58,7 +58,6 @@ ABCXJS.tablature.Infer.prototype.reset = function() {
       this.limit = 1; 
     }
 };
-
 
 ABCXJS.tablature.Infer.prototype.inferTabVoice = function(line) {
     
@@ -333,7 +332,9 @@ ABCXJS.tablature.Infer.prototype.addTABChild = function(token) {
     var inTie = false;
 
     var qtd = column.length;
-    var offset = (qtd===3?-5.6:-this.offset); // inicialmente as notas estão na posição "fechando". Se precisar alterar para "abrindo" este é offset da altura
+    
+    // inicialmente as notas estão na posição "fechando". Se precisar alterar para "abrindo" este é offset da altura
+    var offset = (qtd>=3?-(this.offset-(2.8*(qtd-2))):-this.offset);
 
     var pitchBase = 18;
     var tt = "tabText";
@@ -362,7 +363,6 @@ ABCXJS.tablature.Infer.prototype.addTABChild = function(token) {
     }
 
 
-    var d = qtd; // pela organização da accordion as notas graves ficam melhor se impressas antes, admitindo que foi escrito em ordem crescente no arquivo abc
     var xi = this.getXi();
     for (var c = 0; c < column.length; c++) {
         var item = column[c];
@@ -376,11 +376,10 @@ ABCXJS.tablature.Infer.prototype.addTABChild = function(token) {
                 break
             default:
                 var note = this.getNoteName(item, this.accTrebKey, this.trebBarAcc);
-                d--;
                 item.buttons = this.accordion.getButtons(note, false);
                 item.note = note;
                 item.c = item.inTie ? '-->' :  note;
-                item.pitch = (qtd === 1 ? 11.7 : 13 -( d * 2.8));
+                item.pitch = (qtd === 1 ? 11.7 : 13.4 -( c * 2.8));
                 item.type = "tabText" + (qtd > 1 ? 2 : "");
 
                 allOpen = allOpen ? typeof (item.buttons.open) !== "undefined" : false;

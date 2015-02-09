@@ -353,6 +353,9 @@ ABCXJS.write.Printer.prototype.printABC = function(abctunes) {
   this.y=0;
 
   for (var i = 0; i < abctunes.length; i++) {
+    if( abctunes[i].midi) {
+        abctunes[i].midi.printer = this;
+    }
     this.printTune(abctunes[i]);
   }
 

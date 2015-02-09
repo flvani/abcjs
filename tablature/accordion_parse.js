@@ -49,7 +49,7 @@ ABCXJS.tablature.Parse = function( str, vars ) {
     this.invalid = false;
     this.finished = false;
     this.line = str;
-    this.vars = vars;
+    this.vars = vars || {} ;
     this.bassNoteSyms = "abcdefgABCDEFG>xz";
     this.trebNoteSyms = "0123456789abcdefABCDEF>xz";
     this.durSyms = "0123456789/.";
@@ -58,7 +58,7 @@ ABCXJS.tablature.Parse = function( str, vars ) {
     this.accSyms = "♭♯";
     this.i = 0;
     this.xi = 0;
-    this.offset = 8.5;
+    this.offset = 8.9;
     
     this.warn = function(str) {
         var bad_char = this.line.charAt(this.i);
@@ -136,15 +136,14 @@ ABCXJS.tablature.Parse.prototype.formatChild = function(token) {
   }
 
   var qtd = token.buttons.length;
-  var d = qtd;
   
   for(var i = 0; i < token.buttons.length; i ++ ) {
-    d--;
     var n = child.pitches.length;
     if(token.buttons[i] === "z")
       child.pitches[n] = { c: "", type: "rest", pitch: token.bellows === "+"? 13.2 : 13.2-this.offset };
     else {
-      var p = (qtd === 1 ? 11.7 : 13-( d * 2.8)) + (token.bellows === "+"? 0 : (qtd===3?-5.6:-this.offset));
+      var offset = (qtd>=3?-(this.offset-(2.8*(qtd-2))):-this.offset);
+      var p = (qtd === 1 ? 11.7 : 13.4 - ( i * 2.8)) + (token.bellows === "+"? 0 : offset);
       child.pitches[n] = { c: this.getTabSymbol(token.buttons[i]), type: "tabText"+(qtd>1?"2":""), pitch: p };
     } 
     

@@ -255,6 +255,10 @@ window.ABCXJS.Editor = function(editarea, params) {
   if (params.abcText && typeof params.abcText === "string") {
      this.editarea.setString(params.abcText, "noRefresh" ) ;
   }
+  
+  if( params.map ) {
+      this.map = params.map;
+  }
 
   if(params.refreshController_id)  
     this.refreshController = document.getElementById(params.refreshController_id);
@@ -282,7 +286,7 @@ window.ABCXJS.Editor = function(editarea, params) {
     this.editarea.getElem().parentNode.insertBefore(this.div, this.editarea.getElem());
   }
   
-  if (params.generate_warnings || params.warnings_id) {
+  if (params.generate_warnings ) {
     if (params.warnings_id) {
       this.warningsdiv = document.getElementById(params.warnings_id);
     } else {
@@ -291,7 +295,7 @@ window.ABCXJS.Editor = function(editarea, params) {
   }
   
   if( params.generate_midi ) {
-      this.midiParser = new ABCXJS.midi.Parse(this.gaita, params.midi_options || {});
+      this.midiParser = new ABCXJS.midi.Parse( this.map, params.midi_options );
   }
   
   this.parserparams = params.parser_options || {};
@@ -385,17 +389,13 @@ window.ABCXJS.Editor.prototype.modelChanged = function() {
     this.printer = new ABCXJS.write.Printer(paper, this.printerparams );
     this.printer.printABC(this.tunes);
     
-    if (this.warningsdiv) {
-        this.warningsdiv.innerHTML = (this.warnings) ? this.warnings.join("<br />") : "No errors";
-    }
     if (this.target) {
         var textprinter = new window.ABCXJS.transform.TextPrinter(this.target, true);
         textprinter.printABC(this.tunes[0]); //TODO handle multiple tunes
     }
-    if ( this.midiParser ) {
-//        var midiwriter = new ABCXJS.midi.MidiWriter(this.mididiv, this.midiparams);
-//        midiwriter.addListener(this.printer);
-//        midiwriter.writeABC(this.tunes[0]); //TODO handle multiple tunes
+    
+    if (this.warningsdiv) {
+        this.warningsdiv.innerHTML = '<hr>' + (this.warnings ? this.warnings.join("<br>") : "No warnings or errors.");
     }
     
     this.printer.addSelectListener(this);
@@ -454,6 +454,14 @@ window.ABCXJS.Editor.prototype.parseABC = function(transpose, force ) {
     if( this.accordion ) { 
         // obtem possiveis linhas inferidas para tablatura
         this.editarea.appendString( this.accordion.updateEditor() );
+    }
+    
+    if ( this.midiParser ) {
+        this.midiParser.parse( this.tunes[i]);
+         var warnings = this.midiParser.getWarnings();
+         for (var j=0; j<warnings.length; j++) {
+           this.warnings.push(warnings[j]);
+         }
     }
     
     var warnings = abcParser.getWarnings() || [];

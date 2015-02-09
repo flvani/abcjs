@@ -963,6 +963,37 @@ window.ABCXJS.parse.Parse = function(transporter_, accordion_) {
     this.addTuneElement = function(type, startOfLine, xi, xf, elem) {
         tune.appendElement(type, startOfLine + xi, startOfLine + xf, elem);
     };
+    
+    this.checkTies = function(line, i) {
+        var check = true;
+        this.aTies.forEach( function( pitch ) {
+            if( pitch ) {
+                pitch.startTie.expression = true;
+                check = false;
+            }
+        });
+        this.aTies = [];
+            multilineVars.inTie = false;
+        if( ! check )
+            warn("Ligadura de expressão não implementada!!", line, i);
+        return check;  
+    };
+    this.handleTie = function( pitch, type ) {
+        if( !this.aTies ) this.aTies = [];
+        switch( type ) {
+            case 'startTie':
+                pitch.startTie = {};
+                this.aTies[pitch.pitch] = pitch;
+                break;
+            case 'endTie':
+                pitch.endTie = true;
+                if(this.aTies[pitch.pitch])
+                    this.aTies[pitch.pitch] = null;
+                break;
+        }
+    };
+    
+    
 
     //
     // Parse line of music
@@ -1191,12 +1222,6 @@ window.ABCXJS.parse.Parse = function(transporter_, accordion_) {
                             bar.decoration = el.decoration;
                         if (el.chord !== undefined)
                             bar.chord = el.chord;
-                        //if (bar.startEnding && multilineVars.barFirstEndingNum === undefined)
-                        //    multilineVars.barFirstEndingNum = multilineVars.currBarNumber;
-                        //else if (bar.startEnding && bar.endEnding && multilineVars.barFirstEndingNum)
-                        //    multilineVars.currBarNumber = multilineVars.barFirstEndingNum;
-                        //else if (bar.endEnding)
-                        //    multilineVars.barFirstEndingNum = undefined;
                         var mc = multilineVars.currentVoice; 
                         if (bar.type !== 'bar_invisible' 
                                 && multilineVars.measureNotEmpty 
@@ -1285,10 +1310,14 @@ window.ABCXJS.parse.Parse = function(transporter_, accordion_) {
                                     }
 
                                     if (multilineVars.inTie) {
+                                        var self = this;
+                                        //var el = el;
                                         window.ABCXJS.parse.each(el.pitches, function(pitch) {
-                                            pitch.endTie = true;
+                                            self.handleTie(pitch, 'endTie' );
+                                            //pitch.endTie = true;
                                         });
-                                        multilineVars.inTie = false;
+                                        //multilineVars.inTie = false;
+                                        this.checkTies( line, i ) 
                                     }
 
                                     if (tripletNotesLeft > 0) {
@@ -1318,8 +1347,10 @@ window.ABCXJS.parse.Parse = function(transporter_, accordion_) {
                                                 //window.ABCXJS.parse.each(el.pitches, function(pitch) { if (pitch.endSlur === undefined) pitch.endSlur = 1; else pitch.endSlur++; });
                                                 break;
                                             case '-':
+                                                var self = this;
                                                 window.ABCXJS.parse.each(el.pitches, function(pitch) {
-                                                    pitch.startTie = {};
+                                                    self.handleTie(pitch, 'startTie' )
+                                                    //pitch.startTie = {};
                                                 });
                                                 multilineVars.inTie = true;
                                                 break;
@@ -1397,15 +1428,18 @@ window.ABCXJS.parse.Parse = function(transporter_, accordion_) {
                                 if (core.endSlur !== undefined)
                                     el.pitches[0].endSlur = core.endSlur;
                                 if (core.endTie !== undefined)
-                                    el.pitches[0].endTie = core.endTie;
+                                    this.handleTie(el.pitches[0], 'endTie');
+//                                    el.pitches[0].endTie = core.endTie;
                                 if (core.startSlur !== undefined)
                                     el.pitches[0].startSlur = core.startSlur;
                                 if (el.startSlur !== undefined)
                                     el.pitches[0].startSlur = el.startSlur;
                                 if (core.startTie !== undefined)
-                                    el.pitches[0].startTie = core.startTie;
+                                    this.handleTie(el.pitches[0], 'startTie');
+                                    //el.pitches[0].startTie = core.startTie;
                                 if (el.startTie !== undefined)
-                                    el.pitches[0].startTie = el.startTie;
+                                    this.handleTie(el.pitches[0], 'startTie');
+                                    //el.pitches[0].startTie = el.startTie;
                             } else {
                                 el.rest = core.rest;
                                 if (core.endSlur !== undefined)
@@ -1432,10 +1466,12 @@ window.ABCXJS.parse.Parse = function(transporter_, accordion_) {
                             delete el.startSlur;
                             if (multilineVars.inTie) {
                                 if (el.pitches !== undefined)
-                                    el.pitches[0].endTie = true;
+                                    this.handleTie(el.pitches[0], 'endTie');
+                                    //el.pitches[0].endTie = true;
                                 else
                                     el.rest.endTie = true;
-                                multilineVars.inTie = false;
+                                //multilineVars.inTie = false;
+                                this.checkTies( line, i );
                             }
                             if (core.startTie || el.startTie)
                                 multilineVars.inTie = true;

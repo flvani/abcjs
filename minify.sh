@@ -19,7 +19,7 @@ cat write/abc_glyphs.js write/abc_graphelements.js write/abc_layout.js \
     write/abc_write.js write/sprintf.js > tmp/write.js
 
 cat api/abc_tunebook.js data/abc_tune.js tmp/parse.js tmp/write.js > tmp/abcjs-noraphael-nomidi.js
-cat tmp/abcjs-noraphael-nomidi.js midi/abc_midiwriter.js > tmp/abcjs-noraphael.js
+cat tmp/abcjs-noraphael-nomidi.js midi/midiparser.js  midi/midiplayer.js > tmp/abcjs-noraphael.js
 cat write/raphael.js tmp/abcjs-noraphael-nomidi.js > tmp/abcjs_nomidi.js
 cat write/raphael.js tmp/abcjs-noraphael.js > tmp/abcjs_all.js
 
@@ -33,9 +33,6 @@ cat tmp/abcjs_editor-nomidi.js tmp/tablature.js > tmp/abcxjs-nomidi.js
 cat tmp/abcjs_editor-noraphael.js tmp/tablature.js > tmp/abcxjs-noraphael.js
 cat tmp/abcjs_editor-noraphael-nomidi.js tmp/tablature.js > tmp/abcxjs-noraphael-nomidi.js
 
-cat tmp/abcjs-noraphael.js plugin/abc_plugin.js > tmp/abcjs_plugin-noraphael.js
-cat tmp/abcjs_all.js plugin/abc_plugin.js > tmp/abcjs_plugin.js
-
 #echo "Compressing basic..."
 #java -jar yuicompressor-2.4.2.jar  --line-break 7000 -o bin/abcjs_basic_$1-min.js tmp/abcjs_all.js
 #java -jar yuicompressor-2.4.2.jar  --line-break 7000 -o bin/abcjs_basic_nomidi_$1-min.js tmp/abcjs_nomidi.js
@@ -46,17 +43,13 @@ cat tmp/abcjs_all.js plugin/abc_plugin.js > tmp/abcjs_plugin.js
 #java -jar yuicompressor-2.4.2.jar  --line-break 7000 -o bin/abcjs_editor_nomidi_$1-min.js tmp/abcjs_editor-nomidi.js
 #java -jar yuicompressor-2.4.2.jar  --line-break 7000 -o bin/abcjs_editor_noraphael_$1-min.js tmp/abcjs_editor-noraphael.js
 #java -jar yuicompressor-2.4.2.jar  --line-break 7000 -o bin/abcjs_editor_noraphael_nomidi_$1-min.js tmp/abcjs_editor-noraphael-nomidi.js
+
 echo "Compressing tabeditor..."
 java -jar yuicompressor-2.4.2.jar  --line-break 7000 -o bin/abcxjs_$1-min.js tmp/abcxjs.js
-java -jar yuicompressor-2.4.2.jar  --line-break 7000 -o bin/abcxjs_nomidi_$1-min.js tmp/abcxjs-nomidi.js
+
+#java -jar yuicompressor-2.4.2.jar  --line-break 7000 -o bin/abcxjs_nomidi_$1-min.js tmp/abcxjs-nomidi.js
 #java -jar yuicompressor-2.4.2.jar  --line-break 7000 -o bin/abcxjs_noraphael_$1-min.js tmp/abcxjs-noraphael.js
 #java -jar yuicompressor-2.4.2.jar  --line-break 7000 -o bin/abcxjs_noraphael_nomidi_$1-min.js tmp/abcxjs-noraphael-nomidi.js
-#echo "Compressing plugin..."
-#java -jar yuicompressor-2.4.2.jar  --line-break 7000 -o bin/abcjs_plugin_noraphael_nojquery_$1-min.js tmp/abcjs_plugin-noraphael.js
-#java -jar yuicompressor-2.4.2.jar  --line-break 7000 -o bin/abcjs_plugin_nojquery_$1-min.js tmp/abcjs_plugin.js
-
-#cat jquery-1.10.2.min.js bin/abcjs_plugin_nojquery_$1-min.js > bin/abcjs_plugin_$1-min.js
-#cat plugin/greasemonkey.js bin/abcjs_plugin_$1-min.js > bin/abcjs_plugin_$1.user.js
 
 echo "Removing temporary files..."
 rm tmp/*

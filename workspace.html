@@ -6,6 +6,7 @@
           MAIN DATA STRUCTURES
         
             Tune
+              midi {}
               lines[]
                 staffs[]
                    voices[]
@@ -54,17 +55,22 @@
                 revisar a impressão de múltiplas notas na mesma coluna
         
         -->
-	<title>Draw The Dots: Tune Editor demo</title>
+	<title>Draw The Dots: Tune Editor</title>
         <meta http-equiv="content-type" content="text/html; charset=UTF-8"></meta>
     </head>
     <body>
 
+        <script type="text/javascript" src="MIDI.js/MIDI_2.03-min.js"></script>
+        
 	<script type="text/javascript" src="proto_noconflict.js" ></script>
-	<script type="text/javascript" src="jquery-1.10.2.min.js" ></script>
+	<script type="text/javascript" src="jquery-1.11.1.min.js" ></script>
+	<script type="text/javascript" src="filemanager.js" ></script>
 
         <script type="text/javascript" src="data/abc_tune.js" ></script>
 	<script type="text/javascript" src="api/abc_tunebook.js" ></script>
-        <!--script type="text/javascript" src="midi/abc_midiwriter.js" ></script-->
+        
+        <script type="text/javascript" src="midi/midiparser.js" ></script>
+        <script type="text/javascript" src="midi/midiplayer.js" ></script>
 
         <script type="text/javascript" src="write/raphael.js" ></script>
 	<script type="text/javascript" src="write/sprintf.js" ></script>
@@ -82,8 +88,7 @@
 	<script type="text/javascript" src="parse/abc_common.js" ></script>
 
         <!-- diatonic accordion map -->
-        <script type="text/javascript" src="../diatonic-map/diatonic/diatonic-map.js"></script>
-        <script type="text/javascript" src="../diatonic-map/js/filemanager.js"></script>
+        <script type="text/javascript" src="diatonic/diatonic-map.js"></script>
         
         <!-- support for diatonic accordion tablature -->
         <script type="text/javascript" src="tablature/accordion_map.js"></script>
@@ -93,16 +98,12 @@
         
  	<script type="text/javascript" src="edit/abc_editor.js" ></script>
 
-        <!--applet id="MIDIPlugin" code="MIDIPlugin.class" name="MIDIPlugin" archive="http://dl.dropbox.com/u/223827/abcjs/MIDIPlugin.jar" height="1" width="1"></applet-->
-        <!--applet id="MIDIPlugin" code="MIDIPlugin.class" name="MIDIPlugin" archive="MIDIPlugin.jar" height="2" width="1"></applet-->
-        <!--textarea id="target" cols="80" rows="15"></textarea-->
-
+<div id="editor" style="display:inline-block;"> 
 <div id="editControl" style="display:inline-block;"> 
 
 <textarea id="abc" cols="120" rows="10" >
 X:2
 %%barnumbers 1
-%score( 1 2) 3 4
 %%restsintab
 %%papersize legal
 T:Vanera Grossa teste
@@ -112,16 +113,17 @@ Q:80
 K:G
 V:1 treble stem=down
 %[V:1]|  C-E [CE]-[CE] ([CE] [CE]) (FD [DF]2) |
-[V:1]| C-[CE]
+[V:1]| C-E
 V:3 accordionTab
+</textarea>
+    
+<textarea id="abcx" cols="120" rows="10" style="display: none;" >
 
 %[V:1]| D2F-[DF-] [DF]2[CE]2          | B,2D-[B,D-] [B,D]2[A,C]2      | G,2(EC [CE]2)[B,D]2      | G,2(EC [CE]2)
 %[V:2]| D,,3[D,F,A,] D,,2[D,F,A,]2 | D,,3[D,F,A,] D,,2[D,F,A,]2 | G,,3[G,B,D] G,,2[G,B,D]2 | G,,3[G,B,D] G,,2[G,B,D]2 |
 %V:3 accordionTab
 %V:4 accordionTab
-</textarea>
-    
-<textarea id="abcx" cols="120" rows="10" style="display: none;" >
+
 X:1
 %%papersize A4
 %%barnumbers 0
@@ -232,29 +234,35 @@ V:3 accordionTab
         <select id="selGaitas" ></select>
         <select id="selKey" ></select>
         <input type="submit" id="maisOitava" value="+ Oitava" onclick="javascript:doTranspose(12);" />
-        <!--input type="submit" id="maisMeioTom" value="+ 1/2 Tom" onclick="javascript:doTranspose(1);" />
-        <input type="submit"  id="nenosMeioTom" value="- 1/2 Tom" onclick="javascript:doTranspose(-1);" /-->
         <input type="submit" id="menosOitava" value="- Oitava" onclick="javascript:doTranspose(-12);" />
         <input type="button" id="printBtn" value="Print Preview" />
         <input type="submit" id="forceRefresh" value="Refresh" onclick="javascript:doForceRefresh();" />
         <input type="checkbox" id="chkAutoRefresh" />Auto refresh 
         <input type="checkbox" id="chkDebug" onclick="javascript:doCheckDebug();" />Debug
+        <input type="button" id="playBtn" value="Play" />
+        <input type="button" id="pauseBtn" value="Pause" />
+        <input type="button" id="stopBtn" value="Stop" />
     </div>
+    <div id="warnings"></div>
     <hr>    
-    <div id="warnings">warnings</div>
-    <!--div id="midi"></div-->
+    </div> <!-- editor -->
     <div id="canvas" style="overflow-y: scroll; float:left;"> </div>
         
         <script type="text/javascript">
             window.myEditor = {};
             window.accordionMaps = [];
+            
             window.printButton = document.getElementById("printBtn");
+            
+            window.playButton = document.getElementById("playBtn");
+            window.pauseButton = document.getElementById("pauseBtn");
+            window.stopButton = document.getElementById("stopBtn");
             
             window.addEventListener('load', initApp, false);
 
             function loadAccordions( files, cb )  {
                 var toLoad = 0;
-                for( var f = 0; f <  files.length; f ++ ) {
+                for( var f = 0; f < files.length; f ++ ) {
                     toLoad ++;
                     $.getJSON( files[f], {  format: "json"  })
                         .done(function( data ) {
@@ -272,6 +280,24 @@ V:3 accordionTab
             };
             
             function initApp() {
+                MIDI.loader = new widgets.Loader();
+                
+                MIDI.loadPlugin({
+                    soundfontUrl: "./soundfont/"
+                   ,instruments: "accordion"
+                   ,callback: function() {initApp0();}
+                });
+            }
+            
+            function initApp0() {
+                MIDI.loader.stop();
+                MIDI.programChange(0, 21); // canais para accordeon
+                MIDI.programChange(1, 21); // 
+                MIDI.programChange(2, 21); // 
+                MIDI.programChange(3, 21); // 
+                MIDI.programChange(4, 21); // 
+                MIDI.programChange(5, 21); // 
+                
                 loadAccordions(
                     [
                        'accordions/hohner.gc.accordion'
@@ -284,29 +310,40 @@ V:3 accordionTab
             function initApp1() {
 
                 debug = false;
+                
+                player = new ABCXJS.midi.Player();
 
                 myEditor = new ABCXJS.Editor(
                         "abc", {
                              canvas_id: "canvas"
-                            ,warnings_id: "warnings"
                             ,refreshController_id: "chkAutoRefresh"
                             ,accordionSelector_id: "selGaitas"
                             ,accordionMaps: window.accordionMaps
                             ,keySelector_id: "selKey"
+                            ,generate_warnings: true
+                            ,warnings_id: "warnings"
                             ,generate_midi: true
-                            ,generate_warnings: false
                             ,midi_options: {program: 21, qpm: 150, type: "qt"}
                             ,render_options: {}
                             ,gui: false
                         });
 
-                        
                 printButton.addEventListener("click", function() {
-                    document.getElementById("editControl").style.display = "none";
-                    document.getElementById("outrosControles").style.display = "none";
+                    document.getElementById("editor").style.display = "none";
                     window.print();
-                    document.getElementById("editControl").style.display = "inline";
-                    document.getElementById("outrosControles").style.display = "inherit";
+                    document.getElementById("editor").style.display = "inline-block";
+                }, false);
+                
+                playButton.addEventListener("click", function() {
+                    //myEditor.tunes[0].midi.printer = myEditor.printer;
+                    player.startPlay(myEditor.tunes[0].midi);
+                }, false);
+                pauseButton.addEventListener("click", function() {
+                    player.pausePlay();
+                }, false);
+                stopButton.addEventListener("click", function() {
+                    myEditor.printer.clearSelection();
+                    player.stopPlay();
                 }, false);
                 
             }
