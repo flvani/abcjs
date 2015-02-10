@@ -60,7 +60,7 @@ window.ABCXJS.edit.KeySelector.prototype.populate = function(offSet) {
             opt.innerHTML = transposer.number2keysharp[(i+this.cromaticLength-1)%this.cromaticLength] ;
         else
             opt.innerHTML = transposer.number2key[(i+this.cromaticLength-1)%this.cromaticLength] ;
-        opt.value = (i+this.cromaticLength-1)
+        opt.value = (i+this.cromaticLength-1);
         this.selector.appendChild(opt);
     }
     this.oldValue = offSet+this.cromaticLength;
@@ -441,7 +441,7 @@ window.ABCXJS.Editor.prototype.parseABC = function(transpose, force ) {
     var abcParser = new window.ABCXJS.parse.Parse( this.transposer, this.accordion );
     abcParser.parse(tunebook.tunes[i].abc, this.parserparams ); //TODO handle multiple tunes
     this.tunes[i] = abcParser.getTune();
-    
+
     if( this.transposer ) { 
         if( this.transposer.offSet !== 0 ) {
           var lines = abcParser.tuneHouseKeeping(tunebook.tunes[i].abc);
@@ -450,12 +450,17 @@ window.ABCXJS.Editor.prototype.parseABC = function(transpose, force ) {
         if(this.keySelector) 
             this.keySelector.set( this.transposer.keyToNumber( this.transposer.getKeyVoice(0) ) );       
     }
-    
+
     if( this.accordion ) { 
         // obtem possiveis linhas inferidas para tablatura
         this.editarea.appendString( this.accordion.updateEditor() );
     }
-    
+
+    var warnings = abcParser.getWarnings() || [];
+    for (var j=0; j<warnings.length; j++) {
+      this.warnings.push(warnings[j]);
+    }
+
     if ( this.midiParser ) {
         this.midiParser.parse( this.tunes[i]);
          var warnings = this.midiParser.getWarnings();
@@ -464,10 +469,6 @@ window.ABCXJS.Editor.prototype.parseABC = function(transpose, force ) {
          }
     }
     
-    var warnings = abcParser.getWarnings() || [];
-    for (var j=0; j<warnings.length; j++) {
-      this.warnings.push(warnings[j]);
-    }
   }
   return true;
 };

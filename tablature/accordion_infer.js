@@ -246,9 +246,9 @@ ABCXJS.tablature.Infer.prototype.setTies = function(voice) {
     // add 100 to avoid negative values
     if(voice.wi.el_type && voice.wi.el_type === "note" && voice.wi.pitches )  {
         for( var j = 0; j < voice.wi.pitches.length; j ++  ) {
-            if( voice.wi.endTie || voice.wi.pitches[j].endTie )
+            if( voice.wi.pitches[j].endTie )
                 voice.ties[100+voice.wi.pitches[j].pitch] = false;
-            if( voice.wi.startTie || voice.wi.pitches[j].startTie )
+            if( voice.wi.pitches[j].startTie && ! voice.wi.pitches[j].startTie.expression )
                 voice.ties[100+voice.wi.pitches[j].pitch] = true;
         }
     }
@@ -256,16 +256,16 @@ ABCXJS.tablature.Infer.prototype.setTies = function(voice) {
 
 ABCXJS.tablature.Infer.prototype.checkTies = function(voice) {
     if(voice.wi.el_type && voice.wi.el_type === "note" && voice.wi.pitches )  {
-        var found = false;
+//        var found = false;
         for( var j = 0; j < voice.wi.pitches.length; j ++  ) {
             if(voice.ties[100+voice.wi.pitches[j].pitch]) {
-                found = true;
+                //found = true;
                 voice.wi.pitches[j].inTie = true;
             }
         }
-        if( voice.ties.length && ! found) {
-            this.addWarning('Ligaduras de expressão não implementadas.' ) ;
-        }
+//        if( voice.ties.length && ! found) {
+//            this.addWarning('Ligaduras de expressão não implementadas.' ) ;
+//        }
     }    
 };
 
@@ -273,9 +273,9 @@ ABCXJS.tablature.Infer.prototype.setSlurs = function(voice) {
     // add 100 to avoid negative values
     if(voice.wi.el_type && voice.wi.el_type === "note" && voice.wi.pitches )  {
         for( var j = 0; j < voice.wi.pitches.length; j ++  ) {
-            if( voice.wi.endSlur || voice.wi.pitches[j].endSlur )
+            if( voice.wi.pitches[j].endSlur )
                 voice.slurs[100+voice.wi.pitches[j].pitch] = false;
-            if( voice.wi.startSlur || voice.wi.pitches[j].startSlur )
+            if( voice.wi.pitches[j].startSlur )
                 voice.slurs[100+voice.wi.pitches[j].pitch] = true;
         }
     }

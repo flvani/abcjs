@@ -93,6 +93,7 @@ window.ABCXJS.parse.Parse = function(transporter_, accordion_) {
                 encode(line.substring(col_num + 1));
         addWarning("Music Line:" + tune.getNumLines() + ":" + (col_num + 1) + ': ' + str + ":  " + clean_line);
     };
+    
     var header = new window.ABCXJS.parse.ParseHeader(tokenizer, warn, multilineVars, tune, this.transposer);
 
     this.getWarnings = function() {
@@ -561,6 +562,7 @@ window.ABCXJS.parse.Parse = function(transporter_, accordion_) {
                             el.startSlur = 1;
                         else
                             el.startSlur++;
+                        //this.handleSlur( el, el.startSlur, 'startSlur');
                     } else if (isComplete(state)) {
                         el.endChar = index;
                         return el;
@@ -574,6 +576,7 @@ window.ABCXJS.parse.Parse = function(transporter_, accordion_) {
                             el.endSlur = 1;
                         else
                             el.endSlur++;
+                        //this.handleSlur(el, el.endSlur, 'endSlur');
                     } else
                         return null;
                     break;
@@ -949,74 +952,79 @@ window.ABCXJS.parse.Parse = function(transporter_, accordion_) {
             }
             if (gracenotes.length)
                 return [gra[0], gracenotes];
-//				for (var ret = letter_to_pitch(gra[1], ii); ret[0]>0 && ii<gra[1].length;
-//					ret = letter_to_pitch(gra[1], ii)) {
-//					//todo get other stuff that could be in a grace note
-//					ii += ret[0];
-//					gracenotes.push({el_type:"gracenote",pitch:ret[1]});
-//				}
-//				return [ gra[0], gracenotes ];
         }
         return [0];
     };
 
     this.addTuneElement = function(type, startOfLine, xi, xf, elem) {
-        this.handleTie( elem );
         tune.appendElement(type, startOfLine + xi, startOfLine + xf, elem);
     };
     
-    this.handleTie = function(elem) {
-        if( ! ( elem.rest || elem.pitches ) ) return;
-        if( !this.aTies ) this.aTies = [];
-        if( this.anyTieEnd(elem) )  {
-            var tieCnt = 0;
-            var startEl = this.aTies.pop();
-            if( startEl && startEl.pitches ) {
-                startEl.pitches.forEach( function( startPitch ) {
-                    if(elem.pitches) { 
-                        elem.pitches.forEach( function( pitch ) { 
-                            if(pitch.pitch === startPitch.pitch ) {
-                                startPitch.tie = { id: tieCnt, start:true };
-                                pitch.tie =  { id: tieCnt, start:false };
-                                tieCnt ++;
-                            }
-                        });
-                    }
-                });
-            } else if( startEl && startEl.rest ) {
-                if( elem.rest ) {
-                    startEl.rest.tie = tieCnt;
-                    elem.rest.tie =  tieCnt;
-                    tieCnt ++;
-                } 
+    this.checkTies = function() {
+        var check = true;
+        this.aTies.forEach( function( pitch ) {
+            if( pitch ) {
+                pitch.startTie.expression = true;
+                check = false;
             }
+        });
+        this.aTies = [];
+        multilineVars.inTie = false;
+        return check;  
+    };
+    
+    this.handleSlur = function( el, slur, type ) {
+        if( !this.aSlurs ) this.aSlurs = [];
+        switch( type ) {
+            case 'startSlur':
+                el.startSlur = slur;
+                this.aSlurs[slur] = el;
+                break;
+            case 'endSlur':
+                var startEl = this.aSlurs[slur];
+                if( startEl && startEl.pitches ) {
+                    startEl.pitches.forEach( function( startPitch ) {
+                        if(el.pitches) { 
+                            var found = false;
+                            el.pitches.forEach( function( pitch ) { 
+                                if(!found && pitch.pitch === startPitch.pitch ) {
+                                    startPitch.startSlur = slur;
+                                    pitch.endSlur = slur;
+                                    found = true;
+                                }
+                            });
+                            if( found ) {
+                              delete el.endSlur;
+                              delete startEl.startSlur;
+                            } else {
+                              el.endSlur = slur;
+                            }
+                        }
+                    });
+                    this.aSlurs[slur] = false;
+                }
+                break;
         }
-        if( this.anyTieStart(elem) )  {
-            this.aTies.push(elem);
+        
+    };
+    
+    this.handleTie = function( pitch, type ) {
+        // add 100 to avoid negative ones
+        if( !this.aTies ) this.aTies = [];
+        switch( type ) {
+            case 'startTie':
+                pitch.startTie = {};
+                this.aTies[pitch.pitch + 100] = pitch;
+                break;
+            case 'endTie':
+                pitch.endTie = true;
+                if(this.aTies[pitch.pitch + 100])
+                    this.aTies[pitch.pitch + 100] = null;
+                break;
         }
     };
     
-    this.anyTieEnd = function(elem) {
-        var found = false;
-        if(elem.endTie || ( elem.rest && elem.rest.endTie ) ) return true;
-        if(elem.pitches) {
-            elem.pitches.forEach( function( pitch ) {
-                if( pitch.endTie ) found = true;;
-            });
-        }
-        return found;
-    };
     
-    this.anyTieStart = function(elem) {
-        var found = false;
-        if(elem.startTie || ( elem.rest && elem.rest.startTie ) ) return true;
-        if(elem.pitches) {
-            elem.pitches.forEach( function( pitch ) {
-                if(pitch.startTie ) found = true;
-            });
-        }
-        return found;
-    };
 
     //
     // Parse line of music
@@ -1245,12 +1253,6 @@ window.ABCXJS.parse.Parse = function(transporter_, accordion_) {
                             bar.decoration = el.decoration;
                         if (el.chord !== undefined)
                             bar.chord = el.chord;
-                        //if (bar.startEnding && multilineVars.barFirstEndingNum === undefined)
-                        //    multilineVars.barFirstEndingNum = multilineVars.currBarNumber;
-                        //else if (bar.startEnding && bar.endEnding && multilineVars.barFirstEndingNum)
-                        //    multilineVars.currBarNumber = multilineVars.barFirstEndingNum;
-                        //else if (bar.endEnding)
-                        //    multilineVars.barFirstEndingNum = undefined;
                         var mc = multilineVars.currentVoice; 
                         if (bar.type !== 'bar_invisible' 
                                 && multilineVars.measureNotEmpty 
@@ -1276,7 +1278,7 @@ window.ABCXJS.parse.Parse = function(transporter_, accordion_) {
                     ret = letter_to_open_slurs_and_triplets(line, i);
                     if (ret.consumed > 0) {
                         if (ret.startSlur !== undefined)
-                            el.startSlur = ret.startSlur;
+                            this.handleSlur( el, ret.startSlur, 'startSlur' );
                         if (ret.triplet !== undefined) {
                             if (tripletNotesLeft > 0)
                                 warn("Can't nest triplets", line, i);
@@ -1339,10 +1341,12 @@ window.ABCXJS.parse.Parse = function(transporter_, accordion_) {
                                     }
 
                                     if (multilineVars.inTie) {
+                                        var self = this;
+                                        //var el = el;
                                         window.ABCXJS.parse.each(el.pitches, function(pitch) {
-                                            pitch.endTie = true;
+                                            self.handleTie(pitch, 'endTie' );
                                         });
-                                        multilineVars.inTie = false;
+                                        this.checkTies() 
                                     }
 
                                     if (tripletNotesLeft > 0) {
@@ -1351,11 +1355,6 @@ window.ABCXJS.parse.Parse = function(transporter_, accordion_) {
                                             el.endTriplet = true;
                                         }
                                     }
-
-//									if (el.startSlur !== undefined) {
-//										window.ABCXJS.parse.each(el.pitches, function(pitch) { if (pitch.startSlur === undefined) pitch.startSlur = el.startSlur; else pitch.startSlur += el.startSlur; });
-//										delete el.startSlur;
-//									}
 
                                     var postChordDone = false;
                                     while (i < line.length && !postChordDone) {
@@ -1369,11 +1368,13 @@ window.ABCXJS.parse.Parse = function(transporter_, accordion_) {
                                                     el.endSlur = 1;
                                                 else
                                                     el.endSlur++;
-                                                //window.ABCXJS.parse.each(el.pitches, function(pitch) { if (pitch.endSlur === undefined) pitch.endSlur = 1; else pitch.endSlur++; });
+                                                this.handleSlur(el, el.endSlur, 'endSlur');
                                                 break;
                                             case '-':
+                                                var self = this;
                                                 window.ABCXJS.parse.each(el.pitches, function(pitch) {
-                                                    pitch.startTie = {};
+                                                    self.handleTie(pitch, 'startTie' )
+                                                    //pitch.startTie = {};
                                                 });
                                                 multilineVars.inTie = true;
                                                 break;
@@ -1449,17 +1450,20 @@ window.ABCXJS.parse.Parse = function(transporter_, accordion_) {
                                     el.pitches[0].accidental = core.accidental;
                                 el.pitches[0].pitch = core.pitch;
                                 if (core.endSlur !== undefined)
-                                    el.pitches[0].endSlur = core.endSlur;
+                                    //el.pitches[0].endSlur = core.endSlur;
+                                    this.handleSlur(el, core.endSlur, 'endSlur');
                                 if (core.endTie !== undefined)
-                                    el.pitches[0].endTie = core.endTie;
+                                    this.handleTie(el.pitches[0], 'endTie');
                                 if (core.startSlur !== undefined)
-                                    el.pitches[0].startSlur = core.startSlur;
+                                    this.handleSlur(el, core.startSlur, 'startSlur');
+                                    //el.pitches[0].startSlur = core.startSlur;
                                 if (el.startSlur !== undefined)
-                                    el.pitches[0].startSlur = el.startSlur;
+                                    this.handleSlur(el, el.startSlur, 'startSlur');
+                                    //el.pitches[0].startSlur = el.startSlur;
                                 if (core.startTie !== undefined)
-                                    el.pitches[0].startTie = core.startTie;
+                                    this.handleTie(el.pitches[0], 'startTie');
                                 if (el.startTie !== undefined)
-                                    el.pitches[0].startTie = el.startTie;
+                                    this.handleTie(el.pitches[0], 'startTie');
                             } else {
                                 el.rest = core.rest;
                                 if (core.endSlur !== undefined)
@@ -1468,7 +1472,6 @@ window.ABCXJS.parse.Parse = function(transporter_, accordion_) {
                                     el.rest.endTie = core.endTie;
                                 if (core.startSlur !== undefined)
                                     el.startSlur = core.startSlur;
-                                //if (el.startSlur !== undefined) el.startSlur = el.startSlur;
                                 if (core.startTie !== undefined)
                                     el.rest.startTie = core.startTie;
                                 if (el.startTie !== undefined)
@@ -1483,13 +1486,15 @@ window.ABCXJS.parse.Parse = function(transporter_, accordion_) {
                                 el.decoration = core.decoration;
                             if (core.graceNotes !== undefined)
                                 el.graceNotes = core.graceNotes;
-                            delete el.startSlur;
+                            //delete el.startSlur;
                             if (multilineVars.inTie) {
                                 if (el.pitches !== undefined)
-                                    el.pitches[0].endTie = true;
+                                    this.handleTie(el.pitches[0], 'endTie');
+                                    //el.pitches[0].endTie = true;
                                 else
                                     el.rest.endTie = true;
-                                multilineVars.inTie = false;
+                                //multilineVars.inTie = false;
+                                this.checkTies( line, i );
                             }
                             if (core.startTie || el.startTie)
                                 multilineVars.inTie = true;
@@ -1594,7 +1599,7 @@ window.ABCXJS.parse.Parse = function(transporter_, accordion_) {
         header.reset(tokenizer, warn, multilineVars, tune);
 
         var lines = this.tuneHouseKeeping(strTune);
-        try {
+        //try {
             for (var lineNumber = 0; lineNumber < lines.length; lineNumber++) {
                 //window.ABCXJS.parse.each(lines,  function( line, lineNumber ) 
                 var line = lines[lineNumber];
@@ -1639,38 +1644,43 @@ window.ABCXJS.parse.Parse = function(transporter_, accordion_) {
             
             if (tune.hasTablature) {
                 // necessário inferir a tablatura
-                if (tune.lines[0].staffs[tune.tabStaffPos].voices[0].length === 0) {
-                    // para a tablatura de accordion, sempre se esperam 3 vozes (staffs): uma para melodia, uma para o baixo e a terceira para a tablatura
-                    // opcionalmente, a linha de baixo, não precisa existir
-                    (tune.tabStaffPos === 0) && addWarning("+Warn: Accordion Tablature should not be the first staff!");
-                    for (var t = 1; t < tune.lines.length; t++) {
-                        //se for necessário inferir a tablatura, garante que todas as linhas tenham uma staff apropriada
-                        if (tune.lines[t].staffs && !tune.lines[t].staffs[tune.tabStaffPos]) {
-                            tune.lines[t].staffs[tune.tabStaffPos] = window.ABCXJS.parse.clone(tune.lines[0].staffs[tune.tabStaffPos]);
-                            tune.lines[t].staffs[tune.tabStaffPos].meter = null;
-                            tune.lines[t].staffs[tune.tabStaffPos].subtitle = "";
+                if( ! tune.lines[0].staffs[tune.tabStaffPos] ) {
+                    addWarning("+Warn: Cannot infer tablature line: staff #"+tune.tabStaffPos+" does not exist!");
+                    //tune.hasTablature = false;
+                } else {
+                    if (tune.lines[0].staffs[tune.tabStaffPos].voices[0].length === 0) {
+                        // para a tablatura de accordion, sempre se esperam 3 vozes (staffs): uma para melodia, uma para o baixo e a terceira para a tablatura
+                        // opcionalmente, a linha de baixo, não precisa existir
+                        (tune.tabStaffPos === 0) && addWarning("+Warn: Accordion Tablature should not be the first staff!");
+                        for (var t = 1; t < tune.lines.length; t++) {
+                            //se for necessário inferir a tablatura, garante que todas as linhas tenham uma staff apropriada
+                            if (tune.lines[t].staffs && !tune.lines[t].staffs[tune.tabStaffPos]) {
+                                tune.lines[t].staffs[tune.tabStaffPos] = window.ABCXJS.parse.clone(tune.lines[0].staffs[tune.tabStaffPos]);
+                                tune.lines[t].staffs[tune.tabStaffPos].meter = null;
+                                tune.lines[t].staffs[tune.tabStaffPos].subtitle = "";
+                            }
                         }
-                    }
-                    if (this.accordion) {
-                        for (var t = 0; t < tune.lines.length; t++) {
-                           if (tune.lines[t].staffs ) {
-                              var voice = this.accordion.inferTabVoice(t, tune, strTune, multilineVars);
-                              if (voice.length > 0) {
-                                  tune.lines[t].staffs[tune.tabStaffPos].voices[0] = voice;
-                                  tune.restsInTab = multilineVars.restsintab || false;
-                              }
-                           }  
+                        if (this.accordion) {
+                            for (var t = 0; t < tune.lines.length; t++) {
+                               if (tune.lines[t].staffs ) {
+                                  var voice = this.accordion.inferTabVoice(t, tune, strTune, multilineVars);
+                                  if (voice.length > 0) {
+                                      tune.lines[t].staffs[tune.tabStaffPos].voices[0] = voice;
+                                      tune.restsInTab = multilineVars.restsintab || false;
+                                  }
+                               }  
+                            }
+                        } else {
+                            addWarning("+Warn: Cannot infer tablature line: no accordion defined!");
                         }
-                    } else {
-                        addWarning("+Warn: Cannot infer tablature line: no accordion defined!");
                     }
                 }
             }
 
             
-        } catch (err) {
-            if (err !== "normal_abort")
-                throw err;
-        }
+        //} catch (err) {
+        //    if (err !== "normal_abort")
+        //        throw err;
+        //}
     };
 };

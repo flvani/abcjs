@@ -285,7 +285,7 @@ window.ABCXJS.data.Tune = function() {
 
                     currSlur[chordPos].push(nextNum);
                     obj.startSlur.push({label: nextNum});
-//					lyr.syllable += ' ' + nextNum + '>';	// TODO-PER:debugging
+                        
                     nextNum++;
                 }
             };

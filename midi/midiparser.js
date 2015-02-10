@@ -270,7 +270,7 @@ ABCXJS.midi.Parse.prototype.endTies = function(midipitch, mididuration, endElem,
         this.endNote(endElem, this.timecount + mididuration);
         delete this.startTieElem[midipitch];
     } else {
-        this.addWarning( 'Ligaduras de expressão não implementadas!');
+        //this.addWarning( 'Ligaduras de expressão não implementadas!');
         this.clearTies();
         this.startNote(endElem, this.timecount, midipitch );
         this.endNote(endElem, this.timecount + mididuration, midipitch );
