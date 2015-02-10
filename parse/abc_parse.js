@@ -949,27 +949,78 @@ window.ABCXJS.parse.Parse = function(transporter_, accordion_) {
             }
             if (gracenotes.length)
                 return [gra[0], gracenotes];
-//				for (var ret = letter_to_pitch(gra[1], ii); ret[0]>0 && ii<gra[1].length;
-//					ret = letter_to_pitch(gra[1], ii)) {
-//					//todo get other stuff that could be in a grace note
-//					ii += ret[0];
-//					gracenotes.push({el_type:"gracenote",pitch:ret[1]});
-//				}
-//				return [ gra[0], gracenotes ];
         }
         return [0];
     };
+    
+    this.tieCnt = 0;
+    this.slurCnt = 0;
 
     this.addTuneElement = function(type, startOfLine, xi, xf, elem) {
         this.handleTie( elem );
+        this.handleSlur( elem );
         tune.appendElement(type, startOfLine + xi, startOfLine + xf, elem);
     };
     
+    this.handleSlur = function(elem) {
+        if( !elem.pitches ) return;
+        var ss = this.anySlurEnd(elem);
+        if( ss )  {
+            var tieCnt = this.tieCnt;
+            var el = this.aSlurs.pop();
+            var startEl = el.el;
+            if( startEl && startEl.pitches ) {
+                startEl.pitches.forEach( function( startPitch ) {
+                    if(elem.pitches) { 
+                        elem.pitches.forEach( function( pitch ) { 
+                            if(pitch.pitch === startPitch.pitch ) {
+                                if(!startPitch.tie)
+                                    startPitch.tie = { id_start: tieCnt, slur:true };
+                                else {
+                                    startPitch.tie.id_start = tieCnt;
+                                }
+                                pitch.tie =  { id_end: tieCnt, slur:true };
+                                tieCnt ++;
+                            }
+                        });
+                    }
+                });
+            }
+            this.tieCnt = tieCnt;
+        }
+        ss = this.anySlurStart(elem);
+        if( ss )  {
+            if( !this.aSlurs ) this.aSlurs = [];
+            this.aSlurs.push( { el: elem, id:ss, cnt: ++this.slurCnt });
+        }
+    };
+    
+    this.anySlurEnd = function(elem) {
+        var found = 0;
+        if( elem.endSlur ) return elem.endSlur;
+        if( elem.pitches ) {
+            elem.pitches.forEach( function( pitch ) {
+                if( pitch.endSlur ) found = pitch.endSlur;
+            });
+        }
+        return found;
+    };
+    
+    this.anySlurStart = function(elem) {
+        var found = 0;
+        if( elem.startSlur ) return elem.startSlur;
+        if( elem.pitches) {
+            elem.pitches.forEach( function( pitch ) {
+                if(pitch.startSlur ) found = pitch.startSlur;
+            });
+        }
+        return found;
+    };
+
     this.handleTie = function(elem) {
-        if( ! ( elem.rest || elem.pitches ) ) return;
-        if( !this.aTies ) this.aTies = [];
+        if( ! elem.pitches ) return;
         if( this.anyTieEnd(elem) )  {
-            var tieCnt = 0;
+            var tieCnt = this.tieCnt;
             var startEl = this.aTies.pop();
             if( startEl && startEl.pitches ) {
                 startEl.pitches.forEach( function( startPitch ) {
@@ -983,22 +1034,18 @@ window.ABCXJS.parse.Parse = function(transporter_, accordion_) {
                         });
                     }
                 });
-            } else if( startEl && startEl.rest ) {
-                if( elem.rest ) {
-                    startEl.rest.tie = tieCnt;
-                    elem.rest.tie =  tieCnt;
-                    tieCnt ++;
-                } 
             }
+            this.tieCnt = tieCnt;
         }
         if( this.anyTieStart(elem) )  {
+            if( !this.aTies ) this.aTies = [];
             this.aTies.push(elem);
         }
     };
     
     this.anyTieEnd = function(elem) {
         var found = false;
-        if(elem.endTie || ( elem.rest && elem.rest.endTie ) ) return true;
+        if( elem.endTie ) return true;
         if(elem.pitches) {
             elem.pitches.forEach( function( pitch ) {
                 if( pitch.endTie ) found = true;;
@@ -1009,7 +1056,7 @@ window.ABCXJS.parse.Parse = function(transporter_, accordion_) {
     
     this.anyTieStart = function(elem) {
         var found = false;
-        if(elem.startTie || ( elem.rest && elem.rest.startTie ) ) return true;
+        if( elem.startTie ) return true;
         if(elem.pitches) {
             elem.pitches.forEach( function( pitch ) {
                 if(pitch.startTie ) found = true;
@@ -1275,7 +1322,7 @@ window.ABCXJS.parse.Parse = function(transporter_, accordion_) {
                     // Look for as many open slurs and triplets as there are. (Note: only the first triplet is valid.)
                     ret = letter_to_open_slurs_and_triplets(line, i);
                     if (ret.consumed > 0) {
-                        if (ret.startSlur !== undefined)
+                        if (ret.startSlur !== undefined) 
                             el.startSlur = ret.startSlur;
                         if (ret.triplet !== undefined) {
                             if (tripletNotesLeft > 0)
@@ -1351,11 +1398,6 @@ window.ABCXJS.parse.Parse = function(transporter_, accordion_) {
                                             el.endTriplet = true;
                                         }
                                     }
-
-//									if (el.startSlur !== undefined) {
-//										window.ABCXJS.parse.each(el.pitches, function(pitch) { if (pitch.startSlur === undefined) pitch.startSlur = el.startSlur; else pitch.startSlur += el.startSlur; });
-//										delete el.startSlur;
-//									}
 
                                     var postChordDone = false;
                                     while (i < line.length && !postChordDone) {
