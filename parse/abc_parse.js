@@ -953,8 +953,8 @@ window.ABCXJS.parse.Parse = function(transporter_, accordion_) {
         return [0];
     };
     
-    this.tieCnt = 0;
-    this.slurCnt = 0;
+    this.tieCnt = 1;
+    this.slurCnt = 1;
 
     this.addTuneElement = function(type, startOfLine, xi, xf, elem) {
         this.handleTie( elem );
@@ -965,21 +965,29 @@ window.ABCXJS.parse.Parse = function(transporter_, accordion_) {
     this.handleSlur = function(elem) {
         if( !elem.pitches ) return;
         var ss = this.anySlurEnd(elem);
-        if( ss )  {
+        while( ss )  {
             var tieCnt = this.tieCnt;
             var el = this.aSlurs.pop();
+            if(el.qtd > 1 ) {
+                el.qtd--;
+                this.aSlurs.push(el);
+            }
             var startEl = el.el;
             if( startEl && startEl.pitches ) {
                 startEl.pitches.forEach( function( startPitch ) {
                     if(elem.pitches) { 
                         elem.pitches.forEach( function( pitch ) { 
                             if(pitch.pitch === startPitch.pitch ) {
-                                if(!startPitch.tie)
-                                    startPitch.tie = { id_start: tieCnt, slur:true };
-                                else {
+                                
+                                if(startPitch.tie) {
                                     startPitch.tie.id_start = tieCnt;
-                                }
-                                pitch.tie =  { id_end: tieCnt, slur:true };
+                                } else 
+                                    startPitch.tie = { id_start: tieCnt, slur:true };
+                                if(pitch.tie) {
+                                    startPitch.tie.id_end = tieCnt;
+                                } else
+                                    pitch.tie =  { id_end: tieCnt, slur:true };
+                                    
                                 tieCnt ++;
                             }
                         });
@@ -987,11 +995,12 @@ window.ABCXJS.parse.Parse = function(transporter_, accordion_) {
                 });
             }
             this.tieCnt = tieCnt;
+            ss--;
         }
         ss = this.anySlurStart(elem);
         if( ss )  {
             if( !this.aSlurs ) this.aSlurs = [];
-            this.aSlurs.push( { el: elem, id:ss, cnt: ++this.slurCnt });
+            this.aSlurs.push( { el: elem, qtd:ss, cnt: ++this.slurCnt });
         }
     };
     
@@ -1027,8 +1036,8 @@ window.ABCXJS.parse.Parse = function(transporter_, accordion_) {
                     if(elem.pitches) { 
                         elem.pitches.forEach( function( pitch ) { 
                             if(pitch.pitch === startPitch.pitch ) {
-                                startPitch.tie = { id: tieCnt, start:true };
-                                pitch.tie =  { id: tieCnt, start:false };
+                                startPitch.tie = { id_start: tieCnt };
+                                pitch.tie =  { id_end: tieCnt };
                                 tieCnt ++;
                             }
                         });
@@ -1636,7 +1645,7 @@ window.ABCXJS.parse.Parse = function(transporter_, accordion_) {
         header.reset(tokenizer, warn, multilineVars, tune);
 
         var lines = this.tuneHouseKeeping(strTune);
-        try {
+        //try {
             for (var lineNumber = 0; lineNumber < lines.length; lineNumber++) {
                 //window.ABCXJS.parse.each(lines,  function( line, lineNumber ) 
                 var line = lines[lineNumber];
@@ -1710,9 +1719,9 @@ window.ABCXJS.parse.Parse = function(transporter_, accordion_) {
             }
 
             
-        } catch (err) {
-            if (err !== "normal_abort")
-                throw err;
-        }
+        //} catch (err) {
+        //    if (err !== "normal_abort")
+        //        throw err;
+        //}
     };
 };

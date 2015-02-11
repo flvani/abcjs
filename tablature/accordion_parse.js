@@ -252,6 +252,7 @@ ABCXJS.tablature.Parse.prototype.getBassNote = function() {
   var note = "";
   if( this.bassNoteSyms.indexOf(this.line.charAt(this.i)) < 0 ) {
     this.warn( "Expected Bass Note but found " + this.line.charAt(this.i) );
+    this.i++;
   } else {
     note = this.line.charAt(this.i);
     this.i++;

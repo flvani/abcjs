@@ -166,7 +166,6 @@ ABCXJS.tablature.Infer.prototype.read = function(p_source, item) {
             this.currInterval = source.wi.barNumber;
         }
         this.checkTies(source);
-        this.checkSlurs(source);
         source.st = (source.wi.el_type && source.wi.el_type === "bar") ? "waiting end of interval" : "processing";
         return (source.wi.el_type && source.wi.el_type === "bar") ? 1 : 2;
     } else {
@@ -218,7 +217,6 @@ ABCXJS.tablature.Infer.prototype.extraiIntervalo = function(voices) {
         }
         
         this.setTies(voices[i]);
-        this.setSlurs(voices[i]);
         
         if( voices[i].wi.duration ) {
             voices[i].wi.duration -= minDur;
@@ -243,71 +241,40 @@ ABCXJS.tablature.Infer.prototype.extraiIntervalo = function(voices) {
 };
 
 ABCXJS.tablature.Infer.prototype.setTies = function(voice) {
-    // add 100 to avoid negative values
     if(voice.wi.el_type && voice.wi.el_type === "note" && voice.wi.pitches )  {
         for( var j = 0; j < voice.wi.pitches.length; j ++  ) {
-            if( voice.wi.pitches[j].endTie )
-                voice.ties[100+voice.wi.pitches[j].pitch] = false;
-            if( voice.wi.pitches[j].startTie && ! voice.wi.pitches[j].startTie.expression )
-                voice.ties[100+voice.wi.pitches[j].pitch] = true;
+            if( voice.wi.pitches[j].tie ) {
+                if(voice.wi.pitches[j].tie.id_end){
+                    voice.ties[voice.wi.pitches[j].tie.id_end] = false;
+                }
+                if(voice.wi.pitches[j].tie.id_start){
+                    voice.ties[voice.wi.pitches[j].tie.id_start] = 100+voice.wi.pitches[j].pitch;
+                }
+            }
         }
     }
 };
 
 ABCXJS.tablature.Infer.prototype.checkTies = function(voice) {
     if(voice.wi.el_type && voice.wi.el_type === "note" && voice.wi.pitches )  {
-//        var found = false;
-        for( var j = 0; j < voice.wi.pitches.length; j ++  ) {
-            if(voice.ties[100+voice.wi.pitches[j].pitch]) {
-                //found = true;
-                voice.wi.pitches[j].inTie = true;
-            }
+        for( var i = 1; i < voice.ties.length; i ++ ) {
+            var found = false;
+            for( var j = 0; j < voice.wi.pitches.length; j ++  ) {
+                found = found || (100+voice.wi.pitches[j].pitch === voice.ties[i]);
+            }      
+            if(!found && voice.ties[i] ) {
+                voice.wi.pitches.push({pitch: voice.ties[i], verticalPos: voice.ties[i], inTie:true});
+            }    
         }
-//        if( voice.ties.length && ! found) {
-//            this.addWarning('Ligaduras de expressão não implementadas.' ) ;
-//        }
+        for( var j = 0; j < voice.wi.pitches.length; j ++  ) {
+            if(voice.wi.pitches[j].tie){
+                if(voice.wi.pitches[j].tie.id_end) {
+                    voice.wi.pitches[j].inTie = true;
+                } 
+            }      
+        }       
     }    
 };
-
-ABCXJS.tablature.Infer.prototype.setSlurs = function(voice) {
-    // add 100 to avoid negative values
-    if(voice.wi.el_type && voice.wi.el_type === "note" && voice.wi.pitches )  {
-        for( var j = 0; j < voice.wi.pitches.length; j ++  ) {
-            if( voice.wi.pitches[j].endSlur )
-                voice.slurs[100+voice.wi.pitches[j].pitch] = false;
-            if( voice.wi.pitches[j].startSlur )
-                voice.slurs[100+voice.wi.pitches[j].pitch] = true;
-        }
-    }
-};
-
-ABCXJS.tablature.Infer.prototype.checkSlurs = function(voice) {
-    var adds = [];
-    if(voice.wi.el_type && voice.wi.el_type === "note" && voice.wi.pitches && voice.slurs.length > 0)  {
-      voice.slurs.forEach(function(vlr, idx) {
-         if(!vlr) return;
-         var pitch = (idx%100);
-         var found = false;
-         for( var j = 0; j < voice.wi.pitches.length; j ++  ) {
-            if( voice.wi.pitches[j].pitch === pitch ) {
-                found = true;
-                voice.wi.pitches[j].inTie = vlr;
-            }
-         }
-         if( !found && vlr ) {
-             adds.push(pitch);
-         }
-      });
-      if(adds.length > 0 ) {
-        adds.forEach(function(ptch) {
-           var n = voice.wi.pitches.length; 
-           var vp = voice.wi.pitches[0].verticalPos;
-           voice.wi.pitches[n] = { pitch: ptch, verticalPos: vp, inTie: true};
-        });
-      }
-    }    
-};
-
 
 ABCXJS.tablature.Infer.prototype.addTABChild = function(token) {
 

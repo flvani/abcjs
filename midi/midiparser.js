@@ -197,10 +197,10 @@ ABCXJS.midi.Parse.prototype.writeNote = function(elem) {
                 midipitch += this.accidentals[this.extractNote(pitch)];
             }
             
-            if (note.startTie || note.startSlur/* || elem.startSlur*/) {
+            if (note.tie && note.id_start ) {
                 this.startNote(elem, this.timecount, midipitch );
                 this.startTieElem[midipitch] = elem;
-            } else if (note.endTie || note.endSlur/* || elem.endSlur */) {
+            } else if (note.tie && note.id_end) {
                 this.endTies( midipitch, mididuration, elem, note.endSlur );
             } else {
                 if( this.startTieElem[midipitch] ) {
