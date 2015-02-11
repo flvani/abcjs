@@ -20,10 +20,13 @@ if (!window.ABCXJS)
 if (!window.ABCXJS.parse)
 	window.ABCXJS.parse = {};
     
-window.ABCXJS.parse.Parse = function(transporter_, accordion_) {
+window.ABCXJS.parse.Parse = function(transposer_, accordion_) {
 
-    if (transporter_)
-        this.transposer = transporter_;
+    this.tieCnt = 1;
+    this.slurCnt = 1;
+
+    if (transposer_)
+        this.transposer = transposer_;
     
     if (accordion_)
         this.accordion = accordion_;
@@ -71,6 +74,10 @@ window.ABCXJS.parse.Parse = function(transporter_, accordion_) {
         }
     };
 
+    this.getMultilineVars = function() {
+        return multilineVars;
+    };
+
     var addWarning = function(str) {
         if (!multilineVars.warnings)
             multilineVars.warnings = [];
@@ -93,15 +100,130 @@ window.ABCXJS.parse.Parse = function(transporter_, accordion_) {
                 encode(line.substring(col_num + 1));
         addWarning("Music Line:" + tune.getNumLines() + ":" + (col_num + 1) + ': ' + str + ":  " + clean_line);
     };
-    var header = new window.ABCXJS.parse.ParseHeader(tokenizer, warn, multilineVars, tune, this.transposer);
-
+    
     this.getWarnings = function() {
         return multilineVars.warnings;
     };
     
-    this.getMultilineVars = function() {
-        return multilineVars;
+    this.addTuneElement = function(type, startOfLine, xi, xf, elem) {
+        this.handleTie( elem );
+        this.handleSlur( elem );
+        tune.appendElement(type, startOfLine + xi, startOfLine + xf, elem);
     };
+    
+    this.handleSlur = function(elem) {
+        if( !elem.pitches ) return;
+        var ss = this.anySlurEnd(elem);
+        while( ss )  {
+            var tieCnt = this.tieCnt;
+            var el = this.aSlurs.pop();
+            if(el.qtd > 1 ) {
+                el.qtd--;
+                this.aSlurs.push(el);
+            }
+            var startEl = el.el;
+            if( startEl && startEl.pitches ) {
+                startEl.pitches.forEach( function( startPitch ) {
+                    if(elem.pitches) { 
+                        elem.pitches.forEach( function( pitch ) { 
+                            if(pitch.pitch === startPitch.pitch ) {
+                                
+                                if(startPitch.tie) {
+                                    startPitch.tie.id_start = tieCnt;
+                                } else 
+                                    startPitch.tie = { id_start: tieCnt, slur:true };
+                                if(pitch.tie) {
+                                    startPitch.tie.id_end = tieCnt;
+                                } else
+                                    pitch.tie =  { id_end: tieCnt, slur:true };
+                                    
+                                tieCnt ++;
+                            }
+                        });
+                    }
+                });
+            }
+            this.tieCnt = tieCnt;
+            ss--;
+        }
+        ss = this.anySlurStart(elem);
+        if( ss )  {
+            if( !this.aSlurs ) this.aSlurs = [];
+            this.aSlurs.push( { el: elem, qtd:ss, cnt: ++this.slurCnt });
+        }
+    };
+    
+    this.anySlurEnd = function(elem) {
+        var found = 0;
+        if( elem.endSlur ) return elem.endSlur;
+        if( elem.pitches ) {
+            elem.pitches.forEach( function( pitch ) {
+                if( pitch.endSlur ) found = pitch.endSlur;
+            });
+        }
+        return found;
+    };
+    
+    this.anySlurStart = function(elem) {
+        var found = 0;
+        if( elem.startSlur ) return elem.startSlur;
+        if( elem.pitches) {
+            elem.pitches.forEach( function( pitch ) {
+                if(pitch.startSlur ) found = pitch.startSlur;
+            });
+        }
+        return found;
+    };
+
+    this.handleTie = function(elem) {
+        if( ! elem.pitches ) return;
+        if( this.anyTieEnd(elem) )  {
+            var tieCnt = this.tieCnt;
+            var startEl = this.aTies.pop();
+            if( startEl && startEl.pitches ) {
+                startEl.pitches.forEach( function( startPitch ) {
+                    if(elem.pitches) { 
+                        elem.pitches.forEach( function( pitch ) { 
+                            if(pitch.pitch === startPitch.pitch ) {
+                                startPitch.tie = { id_start: tieCnt };
+                                pitch.tie =  { id_end: tieCnt };
+                                tieCnt ++;
+                            }
+                        });
+                    }
+                });
+            }
+            this.tieCnt = tieCnt;
+        }
+        if( this.anyTieStart(elem) )  {
+            if( !this.aTies ) this.aTies = [];
+            this.aTies.push(elem);
+        }
+    };
+    
+    this.anyTieEnd = function(elem) {
+        var found = false;
+        if( elem.endTie ) return true;
+        if(elem.pitches) {
+            elem.pitches.forEach( function( pitch ) {
+                if( pitch.endTie ) found = true;;
+            });
+        }
+        return found;
+    };
+    
+    this.anyTieStart = function(elem) {
+        var found = false;
+        if( elem.startTie ) return true;
+        if(elem.pitches) {
+            elem.pitches.forEach( function( pitch ) {
+                if(pitch.startTie ) found = true;
+            });
+        }
+        return found;
+    };
+    
+    var header = new window.ABCXJS.parse.ParseHeader(tokenizer, warn, multilineVars, tune, this.transposer);
 
     var letter_to_chord = function(line, i)
     {
@@ -886,9 +1008,6 @@ window.ABCXJS.parse.Parse = function(transporter_, accordion_) {
 
         multilineVars.partForNextLine = "";
         var mc = multilineVars.currentVoice;
-//        if (multilineVars.currentVoice === undefined || 
-//                (multilineVars.currentVoice.staffNum === multilineVars.staves.length - 1 
-//                && multilineVars.staves[multilineVars.currentVoice.staffNum].numVoices - 1 === multilineVars.currentVoice.index)) {
         if (mc === undefined || (multilineVars.start_new_line && mc.staffNum === 0 ) ){
             //multilineVars.meter = null;
             if ( multilineVars.measureNotEmpty ) multilineVars.currBarNumber++;
@@ -953,127 +1072,6 @@ window.ABCXJS.parse.Parse = function(transporter_, accordion_) {
         return [0];
     };
     
-    this.tieCnt = 1;
-    this.slurCnt = 1;
-
-    this.addTuneElement = function(type, startOfLine, xi, xf, elem) {
-        this.handleTie( elem );
-        this.handleSlur( elem );
-        tune.appendElement(type, startOfLine + xi, startOfLine + xf, elem);
-    };
-    
-    this.handleSlur = function(elem) {
-        if( !elem.pitches ) return;
-        var ss = this.anySlurEnd(elem);
-        while( ss )  {
-            var tieCnt = this.tieCnt;
-            var el = this.aSlurs.pop();
-            if(el.qtd > 1 ) {
-                el.qtd--;
-                this.aSlurs.push(el);
-            }
-            var startEl = el.el;
-            if( startEl && startEl.pitches ) {
-                startEl.pitches.forEach( function( startPitch ) {
-                    if(elem.pitches) { 
-                        elem.pitches.forEach( function( pitch ) { 
-                            if(pitch.pitch === startPitch.pitch ) {
-                                
-                                if(startPitch.tie) {
-                                    startPitch.tie.id_start = tieCnt;
-                                } else 
-                                    startPitch.tie = { id_start: tieCnt, slur:true };
-                                if(pitch.tie) {
-                                    startPitch.tie.id_end = tieCnt;
-                                } else
-                                    pitch.tie =  { id_end: tieCnt, slur:true };
-                                    
-                                tieCnt ++;
-                            }
-                        });
-                    }
-                });
-            }
-            this.tieCnt = tieCnt;
-            ss--;
-        }
-        ss = this.anySlurStart(elem);
-        if( ss )  {
-            if( !this.aSlurs ) this.aSlurs = [];
-            this.aSlurs.push( { el: elem, qtd:ss, cnt: ++this.slurCnt });
-        }
-    };
-    
-    this.anySlurEnd = function(elem) {
-        var found = 0;
-        if( elem.endSlur ) return elem.endSlur;
-        if( elem.pitches ) {
-            elem.pitches.forEach( function( pitch ) {
-                if( pitch.endSlur ) found = pitch.endSlur;
-            });
-        }
-        return found;
-    };
-    
-    this.anySlurStart = function(elem) {
-        var found = 0;
-        if( elem.startSlur ) return elem.startSlur;
-        if( elem.pitches) {
-            elem.pitches.forEach( function( pitch ) {
-                if(pitch.startSlur ) found = pitch.startSlur;
-            });
-        }
-        return found;
-    };
-
-    this.handleTie = function(elem) {
-        if( ! elem.pitches ) return;
-        if( this.anyTieEnd(elem) )  {
-            var tieCnt = this.tieCnt;
-            var startEl = this.aTies.pop();
-            if( startEl && startEl.pitches ) {
-                startEl.pitches.forEach( function( startPitch ) {
-                    if(elem.pitches) { 
-                        elem.pitches.forEach( function( pitch ) { 
-                            if(pitch.pitch === startPitch.pitch ) {
-                                startPitch.tie = { id_start: tieCnt };
-                                pitch.tie =  { id_end: tieCnt };
-                                tieCnt ++;
-                            }
-                        });
-                    }
-                });
-            }
-            this.tieCnt = tieCnt;
-        }
-        if( this.anyTieStart(elem) )  {
-            if( !this.aTies ) this.aTies = [];
-            this.aTies.push(elem);
-        }
-    };
-    
-    this.anyTieEnd = function(elem) {
-        var found = false;
-        if( elem.endTie ) return true;
-        if(elem.pitches) {
-            elem.pitches.forEach( function( pitch ) {
-                if( pitch.endTie ) found = true;;
-            });
-        }
-        return found;
-    };
-    
-    this.anyTieStart = function(elem) {
-        var found = false;
-        if( elem.startTie ) return true;
-        if(elem.pitches) {
-            elem.pitches.forEach( function( pitch ) {
-                if(pitch.startTie ) found = true;
-            });
-        }
-        return found;
-    };
-
     //
     // Parse line of music
     //
@@ -1132,8 +1130,6 @@ window.ABCXJS.parse.Parse = function(transporter_, accordion_) {
     // less-than, greater-than, slash: duration
     // back-tick, space, tab: space
     var nonDecorations = "ABCDEFGabcdefgxyzZ[]|^_{";	// use this to prescreen so we don't have to look for a decoration at every note.
-
-
 
     this.parseRegularMusicLine = function(line) {
         header.resolveTempo();
@@ -1645,9 +1641,8 @@ window.ABCXJS.parse.Parse = function(transporter_, accordion_) {
         header.reset(tokenizer, warn, multilineVars, tune);
 
         var lines = this.tuneHouseKeeping(strTune);
-        //try {
+        try {
             for (var lineNumber = 0; lineNumber < lines.length; lineNumber++) {
-                //window.ABCXJS.parse.each(lines,  function( line, lineNumber ) 
                 var line = lines[lineNumber];
                 if (switches) {
                     if (switches.header_only && multilineVars.is_in_header === false)
@@ -1663,7 +1658,6 @@ window.ABCXJS.parse.Parse = function(transporter_, accordion_) {
                         tune.addMetaText("history", tokenizer.translateString(tokenizer.stripComment(line)));
                 } else if (multilineVars.inTextBlock) {
                     if (window.ABCXJS.parse.startsWith(line, "%%endtext")) {
-                        //tune.addMetaText("textBlock", multilineVars.textBlock);
                         tune.addText(multilineVars.textBlock);
                         multilineVars.inTextBlock = false;
                     }
@@ -1717,11 +1711,9 @@ window.ABCXJS.parse.Parse = function(transporter_, accordion_) {
                     }
                 }
             }
-
-            
-        //} catch (err) {
-        //    if (err !== "normal_abort")
-        //        throw err;
-        //}
+        } catch (err) {
+            if (err !== "normal_abort")
+                throw err;
+        }
     };
 };

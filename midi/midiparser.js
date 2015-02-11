@@ -197,16 +197,36 @@ ABCXJS.midi.Parse.prototype.writeNote = function(elem) {
                 midipitch += this.accidentals[this.extractNote(pitch)];
             }
             
-            if (note.tie && note.id_start ) {
+            if (note.tie && note.tie.id_end) { // termina
+                //this.endTies( midipitch, mididuration, elem, note.endSlur );
+                var startElem = this.startTieElem[midipitch][0];
+                this.startNote(elem, this.timecount);
+                if( note.tie.id_start ) { // se termina e recomeça, empilhe a nota
+                    this.startTieElem[midipitch].push(elem);
+                }  else {
+                  this.endNote(elem, this.timecount + mididuration);
+                  if( mididuration >= ABCXJS.midi.baseduration/2 ) { 
+                      this.endNote(startElem, this.timecount+mididuration, midipitch );
+                      this.startNote(startElem, this.timecount, midipitch );
+                      this.endNote(startElem, this.timecount + mididuration, midipitch );
+                  } else {
+                      this.endNote(startElem, this.timecount + mididuration, midipitch );
+                  }
+                  for( var i = 1; i < this.startTieElem[midipitch].length; i++ ) {
+                    var elemInter = this.startTieElem[midipitch][i];
+                    this.endNote(elemInter, this.timecount + mididuration);
+                  }
+                  delete this.startTieElem[midipitch];
+                    
+                }
+            } else if (note.tie && note.tie.id_start ) { // só inicia
                 this.startNote(elem, this.timecount, midipitch );
-                this.startTieElem[midipitch] = elem;
-            } else if (note.tie && note.id_end) {
-                this.endTies( midipitch, mididuration, elem, note.endSlur );
-            } else {
-                if( this.startTieElem[midipitch] ) {
+                this.startTieElem[midipitch] = [elem];
+            } else { // elemento sem tie
+                if( this.startTieElem[midipitch] ) { // já está em tie - continua
                   this.startNote( elem, this.timecount);
                   this.endNote( elem, this.timecount + mididuration);
-                } else {
+                } else { // o básico - inicia e termina a nota
                   this.startNote(elem, this.timecount, midipitch );
                   this.endNote(elem, this.timecount + mididuration, midipitch );
                 }

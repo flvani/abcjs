@@ -73,7 +73,7 @@ ABCXJS.tablature.Infer.prototype.inferTabVoice = function(line) {
     var trebVoices = trebStaff.voices;
     this.accTrebKey = trebStaff.key.accidentals;
     for( var i = 0; i < trebVoices.length; i ++ ) {
-        voices.push( { voz:trebVoices[i], pos:-1, st:'waiting for data', bass:false, wi: {}, ties:[], slurs:[] } ); // wi - work item
+        voices.push( { voz:trebVoices[i], pos:-1, st:'waiting for data', bass:false, wi: {}, ties:[] } ); // wi - work item
     }
     
     if( this.tune.tabStaffPos === 2 ) {
@@ -82,7 +82,7 @@ ABCXJS.tablature.Infer.prototype.inferTabVoice = function(line) {
             var bassVoices = bassStaff.voices;
             this.accBassKey = bassStaff.key.accidentals;
             for( var i = 0; i < bassVoices.length; i ++ ) {
-                voices.push({ voz:bassVoices[i], pos:-1, st:'waiting for data', bass:true, wi: {}, ties:[], slurs:[] } ); // wi - work item
+                voices.push({ voz:bassVoices[i], pos:-1, st:'waiting for data', bass:true, wi: {}, ties:[] } ); // wi - work item
             }
         } else {
             this.addWarning('Possível falta da definição da linha de baixos.') ;
