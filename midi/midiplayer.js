@@ -8,7 +8,7 @@ if (!window.ABCXJS)
     window.ABCXJS = {};
 
 if (!window.ABCXJS.midi) 
-    window.ABCXJS.midi = {baseduration: 1920 }; // nice and divisible, equals 1 whole note
+    window.ABCXJS.midi = {}; 
 
 ABCXJS.midi.Player = function(map, options ) {
 
@@ -22,8 +22,9 @@ ABCXJS.midi.Player.prototype.reset = function(options) {
     options = options || {};
     
     this.i = 0;
-    this.tempo = 60;
+    this.tempo = 250;
     this.playing = false;
+    this.ticksperinterval = 1;
     
     this.printer = {};
     this.playlist = [];
@@ -31,7 +32,6 @@ ABCXJS.midi.Player.prototype.reset = function(options) {
     this.currentMeasure = 1;
     this.lastMeasurePos = 0;
     this.currentMeasurePos = 0;
-    this.ticksperinterval = ABCXJS.midi.baseduration / 16; // 16th note - TODO: see the min in the piece
     
 };
 
@@ -81,7 +81,7 @@ ABCXJS.midi.Player.prototype.startPlay = function(what) {
   
     var self = this;
     this.doPlay();
-    this.playinterval = window.setInterval(function() { self.doPlay(); }, 60000/this.tempo);
+    this.playinterval = window.setInterval(function() { self.doPlay(); }, this.tempo);
     
     return true;
 };
@@ -163,7 +163,7 @@ ABCXJS.midi.Player.prototype.startDidacticPlay = function(what, type, value) {
     }
   
     this.doDidacticPlay(criteria);
-    this.didacticPlayinterval = window.setInterval(function() { that.doDidacticPlay(criteria); }, 60000/this.tempo);
+    this.didacticPlayinterval = window.setInterval(function() { that.doDidacticPlay(criteria); }, this.tempo);
     return true;
 };
 
@@ -195,6 +195,15 @@ ABCXJS.midi.Player.prototype.executa = function(pl) {
     if( pl.start ) {
         pl.item.pitches.forEach( function( pitch ) {
             MIDI.noteOn(pitch.channel, pitch.pitch, loudness, 0);
+            // a nota do midi só dura 2 segundos, então deveria reiniciar a nota o tempo extrapolasse esse valor
+            //this.midiTune.tempo  * duracao do midi = tempo_soando tempo_maximo_suportado
+            //250ms                * 8                 2000ms       2000ms
+            //if( mididuration * self.tempo >= 2000 ) { 
+            //    this.endNote(startElem, this.timecount, midipitch );
+            //    this.startNote(startElem, this.timecount, midipitch );
+            //    this.endNote(startElem, this.timecount + mididuration, midipitch );
+            //}
+            
         });
         pl.item.abcelems.forEach( function( elem ) {
             if( self.map ) self.map.setScrolling(elem.abcelem.abselem.y, elem.channel);
@@ -210,7 +219,7 @@ ABCXJS.midi.Player.prototype.executa = function(pl) {
         });
     } else {
         pl.item.pitches.forEach( function( pitch ) {
-            MIDI.noteOff(pitch.channel, pitch.pitch, 0);
+            MIDI.noteOff(pitch.channel, pitch.pitch, pitch.delay||0);
         });
         pl.item.abcelems.forEach( function( elem ) {
             elem.abcelem.abselem.unhighlight();

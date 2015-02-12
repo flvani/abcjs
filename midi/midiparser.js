@@ -16,7 +16,7 @@ if (!window.ABCXJS)
     window.ABCXJS = {};
 
 if (!window.ABCXJS.midi) 
-    window.ABCXJS.midi = {baseduration: 1920 }; // nice and divisible, equals 1 whole note
+    window.ABCXJS.midi = {}; 
 
 ABCXJS.midi.Parse = function( map, options  ) {
     this.map = map;
@@ -24,6 +24,10 @@ ABCXJS.midi.Parse = function( map, options  ) {
     this.options =  options || {};
     this.vars = { warnings: [] };
     this.scale = [0, 2, 4, 5, 7, 9, 11];
+    
+    this.wholeNote = 16;
+    this.minNote = 1 / this.wholeNote;
+    this.oneMinute = 60000;
     
     this.reset();
     
@@ -42,20 +46,22 @@ ABCXJS.midi.Parse.prototype.reset = function() {
     
     this.multiplier = 1;
     this.timecount = 0;
+    this.alertedMin = false;
     this.repeating = false;
+    this.skiping = false;
     this.next = null;
     this.visited = {};
     this.lastMark = {};       
     this.restart = {line: 0, staff: 0, voice: 0, pos: 0};
     
-    this.startTieElem = {};
+    this.startTieElem = [];
     this.lastTabElem = [];
     this.baraccidentals = [];
     this.channel = -1;
     this.parsedElements = [];
     
     this.midiTune = { 
-        tempo: 640
+        tempo: this.oneMinute/ 640 // duração de cada intervalo em mili
        ,printer: null
        ,playlist: [] // nova strutura, usando 2 elementos de array por intervalo de tempo (um para ends e outro para starts) 
        ,measures: [] // marks the start time for each measure - used for learning mode playing
@@ -75,9 +81,9 @@ ABCXJS.midi.Parse.prototype.parse = function(tune) {
     this.midiTune.gaita = this.gaita;
 
     if ( tune.metaText && tune.metaText.tempo) {
-        var bpm = tune.metaText.tempo.bpm || 160;
+        var bpm = tune.metaText.tempo.bpm || 80;
         var duration = tune.metaText.tempo.duration[0] || 0.25;
-        this.midiTune.tempo = bpm * duration * 16;
+        this.midiTune.tempo = this.oneMinute / (bpm * duration * this.wholeNote);
     }
 
     //faz o parse dos elementos abcx 
@@ -174,7 +180,9 @@ ABCXJS.midi.Parse.prototype.writeNote = function(elem) {
         this.multiplier = (elem.startTriplet === 2) ? 3 / 2 : (elem.startTriplet - 1) / elem.startTriplet;
     }
 
-    var mididuration = elem.duration * ABCXJS.midi.baseduration * this.multiplier;
+    var mididuration = elem.duration * this.wholeNote * this.multiplier;
+    
+    mididuration = this.checkMinNote(mididuration);
 
     this.timecount += this.silencelength;
     this.silencelength = 0;
@@ -198,36 +206,37 @@ ABCXJS.midi.Parse.prototype.writeNote = function(elem) {
             }
             
             if (note.tie && note.tie.id_end) { // termina
-                //this.endTies( midipitch, mididuration, elem, note.endSlur );
                 var startElem = this.startTieElem[midipitch][0];
                 this.startNote(elem, this.timecount);
                 if( note.tie.id_start ) { // se termina e recomeça, empilhe a nota
                     this.startTieElem[midipitch].push(elem);
                 }  else {
-                  this.endNote(elem, this.timecount + mididuration);
-                  if( mididuration >= ABCXJS.midi.baseduration/2 ) { 
-                      this.endNote(startElem, this.timecount+mididuration, midipitch );
-                      this.startNote(startElem, this.timecount, midipitch );
-                      this.endNote(startElem, this.timecount + mididuration, midipitch );
-                  } else {
-                      this.endNote(startElem, this.timecount + mididuration, midipitch );
-                  }
-                  for( var i = 1; i < this.startTieElem[midipitch].length; i++ ) {
-                    var elemInter = this.startTieElem[midipitch][i];
-                    this.endNote(elemInter, this.timecount + mididuration);
-                  }
-                  delete this.startTieElem[midipitch];
+                    if( mididuration * this.midiTune.tempo >= 2000 ) { 
+                        this.endNote(startElem, this.timecount, midipitch );
+                        this.startNote(startElem, this.timecount, midipitch );
+                        this.endNote(startElem, this.timecount + mididuration, midipitch );
+                    } else {
+                        this.endNote(elem, this.timecount + mididuration);
+                        this.endNote(startElem, this.timecount + mididuration, midipitch );
+                    }
+                  
+                    for( var j = 1; j < this.startTieElem[midipitch].length; j++ ) {
+                      var elemInter = this.startTieElem[midipitch][j];
+                      this.endNote(elemInter, this.timecount + mididuration);
+                    }
+                    this.startTieElem[midipitch] = [false];
                     
                 }
             } else if (note.tie && note.tie.id_start ) { // só inicia
-                this.startNote(elem, this.timecount, midipitch );
+                this.startNote(elem, this.timecount, midipitch, mididuration );
                 this.startTieElem[midipitch] = [elem];
             } else { // elemento sem tie
-                if( this.startTieElem[midipitch] ) { // já está em tie - continua
+                if( this.startTieElem[midipitch] && this.startTieElem[midipitch][0] ) { // já está em tie - continua
                   this.startNote( elem, this.timecount);
                   this.endNote( elem, this.timecount + mididuration);
                 } else { // o básico - inicia e termina a nota
-                  this.startNote(elem, this.timecount, midipitch );
+                    
+                  this.startNote(elem, this.timecount, midipitch, mididuration );
                   this.endNote(elem, this.timecount + mididuration, midipitch );
                 }
             } 
@@ -245,8 +254,26 @@ ABCXJS.midi.Parse.prototype.writeNote = function(elem) {
     }
 };
 
+ABCXJS.midi.Parse.prototype.checkMinNote = function(dur) {
+    if( dur < 1 ) {
+        dur = 1;
+        if( !this.alertedMin ) {
+            this.addWarning( 'Nota(s) com duração menor que o mínimo suportado: 1/' + this.wholeNote + '.');
+            this.alertedMin = true;
+        }    
+    }
+    
+    return dur;
+    
+};
+
 ABCXJS.midi.Parse.prototype.selectButtons = function(elem) {
-    var mididuration = elem.duration * ABCXJS.midi.baseduration;
+    
+    var mididuration = this.checkMinNote(mididuration);
+    
+    var mididuration = elem.duration * this.wholeNote;
+    
+    
     if (elem.pitches) {
         
         var button;
@@ -282,29 +309,6 @@ ABCXJS.midi.Parse.prototype.selectButtons = function(elem) {
     this.timecount += mididuration;
 };
 
-ABCXJS.midi.Parse.prototype.endTies = function(midipitch, mididuration, endElem, slur) {
-    var startElem = this.startTieElem[midipitch];
-    if (startElem) {
-        this.endNote(startElem, this.timecount + mididuration, midipitch );
-        this.startNote(endElem, this.timecount);
-        this.endNote(endElem, this.timecount + mididuration);
-        delete this.startTieElem[midipitch];
-    } else {
-        //this.addWarning( 'Ligaduras de expressão não implementadas!');
-        this.clearTies();
-        this.startNote(endElem, this.timecount, midipitch );
-        this.endNote(endElem, this.timecount + mididuration, midipitch );
-    }
- };
- 
-ABCXJS.midi.Parse.prototype.clearTies = function() {
-    for (var index in this.startTieElem) {
-        var startElem = this.startTieElem[index];
-        this.endNote(startElem, this.timecount, index );
-    }
-    this.startTieElem = {};
-};
-
 ABCXJS.midi.Parse.prototype.handleBar = function(elem) {
     this.baraccidentals = [];
 
@@ -337,6 +341,17 @@ ABCXJS.midi.Parse.prototype.handleBar = function(elem) {
     }
 };
 
+ABCXJS.midi.Parse.prototype.clearTies = function() {
+    var self = this;
+    self.startTieElem.forEach( function ( arr, index ) {
+        for(var j = 0; j < arr.length; j++ ) {
+            if(arr[j])
+                self.endNote( arr[j], self.timecount, index );
+        }
+        self.startTieElem[index] = [false];
+    });
+};
+
 ABCXJS.midi.Parse.prototype.setVisited = function() {
     this.visited[this.getMarkString()] = true;
 };
@@ -351,23 +366,25 @@ ABCXJS.midi.Parse.prototype.initParsedElements = function(time) {
     }
 };
 
-ABCXJS.midi.Parse.prototype.startNote = function(abcelem, startTime, pitch ) {
+ABCXJS.midi.Parse.prototype.startNote = function(abcelem, startTime, pitch, mididuration ) {
     this.initParsedElements(startTime);
     
     this.parsedElements[startTime][1].abcelems.push({abcelem:abcelem,channel:this.channel});
 
-    if( ! isNaN( pitch ) )
-        this.parsedElements[startTime][1].pitches.push({pitch:pitch,channel:this.channel});
+    if( ! isNaN( pitch ) ) {
+        //abcelem.miduration = mididuration;
+        this.parsedElements[startTime][1].pitches.push({pitch:pitch,channel:this.channel/*, miduration: mididuration*/});
+    }    
     
     if(this.staff === 0 && this.voice === 0 && abcelem.barNumber ) 
         this.parsedElements[startTime][1].barNumber = this.parsedElements[startTime][1].barNumber || abcelem.barNumber;
 };
 
-ABCXJS.midi.Parse.prototype.endNote = function(abcelem, endTime, pitch ) {
+ABCXJS.midi.Parse.prototype.endNote = function(abcelem, endTime, pitch, delay ) {
     this.initParsedElements(endTime);
     this.parsedElements[endTime][0].abcelems.push({abcelem:abcelem});
     if( ! isNaN( pitch ) )
-        this.parsedElements[endTime][0].pitches.push({pitch:pitch,channel:this.channel});
+        this.parsedElements[endTime][0].pitches.push({pitch:pitch,channel:this.channel, delay:delay });
 };
 
 ABCXJS.midi.Parse.prototype.startButton = function( abcelem, button, startTime ) {
