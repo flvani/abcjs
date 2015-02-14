@@ -6,10 +6,11 @@
 
 /*
  * TODO:
- *   - tratar notas longas
  *   - tratar endings sem marca de final ??
  *   - tratar endings em compassos com repeat bar
  *   - implementar: segno, coda, capo e fine
+ *   OK - tratar notas longas - tanto quanto possível, as notas longas serão reiniciadas
+ *        porém a qualidade não é boa pois o reinício é perceptível
  */
 
 if (!window.ABCXJS)
@@ -54,7 +55,7 @@ ABCXJS.midi.Parse.prototype.reset = function() {
     this.lastMark = {};       
     this.restart = {line: 0, staff: 0, voice: 0, pos: 0};
     
-    this.startTieElem = [];
+    this.startTieInterval = [];
     this.lastTabElem = [];
     this.baraccidentals = [];
     this.channel = -1;
@@ -101,20 +102,19 @@ ABCXJS.midi.Parse.prototype.parse = function(tune) {
     
     //cria a playlist a partir dos elementos obtidos acima  
     this.parsedElements.forEach( function( item, time ) {
-        
-        if( item[0].pitches.length + item[0].abcelems.length + item[0].buttons.length > 0 ) {
-            self.midiTune.playlist.push( {item: item[0], time: time, start: false } );
+        if( item.end.pitches.length + item.end.abcelems.length + item.end.buttons.length > 0 ) {
+            self.midiTune.playlist.push( {item: item.end, time: time, start: false } );
         }
         
-        if( item[1].pitches.length + item[1].abcelems.length + item[1].buttons.length > 0 ) {
-            if( item[1].barNumber && item[1].barNumber > currBar ) {
-                currBar = item[1].barNumber;
-                delete item[1].barNumber;
+        if( item.start.pitches.length + item.start.abcelems.length + item.start.buttons.length > 0 ) {
+            if( item.start.barNumber && item.start.barNumber > currBar ) {
+                currBar = item.start.barNumber;
+                delete item.start.barNumber;
                 self.midiTune.measures[currBar] = self.midiTune.playlist.length;
-                self.midiTune.playlist.push( {item: item[1], time: time, barNumber: currBar, start: true } );
+                self.midiTune.playlist.push( {item: item.start, time: time, barNumber: currBar, start: true } );
             } else {
-                delete item[1].barNumber;
-                self.midiTune.playlist.push( {item: item[1], time: time, start: true } );
+                delete item.start.barNumber;
+                self.midiTune.playlist.push( {item: item.start, time: time, start: true } );
             }
         }
     });
@@ -180,12 +180,9 @@ ABCXJS.midi.Parse.prototype.writeNote = function(elem) {
         this.multiplier = (elem.startTriplet === 2) ? 3 / 2 : (elem.startTriplet - 1) / elem.startTriplet;
     }
 
-    var mididuration = elem.duration * this.wholeNote * this.multiplier;
-    
-    mididuration = this.checkMinNote(mididuration);
+    var mididuration = this.checkMinNote(elem.duration * this.wholeNote * this.multiplier);
 
-    this.timecount += this.silencelength;
-    this.silencelength = 0;
+    var intervalo = { totalDur:0, elem:null, midipitch:null };
     
     if (elem.pitches) {
         var midipitch;
@@ -206,48 +203,64 @@ ABCXJS.midi.Parse.prototype.writeNote = function(elem) {
             }
             
             if (note.tie && note.tie.id_end) { // termina
-                var startElem = this.startTieElem[midipitch][0];
-                this.startNote(elem, this.timecount);
+                var startInterval = this.startTieInterval[midipitch][0];
+                // elem será inserido - this.startNote(elem, this.timecount);
                 if( note.tie.id_start ) { // se termina e recomeça, empilhe a nota
-                    this.startTieElem[midipitch].push(elem);
+                    //TIES EM SERIE: PASSO 1 - empilha mais um intervalo
+                    var mp = {channel:this.channel, midipitch:midipitch, mididuration:mididuration};
+                    elem.openTies = elem.openTies? elem.openTies+1: 1;
+                    intervalo = { totalDur:mididuration, elem:elem, midipitch:mp }; 
+                    this.startTieInterval[midipitch].push(intervalo);
                 }  else {
-                    if( mididuration * this.midiTune.tempo >= 2000 ) { 
-                        this.endNote(startElem, this.timecount, midipitch );
-                        this.startNote(startElem, this.timecount, midipitch );
-                        this.endNote(startElem, this.timecount + mididuration, midipitch );
-                    } else {
-                        this.endNote(elem, this.timecount + mididuration);
-                        this.endNote(startElem, this.timecount + mididuration, midipitch );
+                    startInterval.elem.openTies --;
+                    startInterval.totalDur += mididuration;
+                    startInterval.midipitch.mididuration = startInterval.totalDur;
+                    this.addEnd( this.timecount+mididuration, startInterval.midipitch, null, null );
+                    
+                    if( startInterval.elem.openTies === 0 ) {
+                        delete startInterval.elem.openTies;
+                        this.addEnd( this.timecount+mididuration, null, startInterval.elem, null );
+                    } 
+                    
+                    //TIES EM SERIE: PASSO 2 - trar intervalos intermediários
+                    for( var j = 1; j < this.startTieInterval[midipitch].length; j++ ) {
+                        var interInter = this.startTieInterval[midipitch][j];
+                        interInter.elem.openTies --;
+                        interInter.totalDur += mididuration;
+                        if( interInter.elem.openTies === 0 ) {
+                            delete interInter.elem.openTies;
+                            this.addEnd( this.timecount+mididuration, null, interInter.elem, null );
+                        } 
                     }
-                  
-                    for( var j = 1; j < this.startTieElem[midipitch].length; j++ ) {
-                      var elemInter = this.startTieElem[midipitch][j];
-                      this.endNote(elemInter, this.timecount + mididuration);
-                    }
-                    this.startTieElem[midipitch] = [false];
+                    
+                    this.startTieInterval[midipitch] = [false];
                     
                 }
             } else if (note.tie && note.tie.id_start ) { // só inicia
-                this.startNote(elem, this.timecount, midipitch, mididuration );
-                this.startTieElem[midipitch] = [elem];
+                var mp = {channel:this.channel, midipitch:midipitch, mididuration:mididuration};
+                elem.openTies = elem.openTies? elem.openTies+1: 1;
+                intervalo = { totalDur:mididuration, elem:elem, midipitch:mp }; 
+                this.addStart( this.timecount, mp, null, null );
+                this.startTieInterval[midipitch] = [intervalo];
             } else { // elemento sem tie
-                if( this.startTieElem[midipitch] && this.startTieElem[midipitch][0] ) { // já está em tie - continua
-                  this.startNote( elem, this.timecount);
-                  this.endNote( elem, this.timecount + mididuration);
+                if( this.startTieInterval[midipitch] && this.startTieInterval[midipitch][0] ) { 
+                  // já está em tie - continua e elem será inserido abaixo
                 } else { // o básico - inicia e termina a nota
-                    
-                  this.startNote(elem, this.timecount, midipitch, mididuration );
-                  this.endNote(elem, this.timecount + mididuration, midipitch );
+                  var mp = {channel:this.channel, midipitch:midipitch, mididuration:mididuration};
+                  intervalo = { totalDur:mididuration, elem:elem, midipitch:mp }; 
+                  this.addStart( this.timecount, mp, null, null );
+                  this.addEnd( this.timecount+mididuration, mp, null, null );
                 }
             } 
         }
-        this.timecount += mididuration;
-        
-    } else if (elem.rest && elem.rest.type !== 'spacer') {
-        this.silencelength += mididuration;
-        this.startNote(elem, this.timecount);
-        this.endNote(elem, this.timecount + mididuration);
     }
+
+    this.addStart( this.timecount, null, elem, null );
+    if( ! elem.openTies ) {
+        this.addEnd( this.timecount+mididuration, null, elem, null );
+    }
+    
+    this.timecount += mididuration;
 
     if (elem.endTriplet) {
         this.multiplier = 1;
@@ -269,9 +282,7 @@ ABCXJS.midi.Parse.prototype.checkMinNote = function(dur) {
 
 ABCXJS.midi.Parse.prototype.selectButtons = function(elem) {
     
-    var mididuration = this.checkMinNote(mididuration);
-    
-    var mididuration = elem.duration * this.wholeNote;
+    var mididuration = this.checkMinNote(elem.duration * this.wholeNote);
     
     
     if (elem.pitches) {
@@ -301,11 +312,14 @@ ABCXJS.midi.Parse.prototype.selectButtons = function(elem) {
                     this.lastTabElem[10+i-bassCounter] = button;
                 }
             }
-            this.startButton(elem, button, this.timecount);
-            this.endButton(elem, button, this.timecount + mididuration);
 
+            this.addStart( this.timecount, null, null, button );
+            this.addEnd( this.timecount+mididuration, null, null, button );
         }
     }
+    
+    this.addStart( this.timecount, null, elem, null );
+    this.addEnd( this.timecount+mididuration, null, elem, null );
     this.timecount += mididuration;
 };
 
@@ -343,12 +357,16 @@ ABCXJS.midi.Parse.prototype.handleBar = function(elem) {
 
 ABCXJS.midi.Parse.prototype.clearTies = function() {
     var self = this;
-    self.startTieElem.forEach( function ( arr, index ) {
-        for(var j = 0; j < arr.length; j++ ) {
-            if(arr[j])
-                self.endNote( arr[j], self.timecount, index );
-        }
-        self.startTieElem[index] = [false];
+    self.startTieInterval.forEach( function ( arr, index ) {
+        if( !arr[0] ) return;
+        arr[0].elem.openTies--;
+        if(arr[0].elem.openTies>0) {
+            self.addEnd( self.timecount, arr[0].midipitch, null, null ); 
+        } else {
+            self.addEnd( self.timecount, arr[0].midipitch, arr[0].elem, null ); 
+            delete arr[0].elem.openTies;
+        }   
+        self.startTieInterval[index] = [false];
     });
 };
 
@@ -360,44 +378,33 @@ ABCXJS.midi.Parse.prototype.isVisited = function() {
     return  this.visited[this.getMarkString()];
 };
 
-ABCXJS.midi.Parse.prototype.initParsedElements = function(time) {
+ABCXJS.midi.Parse.prototype.getParsedElement = function(time) {
     if( ! this.parsedElements[time] ) {
-        this.parsedElements[time] = [{pitches:[], abcelems:[], buttons:[]},{pitches:[], abcelems:[], buttons:[], barNumber: null}];
+        this.parsedElements[time] = {
+            start:{pitches:[], abcelems:[], buttons:[], barNumber: null}
+            ,end:{pitches:[], abcelems:[], buttons:[]}
+        };
     }
+    return this.parsedElements[time];
 };
 
-ABCXJS.midi.Parse.prototype.startNote = function(abcelem, startTime, pitch, mididuration ) {
-    this.initParsedElements(startTime);
-    
-    this.parsedElements[startTime][1].abcelems.push({abcelem:abcelem,channel:this.channel});
-
-    if( ! isNaN( pitch ) ) {
-        //abcelem.miduration = mididuration;
-        this.parsedElements[startTime][1].pitches.push({pitch:pitch,channel:this.channel/*, miduration: mididuration*/});
+ABCXJS.midi.Parse.prototype.addStart = function( time, midipitch, abcelem, button ) {
+    var pE = this.getParsedElement(time);
+    if( abcelem ) {
+        pE.start.abcelems.push({abcelem:abcelem,channel:this.channel});
+        if(this.staff === 0 && this.voice === 0 && abcelem.barNumber ) 
+            pE.start.barNumber = pE.start.barNumber || abcelem.barNumber;
     }    
-    
-    if(this.staff === 0 && this.voice === 0 && abcelem.barNumber ) 
-        this.parsedElements[startTime][1].barNumber = this.parsedElements[startTime][1].barNumber || abcelem.barNumber;
+    if( midipitch ) pE.start.pitches.push(midipitch);
+    if( button    ) pE.start.buttons.push({button:button,abcelem:abcelem});
 };
 
-ABCXJS.midi.Parse.prototype.endNote = function(abcelem, endTime, pitch, delay ) {
-    this.initParsedElements(endTime);
-    this.parsedElements[endTime][0].abcelems.push({abcelem:abcelem});
-    if( ! isNaN( pitch ) )
-        this.parsedElements[endTime][0].pitches.push({pitch:pitch,channel:this.channel, delay:delay });
+ABCXJS.midi.Parse.prototype.addEnd = function( time, midipitch, abcelem, button ) {
+    var pE = this.getParsedElement(time);
+    if( abcelem   ) pE.end.abcelems.push({abcelem:abcelem});
+    if( midipitch ) pE.end.pitches.push(midipitch);
+    if( button    ) pE.end.buttons.push({button:button,abcelem:abcelem});
 };
-
-ABCXJS.midi.Parse.prototype.startButton = function( abcelem, button, startTime ) {
-    this.initParsedElements(startTime);
-    this.parsedElements[startTime][1].abcelems.push({abcelem:abcelem,channel:this.channel});
-    if (button) this.parsedElements[startTime][1].buttons.push({button:button,abcelem:abcelem});
-};
- 
-ABCXJS.midi.Parse.prototype.endButton = function( abcelem, button, endTime ) {
-    this.initParsedElements(endTime);
-    this.parsedElements[endTime][0].abcelems.push({abcelem:abcelem});
-    if (button) this.parsedElements[endTime][0].buttons.push({button:button});
- };
 
 ABCXJS.midi.Parse.prototype.getMark = function() {
     return {line: this.line, staff: this.staff,
@@ -434,7 +441,6 @@ ABCXJS.midi.Parse.prototype.startTrack = function() {
     this.channel ++;
     this.timecount = 0;
     this.playlistpos = 0;
-    this.silencelength = 0;
 };
 
 ABCXJS.midi.Parse.prototype.endTrack = function() {

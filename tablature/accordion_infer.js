@@ -6,10 +6,10 @@
 
 /*
  * TODO:
- *   - Bug quando ligaduras de expressão estão presentes
  *   - Tratar inversões de fole e inTie (+/-)
  *   - Verificar currInterval e suas implicações quando se está no último compasso
  *   - Tratar adequadamente os acordes de baixo
+ *   - Ok Bug quando ligaduras de expressão estão presentes
  *   - OK inverter o movimento do fole baseado no tempo do compasso
  *   - OK tratar ligaduras de expressão (como se fossem ligaduras de articulacao)
  *   - OK acertar a posição dos elementos de pausa (quando presentes na tablatura)
@@ -47,6 +47,7 @@ ABCXJS.tablature.Infer.prototype.reset = function() {
     this.lastButton = -1;
     this.closing = true;
     this.currInterval = 0;
+    this.alertedMissSync = false;
     
     // limite para inversão o movimento do fole - baseado no tempo de um compasso
     if( this.tune.lines &&
@@ -98,10 +99,11 @@ ABCXJS.tablature.Infer.prototype.inferTabVoice = function(line) {
         }
 
         for( var j = 0; j < voices.length-1; j ++ ) {
-            if( voices[j].st !== voices[j+1].st ) {
+            if( voices[j].st !== voices[j+1].st && ! this.alertedMissSync) {
                 var n = parseInt(this.currInterval);
                 this.addWarning('Possível falta de sincronismo no compasso ' + n + '.' ) ;
                 j = voices.length;
+                this.alertedMissSync = true;
             }
         }
 

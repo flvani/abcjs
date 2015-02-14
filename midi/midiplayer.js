@@ -194,16 +194,16 @@ ABCXJS.midi.Player.prototype.executa = function(pl) {
     
     if( pl.start ) {
         pl.item.pitches.forEach( function( pitch ) {
-            MIDI.noteOn(pitch.channel, pitch.pitch, loudness, 0);
-            // a nota do midi só dura 2 segundos, então deveria reiniciar a nota o tempo extrapolasse esse valor
-            //this.midiTune.tempo  * duracao do midi = tempo_soando tempo_maximo_suportado
-            //250ms                * 8                 2000ms       2000ms
-            //if( mididuration * self.tempo >= 2000 ) { 
-            //    this.endNote(startElem, this.timecount, midipitch );
-            //    this.startNote(startElem, this.timecount, midipitch );
-            //    this.endNote(startElem, this.timecount + mididuration, midipitch );
-            //}
+            MIDI.noteOn(pitch.channel, pitch.midipitch, loudness, 0);
             
+            var k = 2.2, t = k, resto = ( (pitch.mididuration * self.tempo ) / 1000) - k;
+            // a nota midi dura k segundos (k), então notas mais longas são reiniciadas quantas vezes forem necessárias
+            while( resto > 0 ) {
+                MIDI.noteOff(pitch.channel, pitch.midipitch,  t);
+                MIDI.noteOn(pitch.channel, pitch.midipitch, loudness, t);
+                t += k;
+                resto -= k;
+                }
         });
         pl.item.abcelems.forEach( function( elem ) {
             if( self.map ) self.map.setScrolling(elem.abcelem.abselem.y, elem.channel);
@@ -219,7 +219,7 @@ ABCXJS.midi.Player.prototype.executa = function(pl) {
         });
     } else {
         pl.item.pitches.forEach( function( pitch ) {
-            MIDI.noteOff(pitch.channel, pitch.pitch, pitch.delay||0);
+            MIDI.noteOff(pitch.channel, pitch.midipitch, 0);
         });
         pl.item.abcelems.forEach( function( elem ) {
             elem.abcelem.abselem.unhighlight();
