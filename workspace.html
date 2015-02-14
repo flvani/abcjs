@@ -243,6 +243,7 @@ V:5 accordionTab
         <input type="button" id="playBtn" value="Play" />
         <input type="button" id="pauseBtn" value="Pause" />
         <input type="button" id="stopBtn" value="Stop" />
+        <label id="currentPlayTime" style="font-weight: bold; color: yellow; padding-left: 5px; padding-right: 3px;">0:00</label>
     </div>
     <div id="warnings"></div>
     <hr>    
@@ -313,6 +314,14 @@ V:5 accordionTab
                 debug = false;
                 
                 player = new ABCXJS.midi.Player();
+                
+                cpt = document.getElementById("currentPlayTime")
+                
+                playerCallBack = function ( playListPos, playTime, currMeasure ) {
+                  var t = playTime / 1000;
+                  cpt.innerHTML = t;
+                };
+                
 
                 myEditor = new ABCXJS.Editor(
                         "abc", {
@@ -336,7 +345,8 @@ V:5 accordionTab
                 }, false);
                 
                 playButton.addEventListener("click", function() {
-                    player.startPlay(myEditor.tunes[0].midi);
+                    player.startPlay(myEditor.tunes[0].midi, playerCallBack );
+                    //player.startDidacticPlay(myEditor.tunes[0].midi, 'note');
                 }, false);
                 pauseButton.addEventListener("click", function() {
                     player.pausePlay();
@@ -349,6 +359,7 @@ V:5 accordionTab
                         warns.forEach(function(msg){ txt += msg + '<br>'; });
                         document.getElementById("warnings").innerHTML = '<hr>'+txt;
                     }
+                    cpt.innerHTML = "0:00";
                 }, false);
                 
             }

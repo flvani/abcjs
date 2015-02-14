@@ -84,13 +84,14 @@ ABCXJS.midi.Player.prototype.pausePlay = function(nonStop) {
     this.playing = false;
 };
 
-ABCXJS.midi.Player.prototype.startPlay = function(what) {
+ABCXJS.midi.Player.prototype.startPlay = function(what, cb ) {
 
     if(this.playing || !what ) return false;
     
     this.playlist = what.playlist;
     this.tempo  = what.tempo;
     this.printer = what.printer;
+    this.callback = cb;
 
     this.playing = true;
     this.onError = null;
@@ -103,6 +104,9 @@ ABCXJS.midi.Player.prototype.startPlay = function(what) {
 };
 
 ABCXJS.midi.Player.prototype.doPlay = function() {
+    if( this.callback ) {
+        this.callback(this.i, this.playlist[this.i].time*this.tempo, this.currentMeasure );
+    }
     while (!this.onError && this.playlist[this.i] &&
            this.playlist[this.i].time <= this.currentTime) {
         this.executa(this.playlist[this.i]);
@@ -125,14 +129,14 @@ ABCXJS.midi.Player.prototype.clearDidacticPlay = function() {
 };
 
 
-ABCXJS.midi.Player.prototype.startDidacticPlay = function(what, type, value) {
+ABCXJS.midi.Player.prototype.startDidacticPlay = function(what, type, value, cb ) {
 
     if(this.playing) return false;
     
     this.playlist = what.playlist;
     this.tempo  = what.tempo;
     this.printer = what.printer;
-    
+    this.callback = cb;
     this.playing = true;
     this.onError = null;
     
@@ -140,9 +144,9 @@ ABCXJS.midi.Player.prototype.startDidacticPlay = function(what, type, value) {
     
     switch( type ) {
         case 'note': // step-by-step
-            var curr = (that.playlist[that.i].time*(1/that.currentAndamento));
+            var limite = that.i +1; // verificar se +1 é sempre verdade.
             var criteria = function () { 
-                return curr === (that.playlist[that.i].time*(1/that.currentAndamento));
+                return limite >= that.i;
             };
             break;
         case 'goto': // goto and play measure
@@ -187,7 +191,9 @@ ABCXJS.midi.Player.prototype.doDidacticPlay = function(criteria) {
             this.lastMeasurePos = this.currentMeasurePos;
             this.currentMeasurePos = this.i;
             this.currentMeasure = this.playlist[this.i].barNumber;
-            document.getElementById("gotoMeasureBtn").value = this.currentMeasure;
+            if( this.callback ) {
+                this.callback(this.i, this.playlist[this.i].time*this.tempo, this.currentMeasure );
+            }
         }
     }
     if(this.onError) {
@@ -203,8 +209,14 @@ ABCXJS.midi.Player.prototype.executa = function(pl) {
     
     var self = this;
     var loudness = 256;
+    var endOnly = (this.playUntilTime>0 && this.playUntilTime === (pl.time*(1/this.currentAndamento)));
+
     try {
         if( pl.start ) {
+            if( endOnly ) {
+                this.playUntilTime = null;
+                return;
+            }
             pl.item.pitches.forEach( function( elem ) {
                 MIDI.noteOn(elem.channel, elem.midipitch, loudness, 0);
 
