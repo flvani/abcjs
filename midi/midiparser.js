@@ -313,8 +313,8 @@ ABCXJS.midi.Parse.prototype.selectButtons = function(elem) {
                 }
             }
 
-            this.addStart( this.timecount, null, null, button );
-            this.addEnd( this.timecount+mididuration, null, null, button );
+            this.addStart( this.timecount, null, null, { button: button, closing: (elem.bellows === '+') } );
+            this.addEnd( this.timecount+mididuration, null, null, { button: button, closing: (elem.bellows === '+') } );
         }
     }
     

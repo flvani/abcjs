@@ -13,8 +13,17 @@ if (!window.ABCXJS.midi)
 ABCXJS.midi.Player = function(map, options ) {
 
     this.map = map;
-    this.reset( options );
     this.currentAndamento = 1;
+    
+    this.reset( options );
+
+    this.addWarning = function(str) {
+        this.warnings.push(str);
+    };
+    
+    this.getWarnings = function() {
+        return this.warnings.length>0?this.warnings:null;    
+    };
 };
 
 ABCXJS.midi.Player.prototype.reset = function(options) {
@@ -24,14 +33,19 @@ ABCXJS.midi.Player.prototype.reset = function(options) {
     this.i = 0;
     this.tempo = 250;
     this.playing = false;
-    this.ticksperinterval = 1;
+    this.playlist = [];
+    this.playInterval = null;
+    this.ticksPerInterval = 1;
+    
+    this.warnings = [];
     
     this.printer = {};
-    this.playlist = [];
     this.currentTime = 0;
     this.currentMeasure = 1;
     this.lastMeasurePos = 0;
     this.currentMeasurePos = 0;
+    
+    this.onError = null;
     
 };
 
@@ -61,11 +75,12 @@ ABCXJS.midi.Player.prototype.stopPlay = function() {
     this.i = 0;
     this.currentTime = 0;
     this.pausePlay();
+    return this.getWarnings();
 };
 
-ABCXJS.midi.Player.prototype.pausePlay = function() {
-    MIDI.stopAllNotes();
-    window.clearInterval(this.playinterval);
+ABCXJS.midi.Player.prototype.pausePlay = function(nonStop) {
+    if(!(false||nonStop)) MIDI.stopAllNotes();
+    window.clearInterval(this.playInterval);
     this.playing = false;
 };
 
@@ -78,22 +93,23 @@ ABCXJS.midi.Player.prototype.startPlay = function(what) {
     this.printer = what.printer;
 
     this.playing = true;
+    this.onError = null;
   
     var self = this;
     this.doPlay();
-    this.playinterval = window.setInterval(function() { self.doPlay(); }, this.tempo);
+    this.playInterval = window.setInterval(function() { self.doPlay(); }, this.tempo);
     
     return true;
 };
 
 ABCXJS.midi.Player.prototype.doPlay = function() {
-    while (this.playlist[this.i] &&
+    while (!this.onError && this.playlist[this.i] &&
            this.playlist[this.i].time <= this.currentTime) {
         this.executa(this.playlist[this.i]);
         this.i++;
     }
-    if (this.playlist[this.i]) {
-        this.currentTime += this.ticksperinterval;
+    if (!this.onError && this.playlist[this.i]) {
+        this.currentTime += this.ticksPerInterval;
     } else {
         this.stopPlay();
     }
@@ -105,15 +121,9 @@ ABCXJS.midi.Player.prototype.clearDidacticPlay = function() {
     this.currentMeasure = 1;
     this.currentMeasurePos = 0;
     this.lastMeasurePos = 0;
-    this.pauseDidacticPlay();
+    this.pausePlay(true);
 };
 
-
-ABCXJS.midi.Player.prototype.pauseDidacticPlay = function(nonStop) {
-    if(!nonStop) MIDI.stopAllNotes();
-    window.clearInterval(this.didacticPlayinterval);
-    this.playing = false;
-};
 
 ABCXJS.midi.Player.prototype.startDidacticPlay = function(what, type, value) {
 
@@ -124,6 +134,7 @@ ABCXJS.midi.Player.prototype.startDidacticPlay = function(what, type, value) {
     this.printer = what.printer;
     
     this.playing = true;
+    this.onError = null;
     
     var that = this;
     
@@ -139,7 +150,7 @@ ABCXJS.midi.Player.prototype.startDidacticPlay = function(what, type, value) {
             if(what.measures[that.currentMeasure] !== undefined )
                 that.lastMeasurePos = what.measures[that.currentMeasure];
             else {
-               this.pauseDidacticPlay();
+               this.pausePlay(true);
                return;
            }   
         case 'repeat': // measure
@@ -163,12 +174,12 @@ ABCXJS.midi.Player.prototype.startDidacticPlay = function(what, type, value) {
     }
   
     this.doDidacticPlay(criteria);
-    this.didacticPlayinterval = window.setInterval(function() { that.doDidacticPlay(criteria); }, this.tempo);
+    this.playInterval = window.setInterval(function() { that.doDidacticPlay(criteria); }, this.tempo);
     return true;
 };
 
 ABCXJS.midi.Player.prototype.doDidacticPlay = function(criteria) {
-    while (this.playlist[this.i] && criteria() &&
+    while (!this.onError && this.playlist[this.i] && criteria() &&
             (this.playlist[this.i].time*(1/this.currentAndamento)) < this.currentTime ) {
         this.executa(this.playlist[this.i]);
         this.i++;
@@ -179,11 +190,12 @@ ABCXJS.midi.Player.prototype.doDidacticPlay = function(criteria) {
             document.getElementById("gotoMeasureBtn").value = this.currentMeasure;
         }
     }
-   
-    if( this.playlist[this.i] && criteria() ) {
-        this.currentTime += this.ticksperinterval;
+    if(this.onError) {
+        this.stopPlay();
+    } else if( this.playlist[this.i] && criteria() ) {
+        this.currentTime += this.ticksPerInterval;
     } else {
-        this.pauseDidacticPlay(true);
+        this.pausePlay(true);
     }
 };
 
@@ -191,43 +203,48 @@ ABCXJS.midi.Player.prototype.executa = function(pl) {
     
     var self = this;
     var loudness = 256;
-    
-    if( pl.start ) {
-        pl.item.pitches.forEach( function( pitch ) {
-            MIDI.noteOn(pitch.channel, pitch.midipitch, loudness, 0);
-            
-            var k = 2.2, t = k, resto = ( (pitch.mididuration * self.tempo ) / 1000) - k;
-            // a nota midi dura k segundos (k), então notas mais longas são reiniciadas quantas vezes forem necessárias
-            while( resto > 0 ) {
-                MIDI.noteOff(pitch.channel, pitch.midipitch,  t);
-                MIDI.noteOn(pitch.channel, pitch.midipitch, loudness, t);
-                t += k;
-                resto -= k;
+    try {
+        if( pl.start ) {
+            pl.item.pitches.forEach( function( elem ) {
+                MIDI.noteOn(elem.channel, elem.midipitch, loudness, 0);
+
+                var k = 2.2, t = k, resto = ( (elem.mididuration * self.tempo ) / 1000) - k;
+                // a nota midi dura k segundos (k), então notas mais longas são reiniciadas quantas vezes forem necessárias
+                while( resto > 0 ) {
+                    MIDI.noteOff(elem.channel, elem.midipitch,  t);
+                    MIDI.noteOn(elem.channel, elem.midipitch, loudness, t);
+                    t += k;
+                    resto -= k;
+                    }
+            });
+            pl.item.abcelems.forEach( function( elem ) {
+                if( self.map ) self.map.setScrolling(elem.abcelem.abselem.y, elem.channel);
+                if( self.printer ) self.printer.notifySelect(elem.abcelem.abselem);
+            });
+            pl.item.buttons.forEach( function( elem ) {
+                if(elem.button.button) {
+                    if(elem.button.closing)
+                        elem.button.button.setClose();
+                    else
+                        elem.button.button.setOpen();
                 }
-        });
-        pl.item.abcelems.forEach( function( elem ) {
-            if( self.map ) self.map.setScrolling(elem.abcelem.abselem.y, elem.channel);
-            if( self.printer ) self.printer.notifySelect(elem.abcelem.abselem);
-        });
-        pl.item.buttons.forEach( function( button ) {
-            if(button.button) {
-                if(button.abcelem.bellows === '+')
-                    button.button.setClose();
-                else
-                    button.button.setOpen();
-            }
-        });
-    } else {
-        pl.item.pitches.forEach( function( pitch ) {
-            MIDI.noteOff(pitch.channel, pitch.midipitch, 0);
-        });
-        pl.item.abcelems.forEach( function( elem ) {
-            elem.abcelem.abselem.unhighlight();
-        });
-        pl.item.buttons.forEach( function( button ) {
-            if (button.button ) {
-                button.button.clear();
-            }
-        });
+            });
+        } else {
+            pl.item.pitches.forEach( function( elem ) {
+                MIDI.noteOff(elem.channel, elem.midipitch, 0);
+            });
+            pl.item.abcelems.forEach( function( elem ) {
+                elem.abcelem.abselem.unhighlight();
+            });
+            pl.item.buttons.forEach( function( elem ) {
+                if (elem.button.button ) {
+                    elem.button.button.clear();
+                }
+            });
+        }
+    } catch( err ) {
+        this.onError = { erro: err.message, idx: this.i, item: pl };
+        console.log ('PlayList['+this.onError.idx+'] - Erro: ' + this.onError.erro + '.');
+        this.addWarning( 'PlayList['+this.onError.idx+'] - Erro: ' + this.onError.erro + '.' );
     }
 };
