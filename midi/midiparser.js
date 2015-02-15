@@ -9,6 +9,7 @@
  *   - tratar endings sem marca de final ??
  *   - tratar endings em compassos com repeat bar
  *   - implementar: segno, coda, capo e fine
+ *     Nota: aparentemente o ABC não implementa simbolos como D.S al fine
  *   OK - tratar notas longas - tanto quanto possível, as notas longas serão reiniciadas
  *        porém a qualidade não é boa pois o reinício é perceptível
  */

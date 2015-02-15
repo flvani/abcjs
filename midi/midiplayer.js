@@ -4,11 +4,13 @@
  * and open the template in the editor.
  */
 /* TODO: 
- *      - Modificar a execução nota a nota (antes estava melhor) ou verificar se é possível manter 
- *          os botões selecionados alem de verificar a questão do start/stop na play list
  *      - Verificar se é possível manter um pequeno delay antes de selecionar um botão para que seja
  *          perceptivel que o mesmo foi pressionado mais de uma vez
- *      - ok enviar para o editor o sinal de  end of music (para mudar o label do botão play)
+ *        NOTA: para isso é necessário na tablatura tenha informação de quanto tempo o botão ficará pressionado  
+ *      - ok Modificar a execução nota a nota (antes estava melhor) ou verificar se é possível manter 
+ *          os botões selecionados alem de verificar a questão do start/stop na play list
+ *          NOTA: voltei ao padrão anterior
+ *      - ok Enviar para o editor o sinal de  end of music (para mudar o label do botão play)
 */
 
 if (!window.ABCXJS)
@@ -160,7 +162,7 @@ ABCXJS.midi.Player.prototype.startDidacticPlay = function(what, type, value, cb 
             // var limite = that.i; // verificar se +1 é sempre verdade.
             var limite = that.playlist[that.i].time*(1/that.currentAndamento);
             var criteria = function () { 
-                return limite === that.playlist[that.i].time*(1/that.currentAndamento);;
+                return limite === that.playlist[that.i].time*(1/that.currentAndamento);
             };
             break;
         case 'goto': // goto and play measure
