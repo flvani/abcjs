@@ -315,14 +315,26 @@ V:5 accordionTab
                 
                 player = new ABCXJS.midi.Player();
                 
-                cpt = document.getElementById("currentPlayTime")
+                cpt = document.getElementById("currentPlayTime");
                 
                 playerCallBack = function ( playListPos, playTime, currMeasure ) {
                   var t = playTime / 1000;
                   cpt.innerHTML = t;
                 };
                 
-
+                playerCallBackOnEnd = function ( ) {
+                    cpt.innerHTML = "0:00";
+                    myEditor.printer.clearSelection();
+                    var warns = player.getWarnings();
+                    if( warns ) {
+                        var txt = "";
+                        warns.forEach(function(msg){ txt += msg + '<br>'; });
+                        document.getElementById("warnings").innerHTML = '<hr>'+txt;
+                    }
+                };
+                
+                player.setCallbackOnEnd(playerCallBackOnEnd);
+ 
                 myEditor = new ABCXJS.Editor(
                         "abc", {
                              canvas_id: "canvas"
@@ -352,14 +364,7 @@ V:5 accordionTab
                     player.pausePlay();
                 }, false);
                 stopButton.addEventListener("click", function() {
-                    myEditor.printer.clearSelection();
                     var warns = player.stopPlay();
-                    if( warns ) {
-                        var txt = "";
-                        warns.forEach(function(msg){ txt += msg + '<br>'; });
-                        document.getElementById("warnings").innerHTML = '<hr>'+txt;
-                    }
-                    cpt.innerHTML = "0:00";
                 }, false);
                 
             }

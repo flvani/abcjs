@@ -3,6 +3,13 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
+/* TODO: 
+ *      - Modificar a execução nota a nota (antes estava melhor) ou verificar se é possível manter 
+ *          os botões selecionados alem de verificar a questão do start/stop na play list
+ *      - verificar se é possível manter um pequeno delay antes de selecionar um botão para que seja
+ *          perceptivel que o mesmo foi pressionado mais de uma vez
+ *      - ok enviar para o editor o sinal de  end of music (para mudar o label do botão play)
+*/
 
 if (!window.ABCXJS)
     window.ABCXJS = {};
@@ -71,10 +78,16 @@ ABCXJS.midi.Player.prototype.adjustAndamento = function() {
     return this.currentAndamento;
 };
 
+ABCXJS.midi.Player.prototype.setCallbackOnEnd = function( cb ) {
+    this.callbackOnEnd = cb;
+};
+
+
 ABCXJS.midi.Player.prototype.stopPlay = function() {
     this.i = 0;
     this.currentTime = 0;
     this.pausePlay();
+    if( this.callbackOnEnd ) this.callbackOnEnd();
     return this.getWarnings();
 };
 
