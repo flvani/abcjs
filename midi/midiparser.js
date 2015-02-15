@@ -290,7 +290,7 @@ ABCXJS.midi.Parse.prototype.selectButtons = function(elem) {
         var button;
         var bassCounter = 0; // gato para resolver o problema de agora ter um ou dois botões de baixos
         for (var i = 0; i < elem.pitches.length; i++) {
-            
+            var tie = false;
             if (elem.pitches[i].bass ) 
                 bassCounter++;
             
@@ -300,6 +300,7 @@ ABCXJS.midi.Parse.prototype.selectButtons = function(elem) {
             if (elem.pitches[i].bass) {
                 if (elem.pitches[i].c === '-->') {
                     button = this.lastTabElem[i];
+                    tie = true;
                 } else {
                     button = this.getBassButton(elem.bellows, elem.pitches[i].c);
                     this.lastTabElem[i] = button;
@@ -307,14 +308,16 @@ ABCXJS.midi.Parse.prototype.selectButtons = function(elem) {
             } else {
                 if ( elem.pitches[i].c === '-->') {
                     button = this.lastTabElem[10+i-bassCounter];
+                    tie = true;
                 } else {
                     button = this.getButton(elem.pitches[i].c);
                     this.lastTabElem[10+i-bassCounter] = button;
                 }
             }
-
-            this.addStart( this.timecount, null, null, { button: button, closing: (elem.bellows === '+') } );
-            this.addEnd( this.timecount+mididuration, null, null, { button: button, closing: (elem.bellows === '+') } );
+            //if( ! tie ) {
+                this.addStart( this.timecount, null, null, { button: button, closing: (elem.bellows === '+'), duration: elem.duration } );
+                this.addEnd( this.timecount+mididuration, null, null, { button: button, closing: (elem.bellows === '+') } );
+            //}    
         }
     }
     

@@ -6,7 +6,7 @@
 /* TODO: 
  *      - Modificar a execução nota a nota (antes estava melhor) ou verificar se é possível manter 
  *          os botões selecionados alem de verificar a questão do start/stop na play list
- *      - verificar se é possível manter um pequeno delay antes de selecionar um botão para que seja
+ *      - Verificar se é possível manter um pequeno delay antes de selecionar um botão para que seja
  *          perceptivel que o mesmo foi pressionado mais de uma vez
  *      - ok enviar para o editor o sinal de  end of music (para mudar o label do botão play)
 */
@@ -157,9 +157,10 @@ ABCXJS.midi.Player.prototype.startDidacticPlay = function(what, type, value, cb 
     
     switch( type ) {
         case 'note': // step-by-step
-            var limite = that.i +1; // verificar se +1 é sempre verdade.
+            // var limite = that.i; // verificar se +1 é sempre verdade.
+            var limite = that.playlist[that.i].time*(1/that.currentAndamento);
             var criteria = function () { 
-                return limite >= that.i;
+                return limite === that.playlist[that.i].time*(1/that.currentAndamento);;
             };
             break;
         case 'goto': // goto and play measure
@@ -240,7 +241,7 @@ ABCXJS.midi.Player.prototype.executa = function(pl) {
                     MIDI.noteOn(elem.channel, elem.midipitch, loudness, t);
                     t += k;
                     resto -= k;
-                    }
+                }
             });
             pl.item.abcelems.forEach( function( elem ) {
                 if( self.map ) self.map.setScrolling(elem.abcelem.abselem.y, elem.channel);
@@ -249,9 +250,9 @@ ABCXJS.midi.Player.prototype.executa = function(pl) {
             pl.item.buttons.forEach( function( elem ) {
                 if(elem.button.button) {
                     if(elem.button.closing)
-                        elem.button.button.setClose();
+                        elem.button.button.setClose(/*elem.button.duration*self.tempo/8*/);
                     else
-                        elem.button.button.setOpen();
+                        elem.button.button.setOpen(/*elem.button.duration*self.tempo/8*/);
                 }
             });
         } else {

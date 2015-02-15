@@ -14,6 +14,12 @@
 //    You should have received a copy of the GNU General Public License
 //    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+/*
+ * TODO:
+ * implementar macros como esta m: ~C1 = C,, [C,E,G,] [C,E,G,]
+ * 
+ */
+
 if (!window.ABCXJS)
 	window.ABCXJS = {};
 
