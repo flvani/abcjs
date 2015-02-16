@@ -223,7 +223,7 @@ ABCXJS.midi.Player.prototype.doDidacticPlay = function(criteria) {
             this.currentMeasurePos = this.i;
             this.currentMeasure = this.playlist[this.i].barNumber;
             if( this.callback ) {
-                this.callback(this.i, this.playlist[this.i].time*this.tempo, this.currentMeasure );
+                this.callback(this.i, this.getTime(), this.currentMeasure );
             }
         }
     }
