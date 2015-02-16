@@ -725,9 +725,9 @@ ABCXJS.write.EndingElem.prototype.draw = function(printer, linestartx, lineendx,
         //printer.printPath({path: pathString, stroke: "#000000", fill: "#000000"});
     }   
     
-    lineendx = linestartx + Math.min(lineendx-linestartx, 180 );
+    //lineendx = linestartx + Math.min(lineendx-linestartx, 180 );
 
-    pathString = ABCXJS.write.sprintf("M %f %f L %f %f", linestartx, y, lineendx, y);
+    pathString = ABCXJS.write.sprintf("M %f %f L %f %f", linestartx, y, lineendx-5, y)
     printer.printPath({path: pathString, stroke: "#000000", fill: "#000000"});  
 };
 

@@ -6,12 +6,12 @@
 
 /*
  * TODO:
- *   - tratar endings sem marca de final ??
- *   - tratar endings em compassos com repeat bar
  *   - implementar: segno, coda, capo e fine
  *     Nota: aparentemente o ABC não implementa simbolos como D.S al fine
- *   OK - tratar notas longas - tanto quanto possível, as notas longas serão reiniciadas
- *        porém a qualidade não é boa pois o reinício é perceptível
+ *   - Ok - imprimir endings somente no compasso onde ocorrem
+ *   - Ok - tratar endings em compassos com repeat bar (tratar adequadamente endings/skippings)
+ *   - Ok - tratar notas longas - tanto quanto possível, as notas longas serão reiniciadas
+ *          porém a qualidade não é boa pois o reinício é perceptível
  */
 
 if (!window.ABCXJS)
@@ -50,7 +50,8 @@ ABCXJS.midi.Parse.prototype.reset = function() {
     this.timecount = 0;
     this.alertedMin = false;
     this.repeating = false;
-    this.skiping = false;
+    this.skipping = false;
+    this.inEnding = false;
     this.next = null;
     this.visited = {};
     this.lastMark = {};       
@@ -156,6 +157,7 @@ ABCXJS.midi.Parse.prototype.writeABCVoiceLine = function() {
 ABCXJS.midi.Parse.prototype.writeABCElement = function(elem) {
     switch (elem.el_type) {
         case "note":
+            if( this.skipping ) return;
             if (this.getStaff().clef.type !== "accordionTab") {
               this.writeNote(elem);
             } else {
@@ -163,6 +165,7 @@ ABCXJS.midi.Parse.prototype.writeABCElement = function(elem) {
             }
             break;
         case "key":
+            if( this.skipping ) return;
             this.setKeySignature(elem);
             break;
         case "bar":
@@ -329,8 +332,7 @@ ABCXJS.midi.Parse.prototype.selectButtons = function(elem) {
 
 ABCXJS.midi.Parse.prototype.handleBar = function(elem) {
     this.baraccidentals = [];
-
-    var skip       = (elem.startEnding) ? true : false;
+    
     var repeat     = (elem.type === "bar_right_repeat" || elem.type === "bar_dbl_repeat");
     var setrestart = (elem.type === "bar_left_repeat" || elem.type === "bar_dbl_repeat" || 
                       elem.type === "bar_thick_thin" || elem.type === "bar_thin_thick" || 
@@ -343,14 +345,28 @@ ABCXJS.midi.Parse.prototype.handleBar = function(elem) {
         if( this.repeating ) {
             this.repeating = false;
         } else {
-            if( repeat || skip ) {
+            
+            this.inEnding   = elem.endEnding && !elem.startEnding ? false : this.inEnding;
+            this.skipping   = this.skipping || this.inEnding && elem.startEnding !== undefined && elem.startEnding !== this.inEnding;
+            this.inEnding   = elem.startEnding || this.inEnding;
+
+            if( this.skipping ) {
+                if( elem.startEnding ) this.lastMark = this.getMark();
+                if( ! repeat ) return;
+            }
+
+            if( !this.skipping && (repeat || this.inEnding) ) {
                 this.setVisited();
             }
+            
             if ( repeat ) {
+                this.clearTies();
+                if(!this.skipping)
+                    this.lastMark = this.getMark();
+                this.skipping = false;
+                this.inEnding = false;
                 this.repeating = true;
                 this.next = this.restart;
-                this.lastMark = this.getMark();
-                this.clearTies();
             }
             if ( setrestart ) {
                 this.restart = this.getMark();

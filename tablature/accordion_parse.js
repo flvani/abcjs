@@ -218,14 +218,19 @@ ABCXJS.tablature.Parse.prototype.getBarLine = function() {
 
   if(! this.invalid) {
     this.parseMultiCharToken( ' \t' );
-    if (this.vars.inEnding && token.type !== 'bar_thin') {
-        token.endEnding = true;
-        this.vars.inEnding = false;
+    if (this.vars.inEnding ) {
+            token.endDrawEnding = true;
+            if( token.type !== 'bar_thin') {
+                token.endEnding = true;
+                this.vars.inEnding = false;
+            }    
     }
     if(endings.indexOf(this.line.charAt(this.i))>=0) {
         token.startEnding = this.line.charAt(this.i);
-        if (this.vars.inEnding)
+        if (this.vars.inEnding) {
+            token.endDrawEnding = true;
             token.endEnding = true;
+        }    
         this.vars.inEnding = true;
         this.i++;
     }

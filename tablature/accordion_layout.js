@@ -169,7 +169,7 @@ ABCXJS.tablature.Layout.prototype.printBarLine = function (elem) {
     abselem.addRight(anchor);
   }
 
-  if (elem.type==="bar_invisible") {
+  if (elem.type==="bar_invisible" || elem.endDrawEnding) {
     anchor = new ABCXJS.write.RelativeElement(null, dx, 1, 0, {"type": "none", "pitch2":topbar, linewidth:0.6});
     abselem.addRight(anchor);
   }
@@ -185,9 +185,9 @@ ABCXJS.tablature.Layout.prototype.printBarLine = function (elem) {
     dx+=5;
   }
   
-  if (this.partstartelem && elem.endEnding) {
-    this.partstartelem.anchor2=anchor;
-    this.partstartelem = null;
+  if (this.partstartelem && elem.endDrawEnding) {
+    if(elem.endDrawEnding) this.partstartelem.anchor2  = anchor;
+    if(elem.endEnding) this.partstartelem = null;
   }
 
   if (secondthin) {

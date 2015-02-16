@@ -1289,26 +1289,25 @@ window.ABCXJS.parse.Parse = function(transposer_, accordion_) {
                     if (bar.type.length === 0)
                         warn("Unknown bar type", line, i);
                     else {
-                        if (multilineVars.inEnding && bar.type !== 'bar_thin') {
-                            bar.endEnding = true;
-                            multilineVars.inEnding = false;
+                        if (multilineVars.inEnding ) {
+                            bar.endDrawEnding = true;
+                            if(  bar.type !== 'bar_thin') {
+                                bar.endEnding = true;
+                                multilineVars.inEnding = false;
+                            }
                         }
                         if (ret[2]) {
                             bar.startEnding = ret[2];
-                            if (multilineVars.inEnding)
+                            if (multilineVars.inEnding) {
+                                bar.endDrawEnding = true;
                                 bar.endEnding = true;
+                            }
                             multilineVars.inEnding = true;
                         }
                         if (el.decoration !== undefined)
                             bar.decoration = el.decoration;
                         if (el.chord !== undefined)
                             bar.chord = el.chord;
-                        //if (bar.startEnding && multilineVars.barFirstEndingNum === undefined)
-                        //    multilineVars.barFirstEndingNum = multilineVars.currBarNumber;
-                        //else if (bar.startEnding && bar.endEnding && multilineVars.barFirstEndingNum)
-                        //    multilineVars.currBarNumber = multilineVars.barFirstEndingNum;
-                        //else if (bar.endEnding)
-                        //    multilineVars.barFirstEndingNum = undefined;
                         var mc = multilineVars.currentVoice; 
                         if (bar.type !== 'bar_invisible' 
                                 && multilineVars.measureNotEmpty 
