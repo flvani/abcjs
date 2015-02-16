@@ -226,7 +226,7 @@ V:5 accordionTab
         <input type="button" id="playBtn" value="Play" />
         <input type="button" id="pauseBtn" value="Pause" />
         <input type="button" id="stopBtn" value="Stop" />
-        <label id="currentPlayTime" style="font-weight: bold; color: yellow; padding-left: 5px; padding-right: 3px;">0:00</label>
+        <label id="currentPlayTime" style="font-weight: bold; color: yellow; padding-left: 5px; padding-right: 3px;">00:00.00</label>
     </div>
     <div id="warnings"></div>
     <hr>    
@@ -301,12 +301,12 @@ V:5 accordionTab
                 cpt = document.getElementById("currentPlayTime");
                 
                 playerCallBack = function ( playListPos, playTime, currMeasure ) {
-                  var t = playTime / 1000;
+                  var t = playTime.cTime;
                   cpt.innerHTML = t;
                 };
                 
                 playerCallBackOnEnd = function ( ) {
-                    cpt.innerHTML = "0:00";
+                    cpt.innerHTML = "00:00.00";
                     myEditor.printer.clearSelection();
                     var warns = player.getWarnings();
                     if( warns ) {

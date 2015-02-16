@@ -117,10 +117,25 @@ ABCXJS.midi.Player.prototype.startPlay = function(what, cb ) {
     
     return true;
 };
+ABCXJS.midi.Player.prototype.getTime = function() {
+    var pad =  function(n, width, z) {
+        z = z || '0';
+        n = n + '';
+        return n.length >= width ? n : new Array(width - n.length + 1).join(z) + n;
+    };
+    
+    var time = this.playlist[this.i].time*this.tempo;
+    var secs  = Math.floor(time/1000);
+    var ms    = Math.floor((time - secs*1000)/10);
+    var mins  = Math.floor(secs/60);
+    var secs  = secs - mins*60;
+    var cTime  = pad(mins,2) + ':' + pad(secs,2) + '.' + pad(ms,2);
+    return {cTime: cTime, time: time };
+};
 
 ABCXJS.midi.Player.prototype.doPlay = function() {
     if( this.callback ) {
-        this.callback(this.i, this.playlist[this.i].time*this.tempo, this.currentMeasure );
+        this.callback(this.i, this.getTime(), this.currentMeasure );
     }
     while (!this.onError && this.playlist[this.i] &&
            this.playlist[this.i].time <= this.currentTime) {
