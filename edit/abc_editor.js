@@ -395,7 +395,7 @@ window.ABCXJS.Editor.prototype.modelChanged = function() {
     }
     
     if (this.warningsdiv) {
-        this.warningsdiv.innerHTML = '<hr>' + (this.warnings ? this.warnings.join("<br>") : "No warnings or errors.");
+        this.warningsdiv.innerHTML = '<hr>' + (this.warnings.length > 0 ? this.warnings.join("<br>") : "No warnings or errors.") + '<hr>';
     }
     
     this.printer.addSelectListener(this);
@@ -421,7 +421,7 @@ window.ABCXJS.Editor.prototype.parseABC = function(transpose, force ) {
   this.oldt = t;
   if (t === "") {
 	this.tunes = undefined;
-	this.warnings = "";
+	this.warnings = [];
 	return true;
   }
   
