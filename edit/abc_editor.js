@@ -395,6 +395,7 @@ window.ABCXJS.Editor.prototype.modelChanged = function() {
     }
     
     if (this.warningsdiv) {
+        this.warningsdiv.style.color = this.warnings.length > 0 ? "red" : "green";
         this.warningsdiv.innerHTML = '<hr>' + (this.warnings.length > 0 ? this.warnings.join("<br>") : "No warnings or errors.") + '<hr>';
     }
     
