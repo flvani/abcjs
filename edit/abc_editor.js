@@ -254,6 +254,8 @@ window.ABCXJS.Editor = function(editarea, params) {
 
   if (params.abcText && typeof params.abcText === "string") {
      this.editarea.setString(params.abcText, "noRefresh" ) ;
+  } else {
+     this.editarea.setString("", "noRefresh" ) ;
   }
   
   if( params.map ) {
