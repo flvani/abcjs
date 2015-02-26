@@ -3,7 +3,12 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
+
 /* TODO: 
+ *      - Acertar as chamadas de callBack no Mapa - midplayer
+ *      - Acertar chamada de posicionamento de scroll do editor - workspace
+ *      - Verificar os impactos da alteração do textarea.appendstring - abc_editor
+ *      - Verificar os impactos da mudança em - abc_graphelements
  *      - Verificar se é possível manter um pequeno delay antes de selecionar um botão para que seja
  *          perceptivel que o mesmo foi pressionado mais de uma vez
  *        NOTA: para isso é necessário na tablatura tenha informação de quanto tempo o botão ficará pressionado  
@@ -19,23 +24,7 @@ if (!window.ABCXJS)
 if (!window.ABCXJS.midi) 
     window.ABCXJS.midi = {}; 
 
-ABCXJS.midi.Player = function(map, options ) {
-
-    this.map = map;
-    this.currentAndamento = 1;
-    
-    this.reset( options );
-
-    this.addWarning = function(str) {
-        this.warnings.push(str);
-    };
-    
-    this.getWarnings = function() {
-        return this.warnings.length>0?this.warnings:null;    
-    };
-};
-
-ABCXJS.midi.Player.prototype.reset = function(options) {
+ABCXJS.midi.Player = function( options ) {
     
     options = options || {};
     
@@ -45,6 +34,7 @@ ABCXJS.midi.Player.prototype.reset = function(options) {
     this.playlist = [];
     this.playInterval = null;
     this.ticksPerInterval = 1;
+    this.currentAndamento = 1;
     
     this.warnings = [];
     
@@ -52,14 +42,46 @@ ABCXJS.midi.Player.prototype.reset = function(options) {
     this.currentTime = 0;
     this.currentMeasure = 1;
     this.lastMeasurePos = 0;
+    this.currChannel = 0;
     this.currentMeasurePos = 0;
+    this.currAbsElem = null;
+    
+    this.callbackOnStart = null;
+    this.callbackOnEnd = null;
+    this.callbackOnPlay = null;
+    this.callbackOnScroll = null;
+    this.callbackOnChangeBar = null;
     
     this.onError = null;
     
 };
 
+ABCXJS.midi.Player.prototype.addWarning = function(str) {
+    this.warnings.push(str);
+};
+
+ABCXJS.midi.Player.prototype.getWarnings = function() {
+    return this.warnings.length>0?this.warnings:null;    
+};
+
+ABCXJS.midi.Player.prototype.defineCallbackOnStart = function( cb ) {
+    this.callbackOnStart = cb;
+};
+ABCXJS.midi.Player.prototype.defineCallbackOnEnd = function( cb ) {
+    this.callbackOnEnd = cb;
+};
+ABCXJS.midi.Player.prototype.defineCallbackOnPlay = function( cb ) {
+    this.callbackOnPlay = cb;
+};
+ABCXJS.midi.Player.prototype.defineCallbackOnScroll = function( cb ) {
+    this.callbackOnScroll = cb;
+};
+ABCXJS.midi.Player.prototype.defineCallbackOnChangeBar = function( cb ) {
+    this.callbackOnChangeBar = cb;
+};
+
 ABCXJS.midi.Player.prototype.resetAndamento = function(mode) {
-    if(mode==="normal"){
+    if( mode==="normal" ){
         this.currentTime = this.currentTime * this.currentAndamento;
     } else {
         this.currentTime = this.currentTime * (1/this.currentAndamento);
@@ -67,29 +89,28 @@ ABCXJS.midi.Player.prototype.resetAndamento = function(mode) {
 };
 
 ABCXJS.midi.Player.prototype.adjustAndamento = function() {
-    if(this.currentAndamento === 1 ) {
-        this.currentAndamento = 0.5;
-        this.currentTime = this.currentTime * 2;
-    } else if(this.currentAndamento === 0.5 ) {
-        this.currentTime = this.currentTime * 2;
-        this.currentAndamento = 0.25;
-    } else if(this.currentAndamento === 0.25 ) {
-        this.currentAndamento = 1;
-        this.currentTime = this.currentTime /4;
-    }    
+    switch(this.currentAndamento) {
+        case 1:
+            this.currentAndamento = 0.5;
+            this.currentTime = this.currentTime * 2;
+            break;
+        case 0.5:
+            this.currentTime = this.currentTime * 2;
+            this.currentAndamento = 0.25;
+            break;
+        case 0.25:
+            this.currentAndamento = 1;
+            this.currentTime = this.currentTime/4;
+            break;
+    }
     return this.currentAndamento;
 };
-
-ABCXJS.midi.Player.prototype.setCallbackOnEnd = function( cb ) {
-    this.callbackOnEnd = cb;
-};
-
 
 ABCXJS.midi.Player.prototype.stopPlay = function() {
     this.i = 0;
     this.currentTime = 0;
     this.pausePlay();
-    if( this.callbackOnEnd ) this.callbackOnEnd();
+    if( this.callbackOnEnd ) this.callbackOnEnd(this);
     return this.getWarnings();
 };
 
@@ -99,14 +120,13 @@ ABCXJS.midi.Player.prototype.pausePlay = function(nonStop) {
     this.playing = false;
 };
 
-ABCXJS.midi.Player.prototype.startPlay = function(what, cb ) {
+ABCXJS.midi.Player.prototype.startPlay = function(what) {
 
     if(this.playing || !what ) return false;
     
     this.playlist = what.playlist;
     this.tempo  = what.tempo;
     this.printer = what.printer;
-    this.callback = cb;
 
     this.playing = true;
     this.onError = null;
@@ -117,30 +137,20 @@ ABCXJS.midi.Player.prototype.startPlay = function(what, cb ) {
     
     return true;
 };
-ABCXJS.midi.Player.prototype.getTime = function() {
-    var pad =  function(n, width, z) {
-        z = z || '0';
-        n = n + '';
-        return n.length >= width ? n : new Array(width - n.length + 1).join(z) + n;
-    };
-    
-    var time = this.playlist[this.i].time*this.tempo;
-    var secs  = Math.floor(time/1000);
-    var ms    = Math.floor((time - secs*1000)/10);
-    var mins  = Math.floor(secs/60);
-    var secs  = secs - mins*60;
-    var cTime  = pad(mins,2) + ':' + pad(secs,2) + '.' + pad(ms,2);
-    return {cTime: cTime, time: time };
-};
 
 ABCXJS.midi.Player.prototype.doPlay = function() {
-    if( this.callback ) {
-        this.callback(this.i, this.getTime(), this.currentMeasure );
-    }
+    if( this.callbackOnPlay ) this.callbackOnPlay(this);
+    
     while (!this.onError && this.playlist[this.i] &&
            this.playlist[this.i].time <= this.currentTime) {
         this.executa(this.playlist[this.i]);
         this.i++;
+        if(this.playlist[this.i] && this.playlist[this.i].barNumber) {
+            this.lastMeasurePos = this.currentMeasurePos;
+            this.currentMeasurePos = this.i;
+            this.currentMeasure = this.playlist[this.i].barNumber;
+            if( this.callbackOnChangeBar ) this.callbackOnPlay(this);
+        }    
     }
     if (!this.onError && this.playlist[this.i]) {
         this.currentTime += this.ticksPerInterval;
@@ -158,15 +168,13 @@ ABCXJS.midi.Player.prototype.clearDidacticPlay = function() {
     this.pausePlay(true);
 };
 
-
-ABCXJS.midi.Player.prototype.startDidacticPlay = function(what, type, value, cb ) {
+ABCXJS.midi.Player.prototype.startDidacticPlay = function(what, type, value ) {
 
     if(this.playing) return false;
     
     this.playlist = what.playlist;
     this.tempo  = what.tempo;
     this.printer = what.printer;
-    this.callback = cb;
     this.playing = true;
     this.onError = null;
     
@@ -174,7 +182,6 @@ ABCXJS.midi.Player.prototype.startDidacticPlay = function(what, type, value, cb 
     
     switch( type ) {
         case 'note': // step-by-step
-            // var limite = that.i; // verificar se +1 é sempre verdade.
             var limite = that.playlist[that.i].time*(1/that.currentAndamento);
             var criteria = function () { 
                 return limite === that.playlist[that.i].time*(1/that.currentAndamento);
@@ -214,6 +221,7 @@ ABCXJS.midi.Player.prototype.startDidacticPlay = function(what, type, value, cb 
 };
 
 ABCXJS.midi.Player.prototype.doDidacticPlay = function(criteria) {
+    if( this.callbackOnPlay ) this.callbackOnPlay(this);
     while (!this.onError && this.playlist[this.i] && criteria() &&
             (this.playlist[this.i].time*(1/this.currentAndamento)) < this.currentTime ) {
         this.executa(this.playlist[this.i]);
@@ -222,9 +230,7 @@ ABCXJS.midi.Player.prototype.doDidacticPlay = function(criteria) {
             this.lastMeasurePos = this.currentMeasurePos;
             this.currentMeasurePos = this.i;
             this.currentMeasure = this.playlist[this.i].barNumber;
-            if( this.callback ) {
-                this.callback(this.i, this.getTime(), this.currentMeasure );
-            }
+            if( this.callbackOnChangeBar ) this.callbackOnPlay(this);
         }
     }
     if(this.onError) {
@@ -240,14 +246,9 @@ ABCXJS.midi.Player.prototype.executa = function(pl) {
     
     var self = this;
     var loudness = 256;
-    var endOnly = (this.playUntilTime>0 && this.playUntilTime === (pl.time*(1/this.currentAndamento)));
 
     try {
         if( pl.start ) {
-            if( endOnly ) {
-                this.playUntilTime = null;
-                return;
-            }
             pl.item.pitches.forEach( function( elem ) {
                 MIDI.noteOn(elem.channel, elem.midipitch, loudness, 0);
 
@@ -261,7 +262,11 @@ ABCXJS.midi.Player.prototype.executa = function(pl) {
                 }
             });
             pl.item.abcelems.forEach( function( elem ) {
-                if( self.map ) self.map.setScrolling(elem.abcelem.abselem.y, elem.channel);
+                if( self.callbackOnScroll ) {
+                    self.currAbsElem = elem.abcelem.abselem;
+                    self.currChannel = elem.channel;
+                    self.callbackOnScroll(self);
+                }
                 if( self.printer ) self.printer.notifySelect(elem.abcelem.abselem);
             });
             pl.item.buttons.forEach( function( elem ) {
@@ -290,4 +295,20 @@ ABCXJS.midi.Player.prototype.executa = function(pl) {
         console.log ('PlayList['+this.onError.idx+'] - Erro: ' + this.onError.erro + '.');
         this.addWarning( 'PlayList['+this.onError.idx+'] - Erro: ' + this.onError.erro + '.' );
     }
+};
+
+ABCXJS.midi.Player.prototype.getTime = function() {
+    var pad =  function(n, width, z) {
+        z = z || '0';
+        n = n + '';
+        return n.length >= width ? n : new Array(width - n.length + 1).join(z) + n;
+    };
+    
+    var time = this.playlist[this.i].time*this.tempo;
+    var secs  = Math.floor(time/1000);
+    var ms    = Math.floor((time - secs*1000)/10);
+    var mins  = Math.floor(secs/60);
+    var secs  = secs - mins*60;
+    var cTime  = pad(mins,2) + ':' + pad(secs,2) + '.' + pad(ms,2);
+    return {cTime: cTime, time: time };
 };

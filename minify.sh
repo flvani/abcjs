@@ -19,7 +19,7 @@ cat write/abc_glyphs.js write/abc_graphelements.js write/abc_layout.js \
     write/abc_write.js write/sprintf.js > tmp/write.js
 
 cat api/abc_tunebook.js data/abc_tune.js tmp/parse.js tmp/write.js > tmp/abcjs-noraphael-nomidi.js
-cat tmp/abcjs-noraphael-nomidi.js midi/midiparser.js  midi/midiplayer.js > tmp/abcjs-noraphael.js
+cat tmp/abcjs-noraphael-nomidi.js midi/midi_common.js  midi/midi_parser.js  midi/midi_player.js > tmp/abcjs-noraphael.js
 cat write/raphael.js tmp/abcjs-noraphael-nomidi.js > tmp/abcjs_nomidi.js
 cat write/raphael.js tmp/abcjs-noraphael.js > tmp/abcjs_all.js
 

@@ -23,16 +23,6 @@ if (!window.ABCXJS.parse)
 	window.ABCXJS.parse = {};
 
 // implemented below a more secure form o copy
-//window.ABCXJS.parse.clone = function(source) {
-//     
-//      var destination = {};
-//	for (var property in source)
-//		if (source.hasOwnProperty(property))
-//			destination[property] = source[property];
-//	return destination;
-//};
-
-// implemented below a more secure form o copy
 window.ABCXJS.parse.clone = function(obj) {
     // Handle the 3 simple types, and null or undefined
     if (null === obj || "object" !== typeof obj) return obj;
@@ -109,3 +99,47 @@ window.ABCXJS.parse.detect = function(arr, iterator) {
 	}
 	return false;
 };
+
+window.ABCXJS.parse.pitches = 
+    { C: 0, D: 1, E: 2, F: 3, G: 4, A: 5, B: 6, 
+        c: 7, d: 8, e: 9, f: 10, g: 11, a: 12, b: 13 };
+
+window.ABCXJS.parse.number2keyflat  = ["C", "D♭", "D", "E♭", "E", "F", "G♭", "G", "A♭", "A", "B♭", "B"];
+window.ABCXJS.parse.number2keysharp = ["C", "C♯", "D", "D♯", "E", "F", "F♯", "G", "G♯", "A", "A♯", "B"];
+window.ABCXJS.parse.number2key_br   = ["Dó", "Ré♭", "Ré", "Mi♭", "Mi", "Fá", "Fá♯", "Sol", "Lá♭", "Lá", "Si♭", "Si"];
+
+window.ABCXJS.parse.key2number = 
+    {"C":0, "C♯":1, "D♭":1, "D":2, "D♯":3, "E♭":3, "E":4, 
+     "F":5 ,"F♯":6 ,"G♭":6, "G":7, "G♯":8 ,"A♭":8, "A":9, "A♯":10, "B♭":10, "B":11 };
+
+window.ABCXJS.parse.number2staff   = 
+    [    
+         {note:"C", acc:""}
+        ,{note:"D", acc:"flat"} 
+        ,{note:"D", acc:""}
+        ,{note:"E", acc:"flat"} 
+        ,{note:"E", acc:""} 
+        ,{note:"F", acc:""}
+        ,{note:"G", acc:"flat"} 
+        ,{note:"G", acc:""} 
+        ,{note:"A", acc:"flat"} 
+        ,{note:"A", acc:""} 
+        ,{note:"B", acc:"flat"} 
+        ,{note:"B", acc:""}
+    ];
+
+window.ABCXJS.parse.number2staffSharp   = 
+    [    
+        {note:"C", acc:""}
+       ,{note:"C", acc:"sharp"}
+       ,{note:"D", acc:""} 
+       ,{note:"D", acc:"sharp"}
+       ,{note:"E", acc:""} 
+       ,{note:"F", acc:""} 
+       ,{note:"F", acc:"sharp"}
+       ,{note:"G", acc:""} 
+       ,{note:"G", acc:"sharp"} 
+       ,{note:"A", acc:""} 
+       ,{note:"A", acc:"sharp"} 
+       ,{note:"B", acc:""} 
+    ];

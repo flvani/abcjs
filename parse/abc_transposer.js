@@ -12,73 +12,30 @@ if (!window.ABCXJS)
 if (!window.ABCXJS.parse)
 	window.ABCXJS.parse = {};
     
-window.ABCXJS.parse.Transposer = function ( offSet_ ) {
+window.ABCXJS.parse.Transposer = function ( offSet ) {
     
-    this.reset = function(offSet_){
-        this.offSet           = offSet_;
-        this.currKey          = [];
-        this.newKeyAcc        = [];
-        this.oldKeyAcc        = [];
-        this.changedLines     = [];
-        this.newX             =  0;
-        this.workingX         =  0;
-        this.workingLine      = -1;
-        this.workingLineIdx  = -1;
-    };
+    this.pitches           = window.ABCXJS.parse.pitches;
+    this.key2number        = window.ABCXJS.parse.key2number;
+    this.number2keyflat    = window.ABCXJS.parse.number2keyflat;
+    this.number2keysharp   = window.ABCXJS.parse.number2keysharp;
+    this.number2key_br     = window.ABCXJS.parse.number2key_br;
+    this.number2staff      = window.ABCXJS.parse.number2staff;
+    this.number2staffSharp = window.ABCXJS.parse.number2staffSharp;
     
-    this.minNote        = 0x15; //  A0 = first note
-    this.maxNote        = 0x6C; //  C8 = last note
-    this.pitches       = { C: 0, D: 1, E: 2, F: 3, G: 4, A: 5, B: 6, 
-                            c: 7, d: 8, e: 9, f: 10, g: 11, a: 12, b: 13 };
-                        
-    this.key2number      = {"C":0
-                            ,"C♯":1, "D♭":1
-                            ,"D":2
-                            ,"D♯":3, "E♭":3
-                            ,"E":4 
-                            ,"F":5
-                            ,"F♯":6 ,"G♭":6
-                            ,"G":7
-                            ,"G♯":8 ,"A♭":8
-                            ,"A":9
-                            ,"A♯":10,"B♭":10
-                            ,"B":11};
+    this.reset( offSet );
     
-    this.number2key      = ["C", "D♭", "D", "E♭", "E", "F", "G♭", "G", "A♭", "A", "B♭", "B"];
-    this.number2keysharp = ["C", "C♯", "D", "D♯", "E", "F", "F♯", "G", "G♯", "A", "A♯", "B"];
-    this.number2key_br  = ["Dó", "Ré♭", "Ré", "Mi♭", "Mi", "Fá", "Fá♯", "Sol", "Lá♭", "Lá", "Si♭", "Si"];
-    this.number2staff   = [    
-                 {note:"C", acc:""}
-                ,{note:"D", acc:"flat"} 
-                ,{note:"D", acc:""}
-                ,{note:"E", acc:"flat"} 
-                ,{note:"E", acc:""} 
-                ,{note:"F", acc:""}
-                ,{note:"G", acc:"flat"} 
-                ,{note:"G", acc:""} 
-                ,{note:"A", acc:"flat"} 
-                ,{note:"A", acc:""} 
-                ,{note:"B", acc:"flat"} 
-                ,{note:"B", acc:""}
-    ];
-    
-    this.number2staffSharp   = [    
-                 {note:"C", acc:""}
-                ,{note:"C", acc:"sharp"}
-                ,{note:"D", acc:""} 
-                ,{note:"D", acc:"sharp"}
-                ,{note:"E", acc:""} 
-                ,{note:"F", acc:""} 
-                ,{note:"F", acc:"sharp"}
-                ,{note:"G", acc:""} 
-                ,{note:"G", acc:"sharp"} 
-                ,{note:"A", acc:""} 
-                ,{note:"A", acc:"sharp"} 
-                ,{note:"B", acc:""} 
-    ];
-    
-    this.reset(offSet_);
-   
+};
+
+window.ABCXJS.parse.Transposer.prototype.reset = function( offSet ) {
+    this.offSet          = offSet;
+    this.currKey         = [];
+    this.newKeyAcc       = [];
+    this.oldKeyAcc       = [];
+    this.changedLines    = [];
+    this.newX            =  0;
+    this.workingX        =  0;
+    this.workingLine     = -1;
+    this.workingLineIdx  = -1;
 };
 
 window.ABCXJS.parse.Transposer.prototype.numberToStaff = function(number, newKacc) {
@@ -145,7 +102,6 @@ window.ABCXJS.parse.Transposer.prototype.transposeRegularMusicLine = function(st
     this.newX =0;
     this.baraccidentals = [];
     this.baraccidentalsNew = [];
-    
     
     while (index < line.length) {
         found = false;
@@ -391,9 +347,9 @@ window.ABCXJS.parse.Transposer.prototype.extractStaffOctave = function(pitch) {
 };
 
 window.ABCXJS.parse.Transposer.prototype.numberToKey = function(number) {
-    number %= this.number2key.length;
-    if( number < 0 ) number += this.number2key.length;
-    return this.number2key[number];
+    number %= this.number2keyflat.length;
+    if( number < 0 ) number += this.number2keyflat.length;
+    return this.number2keyflat[number];
 };
 
 window.ABCXJS.parse.Transposer.prototype.keyToNumber = function(key) {

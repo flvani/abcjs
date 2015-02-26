@@ -155,7 +155,7 @@ ABCXJS.write.StaffGroupElement.prototype.calcShiftAbove = function(voz) {
 
 ABCXJS.write.StaffGroupElement.prototype.calcHeight = function(voz) {
     // calculo da altura da pauta + uma pequena folga
-    var h = (1+voz.stave.highest-voz.stave.lowest) * ABCXJS.write.spacing.STEP;
+    var h = (2+voz.stave.highest-voz.stave.lowest) * ABCXJS.write.spacing.STEP;
     // inclui espaço para as linhas de texto
     h += ABCXJS.write.spacing.STEP * 6 * voz.stave.lyricsRows;
     return h;

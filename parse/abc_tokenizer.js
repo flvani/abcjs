@@ -276,7 +276,7 @@ window.ABCXJS.parse.tokenizer = function() {
 
 	this.getPitchFromTokens = function(tokens) {
 		var ret = { };
-		var pitches = {A: 5, B: 6, C: 0, D: 1, E: 2, F: 3, G: 4, a: 12, b: 13, c: 7, d: 8, e: 9, f: 10, g: 11};
+		var pitches = ABCXJS.parse.pitches;
 		ret.position = pitches[tokens[0].token];
 		if (ret.position === undefined)
 			return { warn: "Pitch expected. Found: " + tokens[0].token };

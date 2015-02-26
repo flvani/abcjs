@@ -48,8 +48,6 @@ window.ABCXJS.edit.KeySelector = function(id) {
 
 window.ABCXJS.edit.KeySelector.prototype.populate = function(offSet) {
     
-    var transposer = new window.ABCXJS.parse.Transposer(0);
-
     while( this.selector.options.length > 0 ) {
         this.selector.remove(0);
     }            
@@ -57,9 +55,9 @@ window.ABCXJS.edit.KeySelector.prototype.populate = function(offSet) {
     for (var i = this.cromaticLength+offSet; i >= -this.cromaticLength+2+offSet; i--) {
         var opt = document.createElement('option');
         if(i-1 > offSet) 
-            opt.innerHTML = transposer.number2keysharp[(i+this.cromaticLength-1)%this.cromaticLength] ;
+            opt.innerHTML = ABCXJS.parse.number2keysharp[(i+this.cromaticLength-1)%this.cromaticLength] ;
         else
-            opt.innerHTML = transposer.number2key[(i+this.cromaticLength-1)%this.cromaticLength] ;
+            opt.innerHTML = ABCXJS.parse.number2keyflat[(i+this.cromaticLength-1)%this.cromaticLength] ;
         opt.value = (i+this.cromaticLength-1);
         this.selector.appendChild(opt);
     }
@@ -144,21 +142,21 @@ window.ABCXJS.edit.EditArea.prototype.addChangeListener = function(listener) {
 
 //TODO won't work under IE?
 window.ABCXJS.edit.EditArea.prototype.getSelection = function() {
-  return {start: this.textarea.selectionStart, end: this.textarea.selectionEnd};
+    return {start: this.textarea.selectionStart, end: this.textarea.selectionEnd};
 };
 
-window.ABCXJS.edit.EditArea.prototype.setSelection = function(start, end) {
-	if(this.textarea.setSelectionRange)
-	   this.textarea.setSelectionRange(start, end);
-	else if(this.textarea.createTextRange) {
-		// For IE8
-	   var e = this.textarea.createTextRange();
-	   e.collapse(true);
-	   e.moveEnd('character', end);
-	   e.moveStart('character', start);
-	   e.select();
-	}
-  this.textarea.focus();
+window.ABCXJS.edit.EditArea.prototype.setSelection = function (start, end) {
+    if (this.textarea.setSelectionRange)
+        this.textarea.setSelectionRange(start, end);
+    else if (this.textarea.createTextRange) {
+        // For IE8
+        var e = this.textarea.createTextRange();
+        e.collapse(true);
+        e.moveEnd('character', end);
+        e.moveStart('character', start);
+        e.select();
+    }
+    this.textarea.focus();
 };
 
 window.ABCXJS.edit.EditArea.prototype.getString = function() {
@@ -167,6 +165,8 @@ window.ABCXJS.edit.EditArea.prototype.getString = function() {
 
 window.ABCXJS.edit.EditArea.prototype.setString = function(str, noRefresh ) {
   this.textarea.value = str;
+  this.textarea.selectionStart = 0;  
+  this.textarea.selectionEnd = 0;  
   this.initialText = this.getString();
   if (this.changelistener && typeof( noRefresh ) === 'undefined' ) {
     this.changelistener.fireChanged();
@@ -175,15 +175,13 @@ window.ABCXJS.edit.EditArea.prototype.setString = function(str, noRefresh ) {
 
 window.ABCXJS.edit.EditArea.prototype.appendString = function(str, noRefresh ) {
   //retira \n ao final  
-  while( this.textarea.value.charAt(this.textarea.value.length-1) === '\n' ) {
-    this.textarea.value = this.textarea.value.substr(0,this.textarea.value.length-1);
+  var t = this.textarea.value;
+  while( t.charAt(t.length-1) === '\n' ) {
+    t = t.substr(0,t.length-1);
   }
       
-  this.textarea.value += str;
-  this.initialText = this.getString();
-  if (this.changelistener && typeof( noRefresh ) === 'undefined' ) {
-    this.changelistener.fireChanged();
-  }
+  this.setString(t+str, noRefresh );
+  
 };
 
 window.ABCXJS.edit.EditArea.prototype.getElem = function() {
@@ -253,9 +251,10 @@ window.ABCXJS.Editor = function(editarea, params) {
   }
 
   if (params.abcText && typeof params.abcText === "string") {
-     this.editarea.setString(params.abcText, "noRefresh" ) ;
+    if(params.abcText !== "demo") 
+        this.editarea.setString(params.abcText, "noRefresh" ) ;
   } else {
-     this.editarea.setString("", "noRefresh" ) ;
+    this.editarea.setString("", "noRefresh" ) ;
   }
   
   if( params.map ) {
@@ -404,6 +403,10 @@ window.ABCXJS.Editor.prototype.modelChanged = function() {
     this.printer.addSelectListener(this);
     this.updateSelection();
     this.bReentry = false;
+    
+    if (this.onchangeCallback)
+        this.onchangeCallback(this);
+    
 };
 
 // Call this to reparse in response to the printing parameters changing
@@ -518,28 +521,28 @@ window.ABCXJS.Editor.prototype.setDirtyStyle = function(isDirty) {
 };
 
 // call when abc text is changed and needs re-parsing
-window.ABCXJS.Editor.prototype.fireChanged = function(transpose, force) {
-    
-  if( typeof(force) ==="undefined" && this.refreshController && ! this.refreshController.checked ) 
-      return;
-    
-  if (this.bIsPaused)
-    return;
-  if (this.parseABC(transpose, force)) {
-    var self = this;
-    if (this.timerId)	// If the user is still typing, cancel the update
-      clearTimeout(this.timerId);
-    this.timerId = setTimeout(function () {
-      self.modelChanged();
-    }, 300);	// Is this a good comprimise between responsiveness and not redrawing too much?  
-	  var isDirty = this.isDirty();
-	  if (this.wasDirty !== isDirty) {
-		  this.wasDirty = isDirty;
-		  this.setDirtyStyle(isDirty);
-	  }
-	  if (this.onchangeCallback)
-		  this.onchangeCallback(this);
-	  }
+window.ABCXJS.Editor.prototype.fireChanged = function (transpose, force) {
+
+    if (typeof (force) === "undefined" && this.refreshController && !this.refreshController.checked)
+        return;
+
+    if (this.bIsPaused)
+        return;
+    if (this.parseABC(transpose, force)) {
+        var self = this;
+        if (this.timerId)	// If the user is still typing, cancel the update
+            clearTimeout(this.timerId);
+        this.timerId = setTimeout(function () {
+            self.modelChanged();
+        }, 300);	// Is this a good comprimise between responsiveness and not redrawing too much?  
+        var isDirty = this.isDirty();
+        if (this.wasDirty !== isDirty) {
+            this.wasDirty = isDirty;
+            this.setDirtyStyle(isDirty);
+        }
+//        if (this.onchangeCallback)
+//            this.onchangeCallback(this);
+    }
 };
 
 window.ABCXJS.Editor.prototype.setNotDirty = function() {

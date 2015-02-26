@@ -58,7 +58,7 @@
 	<title>Draw The Dots: Tune Editor</title>
         <meta http-equiv="content-type" content="text/html; charset=UTF-8"></meta>
     </head>
-    <body>
+    <body style="padding-top: 190px;">
 
         <script type="text/javascript" src="MIDI.js/MIDI_2.03-min.js"></script>
         
@@ -69,8 +69,17 @@
         <script type="text/javascript" src="data/abc_tune.js" ></script>
 	<script type="text/javascript" src="api/abc_tunebook.js" ></script>
         
-        <script type="text/javascript" src="midi/midiparser.js" ></script>
-        <script type="text/javascript" src="midi/midiplayer.js" ></script>
+	<script type="text/javascript" src="parse/abc_common.js" ></script>
+        <script type="text/javascript" src="parse/abc_parse_header.js" ></script>
+	<script type="text/javascript" src="parse/abc_tokenizer.js" ></script>
+	<script type="text/javascript" src="parse/abc_parse_key_voice.js" ></script>
+	<script type="text/javascript" src="parse/abc_parse_directive.js" ></script>
+        <script type="text/javascript" src="parse/abc_parse.js" ></script>
+        <script type="text/javascript" src="parse/abc_transposer.js" ></script>
+
+        <script type="text/javascript" src="midi/midi_common.js" ></script>
+        <script type="text/javascript" src="midi/midi_parser.js" ></script>
+        <script type="text/javascript" src="midi/midi_player.js" ></script>
 
         <script type="text/javascript" src="write/raphael.js" ></script>
 	<script type="text/javascript" src="write/sprintf.js" ></script>
@@ -78,14 +87,6 @@
         <script type="text/javascript" src="write/abc_graphelements.js" ></script>
         <script type="text/javascript" src="write/abc_layout.js" ></script>
         <script type="text/javascript" src="write/abc_write.js" ></script>
-
-        <script type="text/javascript" src="parse/abc_parse_header.js" ></script>
-	<script type="text/javascript" src="parse/abc_tokenizer.js" ></script>
-	<script type="text/javascript" src="parse/abc_parse_key_voice.js" ></script>
-	<script type="text/javascript" src="parse/abc_parse_directive.js" ></script>
-        <script type="text/javascript" src="parse/abc_parse.js" ></script>
-        <script type="text/javascript" src="parse/abc_transposer.js" ></script>
-	<script type="text/javascript" src="parse/abc_common.js" ></script>
 
         <!-- diatonic accordion map -->
         <script type="text/javascript" src="diatonic/diatonic-map.js"></script>
@@ -98,7 +99,7 @@
         
  	<script type="text/javascript" src="edit/abc_editor.js" ></script>
 
-<div id="editor" style="display:inline-block;"> 
+<div id="editor" style="position: fixed; top:0; display:inline-block; background-color: gray; width:100%; z-index: 100;"> 
 <div id="editControl" style="display:inline-block;"> 
 
 <textarea id="abc" cols="120" rows="10" >
@@ -228,52 +229,25 @@ V:5 accordionTab
         <input type="button" id="stopBtn" value="Stop" />
         <label id="currentPlayTime" style="font-weight: bold; color: yellow; padding-left: 5px; padding-right: 3px;">00:00.00</label>
     </div>
-    <div id="warnings"><hr></div>
     </div> <!-- editor -->
+    <div id="warnings"><hr></div>
     <div id="canvas" style="overflow-y: scroll; float:left;"> </div>
         
         <script type="text/javascript">
-            window.myEditor = {};
-            window.accordionMaps = [];
             
-            window.printButton = document.getElementById("printBtn");
-            
-            window.playButton = document.getElementById("playBtn");
-            window.pauseButton = document.getElementById("pauseBtn");
-            window.stopButton = document.getElementById("stopBtn");
-            
-            window.addEventListener('load', initApp, false);
+            window.addEventListener('load', loadMIDI, false);
 
-            function loadAccordions( files, cb )  {
-                var toLoad = 0;
-                for( var f = 0; f < files.length; f ++ ) {
-                    toLoad ++;
-                    $.getJSON( files[f], {  format: "json"  })
-                        .done(function( data ) {
-                            window.accordionMaps.push( new DIATONIC.map.Accordion(data) );
-                        })
-                        .fail(function( data, textStatus, error ) {
-                            var err = textStatus + ", " + error;
-                            console.log( "Accordion Load Failed:\nLoading: " + data.responseText.substr(1,40) + '...\nError:\n ' + err );
-                        })
-                        .always(function() {
-                            toLoad --;
-                            if( toLoad === 0 && cb ) cb();
-                        });
-                }
-            };
-            
-            function initApp() {
+            function loadMIDI() {
                 MIDI.loader = new widgets.Loader();
                 
                 MIDI.loadPlugin({
                     soundfontUrl: "./soundfont/"
                    ,instruments: "accordion"
-                   ,callback: function() {initApp0();}
+                   ,callback: postLoadMIDI
                 });
             }
             
-            function initApp0() {
+            function postLoadMIDI() {
                 MIDI.loader.stop();
                 MIDI.programChange(0, 21); // canais para accordeon
                 MIDI.programChange(1, 21); // 
@@ -282,32 +256,48 @@ V:5 accordionTab
                 MIDI.programChange(4, 21); // 
                 MIDI.programChange(5, 21); // 
                 
-                loadAccordions(
+                DIATONIC.map.loadAccordionMaps(
                     [
                        'accordions/hohner.gc.accordion'
                       ,'accordions/hohner.cf.club.br.accordion'
                     ]
-                    ,initApp1 // call back after loading
+                    ,initApp // call back after loading
                 );
             }
             
-            function initApp1() {
+            function initApp() {
 
+                ypos = 0;
+                lastYpos = 0;
                 debug = false;
+                myEditor = {};
+
+                printButton = document.getElementById("printBtn");
+                playButton = document.getElementById("playBtn");
+                pauseButton = document.getElementById("pauseBtn");
+                stopButton = document.getElementById("stopBtn");
+                cpt = document.getElementById("currentPlayTime");
                 
                 player = new ABCXJS.midi.Player();
                 
-                cpt = document.getElementById("currentPlayTime");
                 
-                playerCallBack = function ( playListPos, playTime, currMeasure ) {
-                  var t = playTime.cTime;
-                  cpt.innerHTML = t;
+                playerCallBackOnPlay = function ( player ) {
+                    cpt.innerHTML = player.getTime().cTime;;
                 };
                 
-                playerCallBackOnEnd = function ( ) {
+                playerCallBackOnScroll = function ( player ) {
+                    if( player.currChannel > 0 ) return;
+                    if( player.currAbsElem.y !== window.ypos ) {
+                        window.ypos = player.currAbsElem.y;
+                        window.scrollTo( 0, window.ypos - 40);    
+                    }
+                };
+                
+                playerCallBackOnEnd = function (player) {
                     cpt.innerHTML = "00:00.00";
                     myEditor.printer.clearSelection();
                     var warns = player.getWarnings();
+                    window.scrollTo( 0, 0 );
                     if( warns ) {
                         var txt = "";
                         warns.forEach(function(msg){ txt += msg + '<br>'; });
@@ -315,22 +305,30 @@ V:5 accordionTab
                     }
                 };
                 
-                player.setCallbackOnEnd(playerCallBackOnEnd);
+                editorCallbackOnChange = function ( editor ) {
+                    window.scrollTo( 0, window.lastYpos );
+                };
+                
+                player.defineCallbackOnEnd(playerCallBackOnEnd);
+                player.defineCallbackOnPlay(playerCallBackOnPlay);
+                player.defineCallbackOnScroll(playerCallBackOnScroll);
  
                 myEditor = new ABCXJS.Editor(
-                        "abc", {
-                             canvas_id: "canvas"
-                            ,refreshController_id: "chkAutoRefresh"
-                            ,accordionSelector_id: "selGaitas"
-                            ,accordionMaps: window.accordionMaps
-                            ,keySelector_id: "selKey"
-                            ,generate_midi: true
-                            ,generate_warnings: true
-                            ,warnings_id: "warnings"
-                            ,midi_options: {program: 21, qpm: 150, type: "qt"}
-                            ,render_options: {}
-                            ,gui: false
-                        });
+                    "abc", {
+                         canvas_id: "canvas"
+                        ,abcText: "demo"
+                        ,refreshController_id: "chkAutoRefresh"
+                        ,accordionSelector_id: "selGaitas"
+                        ,accordionMaps: DIATONIC.map.accordionMaps
+                        ,keySelector_id: "selKey"
+                        ,generate_midi: true
+                        ,generate_warnings: true
+                        ,warnings_id: "warnings"
+                        ,onchange: editorCallbackOnChange
+                        ,midi_options: {program: 21, qpm: 150, type: "qt"}
+                        ,render_options: {}
+                        ,gui: false
+                    });
 
                 printButton.addEventListener("click", function() {
                     document.getElementById("editor").style.display = "none";
@@ -339,28 +337,37 @@ V:5 accordionTab
                 }, false);
                 
                 playButton.addEventListener("click", function() {
-                    player.startPlay(myEditor.tunes[0].midi, playerCallBack );
+                    player.startPlay( myEditor.tunes[0].midi );
                     //player.startDidacticPlay(myEditor.tunes[0].midi, 'note');
                 }, false);
                 pauseButton.addEventListener("click", function() {
                     player.pausePlay();
                 }, false);
                 stopButton.addEventListener("click", function() {
-                    var warns = player.stopPlay();
+                    player.stopPlay();
                 }, false);
                 
             }
 
             function doTranspose(value) {
+                var doc = document.documentElement;
+                //var left = (window.pageXOffset || doc.scrollLeft) - (doc.clientLeft || 0);
+                window.lastYpos = (window.pageYOffset || doc.scrollTop)  - (doc.clientTop || 0);                
                 myEditor.fireChanged(value, "force");
             };
 
             function doForceRefresh() {
+                var doc = document.documentElement;
+                //var left = (window.pageXOffset || doc.scrollLeft) - (doc.clientLeft || 0);
+                window.lastYpos = (window.pageYOffset || doc.scrollTop)  - (doc.clientTop || 0);                
                 myEditor.fireChanged(0, "force");
             };
 
             function doCheckDebug() {
                 debug = document.getElementById("chkDebug").checked;
+                var doc = document.documentElement;
+                //var left = (window.pageXOffset || doc.scrollLeft) - (doc.clientLeft || 0);
+                window.lastYpos = (window.pageYOffset || doc.scrollTop)  - (doc.clientTop || 0);                
                 myEditor.fireChanged(0, "force");
             };
 
