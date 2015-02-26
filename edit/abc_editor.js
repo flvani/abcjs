@@ -241,6 +241,15 @@ window.ABCXJS.edit.EditArea.prototype.getElem = function() {
 //
 
 window.ABCXJS.Editor = function(editarea, params) {
+    
+  this.oldt = "";
+  this.bReentry = false;
+  
+  this.defineOnChangeCallback( params.onchange );
+
+  this.parserparams = params.parser_options || {};
+  this.printerparams = params.render_options || {};
+  
   if (params.indicate_changed)
     this.indicate_changed = true;
 
@@ -299,20 +308,11 @@ window.ABCXJS.Editor = function(editarea, params) {
       this.midiParser = new ABCXJS.midi.Parse( this.map, params.midi_options );
   }
   
-  this.parserparams = params.parser_options || {};
-
-  this.onchangeCallback = params.onchange;
-
-  this.printerparams = params.render_options || {};
-  
   if (params.gui) {
     this.target = document.getElementById(editarea);
     this.printerparams.editable = true;
   } 
   
-  this.oldt = "";
-  this.bReentry = false;
-
   this.addClassName = function(element, className) {
     var hasClassName = function(element, className) {
       var elementClassName = element.className;
@@ -347,6 +347,10 @@ window.ABCXJS.Editor = function(editarea, params) {
       this.showUp();
   }
 
+};
+
+window.ABCXJS.Editor.prototype.defineOnChangeCallback = function( cb ) {
+    this.onchangeCallback = cb;
 };
 
 window.ABCXJS.Editor.prototype.getString = function() {

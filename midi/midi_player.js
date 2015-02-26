@@ -25,6 +25,19 @@ if (!window.ABCXJS.midi)
     window.ABCXJS.midi = {}; 
 
 ABCXJS.midi.Player = function( options ) {
+    this.reset(options);
+    
+    this.ticksPerInterval = 1;
+    
+    this.callbackOnStart = null;
+    this.callbackOnEnd = null;
+    this.callbackOnPlay = null;
+    this.callbackOnScroll = null;
+    this.callbackOnChangeBar = null;
+    
+};
+
+ABCXJS.midi.Player.prototype.reset = function(options) {
     
     options = options || {};
     
@@ -33,7 +46,6 @@ ABCXJS.midi.Player = function( options ) {
     this.playing = false;
     this.playlist = [];
     this.playInterval = null;
-    this.ticksPerInterval = 1;
     this.currentAndamento = 1;
     
     this.warnings = [];
@@ -46,14 +58,7 @@ ABCXJS.midi.Player = function( options ) {
     this.currentMeasurePos = 0;
     this.currAbsElem = null;
     
-    this.callbackOnStart = null;
-    this.callbackOnEnd = null;
-    this.callbackOnPlay = null;
-    this.callbackOnScroll = null;
-    this.callbackOnChangeBar = null;
-    
     this.onError = null;
-    
 };
 
 ABCXJS.midi.Player.prototype.addWarning = function(str) {
