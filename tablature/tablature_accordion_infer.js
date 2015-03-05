@@ -328,13 +328,18 @@ ABCXJS.tablature.Infer.prototype.addTABChild = function(token) {
                 this.registerLine('z');
                 break;
             default:
-                child.pitches[b] = this.getBassNote(token.bassNote[b], tt, pitchBase - (b * 3) - 0.5);
+                var item = { bass:true, type: tt, c: "", pitch: pitchBase - (b * 3) - 0.5, inTie: token.bassNote[b].inTie || false };
+                var note = this.accordion.getNoteName(token.bassNote[b], this.accBassKey, this.bassBarAcc, true);
+                item.buttons = this.accordion.getButtons(note);
+                item.note = note.key;
+                item.c = item.inTie ? '-->' :  note.key;
+                child.pitches[b] = item;
                 this.registerLine(child.pitches[b].c === '-->' ? '>' : child.pitches[b].c);
+                
                 baixoOpen  = baixoOpen  ? typeof (child.pitches[b].buttons.open) !== "undefined" : false;
                 baixoClose = baixoClose ? typeof (child.pitches[b].buttons.close) !== "undefined" : false;
         }
     }
-
 
     var xi = this.getXi();
     for (var c = 0; c < column.length; c++) {
@@ -348,10 +353,10 @@ ABCXJS.tablature.Infer.prototype.addTABChild = function(token) {
                 item.pitch = 13.2;
                 break
             default:
-                var note = this.getNoteName(item, this.accTrebKey, this.trebBarAcc);
-                item.buttons = this.accordion.getButtons(note, false);
-                item.note = note;
-                item.c = item.inTie ? '-->' :  note;
+                var note = this.accordion.getNoteName(item, this.accTrebKey, this.trebBarAcc, false);
+                item.buttons = this.accordion.getButtons(note);
+                item.note = note.key + note.octave;
+                item.c = item.inTie ? '-->' :  item.note;
                 item.pitch = (qtd === 1 ? 11.7 : 13.4 -( c * 2.8));
                 item.type = "tabText" + (qtd > 1 ? 2 : "");
 
@@ -434,47 +439,6 @@ ABCXJS.tablature.Infer.prototype.addTABChild = function(token) {
     var dur = child.duration / this.vars.default_length;
     var xf = this.registerLine((qtd > 1 ? "]" : "") + (dur !== 1 ? dur.toString() : "") + " ");
     this.add(child, xi, xf-1);
-};
-
-ABCXJS.tablature.Infer.prototype.getBassNote = function(token, tt, pitch) {
-    var item = { bass:true, type: tt, c: "", pitch: pitch, inTie: token.inTie || false };
-    
-    var note = this.getNoteName(token, this.accBassKey, this.bassBarAcc);
-    if (token.chord)
-        note = note.toLowerCase();
-    // retira a oitava, mas deveria incluir complementos, tais como menor, 7th, etc.
-    item.buttons = this.accordion.getButtons(note, true);
-    note = note.substr(0, note.length - 1);
-    item.note = note;
-    item.c = item.inTie ? '-->' :  note;
-    
-    return item;
-};
-
-ABCXJS.tablature.Infer.prototype.getNoteName = function(item, keyAcc, barAcc ) {
-    // mapeia 
-    //  de: nota da pauta + acidentes (tanto da clave, quanto locais)
-    //  para: valor da nota cromatica (com oitava)
-
-    var n = this.accordion.transposer.staffNoteToCromatic(this.accordion.transposer.extractStaffNote(item.pitch));
-    var oitava = this.accordion.transposer.extractStaffOctave(item.pitch);
-    var staffNote = this.accordion.transposer.numberToKey(n);
-    
-    if(item.accidental) {
-        barAcc[item.pitch] = this.accordion.transposer.getAccOffset(item.accidental);
-        n += barAcc[item.pitch];
-    } else {
-        if(typeof(barAcc[item.pitch]) !== "undefined") {
-          n += barAcc[item.pitch];
-        } else {
-          n += this.accordion.transposer.getKeyAccOffset(staffNote, keyAcc);
-        }
-    }
-    
-    oitava += (n < 0 ? -1 : (n > 11 ? 1 : 0 ));
-    n       = (n < 0 ? 12+n : (n > 11 ? n%12 : n ) );
-    
-    return this.accordion.transposer.numberToKey(n) + oitava;
 };
 
 ABCXJS.tablature.Infer.prototype.getXi = function() {

@@ -252,7 +252,7 @@ ABCXJS.midi.Player.prototype.executa = function(pl) {
     var self = this;
     var loudness = 256;
 
-    try {
+    //try {
         if( pl.start ) {
             pl.item.pitches.forEach( function( elem ) {
                 MIDI.noteOn(elem.channel, elem.midipitch, loudness, 0);
@@ -295,11 +295,11 @@ ABCXJS.midi.Player.prototype.executa = function(pl) {
                 }
             });
         }
-    } catch( err ) {
-        this.onError = { erro: err.message, idx: this.i, item: pl };
-        console.log ('PlayList['+this.onError.idx+'] - Erro: ' + this.onError.erro + '.');
-        this.addWarning( 'PlayList['+this.onError.idx+'] - Erro: ' + this.onError.erro + '.' );
-    }
+//    } catch( err ) {
+//        this.onError = { erro: err.message, idx: this.i, item: pl };
+//        console.log ('PlayList['+this.onError.idx+'] - Erro: ' + this.onError.erro + '.');
+//        this.addWarning( 'PlayList['+this.onError.idx+'] - Erro: ' + this.onError.erro + '.' );
+//    }
 };
 
 ABCXJS.midi.Player.prototype.getTime = function() {

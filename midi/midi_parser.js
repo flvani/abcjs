@@ -20,10 +20,9 @@ if (!window.ABCXJS)
 if (!window.ABCXJS.midi) 
     window.ABCXJS.midi = {}; 
 
-ABCXJS.midi.Parse = function( map, options  ) {
-    this.map = map;
-    this.gaita = map? map.gaita : null;
+ABCXJS.midi.Parse = function( options  ) {
     this.options =  options || {};
+    this.keyboard = options.keyboard;
     this.vars = { warnings: [] };
     this.scale = [0, 2, 4, 5, 7, 9, 11];
     
@@ -71,7 +70,7 @@ ABCXJS.midi.Parse.prototype.reset = function() {
     }; 
 };
 
-ABCXJS.midi.Parse.prototype.parse = function(tune) {
+ABCXJS.midi.Parse.prototype.parse = function(tune, keyboard) {
     
     var self = this;
     var currBar = 0;
@@ -80,8 +79,9 @@ ABCXJS.midi.Parse.prototype.parse = function(tune) {
 
     this.abctune = tune;
     
-    this.midiTune.map = this.map;
-    this.midiTune.gaita = this.gaita;
+    this.keyboard = keyboard || this.keyboard;
+    
+    this.midiTune.keyboard = this.keyboard;
 
     if ( tune.metaText && tune.metaText.tempo) {
         var bpm = tune.metaText.tempo.bpm || 80;
@@ -523,12 +523,12 @@ ABCXJS.midi.Parse.prototype.extractOctave = function(pitch) {
 };
 
 ABCXJS.midi.Parse.prototype.getBassButton = function( bellows, b ) {
-    if( b === '-->' || !this.gaita ) return null;
-    var kb = this.gaita.keyboard;
-    var nota = this.gaita.parseNote(b, true );
-    for( var j = kb.length; j > kb.length - 2; j-- ) {
-      for( var i = 0; i < kb[j-1].length; i++ ) {
-          var tecla = kb[j-1][i];
+    if( b === '-->' || !this.keyboard ) return null;
+    var kb = this.keyboard;
+    var nota = kb.parseNote(b, true );
+    for( var j = kb.keyboard.length; j > kb.keyboard.length - 2; j-- ) {
+      for( var i = 0; i < kb.keyboard[j-1].length; i++ ) {
+          var tecla = kb.keyboard[j-1][i];
           if(bellows === '+') {
             if(tecla.notaClose.key === nota.key ) return tecla.btn;
           } else {  
@@ -540,11 +540,12 @@ ABCXJS.midi.Parse.prototype.getBassButton = function( bellows, b ) {
 };
 
 ABCXJS.midi.Parse.prototype.getButton = function( b ) {
-    if( b === 'x' || !this.gaita ) return null;
+    if( b === 'x' || !this.keyboard ) return null;
+    var kb = this.keyboard;
     var p = parseInt( isNaN(b.substr(0,2)) || b.length === 1 ? 1 : 2 );
     var button = b.substr(0, p) -1;
     var row = b.length - p;
-    if(this.gaita.keyboard[row][button]) 
-        return this.gaita.keyboard[row][button].btn;
+    if(kb.keyboard[row][button]) 
+        return kb.keyboard[row][button].btn;
     return null;
 };

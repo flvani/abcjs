@@ -60,14 +60,19 @@
     </head>
     <body style="padding-top: 190px;">
 
+	<script type="text/javascript" src="proto_noconflict.js" ></script>
+
         <script type="text/javascript" src="MIDI.js/MIDI_2.03-min.js"></script>
         
-	<script type="text/javascript" src="proto_noconflict.js" ></script>
-	<script type="text/javascript" src="jquery-1.11.1.min.js" ></script>
-	<script type="text/javascript" src="filemanager.js" ></script>
+        <script type="text/javascript" src="raphael/raphael_2.1.3.js" ></script>
+	        
+	<script type="text/javascript" src="jquery/jquery-1.11.1.min.js" ></script>
+        
+	<script type="text/javascript" src="file/filemanager.js" ></script>
 
-        <script type="text/javascript" src="data/abc_tune.js" ></script>
 	<script type="text/javascript" src="api/abc_tunebook.js" ></script>
+        
+        <script type="text/javascript" src="data/abc_tune.js" ></script>
         
 	<script type="text/javascript" src="parse/abc_common.js" ></script>
         <script type="text/javascript" src="parse/abc_parse_header.js" ></script>
@@ -81,24 +86,27 @@
         <script type="text/javascript" src="midi/midi_parser.js" ></script>
         <script type="text/javascript" src="midi/midi_player.js" ></script>
 
-        <script type="text/javascript" src="write/raphael.js" ></script>
-	<script type="text/javascript" src="write/sprintf.js" ></script>
+        <script type="text/javascript" src="write/sprintf.js" ></script>
         <script type="text/javascript" src="write/abc_glyphs.js" ></script>
         <script type="text/javascript" src="write/abc_graphelements.js" ></script>
         <script type="text/javascript" src="write/abc_layout.js" ></script>
         <script type="text/javascript" src="write/abc_write.js" ></script>
 
         <!-- diatonic accordion map -->
-        <script type="text/javascript" src="diatonic/diatonic-map.js"></script>
+        <script type="text/javascript" src="diatonic/diatonic_common.js"></script>
+        <script type="text/javascript" src="diatonic/diatonic_accordion_map.js"></script>
+        <script type="text/javascript" src="diatonic/diatonic_keyboard.js"></script>
+        <script type="text/javascript" src="diatonic/diatonic_button.js"></script>
         
         <!-- support for diatonic accordion tablature -->
-        <script type="text/javascript" src="tablature/accordion_map.js"></script>
-        <script type="text/javascript" src="tablature/accordion_infer.js"></script>
-        <script type="text/javascript" src="tablature/accordion_parse.js"></script>
-        <script type="text/javascript" src="tablature/accordion_layout.js"></script>
+        <script type="text/javascript" src="tablature/tablature_accordion.js"></script>
+        <script type="text/javascript" src="tablature/tablature_accordion_infer.js"></script>
+        <script type="text/javascript" src="tablature/tablature_accordion_parse.js"></script>
+        <script type="text/javascript" src="tablature/tablature_accordion_layout.js"></script>
         
  	<script type="text/javascript" src="edit/abc_editor.js" ></script>
 
+    
 <div id="editor" style="position: fixed; top:0; display:inline-block; background-color: gray; width:100%; z-index: 100;"> 
 <div id="editControl" style="display:inline-block;"> 
 
@@ -106,14 +114,14 @@
 X:1
 L:1/4
 Q:120
-T:Teste endings
+T:Teste 
 M:2/4
 K:G
-V:1 treble stem=up
-[V:1]|: d |1 f | f |2 a | a |
-[V:1]| d :| f |  a |]
-[V:1]| d |1 f :|:2 f | a | a |
-[V:1]| d :| f |  a |]
+V:1 treble
+V:2 bass
+[V:1]| C E G |
+[V:2]|  C,, [C,E,G,] [C,E,G,] |
+V:3 accordionTab
 </textarea>
     
 <textarea id="abcx" cols="120" rows="10" style="display: none;" >
@@ -214,7 +222,7 @@ V:5 accordionTab
 
 </textarea>
    </div>
-    <br>
+    <br/>
     <div id="outrosControles" style="display:inline-block; color: #FFFFFF; background-color: #000; padding: 2px;">
         <select id="selGaitas" ></select>
         <select id="selKey" ></select>
@@ -224,6 +232,7 @@ V:5 accordionTab
         <input type="submit" id="forceRefresh" value="Refresh" onclick="javascript:doForceRefresh();" />
         <input type="checkbox" id="chkAutoRefresh" />Auto refresh 
         <input type="checkbox" id="chkDebug" onclick="javascript:doCheckDebug();" />Debug
+        <input type="button" id="showMapBtn" value="Show Map" />
         <input type="button" id="playBtn" value="Play" />
         <input type="button" id="pauseBtn" value="Pause" />
         <input type="button" id="stopBtn" value="Stop" />
@@ -276,6 +285,7 @@ V:5 accordionTab
                 playButton = document.getElementById("playBtn");
                 pauseButton = document.getElementById("pauseBtn");
                 stopButton = document.getElementById("stopBtn");
+                showMapButton = document.getElementById("showMapBtn");
                 cpt = document.getElementById("currentPlayTime");
                 
                 player = new ABCXJS.midi.Player();
@@ -314,21 +324,27 @@ V:5 accordionTab
                 player.defineCallbackOnScroll(playerCallBackOnScroll);
  
                 myEditor = new ABCXJS.Editor(
-                    "abc", {
+                    "abc", 
+                    {
                          canvas_id: "canvas"
                         ,abcText: "demo"
                         ,refreshController_id: "chkAutoRefresh"
-                        ,accordionSelector_id: "selGaitas"
-                        ,accordionMaps: DIATONIC.map.accordionMaps
                         ,keySelector_id: "selKey"
                         ,generate_midi: true
-                        ,generate_warnings: true
                         ,warnings_id: "warnings"
-                        ,onchange: editorCallbackOnChange
+                        ,generate_warnings: true
+                        ,generate_tablature: 'accordion'
+                        ,tablature_options: {
+                                 accordionSelector_id: "selGaitas"
+                                ,accordionMaps: DIATONIC.map.accordionMaps
+                                ,keyboardDiv_id:"keyboardDiv"
+                                ,render_keyboard_opts:{transpose:false, mirror: false, scale:0.8, draggable:false, show:false}}
                         ,midi_options: {program: 21, qpm: 150, type: "qt"}
                         ,render_options: {}
+                        ,onchange: editorCallbackOnChange
                         ,gui: false
-                    });
+                    },
+                    {} );
 
                 printButton.addEventListener("click", function() {
                     document.getElementById("editor").style.display = "none";
@@ -347,6 +363,11 @@ V:5 accordionTab
                     player.stopPlay();
                 }, false);
                 
+                showMapButton.addEventListener("click", function() {
+                    myEditor.accordion.render_keyboard_opts.show = !myEditor.accordion.render_keyboard_opts.show;
+                    this.value = myEditor.accordion.render_keyboard_opts.show? 'Hide Map':'Show Map';
+                    myEditor.accordion.printKeyboard();
+                }, false);
             }
 
             function doTranspose(value) {
@@ -371,8 +392,10 @@ V:5 accordionTab
                 myEditor.fireChanged(0, "force");
             };
 
+        </script>        
 
-        </script>
-
+        <div id="keyboardDiv" style="display:none; position: fixed; top:100px; left:1100px; width:0px; height:0px; z-index: 200;">
+        </div> 
     </body>
+    
 </html>

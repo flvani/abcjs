@@ -34,7 +34,6 @@ if (!window.ABCXJS)
 
 if (!window.ABCXJS.edit)
 	window.ABCXJS.edit = {};
-    
 
 window.ABCXJS.edit.KeySelector = function(id) {
 
@@ -43,7 +42,6 @@ window.ABCXJS.edit.KeySelector = function(id) {
     if (this.selector) {
         this.populate(0);
     }
-
 };
 
 window.ABCXJS.edit.KeySelector.prototype.populate = function(offSet) {
@@ -67,45 +65,12 @@ window.ABCXJS.edit.KeySelector.prototype.populate = function(offSet) {
 
 window.ABCXJS.edit.KeySelector.prototype.set = function(value) {
     this.populate(value);
-    
 };
 
 window.ABCXJS.edit.KeySelector.prototype.addChangeListener = function(editor) {
   this.selector.onchange = function() {
     editor.fireChanged( this.value - editor.keySelector.oldValue, "force" );
   };
-};
-
-window.ABCXJS.edit.AccordionSelector = function(id, accordion) {
-  this.selector = document.getElementById(id);
-  this.accordion = accordion;
-};
-
-window.ABCXJS.edit.AccordionSelector.prototype.updateAccordionList = function() {
-    while(this.selector.options.length > 0){                
-        this.selector.remove(0);
-    }    
-    this.populate();
-};
-
-window.ABCXJS.edit.AccordionSelector.prototype.addChangeListener = function(editor) {
-  this.selector.onchange = function() {
-    editor.accordion.load(parseInt(this.value));
-    editor.fireChanged( 0, "force" );
-  };
-};
-    
-window.ABCXJS.edit.AccordionSelector.prototype.populate = function() {
-    for (var i = 0; i < this.accordion.accordions.length; i++) {
-        var opt = document.createElement('option');
-        opt.innerHTML = this.accordion.accordions[i].getName();
-        opt.value = i;
-        this.selector.appendChild(opt);
-    }
-};
-
-window.ABCXJS.edit.AccordionSelector.prototype.set = function(val) {
-    this.selector.value = val;
 };
 
 window.ABCXJS.edit.EditArea = function(textareaid) {
@@ -179,9 +144,7 @@ window.ABCXJS.edit.EditArea.prototype.appendString = function(str, noRefresh ) {
   while( t.charAt(t.length-1) === '\n' ) {
     t = t.substr(0,t.length-1);
   }
-      
   this.setString(t+str, noRefresh );
-  
 };
 
 window.ABCXJS.edit.EditArea.prototype.getElem = function() {
@@ -244,14 +207,14 @@ window.ABCXJS.Editor = function(editarea, params) {
     
   this.oldt = "";
   this.bReentry = false;
-  
-  this.defineOnChangeCallback( params.onchange );
+  this.accordion = null;
+  this.map = params.map;
+  this.indicate_changed = params.indicate_changed;
 
   this.parserparams = params.parser_options || {};
   this.printerparams = params.render_options || {};
   
-  if (params.indicate_changed)
-    this.indicate_changed = true;
+  this.defineOnChangeCallback( params.onchange );
 
   if (typeof editarea === "string") {
     this.editarea = new window.ABCXJS.edit.EditArea(editarea);
@@ -266,19 +229,19 @@ window.ABCXJS.Editor = function(editarea, params) {
     this.editarea.setString("", "noRefresh" ) ;
   }
   
-  if( params.map ) {
-      this.map = params.map;
-  }
-
   if(params.refreshController_id)  
     this.refreshController = document.getElementById(params.refreshController_id);
 
-  if(params.accordionSelector_id)  {
-    this.accordion = new window.ABCXJS.tablature.Accordion({id: undefined, accordionMaps: params.accordionMaps});
-    this.accordionSelector = new window.ABCXJS.edit.AccordionSelector(params.accordionSelector_id, this.accordion);
-    this.accordionSelector.populate();
-    this.accordionSelector.addChangeListener(this);
+  if( params.generate_tablature ) {
+    if(params.generate_tablature === 'accordion')  {
+        this.accordion = new window.ABCXJS.tablature.Accordion({id: undefined, options: params.tablature_options});
+        if(this.accordion.selector)
+            this.accordion.selector.addChangeListener(this);
+    } else {
+        throw new Error( 'Tablatura para '+params.generate_tablature+' não suportada!');
+    }
   }
+
   if(params.keySelector_id) {  
     this.keySelector = new window.ABCXJS.edit.KeySelector(params.keySelector_id);
     this.keySelector.addChangeListener(this);
@@ -305,7 +268,8 @@ window.ABCXJS.Editor = function(editarea, params) {
   }
   
   if( params.generate_midi ) {
-      this.midiParser = new ABCXJS.midi.Parse( this.map, params.midi_options );
+      params.midi_options.keyboard = this.accordion.getKeyboard();
+      this.midiParser = new ABCXJS.midi.Parse( params.midi_options );
   }
   
   if (params.gui) {
@@ -472,7 +436,7 @@ window.ABCXJS.Editor.prototype.parseABC = function(transpose, force ) {
     }
 
     if ( this.midiParser ) {
-        this.midiParser.parse( this.tunes[i]);
+        this.midiParser.parse( this.tunes[i], this.accordion.getKeyboard() );
          var warnings = this.midiParser.getWarnings();
          for (var j=0; j<warnings.length; j++) {
            this.warnings.push(warnings[j]);
