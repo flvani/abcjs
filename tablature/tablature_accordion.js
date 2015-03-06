@@ -122,6 +122,31 @@ ABCXJS.tablature.Accordion.prototype.setKeyboardCanvas = function (div_id) {
     }
 };
 
+ABCXJS.tablature.Accordion.prototype.loadById = function (id) {
+    for (var g = 0; g < this.accordions.length; g ++)
+        if (this.accordions[g].id === id) {
+            this.load(g);
+            break;
+        }
+};
+
+ABCXJS.tablature.Accordion.prototype.load = function (sel) {
+    this.selected = sel;
+    this.printKeyboard();
+};
+
+ABCXJS.tablature.Accordion.prototype.changeNotation = function() {
+    this.accordions[this.selected].keyboard.changeNotation();
+};
+
+ABCXJS.tablature.Accordion.prototype.clearKeyboard = function(full) {
+    this.accordions[this.selected].keyboard.clear(full);
+};
+
+ABCXJS.tablature.Accordion.prototype.redrawKeyboard = function() {
+    this.accordions[this.selected].keyboard.redraw();
+};
+
 ABCXJS.tablature.Accordion.prototype.rotateKeyboard = function () {
     var o = this.render_keyboard_opts;
     
@@ -142,16 +167,11 @@ ABCXJS.tablature.Accordion.prototype.scaleKeyboard = function () {
     this.printKeyboard();
 };
 
-ABCXJS.tablature.Accordion.prototype.loadById = function (id) {
-    for (var g = 0; g < this.accordions.length; g ++)
-        if (this.accordions[g].id === id) {
-            this.load(g);
-            break;
-        }
-};
-
-ABCXJS.tablature.Accordion.prototype.load = function (sel) {
-    this.selected = sel;
+ABCXJS.tablature.Accordion.prototype.layoutKeyboard = function(options) {
+    if(options.transpose!==undefined)
+        this.render_keyboard_opts.transpose = options.transpose;
+    if(options.mirror!==undefined)
+        this.render_keyboard_opts.mirror = options.mirror;
     this.printKeyboard();
 };
 

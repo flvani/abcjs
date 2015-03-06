@@ -1,4 +1,4 @@
-﻿/* 
+/* 
  * To change this license header, choose License Headers in Project Properties.
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
@@ -11,11 +11,13 @@ if (!window.DIATONIC.map)
     window.DIATONIC.map = {};
 
 DIATONIC.map.Keyboard = function (keyMap, pedalInfo) {
+    this.showLabel = false;
     this.pedalInfo = pedalInfo;
     this.layout = keyMap.layout;
     this.noteToButtonsOpen = {};
     this.noteToButtonsClose = {};
     this.legenda = {};
+    this.baseLine = {}; // linha decorativa
     
     this.limits = {minX:10000, minY:10000, maxX:0, maxY:0};
     
@@ -34,20 +36,20 @@ DIATONIC.map.Keyboard.prototype.setup = function (keyMap) {
     var nIlheiras = keyMap.keys.open.length;
     var nIlheirasBaixo = keyMap.basses.open.length;
 
-    this.keyboard = new Array();
+    this.keyMap = new Array();
     this.modifiedItems = new Array();
 
     // ilheiras da mao direita
     var maiorIlheira = 0;
     for (i = 0; i < nIlheiras; i++) {
-        this.keyboard[i] = new Array(keyMap.keys.open[i].length);
+        this.keyMap[i] = new Array(keyMap.keys.open[i].length);
         maiorIlheira = Math.max( keyMap.keys.open[i].length, maiorIlheira);
     }
 
     // ilheiras da mao esquerda
     var maiorIlheiraBaixo = keyMap.basses.open[0].length;
     for (i = nIlheiras; i < nIlheiras + nIlheirasBaixo; i++) {
-        this.keyboard[i] = new Array(keyMap.basses.open[i - nIlheiras].length);
+        this.keyMap[i] = new Array(keyMap.basses.open[i - nIlheiras].length);
     }
 
     this.width = (nIlheiras + nIlheirasBaixo + 1) * (this.BTNSIZE + this.BTNSPACE) + this.BTNSPACE*2;
@@ -57,7 +59,7 @@ DIATONIC.map.Keyboard.prototype.setup = function (keyMap) {
     
     var openRow, closeRow, bass, noteName;
     
-    for (var j = 0; j < this.keyboard.length; j++) {
+    for (var j = 0; j < this.keyMap.length; j++) {
 
         if (j < nIlheiras) {
             x = this.BTNSPACE + (j + 0.6) * (this.BTNSIZE + this.BTNSPACE);
@@ -73,44 +75,44 @@ DIATONIC.map.Keyboard.prototype.setup = function (keyMap) {
             bass = true;
         }
 
-        for (var i = 0; i < this.keyboard[j].length; i++) {
+        for (var i = 0; i < this.keyMap[j].length; i++) {
 
             y = yi + i * (this.BTNSIZE + this.BTNSPACE);
-
-            this.keyboard[j][i] = {};
-
-            this.keyboard[j][i].notaOpen = this.parseNote(openRow[i], bass);
-            noteName = this.keyboard[j][i].notaOpen.key + (bass?'':this.keyboard[j][i].notaOpen.octave);
-            if (!this.noteToButtonsOpen[ noteName ]) this.noteToButtonsOpen[ noteName ] = [];
-            this.noteToButtonsOpen[ noteName ].push((i + 1) + Array(j + 1).join("'"));
-
-            this.keyboard[j][i].notaClose = this.parseNote(closeRow[i], bass);
-            noteName = this.keyboard[j][i].notaClose.key + (bass?'':this.keyboard[j][i].notaClose.octave);
-            if (!this.noteToButtonsClose[ noteName ]) this.noteToButtonsClose[ noteName ] = [];
-            this.noteToButtonsClose[ noteName ].push((i + 1) + Array(j + 1).join("'"));
             
             this.limits.minX = Math.min(this.limits.minX, x );
             this.limits.minY = Math.min(this.limits.minY, y );
             this.limits.maxX = Math.max(this.limits.maxX, x );
             this.limits.maxY = Math.max(this.limits.maxY, y );
 
-            this.keyboard[j][i].btn = new DIATONIC.map.Button(x, y
-                , this.keyboard[j][i].notaOpen.key + (this.keyboard[j][i].notaOpen.isMinor ? '-' : '')
-                , this.keyboard[j][i].notaClose.key + (this.keyboard[j][i].notaClose.isMinor ? '-' : '')
-                , {pedal: this.isPedal(i, j)}
-            );
+            var btn  = new DIATONIC.map.Button( x, y, {pedal: this.isPedal(i, j)} );
+            
+            btn.tabButton = (i + 1) + Array(j + 1).join("'");
+            btn.openNote = this.parseNote(openRow[i], bass);
+            btn.closeNote = this.parseNote(closeRow[i], bass);
+            btn.setText( this.showLabel );
+            
+            noteName = btn.openNote.key + (bass?'':btn.openNote.octave);
+            if (!this.noteToButtonsOpen[ noteName ]) this.noteToButtonsOpen[ noteName ] = [];
+            this.noteToButtonsOpen[ noteName ].push(btn.tabButton);
+
+            noteName = btn.closeNote.key + (bass?'':btn.closeNote.octave);
+            if (!this.noteToButtonsClose[ noteName ]) this.noteToButtonsClose[ noteName ] = [];
+            this.noteToButtonsClose[ noteName ].push(btn.tabButton);
+            
+            this.keyMap[j][i] = btn;
         }
     }
-    // adiciona linha decorativa
+    // posiciona linha decorativa
     x = this.BTNSPACE + (nIlheiras+0.5) * (this.BTNSIZE + this.BTNSPACE);
     y = bassY - 0.5 * (this.BTNSIZE + this.BTNSPACE);
     this.baseLine = {x: x, yi:y, yf:y + 5 * (this.BTNSIZE + this.BTNSPACE)};
     
     // adiciona o botão de legenda - acertar textos de legenda
-    this.legenda = new DIATONIC.map.Button(
-             this.limits.maxX-30, this.limits.minY+30 , 'Abre', 'Fecha', //DR.getResource("DR_pull"), DR.getResource("DR_push"),
-            {radius: 36, pedal: true, fontsize: 14, xLabel: 0, textAnchor: 'middle', color: '#828282'});
-
+    // DR.getResource("DR_pull"), DR.getResource("DR_push"),
+    this.legenda = new DIATONIC.map.Button( 
+        this.limits.maxX-(this.BTNRADIUS + this.BTNSPACE), this.limits.minY+(this.BTNRADIUS + this.BTNSPACE), 
+        {openLabel: 'Abre', closeLabel: 'Fecha', radius: 36, pedal: true, fontsize: 14, xLabel: 0, textAnchor: 'middle', color: '#828282'}
+    );
 };
 
 DIATONIC.map.Keyboard.prototype.print = function (paper, div, options ) {
@@ -146,19 +148,11 @@ DIATONIC.map.Keyboard.prototype.print = function (paper, div, options ) {
         }
     }
     
-    for (var j = 0; j < this.keyboard.length; j++) {
-        for (var i = 0; i < this.keyboard[j].length; i++) {
-            this.keyboard[j][i].btn.draw(this.paper, this.limits, options );
+    for (var j = 0; j < this.keyMap.length; j++) {
+        for (var i = 0; i < this.keyMap[j].length; i++) {
+            this.keyMap[j][i].draw(this.paper, this.limits, options );
         }
     }
-    
-//    if (this.renderedTune)
-//        this.renderedTune.midi = this.map.editor.midiParser.parse(this.renderedTune.abc/*, this.songPrinter*/);
-//    if (this.renderedPractice)
-//        this.renderedPractice.midi = this.map.editor.midiParser.parse(this.renderedPractice.abc/*, this.practicePrinter*/);
-//    if (this.renderedChord)
-//        this.renderedChord.midi = this.map.editor.midiParser.parse(this.renderedChord.abc/*, this.chordPrinter*/);
-
 };
 
 DIATONIC.map.Keyboard.prototype.drawLine = function(xi,yi,xf,yf) {
@@ -193,18 +187,37 @@ DIATONIC.map.Keyboard.prototype.parseNote = function(txtNota, isBass) {
       throw new Error( 'Nota inválida: ' + txtNota );
   };
 
-  return this.setKeyLabel( nota );
-};
-
-DIATONIC.map.Keyboard.prototype.setKeyLabel = function(nota) {
-  if( nota.isChord )  {
-    nota.key = DIATONIC.map.number2key[nota.value ].toLowerCase() ;
-  } else {
-      if( this.showLabel) {
-        nota.key = DIATONIC.map.number2key_br[nota.value ] ;
-      } else {
-        nota.key = DIATONIC.map.number2key[nota.value ];
-      }
-  }
   return nota;
 };
+
+DIATONIC.map.Keyboard.prototype.changeNotation = function() {
+    this.showLabel = !this.showLabel;
+    this.redraw();
+};
+
+DIATONIC.map.Keyboard.prototype.redraw = function() {
+    for (var j = 0; j < this.keyMap.length; j++) {
+        for (var i = 0; i < this.keyMap[j].length; i++) {
+            var key = this.keyMap[j][i];
+            key.setText( this.showLabel );
+        }
+    }
+};
+
+DIATONIC.map.Keyboard.prototype.clear = function (full) {
+    full = true; // modificação em andamento
+    if (full) {
+        for (var j = 0; j < this.keyMap.length; j++) {
+            for (var i = 0; i < this.keyMap[j].length; i++) {
+                this.keyMap[j][i].clear();
+            }
+        }
+    } else {
+        for (var i = 0; i < this.modifiedItems.length; i++) {
+            this.modifiedItems[i].clear();
+        }
+    }
+    this.modifiedItems = new Array();
+};
+
+

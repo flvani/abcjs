@@ -1,4 +1,4 @@
-﻿/* 
+/* 
  * To change this license header, choose License Headers in Project Properties.
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
@@ -24,28 +24,36 @@ Raphael.fn.circularArc = function(centerX, centerY, radius, startAngle, endAngle
   return this.arc(startX, startY, endX-startX, endY-startY, radius, radius, 0);
 };
 
-DIATONIC.map.Button = function( x, y, labelOpen, labelClose, options ) {
+DIATONIC.map.Button = function( x, y, options ) {
 
     var opt = options || {};
     
     this.x = x;
     this.y = y;
     this.paper = null;
-    this.labelOpen = labelOpen;
-    this.labelClose = labelClose;
+    this.openNote = null;
+    this.closeNote = null;
+    this.closeSide = null;
+    this.openSide = null;
+    this.closeNoteKey = null;
+    this.openNoteKey = null;
+    this.tabButton = null;
+    
+    this.openColor = opt.openColor || '#00ff00';
+    this.closeColor = opt.closeColor || '#00b2ee';
+    this.openLabel = opt.openLabel|| '';
+    this.closeLabel = opt.closeLabel|| '';
     this.xLabel = opt.xLabel || 0;
     this.pedal = opt.pedal || false;
     this.stroke = this.pedal ? 2 : 1;
     this.textAnchor = opt.textAnchor || 'middle';
-    this.openColor = opt.openColor || '#00ff00';
-    this.closeColor = opt.closeColor || '#00b2ee';
     this.color = opt.color || (opt.pedal? 'red' :'black');
     this.BTNRADIUS = opt.radius || DIATONIC.map.Units.BTNRADIUS;
     this.FONTSIZE = opt.fontsize || DIATONIC.map.Units.FONTSIZE; 
 
 };
 
-DIATONIC.map.Button.prototype.draw = function(paper, limits, options ) {
+DIATONIC.map.Button.prototype.draw = function( paper, limits, options ) {
     
     var currX, currY, currRadius, currFontSize;
 
@@ -63,7 +71,6 @@ DIATONIC.map.Button.prototype.draw = function(paper, limits, options ) {
     currY *= options.scale;
     currRadius =  this.BTNRADIUS*options.scale;
     currFontSize = this.FONTSIZE*options.scale;
-   
     
     //background
     this.paper = this.paper || paper;
@@ -77,10 +84,10 @@ DIATONIC.map.Button.prototype.draw = function(paper, limits, options ) {
     this.openSide = this.paper.circularArc(currX, currY, currRadius, 350, 170);
     this.openSide.attr({"fill": "none", "stroke": "none", "stroke-width": 0});
 
-    this.notaCloseKey = this.paper.text(currX + (this.xLabel*options.scale), currY-(12*options.scale), this.labelClose)
+    this.closeNoteKey = this.paper.text(currX + (this.xLabel*options.scale), currY-(12*options.scale), this.closeLabel)
             .attr({'text-anchor': this.textAnchor, "font-family": "Sans Serif", "font-size": currFontSize });
     
-    this.notaOpenKey = this.paper.text(currX + (this.xLabel*options.scale), currY+(12*options.scale), this.labelOpen)
+    this.openNoteKey = this.paper.text(currX + (this.xLabel*options.scale), currY+(12*options.scale), this.openLabel)
             .attr({'text-anchor': this.textAnchor, "font-family": "Sans Serif", "font-size": currFontSize });
     
     // top circle and line
@@ -115,10 +122,37 @@ DIATONIC.map.Button.prototype.setClose = function(delay) {
     }    
 };
 
+DIATONIC.map.Button.prototype.getLabel = function(nota, showLabel) {
+    var l = '';
+    if (nota.isChord) {
+        l = DIATONIC.map.number2key[ nota.value ].toLowerCase() + '';
+    } else {
+        if (showLabel) {
+            l = nota.key = DIATONIC.map.number2key_br[nota.value ];
+        } else {
+            l = nota.key = DIATONIC.map.number2key[nota.value ];
+        }
+    }
+    if( nota.isMinor ) {
+        l+='-';
+    }
+    
+    return l;
+};
+  
+DIATONIC.map.Button.prototype.setText = function( showLabel ) {
+    this.setTextOpen( this.getLabel( this.openNote, showLabel ) );
+    this.setTextClose( this.getLabel( this.closeNote, showLabel ) );
+};
+
 DIATONIC.map.Button.prototype.setTextClose = function(t) {
-    this.notaCloseKey.attr('text',t );
+    this.closeLabel = t;
+    if(this.closeNoteKey)
+        this.closeNoteKey.attr('text', this.closeLabel );
 };
 
 DIATONIC.map.Button.prototype.setTextOpen = function(t) {
-    this.notaOpenKey.attr('text',t );
+    this.openLabel = t;
+    if(this.openNoteKey)
+        this.openNoteKey.attr('text', this.openLabel );
 };

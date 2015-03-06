@@ -526,13 +526,13 @@ ABCXJS.midi.Parse.prototype.getBassButton = function( bellows, b ) {
     if( b === '-->' || !this.keyboard ) return null;
     var kb = this.keyboard;
     var nota = kb.parseNote(b, true );
-    for( var j = kb.keyboard.length; j > kb.keyboard.length - 2; j-- ) {
-      for( var i = 0; i < kb.keyboard[j-1].length; i++ ) {
-          var tecla = kb.keyboard[j-1][i];
+    for( var j = kb.keyMap.length; j > kb.keyMap.length - 2; j-- ) {
+      for( var i = 0; i < kb.keyMap[j-1].length; i++ ) {
+          var tecla = kb.keyMap[j-1][i];
           if(bellows === '+') {
-            if(tecla.notaClose.key === nota.key ) return tecla.btn;
+            if(tecla.closeNote.key === nota.key ) return tecla;
           } else {  
-            if(tecla.notaOpen.key === nota.key ) return tecla.btn;
+            if(tecla.openNote.key === nota.key ) return tecla;
           }
       }   
     }
@@ -545,7 +545,7 @@ ABCXJS.midi.Parse.prototype.getButton = function( b ) {
     var p = parseInt( isNaN(b.substr(0,2)) || b.length === 1 ? 1 : 2 );
     var button = b.substr(0, p) -1;
     var row = b.length - p;
-    if(kb.keyboard[row][button]) 
-        return kb.keyboard[row][button].btn;
+    if(kb.keyMap[row][button]) 
+        return kb.keyMap[row][button];
     return null;
 };
