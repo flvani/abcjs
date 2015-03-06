@@ -64,6 +64,6 @@ java -jar yuicompressor-2.4.2.jar  --line-break 7000 -o bin/filemanager_$1-min.j
 #java -jar yuicompressor-2.4.2.jar  --line-break 7000 -o bin/abcxjs_noraphael_$1-min.js tmp/abcxjs-noraphael.js
 #java -jar yuicompressor-2.4.2.jar  --line-break 7000 -o bin/abcxjs_noraphael_nomidi_$1-min.js tmp/abcxjs-noraphael-nomidi.js
 
-echo "Removing temporary files..."
-rm tmp/*
+#echo "Removing temporary files..."
+#rm tmp/*
 

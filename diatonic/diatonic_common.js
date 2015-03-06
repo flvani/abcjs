@@ -10,8 +10,6 @@ if (!window.DIATONIC)
 if (!window.DIATONIC.map)
     window.DIATONIC.map = {};
 
-var number2key_br = ["Dó", "Dó♯", "Ré", "Mi♭", "Mi", "Fá", "Fá♯", "Sol", "Sol♯", "Lá", "Si♭", "Si"];
-    
 DIATONIC.map.accordionMaps = [];
 
 DIATONIC.map.key2number = 
