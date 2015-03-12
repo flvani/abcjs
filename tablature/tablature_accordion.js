@@ -132,6 +132,7 @@ ABCXJS.tablature.Accordion.prototype.loadById = function (id) {
 
 ABCXJS.tablature.Accordion.prototype.load = function (sel) {
     this.selected = sel;
+    this.selector.set(this.selected);
     this.printKeyboard();
 };
 

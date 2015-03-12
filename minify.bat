@@ -9,8 +9,8 @@ copy /b/y midi\* tmp\midi.js
 copy /b/y api\abc_tunebook.js+data\abc_tune.js+tmp\parse.js+tmp\write.js tmp\abcjs-noraphael-nomidi.js
 
 copy /b/y tmp\abcjs-noraphael-nomidi.js+tmp\midi.js tmp\abcjs-noraphael.js
-copy /b/y raphael\raphael_2.1.3-min.js+tmp\abcjs-noraphael-nomidi.js tmp\abcjs_nomidi.js
-copy /b/y raphael\raphael_2.1.3-min.js+tmp\abcjs-noraphael.js tmp\abcjs_all.js
+copy /b/y tmp\abcjs-noraphael-nomidi.js tmp\abcjs_nomidi.js
+copy /b/y tmp\abcjs-noraphael.js tmp\abcjs_all.js
 
 copy /b/y tmp\abcjs_all.js+edit\abc_editor.js tmp\abcjs_editor.js
 copy /b/y tmp\abcjs_nomidi.js+edit\abc_editor.js tmp\abcjs_editor-nomidi.js
