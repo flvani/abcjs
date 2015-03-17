@@ -353,7 +353,7 @@ V:5 accordionTab
                     document.getElementById("warningsDiv").style.display = "none";
                     document.body.style.paddingTop = '0px';
                     window.print();
-                document.body.style.paddingTop = '190px';
+                    document.body.style.paddingTop = '190px';
                     document.getElementById("warningsDiv").style.display = "inline";
                     document.getElementById("editorDiv").style.display = "inline";
                 }, false);
@@ -378,14 +378,12 @@ V:5 accordionTab
 
             function doTranspose(value) {
                 var doc = document.documentElement;
-                //var left = (window.pageXOffset || doc.scrollLeft) - (doc.clientLeft || 0);
                 window.lastYpos = (window.pageYOffset || doc.scrollTop)  - (doc.clientTop || 0);                
                 myEditor.fireChanged(value, "force");
             };
 
             function doForceRefresh() {
                 var doc = document.documentElement;
-                //var left = (window.pageXOffset || doc.scrollLeft) - (doc.clientLeft || 0);
                 window.lastYpos = (window.pageYOffset || doc.scrollTop)  - (doc.clientTop || 0);                
                 myEditor.fireChanged(0, "force");
             };
@@ -393,7 +391,6 @@ V:5 accordionTab
             function doCheckDebug() {
                 debug = document.getElementById("chkDebug").checked;
                 var doc = document.documentElement;
-                //var left = (window.pageXOffset || doc.scrollLeft) - (doc.clientLeft || 0);
                 window.lastYpos = (window.pageYOffset || doc.scrollTop)  - (doc.clientTop || 0);                
                 myEditor.fireChanged(0, "force");
             };

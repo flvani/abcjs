@@ -22,7 +22,7 @@ copy /b/y tmp\abcjs_editor-nomidi.js+tmp\tablature.js tmp\abcxjs-nomidi.js
 copy /b/y tmp\abcjs_editor-noraphael.js+tmp\tablature.js tmp\abcxjs-noraphael.js
 copy /b/y tmp\abcjs_editor-noraphael-nomidi.js+tmp\tablature.js tmp\abcxjs-noraphael-nomidi.js
 
-set versao=3.20
+set versao=3.21
 
 echo Compressing ABCX %versao% tabeditor lib ...
 java -Dfile.encoding=utf-8 -jar yuicompressor-2.4.2.jar  --line-break 7000 -o bin\abcxjs_%versao%-min.js tmp/abcxjs.js
