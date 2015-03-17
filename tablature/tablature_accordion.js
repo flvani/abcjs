@@ -10,57 +10,19 @@ if (!window.ABCXJS)
 if (!window.ABCXJS.tablature)
 	window.ABCXJS.tablature = {};
 
-window.ABCXJS.tablature.AccordionSelector = function(id, accordion) {
-  this.selector = document.getElementById(id);
-  this.accordion = accordion;
-};
-
-window.ABCXJS.tablature.AccordionSelector.prototype.updateAccordionList = function() {
-    while(this.selector.options.length > 0){                
-        this.selector.remove(0);
-    }    
-    this.populate();
-};
-
-window.ABCXJS.tablature.AccordionSelector.prototype.addChangeListener = function(editor) {
-  this.selector.onchange = function() {
-    editor.accordion.load(parseInt(this.value));
-    editor.fireChanged( 0, "force" );
-  };
-};
-    
-window.ABCXJS.tablature.AccordionSelector.prototype.populate = function() {
-    for (var i = 0; i < this.accordion.accordions.length; i++) {
-        var opt = document.createElement('option');
-        opt.innerHTML = this.accordion.accordions[i].getName();
-        opt.value = i;
-        this.selector.appendChild(opt);
-    }
-};
-
-window.ABCXJS.tablature.AccordionSelector.prototype.set = function(val) {
-    this.selector.value = val;
-};
-
 ABCXJS.tablature.Accordion = function( params ) {
     
-    this.transposer     = new window.ABCXJS.parse.Transposer();
-    this.selected       = -1;
-    this.tabLines       = [];
-    this.paper          = null;
-    this.selector       = null;
-    this.keyboardDiv    = null;
-    this.accordions     = params.options.accordionMaps || [] ;
+    this.transposer   = new window.ABCXJS.parse.Transposer();
+    this.selected     = -1;
+    this.tabLines     = [];
+    this.paper        = null;
+    this.keyboardDiv  = null;
+    this.accordions   = params.accordionMaps || [] ;
     
-    this.render_keyboard_opts = params.options.render_keyboard_opts || {transpose:false, mirror: false, scale:1, draggable:false, show:false};
+    this.render_keyboard_opts = params.render_keyboard_opts || {transpose:false, mirror: false, scale:1, draggable:false, show:false};
 
-    if(params.options.keyboardDiv_id) {
-        this.setKeyboardCanvas(params.options.keyboardDiv_id);
-    }
-    
-    if( params.options.accordionSelector_id ) {
-        this.selector = new window.ABCXJS.tablature.AccordionSelector(params.options.accordionSelector_id, this);
-        this.selector.populate();
+    if(params.keyboardDiv_id) {
+        this.setKeyboardCanvas(params.keyboardDiv_id);
     }
     
     if( params.id )
@@ -132,7 +94,6 @@ ABCXJS.tablature.Accordion.prototype.loadById = function (id) {
 
 ABCXJS.tablature.Accordion.prototype.load = function (sel) {
     this.selected = sel;
-    this.selector.set(this.selected);
     this.printKeyboard();
 };
 
@@ -193,6 +154,10 @@ ABCXJS.tablature.Accordion.prototype.printKeyboard = function() {
         
 ABCXJS.tablature.Accordion.prototype.getKeyboard = function () {
     return this.accordions[this.selected].keyboard;
+};
+
+ABCXJS.tablature.Accordion.prototype.getName = function () {
+    return this.accordions[this.selected].getName();
 };
 
 ABCXJS.tablature.Accordion.prototype.getNoteName = function( item, keyAcc, barAcc, bass ) {
