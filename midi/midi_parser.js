@@ -20,9 +20,9 @@ if (!window.ABCXJS)
 if (!window.ABCXJS.midi) 
     window.ABCXJS.midi = {}; 
 
-ABCXJS.midi.Parse = function( options  ) {
-    this.options =  options || {};
-    this.keyboard = options.keyboard;
+ABCXJS.midi.Parse = function( options ) {
+    options = options || {};
+    this.keyboard = options.keyboard || null;
     this.vars = { warnings: [] };
     this.scale = [0, 2, 4, 5, 7, 9, 11];
     
