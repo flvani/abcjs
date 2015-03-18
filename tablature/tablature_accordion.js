@@ -95,7 +95,7 @@ ABCXJS.tablature.Accordion.prototype.loadById = function (id) {
             
         }
     console.log( 'Accordion not found. Loading the first one.');
-    return this.load(g);
+    return this.load(0);
 };
 
 ABCXJS.tablature.Accordion.prototype.load = function (sel) {
