@@ -19,6 +19,10 @@ ABCXJS.tablature.Accordion = function( params ) {
     this.keyboardDiv  = null;
     this.accordions   = params.accordionMaps || [] ;
     
+    if( this.accordions.length === 0 ) {
+        throw new Error( 'No accordionMap found!');
+    }
+    
     this.render_keyboard_opts = params.render_keyboard_opts || {transpose:false, mirror: false, scale:1, draggable:false, show:false};
 
     if(params.keyboardDiv_id) {
@@ -90,7 +94,8 @@ ABCXJS.tablature.Accordion.prototype.loadById = function (id) {
             return this.load(g);
             
         }
-    return null;
+    console.log( 'Accordion not found. Loading the first one.');
+    return this.load(g);
 };
 
 ABCXJS.tablature.Accordion.prototype.load = function (sel) {
