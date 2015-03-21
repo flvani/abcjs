@@ -191,33 +191,6 @@ ABCXJS.write.Layout.prototype.printABCVoice = function() {
   this.pushCrossLineElems();
 };
 
-ABCXJS.write.Layout.prototype.printABCVoice = function() {
-  this.popCrossLineElems();
-  this.stemdir = (this.isBagpipes)?"down":null;
-  if (this.partstartelem) {
-    this.partstartelem = new ABCXJS.write.EndingElem("", null, null);
-    this.voice.addOther(this.partstartelem);
-  }
-  for (var slur in this.slurs) {
-    if (this.slurs.hasOwnProperty(slur)) {
-      this.slurs[slur]= new ABCXJS.write.TieElem(null, null, this.slurs[slur].above, this.slurs[slur].force);
-	this.voice.addOther(this.slurs[slur]);
-    }
-  }
-  for (var i=0; i<this.ties.length; i++) {
-    this.ties[i]=new ABCXJS.write.TieElem(null, null, this.ties[i].above, this.ties[i].force);
-    this.voice.addOther(this.ties[i]);
-  }
-
-  for (this.pos=0; this.pos<this.currVoice.length; this.pos++) {
-    var abselems = this.printABCElement();
-    for (i=0; i<abselems.length; i++) {
-      this.voice.addChild(abselems[i]);
-    }
-  }
-  this.pushCrossLineElems();
-};
-
 // return an array of ABCXJS.write.AbsoluteElement
 ABCXJS.write.Layout.prototype.printABCElement = function() {
   var elemset = [];

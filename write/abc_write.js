@@ -353,9 +353,6 @@ ABCXJS.write.Printer.prototype.printABC = function(abctunes) {
   this.y=0;
 
   for (var i = 0; i < abctunes.length; i++) {
-    if( abctunes[i].midi) {
-        abctunes[i].midi.printer = this;
-    }
     this.printTune(abctunes[i]);
   }
 
@@ -420,7 +417,12 @@ ABCXJS.write.Printer.prototype.printTune = function(abctune) {
     
     this.reset();
     
+    if( abctune.midi) {
+        abctune.midi.printer = this;
+    }
+    
     this.layouter = new ABCXJS.write.Layout( this, abctune.formatting.bagpipes );
+    
     if (abctune.media === 'print') {
         // TODO create the page the size of
         //  tune.formatting.pageheight by tune.formatting.pagewidth
