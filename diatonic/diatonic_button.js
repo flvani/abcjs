@@ -73,7 +73,7 @@ DIATONIC.map.Button.prototype.draw = function( paper, limits, options ) {
     currFontSize = this.FONTSIZE*options.scale;
     
     //background
-    this.paper = this.paper || paper;
+    this.paper = paper || this.paper;
     
     this.circle = this.paper.circle(currX, currY, currRadius);
     this.circle.attr({"fill": "white", "stroke": "white", "stroke-width": 0});

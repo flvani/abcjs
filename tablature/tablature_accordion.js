@@ -42,7 +42,7 @@ ABCXJS.tablature.Accordion.prototype.setKeyboardCanvas = function (div_id) {
     if(this.render_keyboard_opts.draggable) {
         
         this.topDiv.setAttribute( "style", 
-                "display:none; position: fixed; top:100px; left:900px; width:0px; height:0px; z-index: 200;" +
+                "display:none; position: fixed; top:100px; left:900px; width:0px; height:0px; z-index: 700;" +
                 "background-color: #ffe; border-style: groove; border-color: #ffd;" ); 
 
         var self = this;
@@ -51,7 +51,7 @@ ABCXJS.tablature.Accordion.prototype.setKeyboardCanvas = function (div_id) {
         this.keyboardMenu = div;
         div.setAttribute("id", "keyboardMenu" ); 
         div.setAttribute("style", "top:0; width:100%; min-height:20px; background-color: black; color: white;"); 
-        div.innerHTML = '<input id="rotateBtn" type="button"  value="Rotate" /><input id="scaleBtn" type="button"  value="Scale" />&nbsp;&nbsp;<label>Key Map</label>';
+        div.innerHTML = '<input id="rotateBtn" type="button"  value="Rotate" /><input id="scaleBtn" type="button" value="Scale" />&nbsp;&nbsp;<span>Key Map</span>';
         this.topDiv.appendChild( div );
         div = document.createElement("DIV");
         div.setAttribute("id", "keyboardData"); 
