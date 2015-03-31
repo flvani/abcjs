@@ -670,12 +670,13 @@ window.ABCXJS.parse.parseKeyVoice = {};
 	//								else if (staffInfo.clef[ii] === "'") oct += 7;
 	//							}
 						if (staffInfo.clef !== undefined) {
-						  staffInfo.clef = staffInfo.clef.replace(/[',]/g, ""); //'//comment for emacs formatting of regexp
-							if (staffInfo.clef.indexOf('+16') !== -1) {
-								oct += 14;
-								staffInfo.clef = staffInfo.clef.replace('+16', '');
-							}
-							staffInfo.verticalPos = calcMiddle(staffInfo.clef, oct);
+                                                    staffInfo.clef = staffInfo.clef.replace(/[',]/g, ""); //'//comment for emacs formatting of regexp
+                                                    if (staffInfo.clef.indexOf('+16') !== -1) {
+                                                        oct += 14;
+                                                        staffInfo.clef = staffInfo.clef.replace('+16', '');
+                                                    }
+                                                    staffInfo.verticalPos = calcMiddle(staffInfo.clef, oct);
+                                                    multilineVars.clef = {type: staffInfo.clef, verticalPos: staffInfo.verticalPos};
 						}
 						break;
                                         case 'accordionTab':
