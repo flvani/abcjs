@@ -22,7 +22,6 @@ if (!window.ABCXJS.midi)
 
 ABCXJS.midi.Parse = function( options ) {
     options = options || {};
-    this.keyboard = options.keyboard || null;
     this.vars = { warnings: [] };
     this.scale = [0, 2, 4, 5, 7, 9, 11];
     
@@ -79,9 +78,7 @@ ABCXJS.midi.Parse.prototype.parse = function(tune, keyboard) {
 
     this.abctune = tune;
     
-    this.keyboard = keyboard || this.keyboard;
-    
-    this.midiTune.keyboard = this.keyboard;
+    this.midiTune.keyboard = keyboard;
 
     if ( tune.metaText && tune.metaText.tempo) {
         var bpm = tune.metaText.tempo.bpm || 80;
@@ -523,8 +520,8 @@ ABCXJS.midi.Parse.prototype.extractOctave = function(pitch) {
 };
 
 ABCXJS.midi.Parse.prototype.getBassButton = function( bellows, b ) {
-    if( b === '-->' || !this.keyboard ) return null;
-    var kb = this.keyboard;
+    if( b === '-->' || !this.midiTune.keyboard ) return null;
+    var kb = this.midiTune.keyboard;
     var nota = kb.parseNote(b, true );
     for( var j = kb.keyMap.length; j > kb.keyMap.length - 2; j-- ) {
       for( var i = 0; i < kb.keyMap[j-1].length; i++ ) {
@@ -540,8 +537,8 @@ ABCXJS.midi.Parse.prototype.getBassButton = function( bellows, b ) {
 };
 
 ABCXJS.midi.Parse.prototype.getButton = function( b ) {
-    if( b === 'x' || !this.keyboard ) return null;
-    var kb = this.keyboard;
+    if( b === 'x' || !this.midiTune.keyboard ) return null;
+    var kb = this.midiTune.keyboard;
     var p = parseInt( isNaN(b.substr(0,2)) || b.length === 1 ? 1 : 2 );
     var button = b.substr(0, p) -1;
     var row = b.length - p;

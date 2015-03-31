@@ -313,9 +313,6 @@ ABCXJS.Editor = function(editarea, params) {
   }
   
   if( params.generate_midi ) {
-      if( this.accordion ) {
-        params.midi_options.keyboard = this.accordion.getKeyboard();
-      }   
       this.midiParser = new ABCXJS.midi.Parse( params.midi_options );
   }
   
