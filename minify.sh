@@ -26,21 +26,20 @@ cat api/abc_tunebook.js data/abc_tune.js tmp/parse.js tmp/write.js > tmp/abcjs-n
 cat tmp/abcjs-noraphael-nomidi.js  tmp/midi.js > tmp/abcjs-noraphael.js
 #cat raphael/raphael_2.1.3-min.js tmp/abcjs-noraphael-nomidi.js > tmp/abcjs_nomidi.js
 #cat raphael/raphael_2.1.3-min.js tmp/abcjs-noraphael.js > tmp/abcjs_all.js
-cat tmp/abcjs-noraphael-nomidi.js > tmp/abcjs_nomidi.js
-cat tmp/abcjs-noraphael.js > tmp/abcjs_all.js
+cat tmp/abcjs-noraphael-nomidi.js > tmp/abcjs-nomidi.js
+cat tmp/abcjs-noraphael.js > tmp/abcjs-all.js
 
-cat tmp/abcjs_all.js edit/abc_editor.js > tmp/abcjs_editor.js
+cat tmp/abcjs-all.js edit/abc_editor.js > tmp/abcjs-editor.js
 cat tmp/abcjs_nomidi.js edit/abc_editor.js > tmp/abcjs_editor-nomidi.js
 cat tmp/abcjs-noraphael.js edit/abc_editor.js > tmp/abcjs_editor-noraphael.js
 cat tmp/abcjs-noraphael-nomidi.js edit/abc_editor.js > tmp/abcjs_editor-noraphael-nomidi.js
 
-cat tmp/abcjs_editor.js tmp/tablature.js > tmp/abcxjs.js
-cat tmp/abcjs_editor-nomidi.js tmp/tablature.js > tmp/abcxjs-nomidi.js
-cat tmp/abcjs_editor-noraphael.js tmp/tablature.js > tmp/abcxjs-noraphael.js
-cat tmp/abcjs_editor-noraphael-nomidi.js tmp/tablature.js > tmp/abcxjs-noraphael-nomidi.js
+cat tmp/abcjs-all.js tmp/tablature.js > tmp/abcxjs.js
+cat tmp/abcjs-nomidi.js tmp/tablature.js > tmp/abcxjs-nomidi.js
+cat tmp/abcjs-noraphael.js tmp/tablature.js > tmp/abcxjs-noraphael.js
+cat tmp/abcjs-noraphael-nomidi.js tmp/tablature.js > tmp/abcxjs-noraphael-nomidi.js
 
-
-echo "Compressing ABCX tabeditor lib ..."
+echo "Compressing ABCX lib ..."
 java -jar yuicompressor-2.4.2.jar  --line-break 7000 -o bin/abcxjs_$1-min.js tmp/abcxjs.js
 
 echo "Compressing diatonic-map lib..."
