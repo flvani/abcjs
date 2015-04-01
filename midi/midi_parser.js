@@ -62,8 +62,7 @@ ABCXJS.midi.Parse.prototype.reset = function() {
     this.parsedElements = [];
     
     this.midiTune = { 
-        tempo: this.oneMinute/ 640 // duração de cada intervalo em mili
-       ,printer: null
+        tempo: this.oneMinute/640 // duração de cada intervalo em mili
        ,playlist: [] // nova strutura, usando 2 elementos de array por intervalo de tempo (um para ends e outro para starts) 
        ,measures: [] // marks the start time for each measure - used for learning mode playing
     }; 

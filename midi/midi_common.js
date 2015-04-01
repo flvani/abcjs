@@ -1,4 +1,3 @@
-﻿
 if (!window.ABCXJS)
     window.ABCXJS = {};
 
