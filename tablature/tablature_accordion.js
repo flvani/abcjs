@@ -35,6 +35,13 @@ ABCXJS.tablature.Accordion = function( params ) {
         this.load( 0 );
 };
 
+ABCXJS.tablature.Accordion.prototype.setKeyboardCanvasId = function () {
+    var a = this.getLoaded();
+    var t = a.getTxtTuning() + " - " + a.getTxtNumButtons();
+    var e = document.getElementById("keyboardId");
+    if(e) e.innerHTML = t;
+};
+
 ABCXJS.tablature.Accordion.prototype.setKeyboardCanvas = function (div_id) {
 
     this.topDiv = document.getElementById(div_id);
@@ -51,7 +58,7 @@ ABCXJS.tablature.Accordion.prototype.setKeyboardCanvas = function (div_id) {
         this.keyboardMenu = div;
         div.setAttribute("id", "keyboardMenu" ); 
         div.setAttribute("style", "top:0; width:100%; min-height:20px; background-color: black; color: white;"); 
-        div.innerHTML = '<input id="rotateBtn" type="button"  value="Rotate" /><input id="scaleBtn" type="button" value="Scale" />&nbsp;&nbsp;<span>Key Map</span>';
+        div.innerHTML = '<input id="rotateBtn" type="button"  value="Rotate" /><input id="scaleBtn" type="button" value="Scale" />&nbsp;&nbsp;<span id="keyboardId" readonly >Key Map</span>';
         this.topDiv.appendChild( div );
         div = document.createElement("DIV");
         div.setAttribute("id", "keyboardData"); 
@@ -68,11 +75,11 @@ ABCXJS.tablature.Accordion.prototype.setKeyboardCanvas = function (div_id) {
         }, false);
 
         this.mouseUp = function () {
-            window.removeEventListener('mousemove', self.divMove, true);
+            window.removeEventListener('mousemove', self.divMove, false);
         };
 
         this.mouseDown = function (){
-          window.addEventListener('mousemove', self.divMove, true);
+          window.addEventListener('mousemove', self.divMove, false);
         };
 
         this.divMove = function(e){
@@ -167,6 +174,7 @@ ABCXJS.tablature.Accordion.prototype.layoutKeyboard = function(options) {
 ABCXJS.tablature.Accordion.prototype.printKeyboard = function() {
     if (this.keyboardDiv) {
         if( this.render_keyboard_opts.show ) {
+            this.setKeyboardCanvasId();
             this.topDiv.style.display="inline-block";
             this.getLoaded().keyboard.print(this.paper, this.keyboardDiv, this.render_keyboard_opts);
             if (this.render_keyboard_opts.draggable) {
