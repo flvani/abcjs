@@ -153,7 +153,6 @@ FILEMANAGER.download = function(name, data) {
         return node.dispatchEvent(ev);
     };
     var link = function(data, name) {
-        window.URL = window.webkitURL || window.URL;
         var bb = new Blob([data], {type: 'text/plain'});
         
         var a = document.createElement('a');

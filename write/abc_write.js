@@ -407,7 +407,7 @@ ABCXJS.write.Printer.prototype.printTempo = function (tempo, paper, layouter, y,
 };
 
 ABCXJS.write.Printer.prototype.skipPage = function() {
-    this.y = this.estimatedPageLength*this.pageNumber + this.paddingtop;
+    this.y = this.estimatedPageLength*this.pageNumber + this.paddingtop + this.paddingbottom;
     this.pageNumber++;
 };
 
