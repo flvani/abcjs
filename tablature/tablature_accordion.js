@@ -28,26 +28,7 @@ ABCXJS.tablature.Accordion = function( params ) {
     else
         this.load( 0 );
     
-    this.printKeyboard(params.keyboardDiv_id);
-        
 };
-
-//ABCXJS.tablature.Accordion.prototype.setKeyboardCanvas = function (div_id) {
-//
-//    if( typeof(div_id) === "string" )
-//        this.dataDiv = document.getElementById(div_id);
-//    else  
-//        this.dataDiv = div_id;
-//
-//    if(this.render_keyboard_opts.draggable) {
-//        this.topDiv = this.dataDiv.parentElement;
-//    } else {
-//        this.topDiv = this.dataDiv;
-//    }    
-//    
-//    this.definePaper(this.dataDiv);    
-//};
-//
 
 ABCXJS.tablature.Accordion.prototype.loadById = function (id) {
     for (var g = 0; g < this.accordions.length; g ++)
@@ -61,7 +42,6 @@ ABCXJS.tablature.Accordion.prototype.loadById = function (id) {
 
 ABCXJS.tablature.Accordion.prototype.load = function (sel) {
     this.selected = sel;
-    //this.printKeyboard(div);
     return this.accordions[this.selected];
 };
 
@@ -127,11 +107,6 @@ ABCXJS.tablature.Accordion.prototype.printKeyboard = function(div_id) {
     if( this.render_keyboard_opts.show ) {
         div.style.display="inline-block";
         this.getKeyboard().print(div, this.render_keyboard_opts);
-        //this.setKeyboardCanvasId();
-//        if (this.render_keyboard_opts.draggable) {
-//            this.topDiv.style.width = this.dataDiv.clientWidth + "px";
-//            this.topDiv.style.height = (this.dataDiv.clientHeight+20) + "px";
-//        }
     } else {
         div.style.display="none";
     }
