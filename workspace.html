@@ -372,7 +372,7 @@ V:5 accordionTab
                 showMapButton.addEventListener("click", function() {
                     myEditor.accordion.render_keyboard_opts.show = !myEditor.accordion.render_keyboard_opts.show;
                     this.value = myEditor.accordion.render_keyboard_opts.show? 'Hide Map':'Show Map';
-                    myEditor.accordion.printKeyboard();
+                    myEditor.accordion.printKeyboard('keyboardDiv');
                 }, false);
             }
 

@@ -117,12 +117,12 @@ DIATONIC.map.Keyboard.prototype.setup = function (keyMap) {
     );
 };
 
-DIATONIC.map.Keyboard.prototype.print = function (paper, div, options ) {
+DIATONIC.map.Keyboard.prototype.print = function (div, options ) {
     
     options = options || {};
     
-    this.paper = paper;
-    this.paper.clear();
+    div.innerHTML = "";
+    this.paper = Raphael(div, "100%", "100%");
     
     options.scale = options.scale || 1;
     options.mirror = options.mirror || false;

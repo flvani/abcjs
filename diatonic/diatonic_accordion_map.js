@@ -37,11 +37,11 @@ DIATONIC.map.AccordionMap.prototype.getId = function () {
     return this.id;
 };
 
-DIATONIC.map.AccordionMap.prototype.getName = function () {
-    return this.getModel() + " " + this.getTxtTuning() + " - " + this.getTxtNumButtons();
+DIATONIC.map.AccordionMap.prototype.getFullName = function () {
+    return this.getTxtModel() + " " + this.getTxtTuning() + " - " + this.getTxtNumButtons();
 };
 
-DIATONIC.map.AccordionMap.prototype.getModel = function () {
+DIATONIC.map.AccordionMap.prototype.getTxtModel = function () {
     return this.model;
 };
 

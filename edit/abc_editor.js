@@ -57,7 +57,7 @@ ABCXJS.edit.AccordionSelector.prototype.addChangeListener = function(editor) {
 ABCXJS.edit.AccordionSelector.prototype.populate = function() {
     for (var i = 0; i < this.accordion.accordions.length; i++) {
         var opt = document.createElement('option');
-        opt.innerHTML = this.accordion.accordions[i].getName();
+        opt.innerHTML = this.accordion.accordions[i].getFullName();
         opt.value = i;
         this.selector.appendChild(opt);
     }
