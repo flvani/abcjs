@@ -504,7 +504,7 @@ ABCXJS.write.AbsoluteElement.prototype.draw = function(printer, staveInfo ) {
         this.setClass("mark", "", "#00ff00");
     var self = this;
     this.elemset.mouseup(function(e) {
-        printer.notifySelect(self);
+        printer.notifyClearNSelect(self);
     });
     this.abcelem.abselem = this;
     this.abcelem.abselem.y = printer.y;
