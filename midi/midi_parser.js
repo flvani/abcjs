@@ -105,17 +105,19 @@ ABCXJS.midi.Parse.prototype.parse = function(tune, keyboard) {
         }
         
         if( item.start.pitches.length + item.start.abcelems.length + item.start.buttons.length > 0 ) {
-            if( item.start.barNumber && item.start.barNumber > currBar ) {
-                currBar = item.start.barNumber;
-                delete item.start.barNumber;
-                self.midiTune.measures[currBar] = self.midiTune.playlist.length;
-                self.midiTune.playlist.push( {item: item.start, time: time, barNumber: currBar, start: true } );
+            if( item.start.barNumber ) {
+                if( item.start.barNumber > currBar ) {
+                    currBar = item.start.barNumber;
+                    self.midiTune.measures[currBar] = self.midiTune.playlist.length;
+                }
+                self.midiTune.playlist.push( {item: item.start, time: time, barNumber: item.start.barNumber, start: true } );
             } else {
-                delete item.start.barNumber;
                 self.midiTune.playlist.push( {item: item.start, time: time, start: true } );
             }
+            delete item.start.barNumber;
         }
     });
+    
     
     tune.midi = this.midiTune;
     

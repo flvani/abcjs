@@ -48,17 +48,18 @@ ABCXJS.midi.Player.prototype.reset = function(options) {
     this.playInterval = null;
     this.currentAndamento = 1;
     
+    this.onError = null;
     this.warnings = [];
     
     this.printer = {};
-    this.currentTime = 0;
-    this.currentMeasure = 1;
-    this.lastMeasurePos = 0;
     this.currChannel = 0;
+    this.currentTime = 0;
+    this.lastMeasure = 1;
+    this.lastMeasurePos = 0;
+    this.currentMeasure = 1;
     this.currentMeasurePos = 0;
-    this.currAbsElem = null;
     
-    this.onError = null;
+    this.currAbsElem = null;   
 };
 
 ABCXJS.midi.Player.prototype.addWarning = function(str) {
@@ -169,6 +170,7 @@ ABCXJS.midi.Player.prototype.clearDidacticPlay = function() {
     this.currentTime = 0;
     this.currentMeasure = 1;
     this.currentMeasurePos = 0;
+    this.lastMeasure = 1;
     this.lastMeasurePos = 0;
     this.pausePlay(true);
 };
@@ -200,7 +202,7 @@ ABCXJS.midi.Player.prototype.startDidacticPlay = function(what, type, value, val
             if(what.measures[that.currentMeasure] !== undefined ) {
                 that.lastMeasurePos = what.measures[that.currentMeasure];
                 var criteria = function () { 
-                    return that.currentMeasure <= that.endMeasure;
+                    return (that.currentMeasure <= that.endMeasure) && (that.lastMeasure <= that.currentMeasure);
                 };
             } else {
                this.pausePlay(true);
@@ -215,8 +217,8 @@ ABCXJS.midi.Player.prototype.startDidacticPlay = function(what, type, value, val
                 that.currentTime = that.playlist[that.i].time*(1/that.currentAndamento);
                 that.currentMeasure = that.playlist[that.i].barNumber;
                 that.currentMeasurePos = that.i;
-                
             }    
+            that.lastMeasure = that.currentMeasure;
            break;
         case 'measure': // play-measure
             var curr = that.currentMeasure;
@@ -240,6 +242,7 @@ ABCXJS.midi.Player.prototype.doDidacticPlay = function(criteria) {
         if(this.playlist[this.i] && this.playlist[this.i].barNumber) {
             this.lastMeasurePos = this.currentMeasurePos;
             this.currentMeasurePos = this.i;
+            this.lastMeasure = this.currentMeasure;
             this.currentMeasure = this.playlist[this.i].barNumber;
             if( this.callbackOnChangeBar ) this.callbackOnPlay(this);
         }
