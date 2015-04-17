@@ -54,10 +54,7 @@ ABCXJS.midi.Player.prototype.reset = function(options) {
     this.printer = {};
     this.currChannel = 0;
     this.currentTime = 0;
-    this.lastMeasure = 1;
-    this.lastMeasurePos = 0;
     this.currentMeasure = 1;
-    this.currentMeasurePos = 0;
     
     this.currAbsElem = null;   
 };
@@ -131,8 +128,8 @@ ABCXJS.midi.Player.prototype.startPlay = function(what) {
     if(this.playing || !what ) return false;
     
     this.playlist = what.playlist;
-    this.tempo  = what.tempo;
-    this.printer = what.printer;
+    this.tempo    = what.tempo;
+    this.printer  = what.printer;
 
     this.playing = true;
     this.onError = null;
@@ -144,34 +141,10 @@ ABCXJS.midi.Player.prototype.startPlay = function(what) {
     return true;
 };
 
-ABCXJS.midi.Player.prototype.doPlay = function() {
-    if( this.callbackOnPlay ) this.callbackOnPlay(this);
-    
-    while (!this.onError && this.playlist[this.i] &&
-           this.playlist[this.i].time <= this.currentTime) {
-        this.executa(this.playlist[this.i]);
-        this.i++;
-        if(this.playlist[this.i] && this.playlist[this.i].barNumber) {
-            this.lastMeasurePos = this.currentMeasurePos;
-            this.currentMeasurePos = this.i;
-            this.currentMeasure = this.playlist[this.i].barNumber;
-            if( this.callbackOnChangeBar ) this.callbackOnPlay(this);
-        }    
-    }
-    if (!this.onError && this.playlist[this.i]) {
-        this.currentTime += this.ticksPerInterval;
-    } else {
-        this.stopPlay();
-    }
-};
-
 ABCXJS.midi.Player.prototype.clearDidacticPlay = function() {
     this.i = 0;
     this.currentTime = 0;
     this.currentMeasure = 1;
-    this.currentMeasurePos = 0;
-    this.lastMeasure = 1;
-    this.lastMeasurePos = 0;
     this.pausePlay(true);
 };
 
@@ -180,51 +153,53 @@ ABCXJS.midi.Player.prototype.startDidacticPlay = function(what, type, value, val
     if(this.playing) return false;
     
     this.playlist = what.playlist;
-    this.tempo  = what.tempo;
-    this.printer = what.printer;
-    this.playing = true;
-    this.onError = null;
+    this.tempo    = what.tempo;
+    this.printer  = what.printer;
+
+    this.playing  = true;
+    this.onError  = null;
     
+    var criteria = null;
     var that = this;
     
     switch( type ) {
         case 'note': // step-by-step
-            var limite = that.playlist[that.i].time*(1/that.currentAndamento);
-            var criteria = function () { 
-                return limite === that.playlist[that.i].time*(1/that.currentAndamento);
+            that.initTime = that.playlist[that.i].time;
+            criteria = function () { 
+                return that.initTime === that.playlist[that.i].time;
             };
             break;
-        case 'repeat': // measure
-        case 'goto': // goto and play measure
-            if(parseInt(value))
-                that.currentMeasure = parseInt(value);
-            that.endMeasure = parseInt(valueF)?parseInt(valueF):that.currentMeasure;
+        case 'goto':   //goto-measure or goto-interval
+        case 'repeat': // repeat-measure or repeat-interval
+            that.currentMeasure = parseInt(value)? parseInt(value): that.currentMeasure;
+            that.endMeasure = parseInt(valueF)? parseInt(valueF): that.currentMeasure;
+            that.initMeasure = that.currentMeasure;
             if(what.measures[that.currentMeasure] !== undefined ) {
-                that.lastMeasurePos = what.measures[that.currentMeasure];
-                var criteria = function () { 
-                    return (that.currentMeasure <= that.endMeasure) && (that.lastMeasure <= that.currentMeasure);
+                that.i = that.currentMeasure === 1 ? 0 : what.measures[that.currentMeasure];
+                that.currentTime = that.playlist[that.i].time*(1/that.currentAndamento);
+                criteria = function () { 
+                    return (that.initMeasure <= that.currentMeasure) && (that.currentMeasure <= that.endMeasure);
                 };
             } else {
+               console.log('goto-measure or repeat-measure:  measure \''+value+'\' not found!');
                this.pausePlay(true);
                return;
-           }   
-            if(that.currentMeasure === 1) {
-                that.i = 0;
-                that.currentTime = that.playlist[that.i].time*(1/that.currentAndamento);
-                that.currentMeasurePos = that.i;
-            } else {
-                that.i = that.lastMeasurePos;
-                that.currentTime = that.playlist[that.i].time*(1/that.currentAndamento);
-                that.currentMeasure = that.playlist[that.i].barNumber;
-                that.currentMeasurePos = that.i;
-            }    
-            that.lastMeasure = that.currentMeasure;
-           break;
+            }   
+            break;
         case 'measure': // play-measure
-            var curr = that.currentMeasure;
-            var criteria = function () { 
-                return curr === that.currentMeasure;
-            };
+            that.currentMeasure = parseInt(value)? parseInt(value): that.currentMeasure;
+            that.initMeasure = that.currentMeasure;
+            if(what.measures[that.currentMeasure] !== undefined ) {
+                that.i = that.currentMeasure === 1 ? 0 : what.measures[that.currentMeasure];
+                that.currentTime = that.playlist[that.i].time*(1/that.currentAndamento);
+                criteria = function () { 
+                    return that.initMeasure === that.currentMeasure;
+                };
+            } else {
+               console.log('play-measure: measure \''+value+'\' not found!');
+               this.pausePlay(true);
+               return;
+            }   
             break;
     }
   
@@ -233,19 +208,45 @@ ABCXJS.midi.Player.prototype.startDidacticPlay = function(what, type, value, val
     return true;
 };
 
+ABCXJS.midi.Player.prototype.handleBar = function() {
+    if(this.playlist[this.i] && this.playlist[this.i].barNumber) {
+        this.currentMeasure = this.playlist[this.i].barNumber;
+        if( this.callbackOnChangeBar ) {
+            this.callbackOnPlay(this);
+        }
+    }    
+};
+
+ABCXJS.midi.Player.prototype.doPlay = function() {
+    
+    if( this.callbackOnPlay ) {
+        this.callbackOnPlay(this);
+    }
+    
+    while (!this.onError && this.playlist[this.i] &&
+           this.playlist[this.i].time <= this.currentTime) {
+        this.executa(this.playlist[this.i]);
+        this.i++;
+        this.handleBar();
+    }
+    if (!this.onError && this.playlist[this.i]) {
+        this.currentTime += this.ticksPerInterval;
+    } else {
+        this.stopPlay();
+    }
+};
+
 ABCXJS.midi.Player.prototype.doDidacticPlay = function(criteria) {
-    if( this.callbackOnPlay ) this.callbackOnPlay(this);
+    
+    if( this.callbackOnPlay ) {
+        this.callbackOnPlay(this);
+    }
+    
     while (!this.onError && this.playlist[this.i] && criteria() &&
             (this.playlist[this.i].time*(1/this.currentAndamento)) < this.currentTime ) {
         this.executa(this.playlist[this.i]);
         this.i++;
-        if(this.playlist[this.i] && this.playlist[this.i].barNumber) {
-            this.lastMeasurePos = this.currentMeasurePos;
-            this.currentMeasurePos = this.i;
-            this.lastMeasure = this.currentMeasure;
-            this.currentMeasure = this.playlist[this.i].barNumber;
-            if( this.callbackOnChangeBar ) this.callbackOnPlay(this);
-        }
+        this.handleBar();
     }
     if(this.onError) {
         this.stopPlay();
@@ -261,7 +262,7 @@ ABCXJS.midi.Player.prototype.executa = function(pl) {
     var self = this;
     var loudness = 256;
 
-    //try {
+    try {
         if( pl.start ) {
             pl.item.pitches.forEach( function( elem ) {
                 MIDI.noteOn(elem.channel, elem.midipitch, loudness, 0);
@@ -304,11 +305,11 @@ ABCXJS.midi.Player.prototype.executa = function(pl) {
                 }
             });
         }
-//    } catch( err ) {
-//        this.onError = { erro: err.message, idx: this.i, item: pl };
-//        console.log ('PlayList['+this.onError.idx+'] - Erro: ' + this.onError.erro + '.');
-//        this.addWarning( 'PlayList['+this.onError.idx+'] - Erro: ' + this.onError.erro + '.' );
-//    }
+    } catch( err ) {
+        this.onError = { erro: err.message, idx: this.i, item: pl };
+        console.log ('PlayList['+this.onError.idx+'] - Erro: ' + this.onError.erro + '.');
+        this.addWarning( 'PlayList['+this.onError.idx+'] - Erro: ' + this.onError.erro + '.' );
+    }
 };
 
 ABCXJS.midi.Player.prototype.getTime = function() {
@@ -318,7 +319,7 @@ ABCXJS.midi.Player.prototype.getTime = function() {
         return n.length >= width ? n : new Array(width - n.length + 1).join(z) + n;
     };
     
-    var time = this.playlist[this.i].time*this.tempo;
+    var time = this.playlist[this.i].time*this.tempo*(1/this.currentAndamento);
     var secs  = Math.floor(time/1000);
     var ms    = Math.floor((time - secs*1000)/10);
     var mins  = Math.floor(secs/60);
