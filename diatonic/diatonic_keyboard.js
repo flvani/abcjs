@@ -59,7 +59,7 @@ DIATONIC.map.Keyboard.prototype.setup = function (keyMap) {
     
     bassY = this.BTNSPACE * 4 + (((maiorIlheira - maiorIlheiraBaixo) / 2)) * (this.BTNSIZE + this.BTNSPACE);
     
-    var openRow, closeRow, bass, noteName;
+    var openRow, closeRow, bass, noteVal;
     
     for (var j = 0; j < this.keyMap.length; j++) {
 
@@ -93,13 +93,15 @@ DIATONIC.map.Keyboard.prototype.setup = function (keyMap) {
             btn.closeNote = this.parseNote(closeRow[i], bass);
             btn.setText( this.showLabel );
             
-            noteName = btn.openNote.key + (bass?'':btn.openNote.octave);
-            if (!this.noteToButtonsOpen[ noteName ]) this.noteToButtonsOpen[ noteName ] = [];
-            this.noteToButtonsOpen[ noteName ].push(btn.tabButton);
+            //noteName = btn.openNote.key + (bass?'':btn.openNote.octave);
+            noteVal = this.getNoteVal(btn.openNote);
+            if (!this.noteToButtonsOpen[ noteVal ]) this.noteToButtonsOpen[ noteVal ] = [];
+            this.noteToButtonsOpen[ noteVal ].push(btn.tabButton);
 
-            noteName = btn.closeNote.key + (bass?'':btn.closeNote.octave);
-            if (!this.noteToButtonsClose[ noteName ]) this.noteToButtonsClose[ noteName ] = [];
-            this.noteToButtonsClose[ noteName ].push(btn.tabButton);
+            //noteName = btn.closeNote.key + (bass?'':btn.closeNote.octave);
+            noteVal = this.getNoteVal(btn.closeNote);
+            if (!this.noteToButtonsClose[ noteVal ]) this.noteToButtonsClose[ noteVal ] = [];
+            this.noteToButtonsClose[ noteVal ].push(btn.tabButton);
             
             this.keyMap[j][i] = btn;
         }
@@ -115,6 +117,19 @@ DIATONIC.map.Keyboard.prototype.setup = function (keyMap) {
         this.limits.maxX-(this.BTNRADIUS + this.BTNSPACE), this.limits.minY+(this.BTNRADIUS + this.BTNSPACE), 
         {openLabel: 'Abre', closeLabel: 'Fecha', radius: 36, pedal: true, fontsize: 14, xLabel: 0, textAnchor: 'middle', color: '#828282'}
     );
+};
+
+DIATONIC.map.Keyboard.prototype.getButtons = function (note) {
+    var noteVal = this.getNoteVal(note);
+    return {
+        open: this.noteToButtonsOpen[noteVal]
+        , close: this.noteToButtonsClose[noteVal]
+    };
+};
+
+DIATONIC.map.Keyboard.prototype.getNoteVal = function ( note ) {
+    //noteVal will be a numeric product of the key + octave (to avoid #/b problem)
+    return DIATONIC.map.key2number[note.key.toUpperCase()] + (note.isBass?(note.isChord?-12:0):note.octave*12);
 };
 
 DIATONIC.map.Keyboard.prototype.print = function (div, options ) {

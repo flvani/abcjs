@@ -165,17 +165,9 @@ ABCXJS.tablature.Accordion.prototype.getNoteName = function( item, keyAcc, barAc
     return { key: key, octave:oitava, isBass:bass, isChord: item.chord, value:value };
 };
 
-ABCXJS.tablature.Accordion.prototype.getButtons = function (note) {
-  return {
-       open:this.getKeyboard().noteToButtonsOpen[note.isBass?note.key:note.key+note.octave]
-      ,close:this.getKeyboard().noteToButtonsClose[note.isBass?note.key:note.key+note.octave]
-  };    
-};
-
 ABCXJS.tablature.Accordion.prototype.inferTabVoice = function( line, tune, strTUne, vars ) {
     var i = new ABCXJS.tablature.Infer( this, tune, strTUne, vars );
     return i.inferTabVoice( line );
-
 };
 
 ABCXJS.tablature.Accordion.prototype.parseTabVoice = function(str, vars ) {
