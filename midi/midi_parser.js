@@ -129,6 +129,10 @@ ABCXJS.midi.Parse.prototype.handleButtons = function(pitches, buttons) {
     var note, midipitch, key, pitch;
     
     buttons.forEach( function( item ) {
+        if(!item.button.button) {
+            console.log( 'ABCXJS.midi.Parse.prototype.handleButtons: botão não encontrado.');
+            return;
+        }
         if( item.button.closing )  {
             note = item.button.button.closeNote;
         } else {

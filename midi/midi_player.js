@@ -166,6 +166,7 @@ ABCXJS.midi.Player.prototype.startDidacticPlay = function(what, type, value, val
     
     switch( type ) {
         case 'note': // step-by-step
+            what.printer.clearSelection();
             what.keyboard.clear(true);
             that.initTime = that.playlist[that.i].time;
             criteria = function () { 
