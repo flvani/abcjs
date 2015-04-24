@@ -286,8 +286,9 @@ ABCXJS.midi.Player.prototype.executa = function(pl) {
                         elem.button.button.setOpen();
                     }
                     if( self.type !== 'note' ) {
-                        //limpa o botão 1/4 de tempo antes do fim da nota - para dar ideia visual de botão pressionado/liberado antes da proxima nota
-                        elem.button.button.clear( ( elem.mididuration * self.tempo * (1/self.currentAndamento) ) * 0.80 );
+                        //limpa o botão uma fração de tempo antes do fim da nota - para dar ideia visual de botão pressionado/liberado antes da proxima nota
+                        var clearTime = (self.tempo * (1/self.currentAndamento)) *.5;
+                        elem.button.button.clear( ( elem.mididuration * self.tempo * (1/self.currentAndamento) ) - clearTime  );
                     }    
                 }
                 
