@@ -68,6 +68,10 @@ java -jar yuicompressor-2.4.2.jar  --line-break 7000 -o bin/filemanager_$1-min.j
 mv tmp/abcxjs.js  ../diatonic-map/abcxjs/
 mv tmp/diatonic.js  ../diatonic-map/diatonic/
 
+cp bin/abcxjs_$1-min.js ../diatonic-map/abcxjs/
+cp bin/diatonic_$1-min.js ../diatonic-map/diatonic/
+cp bin/filemanager_$1-min.js ../diatonic-map/file/
+
 #echo "Removing temporary files..."
 #rm tmp/*
 

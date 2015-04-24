@@ -106,7 +106,7 @@ ABCXJS.midi.Parse.prototype.parse = function(tune, keyboard) {
         
         if( item.start.pitches.length + item.start.abcelems.length + item.start.buttons.length > 0 ) {
             self.handleButtons(item.start.pitches, item.start.buttons);
-                if( item.start.barNumber ) {
+            if( item.start.barNumber ) {
                 if( item.start.barNumber > currBar ) {
                     currBar = item.start.barNumber;
                     self.midiTune.measures[currBar] = self.midiTune.playlist.length;

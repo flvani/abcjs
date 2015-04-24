@@ -286,9 +286,11 @@ ABCXJS.midi.Player.prototype.executa = function(pl) {
                         elem.button.button.setOpen();
                     }
                     if( self.type !== 'note' ) {
+                        //o andamento é considerado somente para o modo didatico
+                        var andamento = self.type?(1/self.currentAndamento):1;
                         //limpa o botão uma fração de tempo antes do fim da nota - para dar ideia visual de botão pressionado/liberado antes da proxima nota
-                        var clearTime = (self.tempo * (1/self.currentAndamento)) *.5;
-                        elem.button.button.clear( ( elem.mididuration * self.tempo * (1/self.currentAndamento) ) - clearTime  );
+                        var clearTime = (self.tempo * andamento) *.5;
+                        elem.button.button.clear( ( elem.mididuration * self.tempo * andamento ) - clearTime  );
                     }    
                 }
                 

@@ -1,4 +1,9 @@
-echo "Concatenating all files..."
+
+@echo "Concatenating all files..."
+@echo .
+
+@IF [%1]==[] echo Informe o numero da versao. Formato x.xx
+@IF [%1]==[] goto :fim
 
 copy /b/y diatonic\* tmp\diatonic.js
 copy /b/y parse\* tmp\parse.js
@@ -22,20 +27,25 @@ copy /b/y tmp\abcjs-nomidi.js+tmp\tablature.js tmp\abcxjs-nomidi.js
 copy /b/y tmp\abcjs-noraphael.js+tmp\tablature.js tmp\abcxjs-noraphael.js
 copy /b/y tmp\abcjs-noraphael-nomidi.js+tmp\tablature.js tmp\abcxjs-noraphael-nomidi.js
 
-set versao=3.25
+@set versao=%1
 
-echo Compressing ABCX %versao% tabeditor lib ...
-java -Dfile.encoding=utf-8 -jar yuicompressor-2.4.2.jar  --line-break 7000 -o bin\abcxjs_%versao%-min.js tmp/abcxjs.js
+@echo Compressing ABCX %versao% tabeditor lib ...
+java -Dfile.encoding=utf-8 -jar yuicompressor-2.4.2.jar  --line-break 7000 -o bin\abcxjs_%versao%-min.js tmp\abcxjs.js
 
-echo "Compressing diatonic-map lib..."
-java -Dfile.encoding=utf-8 -jar yuicompressor-2.4.2.jar  --line-break 7000 -o bin\diatonic_%versao%-min.js tmp/diatonic.js
+@echo "Compressing diatonic-map lib..."
+java -Dfile.encoding=utf-8 -jar yuicompressor-2.4.2.jar  --line-break 7000 -o bin\diatonic_%versao%-min.js tmp\diatonic.js
 
-echo "Compressing file manager lib..."
-java -Dfile.encoding=utf-8 -jar yuicompressor-2.4.2.jar  --line-break 7000 -o bin\filemanager_%versao%-min.js file/filemanager.js
+@echo "Compressing file manager lib..."
+java -Dfile.encoding=utf-8 -jar yuicompressor-2.4.2.jar  --line-break 7000 -o bin\filemanager_%versao%-min.js file\filemanager.js
 
-#echo "Removing temporary files..."
-#rm tmp\*
+rem echo "Removing temporary files..."
+rem rm tmp\*
 
 copy /b/y tmp\abcxjs.js ..\diatonic-map\abcxjs\
 copy /b/y tmp\diatonic.js ..\diatonic-map\diatonic\
 
+copy /b/y bin\abcxjs_%versao%-min.js ..\diatonic-map\abcxjs\
+copy /b/y bin\diatonic_%versao%-min.js ..\diatonic-map\diatonic\
+copy /b/y bin\filemanager_%versao%-min.js ..\diatonic-map\file\
+
+:fim
