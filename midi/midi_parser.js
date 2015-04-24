@@ -143,20 +143,21 @@ ABCXJS.midi.Parse.prototype.handleButtons = function(pitches, buttons) {
         } else {
             midipitch = 12 + 12 * note.octave + DIATONIC.map.key2number[ note.key ];
         }
-
+        
+        // TODO:  no caso dos baixos, quando houver o baixo e o acorde simultaneamente
+        // preciso garantir que estou atribuindo o botão à nota certa, visto que  podem ter tempos diferentes
+        // por hora, procuro a primeira nota que corresponda e não esteja com botão associado (! pitches[r].button)
         for( var r = 0; r < pitches.length; r ++ ) {
             if(note.isBass && pitches[r].clef === 'bass') {
                 pitch = pitches[r].midipitch % 12;
-                if( pitch === DIATONIC.map.key2number[ key ]){
+                if( pitch === DIATONIC.map.key2number[ key ] && ! pitches[r].button ){
                     pitches[r].button = item.button;
-                    //item.button.button = null;
                     item.button = null;
                     return;
                 }
             } else if(!note.isBass && pitches[r].clef !== 'bass') { 
-                if( pitches[r].midipitch === midipitch) {
+                if( pitches[r].midipitch === midipitch ) {
                     pitches[r].button = item.button;
-                    //item.button.button = null;
                     item.button = null;
                     return;
                 }

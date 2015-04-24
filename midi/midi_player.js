@@ -130,6 +130,7 @@ ABCXJS.midi.Player.prototype.startPlay = function(what) {
     this.playlist = what.playlist;
     this.tempo    = what.tempo;
     this.printer  = what.printer;
+    this.type     = null; // definido somente para o modo didatico
 
     this.playing = true;
     this.onError = null;
@@ -155,6 +156,7 @@ ABCXJS.midi.Player.prototype.startDidacticPlay = function(what, type, value, val
     this.playlist = what.playlist;
     this.tempo    = what.tempo;
     this.printer  = what.printer;
+    this.type     = type;
 
     this.playing  = true;
     this.onError  = null;
@@ -164,6 +166,7 @@ ABCXJS.midi.Player.prototype.startDidacticPlay = function(what, type, value, val
     
     switch( type ) {
         case 'note': // step-by-step
+            what.keyboard.clear(true);
             that.initTime = that.playlist[that.i].time;
             criteria = function () { 
                 return that.initTime === that.playlist[that.i].time;
@@ -282,8 +285,10 @@ ABCXJS.midi.Player.prototype.executa = function(pl) {
                     }else{
                         elem.button.button.setOpen();
                     }
-                    //limpa o botão 1/4 de tempo antes do fim da nota - para dar ideia visual de botão pressionado/liberado antes da proxima nota
-                    elem.button.button.clear( ( elem.mididuration * self.tempo * (1/self.currentAndamento) ) * 0.75 );
+                    if( self.type !== 'note' ) {
+                        //limpa o botão 1/4 de tempo antes do fim da nota - para dar ideia visual de botão pressionado/liberado antes da proxima nota
+                        elem.button.button.clear( ( elem.mididuration * self.tempo * (1/self.currentAndamento) ) * 0.80 );
+                    }    
                 }
                 
             });

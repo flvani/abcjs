@@ -367,6 +367,7 @@ V:5 accordionTab
                 playButton.addEventListener("click", function() {
                     player.startPlay( myEditor.tunes[0].midi );
                     //player.startDidacticPlay(myEditor.tunes[0].midi, 'note');
+                    //player.startDidacticPlay(myEditor.tunes[0].midi, 'measure');
                 }, false);
                 pauseButton.addEventListener("click", function() {
                     player.pausePlay();
@@ -403,7 +404,7 @@ V:5 accordionTab
 
         </script>        
 
-        <div id="keyboardDiv"></div> 
+        <div id="keyboardDiv" style="position:absolute; top:50px; left:80%;"></div> 
     </body>
     
 </html>
