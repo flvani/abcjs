@@ -105,7 +105,8 @@ ABCXJS.midi.Parse.prototype.parse = function(tune, keyboard) {
         }
         
         if( item.start.pitches.length + item.start.abcelems.length + item.start.buttons.length > 0 ) {
-            if( item.start.barNumber ) {
+            self.handleButtons(item.start.pitches, item.start.buttons);
+                if( item.start.barNumber ) {
                 if( item.start.barNumber > currBar ) {
                     currBar = item.start.barNumber;
                     self.midiTune.measures[currBar] = self.midiTune.playlist.length;
@@ -124,6 +125,48 @@ ABCXJS.midi.Parse.prototype.parse = function(tune, keyboard) {
     return this.midiTune;
 };
 
+ABCXJS.midi.Parse.prototype.handleButtons = function(pitches, buttons) {
+    var note, midipitch, key, pitch;
+    
+    buttons.forEach( function( item ) {
+        if( item.button.closing )  {
+            note = item.button.button.closeNote;
+        } else {
+            note = item.button.button.openNote;
+        }
+        if(note.isBass) {
+            if(note.isChord){
+                key = note.key.toUpperCase();
+            } else{
+                key = note.key;
+            }
+        } else {
+            midipitch = 12 + 12 * note.octave + DIATONIC.map.key2number[ note.key ];
+        }
+
+        for( var r = 0; r < pitches.length; r ++ ) {
+            if(note.isBass && pitches[r].clef === 'bass') {
+                pitch = pitches[r].midipitch % 12;
+                if( pitch === DIATONIC.map.key2number[ key ]){
+                    pitches[r].button = item.button;
+                    //item.button.button = null;
+                    item.button = null;
+                    return;
+                }
+            } else if(!note.isBass && pitches[r].clef !== 'bass') { 
+                if( pitches[r].midipitch === midipitch) {
+                    pitches[r].button = item.button;
+                    //item.button.button = null;
+                    item.button = null;
+                    return;
+                }
+            }
+        }
+    });
+    
+    
+};
+            
 ABCXJS.midi.Parse.prototype.writeABCLine = function() {
     
     if ( this.abctune.lines[this.line].staffs ) {
@@ -413,7 +456,10 @@ ABCXJS.midi.Parse.prototype.addStart = function( time, midipitch, abcelem, butto
         if(this.staff === 0 && this.voice === 0 && abcelem.barNumber ) 
             pE.start.barNumber = pE.start.barNumber || abcelem.barNumber;
     }    
-    if( midipitch ) pE.start.pitches.push(midipitch);
+    if( midipitch ) {
+        midipitch.clef = this.getStaff().clef.type;
+        pE.start.pitches.push(midipitch);
+    }
     if( button    ) pE.start.buttons.push({button:button,abcelem:abcelem});
 };
 

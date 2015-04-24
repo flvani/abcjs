@@ -97,8 +97,13 @@ DIATONIC.map.Button.prototype.draw = function( paper, limits, options ) {
             .attr({"fill": "none", "stroke": this.color, "stroke-width": this.stroke});
 };
 
-DIATONIC.map.Button.prototype.clear = function() {
+DIATONIC.map.Button.prototype.clear = function(delay) {
     if(!this.closeSide) return;
+    var that = this;
+    if(delay) {
+        window.setTimeout(function(){ that.clear(); }, delay);
+        return;
+    }    
     this.openSide.attr({"fill": "none", "stroke": "none", "stroke-width": 0});
     this.closeSide.attr({"fill": "none", "stroke": "none", "stroke-width": 0});
 };
@@ -107,19 +112,21 @@ DIATONIC.map.Button.prototype.setOpen = function(delay) {
     if(!this.openSide) return;
     var that = this;
     if(  delay ) {
-        window.setTimeout(function(){that.openSide.attr({"fill": that.openColor, "stroke": that.openColor, "stroke-width": 0});}, delay );
-    } else {
-        that.openSide.attr({"fill": that.openColor, "stroke": that.openColor, "stroke-width": 0});
-    }
+        window.setTimeout(function(){that.setOpen();}, delay );
+        return;
+    } 
+    this.openSide.attr({"fill": this.openColor, "stroke": this.openColor, "stroke-width": 0});
 };
+
 DIATONIC.map.Button.prototype.setClose = function(delay) {
     if(!this.closeSide) return;
     var that = this;
     if(  delay ) {
-        window.setTimeout(function(){that.closeSide.attr({"fill": that.closeColor, "stroke": that.closeColor, "stroke-width": 0});}, delay);
-    } else {
-        that.closeSide.attr({"fill": that.closeColor, "stroke": that.closeColor, "stroke-width": 0});
-    }    
+        window.setTimeout(function(){that.setClose();}, delay);
+        return;
+    } 
+    this.closeSide.attr({"fill": this.closeColor, "stroke": this.closeColor, "stroke-width": 0});
+    
 };
 
 DIATONIC.map.Button.prototype.getLabel = function(nota, showLabel) {

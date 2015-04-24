@@ -275,6 +275,17 @@ ABCXJS.midi.Player.prototype.executa = function(pl) {
                     t += k;
                     resto -= k;
                 }
+                
+                if(elem.button && elem.button.button) {
+                    if(elem.button.closing) {
+                        elem.button.button.setClose();
+                    }else{
+                        elem.button.button.setOpen();
+                    }
+                    //limpa o botão 1/4 de tempo antes do fim da nota - para dar ideia visual de botão pressionado/liberado antes da proxima nota
+                    elem.button.button.clear( ( elem.mididuration * self.tempo * (1/self.currentAndamento) ) * 0.75 );
+                }
+                
             });
             pl.item.abcelems.forEach( function( elem ) {
                 if( self.callbackOnScroll ) {
@@ -284,25 +295,12 @@ ABCXJS.midi.Player.prototype.executa = function(pl) {
                 }
                 if( self.printer ) self.printer.notifySelect(elem.abcelem.abselem);
             });
-            pl.item.buttons.forEach( function( elem ) {
-                if(elem.button.button) {
-                    if(elem.button.closing)
-                        elem.button.button.setClose(/*elem.button.duration*self.tempo/8*/);
-                    else
-                        elem.button.button.setOpen(/*elem.button.duration*self.tempo/8*/);
-                }
-            });
         } else {
             pl.item.pitches.forEach( function( elem ) {
                 MIDI.noteOff(elem.channel, elem.midipitch, 0);
             });
             pl.item.abcelems.forEach( function( elem ) {
                 elem.abcelem.abselem.unhighlight();
-            });
-            pl.item.buttons.forEach( function( elem ) {
-                if (elem.button.button ) {
-                    elem.button.button.clear();
-                }
             });
         }
     } catch( err ) {
