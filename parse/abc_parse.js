@@ -1646,7 +1646,7 @@ window.ABCXJS.parse.Parse = function(transposer_, accordion_) {
         header.reset(tokenizer, warn, multilineVars, tune);
 
         var lines = this.tuneHouseKeeping(strTune);
-        try {
+        //try {
             for (var lineNumber = 0; lineNumber < lines.length; lineNumber++) {
                 var line = lines[lineNumber];
                 if (switches) {
@@ -1716,9 +1716,9 @@ window.ABCXJS.parse.Parse = function(transposer_, accordion_) {
                     }
                 }
             }
-        } catch (err) {
-            if (err !== "normal_abort")
-                throw err;
-        }
+        //} catch (err) {
+        //    if (err !== "normal_abort")
+        //        throw err;
+        //}
     };
 };

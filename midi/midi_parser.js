@@ -105,7 +105,11 @@ ABCXJS.midi.Parse.prototype.parse = function(tune, keyboard) {
         }
         
         if( item.start.pitches.length + item.start.abcelems.length + item.start.buttons.length > 0 ) {
-            self.handleButtons(item.start.pitches, item.start.buttons);
+            if( item.start.barNumber ) {
+               this.lastBar = item.start.barNumber > currBar? item.start.barNumber:null;
+            }
+            
+            self.handleButtons(item.start.pitches, item.start.buttons );
             if( item.start.barNumber ) {
                 if( item.start.barNumber > currBar ) {
                     currBar = item.start.barNumber;
@@ -125,12 +129,12 @@ ABCXJS.midi.Parse.prototype.parse = function(tune, keyboard) {
     return this.midiTune;
 };
 
-ABCXJS.midi.Parse.prototype.handleButtons = function(pitches, buttons) {
+ABCXJS.midi.Parse.prototype.handleButtons = function(pitches, buttons, currBar) {
     var note, midipitch, key, pitch;
-    
+    var self = this;
     buttons.forEach( function( item ) {
         if(!item.button.button) {
-            console.log( 'ABCXJS.midi.Parse.prototype.handleButtons: botão não encontrado.');
+            //console.log( 'ABCXJS.midi.Parse.prototype.handleButtons: botão não encontrado.');
             return;
         }
         if( item.button.closing )  {
@@ -151,15 +155,18 @@ ABCXJS.midi.Parse.prototype.handleButtons = function(pitches, buttons) {
         // TODO:  no caso dos baixos, quando houver o baixo e o acorde simultaneamente
         // preciso garantir que estou atribuindo o botão à nota certa, visto que  podem ter tempos diferentes
         // por hora, procuro a primeira nota que corresponda e não esteja com botão associado (! pitches[r].button)
+        var hasBass=false, hasTreble=false;
         for( var r = 0; r < pitches.length; r ++ ) {
             if(note.isBass && pitches[r].clef === 'bass') {
                 pitch = pitches[r].midipitch % 12;
+                hasBass=true;
                 if( pitch === DIATONIC.map.key2number[ key ] && ! pitches[r].button ){
                     pitches[r].button = item.button;
                     item.button = null;
                     return;
                 }
             } else if(!note.isBass && pitches[r].clef !== 'bass') { 
+                hasTreble=true;
                 if( pitches[r].midipitch === midipitch ) {
                     pitches[r].button = item.button;
                     item.button = null;
@@ -167,6 +174,9 @@ ABCXJS.midi.Parse.prototype.handleButtons = function(pitches, buttons) {
                 }
             }
         }
+        if((note.isBass && hasBass) || (!note.isBass && hasTreble && this.lastBar )) {
+            self.addWarning( 'Compasso '+this.lastBar+': Botao '+item.button.button.tabButton+' ('+item.button.button.closeLabel+'/'+item.button.button.openLabel+') não corresponde a nenhuma nota em execução.');
+        }    
     });
     
     

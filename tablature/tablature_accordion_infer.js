@@ -134,6 +134,12 @@ ABCXJS.tablature.Infer.prototype.inferTabVoice = function(line) {
         }
     } 
     
+    if(this.missingButtons){
+        for( var m in this.missingButtons ) {
+            this.addWarning('Nota ' + m + ' não disponível nos compassos: ' + this.missingButtons[m].join(",") + '.' ) ;
+        }
+    }
+    
     this.accordion.setTabLine(this.producedLine);
     
     return this.voice;
@@ -432,6 +438,9 @@ ABCXJS.tablature.Infer.prototype.addTABChild = function(token) {
                     } else {
                         item.c = this.elegeBotao(this.closing ? item.buttons.close : item.buttons.open);
                         this.registerLine(this.button2Hex(item.c));
+                        if( item.c === 'x'){
+                            this.registerMissingButton(this.closing, item);
+                       }
                     }
             }
         }
@@ -439,6 +448,12 @@ ABCXJS.tablature.Infer.prototype.addTABChild = function(token) {
     var dur = child.duration / this.vars.default_length;
     var xf = this.registerLine((qtd > 1 ? "]" : "") + (dur !== 1 ? dur.toString() : "") + " ");
     this.add(child, xi, xf-1);
+};
+
+ABCXJS.tablature.Infer.prototype.registerMissingButton = function(close,item) {
+    if( ! this.missingButtons ) this.missingButtons = {};
+    if( ! this.missingButtons[item.note] )  this.missingButtons[item.note] = [];
+    this.missingButtons[item.note].push(this.currInterval);
 };
 
 ABCXJS.tablature.Infer.prototype.getXi = function() {
