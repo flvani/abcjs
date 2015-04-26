@@ -174,9 +174,10 @@ ABCXJS.midi.Parse.prototype.handleButtons = function(pitches, buttons, currBar) 
                 }
             }
         }
-        if((note.isBass && hasBass) || (!note.isBass && hasTreble && this.lastBar )) {
-            self.addWarning( 'Compasso '+this.lastBar+': Botao '+item.button.button.tabButton+' ('+item.button.button.closeLabel+'/'+item.button.button.openLabel+') não corresponde a nenhuma nota em execução.');
-        }    
+        // está quase certo: precisa tratar o caso de ter mais de uma voz sobreposta.
+        //if((note.isBass && hasBass) || (!note.isBass && hasTreble && this.lastBar )) {
+        //    self.addWarning( 'Compasso '+this.lastBar+': Botao '+item.button.button.tabButton+' ('+item.button.button.closeLabel+'/'+item.button.button.openLabel+') não corresponde a nenhuma nota em execução.');
+        //}    
     });
     
     
