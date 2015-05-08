@@ -40,8 +40,13 @@ window.ABCXJS.parse.Parse = function(transposer_, accordion_) {
     var tune = new window.ABCXJS.data.Tune();
     var tokenizer = new window.ABCXJS.parse.tokenizer();
 
+    var strTune = '';
+
     this.getTune = function() {
         return tune;
+    };
+    this.getStrTune = function() {
+        return strTune;
     };
 
     var multilineVars = {
@@ -1587,12 +1592,16 @@ window.ABCXJS.parse.Parse = function(transposer_, accordion_) {
             if (multilineVars.clef.type === "accordionTab") {
                 var startOfLine = this.getMultilineVars().iChar;
                 if (this.accordion) {
-                    var voice = this.accordion.parseTabVoice(ret.str, this.getMultilineVars(), this.getTune());
-                    if (voice.length > 0) {
-                        startNewLine();
-                        tune.restsInTab = multilineVars.restsintab || false;
-                        for (var i = 0; i < voice.length; i++) {
-                            tune.appendElement(voice[i].el_type, startOfLine + voice[i].startChar, startOfLine + voice[i].endChar, voice[i]);
+                    if( this.transposer && this.transposer.offSet !== 0) {
+                        this.transposer.deleteTabLine(lineNumber);
+                    } else {
+                        var voice = this.accordion.parseTabVoice(ret.str, this.getMultilineVars(), this.getTune());
+                        if (voice.length > 0) {
+                            startNewLine();
+                            tune.restsInTab = multilineVars.restsintab || false;
+                            for (var i = 0; i < voice.length; i++) {
+                                tune.appendElement(voice[i].el_type, startOfLine + voice[i].startChar, startOfLine + voice[i].endChar, voice[i]);
+                            }
                         }
                     }
                 } else {
@@ -1600,7 +1609,7 @@ window.ABCXJS.parse.Parse = function(transposer_, accordion_) {
                 }
             } else {
                 if (this.transposer && this.transposer.offSet !== 0) {
-                    ret.str = this.transposer.transposeRegularMusicLine(ret.str, line, lineNumber);
+                    ret.str = this.transposer.transposeRegularMusicLine(line, lineNumber);
                 }
                 this.parseRegularMusicLine(ret.str);
             }
@@ -1615,7 +1624,7 @@ window.ABCXJS.parse.Parse = function(transposer_, accordion_) {
             this.parseLine(ret.str);
     };
 
-    this.tuneHouseKeeping = function(strTune) {
+    this.strTuneHouseKeeping = function() {
         // Take care of whatever line endings come our way
         strTune = window.ABCXJS.parse.gsub(strTune, '\r\n', '\n');
         strTune = window.ABCXJS.parse.gsub(strTune, '\r', '\n');
@@ -1632,20 +1641,31 @@ window.ABCXJS.parse.Parse = function(transposer_, accordion_) {
             lines.pop();
         return lines;
     };
+    
+    this.appendString = function(newLines) {
+        //retira \n ao final  
+        var t = strTune;
+        while( t.charAt(t.length-1) === '\n' ) {
+            t = t.substr(0,t.length-1);
+        }
+        return t + newLines;
+    };
+    
 
-    this.parse = function(strTune, switches) {
+    this.parse = function(tuneTxt, switches) {
         // the switches are optional and cause a difference in the way the tune is parsed.
         // switches.header_only : stop parsing when the header is finished
         // switches.stop_on_warning : stop at the first warning encountered.
         // switches.print: format for the page instead of the browser.
         //window.ABCXJS.parse.transpose = transpose;
+        strTune = tuneTxt;
         tune.reset();
         if (switches && switches.print)
             tune.media = 'print';
         multilineVars.reset();
         header.reset(tokenizer, warn, multilineVars, tune);
 
-        var lines = this.tuneHouseKeeping(strTune);
+        var lines = this.strTuneHouseKeeping();
         //try {
             for (var lineNumber = 0; lineNumber < lines.length; lineNumber++) {
                 var line = lines[lineNumber];
@@ -1687,6 +1707,10 @@ window.ABCXJS.parse.Parse = function(transposer_, accordion_) {
             
             tune.cleanUp(multilineVars.barsperstaff, multilineVars.staffnonote);
             
+            if( this.transposer && this.transposer.offSet !== 0 ) {
+                strTune = this.transposer.updateEditor( lines );
+            }
+            
             if (tune.hasTablature) {
                 // necessário inferir a tablatura
                 if (tune.lines[0].staffs[tune.tabStaffPos].voices[0].length === 0) {
@@ -1704,13 +1728,16 @@ window.ABCXJS.parse.Parse = function(transposer_, accordion_) {
                     if (this.accordion) {
                         for (var t = 0; t < tune.lines.length; t++) {
                            if (tune.lines[t].staffs ) {
-                              var voice = this.accordion.inferTabVoice(t, tune, strTune, multilineVars);
+                              var voice = this.accordion.inferTabVoice(t, tune/*, strTune*/, multilineVars);
                               if (voice.length > 0) {
                                   tune.lines[t].staffs[tune.tabStaffPos].voices[0] = voice;
                                   tune.restsInTab = multilineVars.restsintab || false;
                               }
                            }  
                         }
+                        // obtem possiveis linhas inferidas para tablatura
+                        strTune = this.appendString( this.accordion.updateEditor() );
+                        
                     } else {
                         addWarning("+Warn: Cannot infer tablature line: no accordion defined!");
                     }

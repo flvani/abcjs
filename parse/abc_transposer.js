@@ -14,13 +14,15 @@ if (!window.ABCXJS.parse)
     
 window.ABCXJS.parse.Transposer = function ( offSet ) {
     
-    this.pitches           = window.ABCXJS.parse.pitches;
-    this.key2number        = window.ABCXJS.parse.key2number;
-    this.number2keyflat    = window.ABCXJS.parse.number2keyflat;
-    this.number2keysharp   = window.ABCXJS.parse.number2keysharp;
-    this.number2key_br     = window.ABCXJS.parse.number2key_br;
-    this.number2staff      = window.ABCXJS.parse.number2staff;
-    this.number2staffSharp = window.ABCXJS.parse.number2staffSharp;
+    this.pitches           = ABCXJS.parse.pitches;
+    this.key2number        = ABCXJS.parse.key2number;
+    this.number2keyflat    = ABCXJS.parse.number2keyflat;
+    this.number2keysharp   = ABCXJS.parse.number2keysharp;
+    this.number2key_br     = ABCXJS.parse.number2key_br;
+    this.number2staff      = ABCXJS.parse.number2staff;
+    this.number2staffSharp = ABCXJS.parse.number2staffSharp;
+    
+    this.tokenizer         = new ABCXJS.parse.tokenizer();
     
     this.reset( offSet );
     
@@ -32,6 +34,7 @@ window.ABCXJS.parse.Transposer.prototype.reset = function( offSet ) {
     this.newKeyAcc       = [];
     this.oldKeyAcc       = [];
     this.changedLines    = [];
+    this.deletedLines    = [];
     this.newX            =  0;
     this.workingX        =  0;
     this.workingLine     = -1;
@@ -78,11 +81,8 @@ window.ABCXJS.parse.Transposer.prototype.numberToStaff = function(number, newKac
     return s;
 };
 
-window.ABCXJS.parse.Transposer.prototype.transposeRegularMusicLine = function(str, line, lineNumber) {
+window.ABCXJS.parse.Transposer.prototype.transposeRegularMusicLine = function(line, lineNumber) {
 
-    if( str.trim() !== line.trim() ) 
-        alert( "window.ABCXJS.parse.Transposer.prototype.TransposeRegularMusicLine: isto não devia acontecer!\nstr.:"+str+".\nline:"+line+".");
-    
     var index = 0;
     var found = false;
     var inside = false;
@@ -107,19 +107,17 @@ window.ABCXJS.parse.Transposer.prototype.transposeRegularMusicLine = function(st
         found = false;
         inside = false;
         lastState = 0;
-        while (index < line.length && !found) {
+        while (index < line.length && !found && line.charAt(index) !== '%') {
             
             // ignora o conteúdo de accents
-            if( exclusionSyms.indexOf(line.charAt(index)) >= 0 ) {
+            if( !inside && exclusionSyms.indexOf(line.charAt(index)) >= 0 ) {
                 var nextPos = line.substr( index+1 ).indexOf(line.charAt(index));
                 if( nextPos < 0 ) {
                     index = line.length;
                 } else {
                     if(line.charAt(index)==='"') {
-                        //transpor acorde textual - aqui não está tratando bemois e sustenidos...
-                        //alem disso, trata com abc note, ou seja, tem maiusculas e minusculas
-                        this.transposeNote(index+1, 1);
-                    }
+                        this.transposeChord( index+1, nextPos ); 
+                    }    
                     index += nextPos + 2;
                 }
                 continue;
@@ -151,11 +149,37 @@ window.ABCXJS.parse.Transposer.prototype.transposeRegularMusicLine = function(st
             } else {
               index++;
             }   
+            
         }
-        if(inside && !found)
-          this.transposeNote(xi, index - xi);
+        
+        if(inside && !found) {
+            this.transposeNote(xi, index - xi);
+        }
+        
+        if(line.charAt(index) === '%' ){
+            index = line.length;
+        }
+      
     }
     return this.changedLines[ this.workingLineIdx ].text;
+};
+
+window.ABCXJS.parse.Transposer.prototype.transposeChord = function ( xi, size ) {
+    
+    var c = this.workingLine.substring(xi,xi+size);
+    var rex = c.match(/[ABCDEFG][#b]*[°]*[0-9]*(\/*[0-9])*/g);
+    
+    if( Math.abs(this.offSet)%12 === 0 || !rex || c!==rex[0]  ) return ;
+    
+    var cKey = this.parseKey( c );
+    
+    var newKey = this.keyToNumber( cKey );
+    var cNewKey = this.denormalizeAcc( this.numberToKey(newKey + this.offSet ));
+    
+    var newStr  = c.replace(cKey, cNewKey );
+   
+    this.updateWorkingLine( newStr, xi, size/*, cNewKey.length*/ );
+    //this.workingLine = this.workingLine.substr(0, xi) + cNewKey + this.workingLine.substr(xi+size);
 };
 
 window.ABCXJS.parse.Transposer.prototype.transposeNote = function(xi, size )
@@ -217,15 +241,18 @@ window.ABCXJS.parse.Transposer.prototype.transposeNote = function(xi, size )
     var key = this.numberToKey(this.staffNoteToCromatic(this.extractStaffNote(pitch)));
     txtAcc = newElem.accidental;
     abcNote = this.getAbcNote(key, txtAcc, oct);
+    this.updateWorkingLine( abcNote, xi, size/*, abcNote.length */);
+    return newElem;
+};
+
+window.ABCXJS.parse.Transposer.prototype.updateWorkingLine = function( newText, xi, size/*, newSize*/ ) {
     var p0 = this.changedLines[this.workingLineIdx].text.substr(0, this.newX);
     var p1 = this.workingLine.substr(this.workingX, xi - this.workingX);
     var p2 = this.workingLine.substr(xi + size);
     this.workingX = xi + size;
-    this.changedLines[this.workingLineIdx].text = p0 + p1 + abcNote;
+    this.changedLines[this.workingLineIdx].text = p0 + p1 + newText;
     this.newX = this.changedLines[this.workingLineIdx].text.length;
     this.changedLines[this.workingLineIdx].text += p2;
-    return newElem;
-
 };
 
 window.ABCXJS.parse.Transposer.prototype.getAbcNote = function( key, txtAcc, oct) {
@@ -240,35 +267,14 @@ window.ABCXJS.parse.Transposer.prototype.getAbcNote = function( key, txtAcc, oct
    return this.accNameToABC(txtAcc) + key + cOct;
 };
 
-window.ABCXJS.parse.Transposer.prototype.registerKey = function ( tokenizer, str ) {
-    var cKey = "C";
-    var tokens = tokenizer.tokenize(str, 0, str.length);
-    var retPitch = tokenizer.getKeyPitch(tokens[0].token);
+window.ABCXJS.parse.Transposer.prototype.transposeKey = function ( str, line, lineNumber ) {
 
-    if (retPitch.len > 0) {
-        // The accidental and mode might be attached to the pitch, so we might want to just remove the first character.
-        cKey = retPitch.token;
-        if (tokens[0].token.length > 1)
-            tokens[0].token = tokens[0].token.substring(1);
-        else
-            tokens.shift();
-        // We got a pitch to start with, so we might also have an accidental and a mode
-        if (tokens.length > 0) {
-            var retAcc = tokenizer.getSharpFlat(tokens[0].token);
-            if (retAcc.len > 0) {
-                cKey += retAcc.token;
-            }
-        }
-    }
+    var cKey = this.parseKey( str );
     
     this.currKey[this.currKey.length] = cKey;
     
-    return cKey;
-};
-
-window.ABCXJS.parse.Transposer.prototype.transposeKey = function ( tokenizer, str, line, lineNumber ) {
+    if( Math.abs(this.offSet)%12 === 0 || ! cKey ) return this.tokenizer.tokenize(str, 0, str.length);
     
-    var cKey = this.registerKey( tokenizer, str );
     var newKey = this.keyToNumber( cKey );
     var cNewKey = this.denormalizeAcc( this.numberToKey(newKey + this.offSet ));
     
@@ -279,20 +285,54 @@ window.ABCXJS.parse.Transposer.prototype.transposeKey = function ( tokenizer, st
     
     this.changedLines[ this.changedLines.length ] = { line:lineNumber, text: newLine };
 
-    this.oldKeyAcc = window.ABCXJS.parse.parseKeyVoice.standardKey(this.denormalizeAcc(cKey));
-    this.newKeyAcc = window.ABCXJS.parse.parseKeyVoice.standardKey(this.denormalizeAcc(cNewKey));
+    this.oldKeyAcc = ABCXJS.parse.parseKeyVoice.standardKey(this.denormalizeAcc(cKey));
+    this.newKeyAcc = ABCXJS.parse.parseKeyVoice.standardKey(this.denormalizeAcc(cNewKey));
     
-    return tokenizer.tokenize(newStr, 0, newStr.length);
+    return this.tokenizer.tokenize(newStr, 0, newStr.length);
+};
+
+window.ABCXJS.parse.Transposer.prototype.parseKey = function ( str ) {
+    var cKey = null;
+    var tokens = this.tokenizer.tokenize(str, 0, str.length);
+    var retPitch = this.tokenizer.getKeyPitch(tokens[0].token);
+
+    if (retPitch.len > 0) {
+        // The accidental and mode might be attached to the pitch, so we might want to just remove the first character.
+        cKey = retPitch.token;
+        if (tokens[0].token.length > 1)
+            tokens[0].token = tokens[0].token.substring(1);
+        else
+            tokens.shift();
+        // We got a pitch to start with, so we might also have an accidental and a mode
+        if (tokens.length > 0) {
+            var retAcc = this.tokenizer.getSharpFlat(tokens[0].token);
+            if (retAcc.len > 0) {
+                cKey += retAcc.token;
+            }
+        }
+    }
+    
+    return cKey;
+};
+
+
+window.ABCXJS.parse.Transposer.prototype.deleteTabLine = function ( n ) {
+    this.deletedLines[n] = true;
 };
 
 window.ABCXJS.parse.Transposer.prototype.updateEditor = function ( lines ) {
     for( i = 0; i < this.changedLines.length; i++ ){
         lines[this.changedLines[i].line] = this.changedLines[i].text;
     }
-    var newStr = lines[0];
-    for( i = 1; i < lines.length; i++ ){
-        newStr += '\n' + lines[i];
+    
+    var newStr = lines[0]; // supoe q a linha zero nunca sera apagada
+    
+    for( var i = 1; i < lines.length; i++ ){
+        if( ! this.deletedLines[i] ) {
+            newStr += '\n' + lines[i];
+        }
     }
+    this.deletedLines = [];
     this.changedLines = [];
     return newStr;
 };

@@ -23,9 +23,9 @@ if (!window.ABCXJS)
 if (!window.ABCXJS.tablature)
 	window.ABCXJS.tablature = {};
     
-ABCXJS.tablature.Infer = function( accordion, tune, strTune, vars ) {
+ABCXJS.tablature.Infer = function( accordion, tune/*, strTune*/, vars ) {
     this.accordion = accordion;
-    this.abcText = strTune;
+    //this.abcText = strTune;
     this.vars = vars || {} ;
     this.tune = tune;
     this.offset = 8.9;
@@ -35,6 +35,24 @@ ABCXJS.tablature.Infer = function( accordion, tune, strTune, vars ) {
         if (!this.vars.warnings) this.vars.warnings = [];
         this.vars.warnings.push(str);
     };
+    
+    this.barTypes = { 
+        "bar"         : "|"
+      , "bar_thin"         : "|"
+      , "bar_thin_thin"    : "||"
+      , "bar_thick_thin"   : "[|"
+      , "bar_thin_thick"   : "|]"
+      , "bar_dbl_repeat"   : ":|:"
+      //, "bar_dbl_repeat"   : ":||:"
+      //, "bar_dbl_repeat"   : "::"
+      , "bar_left_repeat"  : "|:"
+      //, "bar_left_repeat"  : "||:"
+      //, "bar_left_repeat"  : "[|:"
+      , "bar_right_repeat" : ":|"
+      //, "bar_right_repeat" : ":||"
+      //, "bar_right_repeat" : ":|]"
+    };
+    
 };
 
 ABCXJS.tablature.Infer.prototype.reset = function() {
@@ -287,8 +305,14 @@ ABCXJS.tablature.Infer.prototype.checkTies = function(voice) {
 ABCXJS.tablature.Infer.prototype.addTABChild = function(token) {
 
     if (token.el_type !== "note") {
+        var xf = 0;
+        if( this.barTypes[token.type] ){
+            xf = this.registerLine(this.barTypes[token.type] + " ");
+        } else {
+            throw new Error( 'ABCXJS.tablature.Infer.prototype.addTABChild (token_type): ' + token.type );
+            //xf = this.registerLine(this.abcText.substr(token.startChar, token.endChar - token.startChar) + " ");
+        }
         var xi = this.getXi();
-        var xf = this.registerLine(this.abcText.substr(token.startChar, token.endChar - token.startChar) + " ");
         this.add(token, xi, xf - 1 );
         return;
     }

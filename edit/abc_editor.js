@@ -170,14 +170,14 @@ ABCXJS.edit.EditArea.prototype.setString = function(str, noRefresh ) {
   }
 };
 
-ABCXJS.edit.EditArea.prototype.appendString = function(str, noRefresh ) {
-  //retira \n ao final  
-  var t = this.textarea.value;
-  while( t.charAt(t.length-1) === '\n' ) {
-    t = t.substr(0,t.length-1);
-  }
-  this.setString(t+str, noRefresh );
-};
+//ABCXJS.edit.EditArea.prototype.appendString = function(str, noRefresh ) {
+//  //retira \n ao final  
+//  var t = this.textarea.value;
+//  while( t.charAt(t.length-1) === '\n' ) {
+//    t = t.substr(0,t.length-1);
+//  }
+//  this.setString(t+str, noRefresh );
+//};
 
 ABCXJS.edit.EditArea.prototype.getElem = function() {
   return this.textarea;
@@ -483,18 +483,11 @@ ABCXJS.Editor.prototype.parseABC = function(transpose, force ) {
     abcParser.parse(tunebook.tunes[i].abc, this.parserparams ); //TODO handle multiple tunes
     this.tunes[i] = abcParser.getTune();
 
-    if( this.transposer ) { 
-        if( this.transposer.offSet !== 0 ) {
-          var lines = abcParser.tuneHouseKeeping(tunebook.tunes[i].abc);
-          this.editarea.setString( this.transposer.updateEditor( lines ), "norefresh" );
-        }
-        if(this.keySelector) 
-            this.keySelector.set( this.transposer.keyToNumber( this.transposer.getKeyVoice(0) ) );       
-    }
-
-    if( this.accordion ) { 
-        // obtem possiveis linhas inferidas para tablatura
-        this.editarea.appendString( this.accordion.updateEditor() );
+    // transposição e geracao de tablatura podem ter alterado o texto ABC
+    this.editarea.setString( abcParser.getStrTune(), "noRefresh" );
+    
+    if( this.transposer && this.keySelector ) {
+        this.keySelector.set( this.transposer.keyToNumber( this.transposer.getKeyVoice(0) ) );       
     }
 
     var warnings = abcParser.getWarnings() || [];

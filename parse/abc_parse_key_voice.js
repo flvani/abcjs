@@ -376,11 +376,8 @@ window.ABCXJS.parse.parseKeyVoice = {};
 				break;
 			default:
                                 if( transposer ) {
-                                   if( transposer.offSet !== 0 ) 
-                                     tokens = transposer.transposeKey( tokenizer, str, line, lineNumber);
-                                   else 
-                                     transposer.registerKey( tokenizer, str);  
-                                } 
+                                    tokens = transposer.transposeKey( str, line, lineNumber );
+                                }    
                                 
 				var retPitch = tokenizer.getKeyPitch(tokens[0].token);
 				if (retPitch.len > 0) {

@@ -201,6 +201,7 @@ DIATONIC.map.Keyboard.prototype.parseNote = function(txtNota, isBass) {
   nota.isSetima   = nota.complement.substr(0,2).indexOf( '7' ) >= 0;
   
   if (typeof (nota.value) === "undefined" ) {
+      // para debug veja this.abctune.lines[this.line].staffs[this.staff].voices[this.voice][this.pos]
       throw new Error( 'Nota inválida: ' + txtNota );
   };
 
