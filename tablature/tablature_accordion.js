@@ -21,7 +21,7 @@ ABCXJS.tablature.Accordion = function( params ) {
         throw new Error( 'No accordionMap found!');
     }
     
-    this.render_keyboard_opts = params.render_keyboard_opts || {transpose:false, mirror: false, scale:1, draggable:false, show:false};
+    this.render_keyboard_opts = params.render_keyboard_opts || {transpose:false, mirror: false, scale:1, draggable:false, show:false, label:false};
 
     if( params.id )
         this.loadById( params.id );
@@ -61,16 +61,17 @@ ABCXJS.tablature.Accordion.prototype.accordionIsCurrent = function(id) {
     return ret;
 };
 
-ABCXJS.tablature.Accordion.prototype.changeNotation = function() {
-    this.accordions[this.selected].keyboard.changeNotation();
-};
-
 ABCXJS.tablature.Accordion.prototype.clearKeyboard = function(full) {
     this.accordions[this.selected].keyboard.clear(full);
 };
 
+ABCXJS.tablature.Accordion.prototype.changeNotation = function() {
+    this.render_keyboard_opts.label = ! this.render_keyboard_opts.label;
+    this.redrawKeyboard();
+};
+
 ABCXJS.tablature.Accordion.prototype.redrawKeyboard = function() {
-    this.accordions[this.selected].keyboard.redraw();
+    this.getKeyboard().redraw(this.render_keyboard_opts);
 };
 
 ABCXJS.tablature.Accordion.prototype.rotateKeyboard = function(div) {

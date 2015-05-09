@@ -95,6 +95,8 @@ DIATONIC.map.Button.prototype.draw = function( paper, limits, options ) {
             .attr({"fill": "none", "stroke": this.color, "stroke-width": this.stroke});
     this.paper.path( ["M", currX-currRadius, currY+(5*options.scale), "L", currX+currRadius, currY-(5*options.scale) ] )
             .attr({"fill": "none", "stroke": this.color, "stroke-width": this.stroke});
+    
+    this.setText( options.label );
 };
 
 DIATONIC.map.Button.prototype.clear = function(delay) {
@@ -135,10 +137,11 @@ DIATONIC.map.Button.prototype.getLabel = function(nota, showLabel) {
         l = DIATONIC.map.number2key[ nota.value ].toLowerCase() + '';
     } else {
         if (showLabel) {
-            l = nota.key = DIATONIC.map.number2key_br[nota.value ];
+            l= DIATONIC.map.number2key_br[nota.value ];
         } else {
-            l = nota.key = DIATONIC.map.number2key[nota.value ];
+            l = DIATONIC.map.number2key[nota.value ];
         }
+        // devo fazer nota.key  = l???
     }
     if( nota.isMinor ) {
         l+='-';
@@ -148,8 +151,10 @@ DIATONIC.map.Button.prototype.getLabel = function(nota, showLabel) {
 };
   
 DIATONIC.map.Button.prototype.setText = function( showLabel ) {
-    this.setTextOpen( this.getLabel( this.openNote, showLabel ) );
-    this.setTextClose( this.getLabel( this.closeNote, showLabel ) );
+    if(this.openNote) {
+        this.setTextOpen( this.getLabel( this.openNote, showLabel ) );
+        this.setTextClose( this.getLabel( this.closeNote, showLabel ) );
+    }    
 };
 
 DIATONIC.map.Button.prototype.setTextClose = function(t) {

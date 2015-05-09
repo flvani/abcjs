@@ -11,7 +11,7 @@ if (!window.DIATONIC.map)
     window.DIATONIC.map = {};
 
 DIATONIC.map.Keyboard = function (keyMap, pedalInfo) {
-    this.showLabel = false;
+    //this.showLabel = false;
     this.pedalInfo = pedalInfo;
     this.layout = keyMap.layout;
     this.keys = keyMap.keys;
@@ -91,7 +91,7 @@ DIATONIC.map.Keyboard.prototype.setup = function (keyMap) {
             btn.tabButton = (i + 1) + Array(j + 1).join("'");
             btn.openNote = this.parseNote(openRow[i], bass);
             btn.closeNote = this.parseNote(closeRow[i], bass);
-            btn.setText( this.showLabel );
+            btn.setText( false );
             
             //noteName = btn.openNote.key + (bass?'':btn.openNote.octave);
             noteVal = this.getNoteVal(btn.openNote);
@@ -142,6 +142,7 @@ DIATONIC.map.Keyboard.prototype.print = function (div, options ) {
     options.scale = options.scale || 1;
     options.mirror = options.mirror || false;
     options.transpose = options.transpose || false;
+    options.label = options.label|| false;
     
     this.legenda.draw(this.paper, this.limits, options);
     this.legenda.setOpen();
@@ -208,16 +209,16 @@ DIATONIC.map.Keyboard.prototype.parseNote = function(txtNota, isBass) {
   return nota;
 };
 
-DIATONIC.map.Keyboard.prototype.changeNotation = function() {
-    this.showLabel = !this.showLabel;
-    this.redraw();
-};
+//DIATONIC.map.Keyboard.prototype.changeNotation = function() {
+//    this.showLabel = !this.showLabel;
+//    this.redra();
+//};
 
-DIATONIC.map.Keyboard.prototype.redraw = function() {
+DIATONIC.map.Keyboard.prototype.redraw = function(opts) {
     for (var j = 0; j < this.keyMap.length; j++) {
         for (var i = 0; i < this.keyMap[j].length; i++) {
             var key = this.keyMap[j][i];
-            key.setText( this.showLabel );
+            key.setText( opts.label );
         }
     }
 };

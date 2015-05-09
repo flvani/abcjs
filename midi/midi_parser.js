@@ -10,7 +10,7 @@
  *     Nota: aparentemente o ABC não implementa simbolos como D.S al fine
  *   - Ok - imprimir endings somente no compasso onde ocorrem
  *   - Ok - tratar endings em compassos com repeat bar (tratar adequadamente endings/skippings)
- *   - Ok - tratar notas longas - tanto quanto possível, as notas longas serão reiniciadas
+ *   - Ok - tratar notas longas - tanto quganto possível, as notas longas serão reiniciadas
  *          porém a qualidade não é boa pois o reinício é perceptível
  */
 
