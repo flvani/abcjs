@@ -133,6 +133,29 @@ DIATONIC.map.Button.prototype.setClose = function(delay) {
 
 DIATONIC.map.Button.prototype.getLabel = function(nota, showLabel) {
     var l = '';
+    if (showLabel) {
+        l= DIATONIC.map.number2key_br[nota.value];
+    } else {
+        l = DIATONIC.map.number2key[nota.value];
+    }
+    
+    if( showLabel )  {
+        l = l.toUpperCase() + '';
+    }
+    
+    if ( nota.isChord ) {
+       l = l.toLowerCase() + '';
+    }    
+    
+    if( nota.isMinor ) {
+        l+='-';
+    }
+    return l;
+};
+  
+
+DIATONIC.map.Button.prototype.getLabelOld = function(nota, showLabel) {
+    var l = '';
     if (nota.isChord) {
         l = DIATONIC.map.number2key[ nota.value ].toLowerCase() + '';
     } else {
@@ -141,15 +164,13 @@ DIATONIC.map.Button.prototype.getLabel = function(nota, showLabel) {
         } else {
             l = DIATONIC.map.number2key[nota.value ];
         }
-        // devo fazer nota.key  = l???
     }
     if( nota.isMinor ) {
         l+='-';
     }
-    
     return l;
 };
-  
+
 DIATONIC.map.Button.prototype.setText = function( showLabel ) {
     if(this.openNote) {
         this.setTextOpen( this.getLabel( this.openNote, showLabel ) );
