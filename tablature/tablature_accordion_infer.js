@@ -64,7 +64,7 @@ ABCXJS.tablature.Infer.prototype.reset = function() {
     this.count = 0;
     this.lastButton = -1;
     this.closing = true;
-    this.currInterval = 0;
+    this.currInterval = 1;
     this.alertedMissSync = false;
     
     // limite para inversão o movimento do fole - baseado no tempo de um compasso
@@ -92,7 +92,7 @@ ABCXJS.tablature.Infer.prototype.inferTabVoice = function(line) {
     var trebVoices = trebStaff.voices;
     this.accTrebKey = trebStaff.key.accidentals;
     for( var i = 0; i < trebVoices.length; i ++ ) {
-        voices.push( { voz:trebVoices[i], pos:-1, st:'waiting for data', bass:false, wi: {}, ties:[] } ); // wi - work item
+        voices.push( { voz:trebVoices[i], pos:-1, st:'waiting for data', bass:false, wi: {}, ties:[]} ); // wi - work item
     }
     
     if( this.tune.tabStaffPos === 2 ) {
@@ -118,8 +118,7 @@ ABCXJS.tablature.Infer.prototype.inferTabVoice = function(line) {
 
         for( var j = 0; j < voices.length-1; j ++ ) {
             if( voices[j].st !== voices[j+1].st && ! this.alertedMissSync) {
-                var n = parseInt(this.currInterval);
-                this.addWarning('Possível falta de sincronismo no compasso ' + n + '.' ) ;
+                this.addWarning('Possível falta de sincronismo no compasso ' + this.currInterval + '.' ) ;
                 j = voices.length;
                 this.alertedMissSync = true;
             }
@@ -188,7 +187,7 @@ ABCXJS.tablature.Infer.prototype.read = function(p_source, item) {
     
     if( source.pos < source.voz.length ) {
         source.wi = ABCXJS.parse.clone(source.voz[source.pos]);
-        if( source.wi.barNumber && source.wi.barNumber !== this.currInterval ) {
+        if( source.wi.barNumber && source.wi.barNumber !== this.currInterval && item === 0 ) {
             this.currInterval = source.wi.barNumber;
         }
         this.checkTies(source);
@@ -477,7 +476,7 @@ ABCXJS.tablature.Infer.prototype.addTABChild = function(token) {
 ABCXJS.tablature.Infer.prototype.registerMissingButton = function(close,item) {
     if( ! this.missingButtons ) this.missingButtons = {};
     if( ! this.missingButtons[item.note] )  this.missingButtons[item.note] = [];
-    this.missingButtons[item.note].push(this.currInterval);
+    this.missingButtons[item.note].push(parseInt(this.currInterval));
 };
 
 ABCXJS.tablature.Infer.prototype.getXi = function() {
