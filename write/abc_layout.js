@@ -314,6 +314,12 @@ ABCXJS.write.Layout.prototype.printNote = function(elem, nostem, dontDraw) { //s
     for (var tot = Math.pow(2, durlog), inc = tot / 2; tot < duration; dot++, tot += inc, inc /= 2)
         ;
 
+    if (elem.startTriplet) {
+        if (elem.startTriplet === 2)
+            this.tripletmultiplier = 3/2;
+        else
+            this.tripletmultiplier=(elem.startTriplet-1)/elem.startTriplet;
+    }
 
     var abselem = new ABCXJS.write.AbsoluteElement(elem, duration * this.tripletmultiplier, 1);
 

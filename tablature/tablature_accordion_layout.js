@@ -20,6 +20,7 @@ ABCXJS.tablature.Layout = function( tuneCurrVoice, tuneCurrStaff, abcstaff, glyp
    this.abcstaff = abcstaff;
    this.glyphs = glyphs;
    this.restsInTab = restsInTab;
+   this.tripletmultiplier = 1;
 };
 
 ABCXJS.tablature.Layout.prototype.getElem = function() {
@@ -69,12 +70,20 @@ ABCXJS.tablature.Layout.prototype.printTABElement = function() {
 ABCXJS.tablature.Layout.prototype.printTabNote = function(elem) {
     var p, pp;
     
+    if (elem.startTriplet) {
+        if (elem.startTriplet === 2)
+            this.tripletmultiplier = 3/2;
+        else
+            this.tripletmultiplier=(elem.startTriplet-1)/elem.startTriplet;
+    }
+    
+    
     var duration = ABCXJS.write.getDuration(elem);
     if (duration === 0) {
         duration = 0.25;
     }   // PER: zero duration will draw a quarter note head.
     var durlog = ABCXJS.write.getDurlog(duration);
-    var abselem = new ABCXJS.write.AbsoluteElement(elem, duration , 1);
+    var abselem = new ABCXJS.write.AbsoluteElement(elem, duration*this.tripletmultiplier, 1);
 
     // determine averagepitch, minpitch, maxpitch and stem direction
     var sum = 0;
@@ -105,6 +114,10 @@ ABCXJS.tablature.Layout.prototype.printTabNote = function(elem) {
             rel.type = curr.type;
         }
         abselem.addHead(rel);
+    }
+    
+    if( elem.endTriplet ) {
+        this.tripletmultiplier =1;
     }
 
     return abselem;

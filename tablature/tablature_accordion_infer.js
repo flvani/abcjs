@@ -24,6 +24,7 @@ if (!window.ABCXJS.tablature)
 	window.ABCXJS.tablature = {};
     
 ABCXJS.tablature.Infer = function( accordion, tune/*, strTune*/, vars ) {
+    this.multiplier = 1;
     this.accordion = accordion;
     //this.abcText = strTune;
     this.vars = vars || {} ;
@@ -190,6 +191,18 @@ ABCXJS.tablature.Infer.prototype.read = function(p_source, item) {
         if( source.wi.barNumber && source.wi.barNumber !== this.currInterval && item === 0 ) {
             this.currInterval = source.wi.barNumber;
         }
+        
+        if( source.wi.startTriplet){
+            source.triplet = true;
+            this.startTriplet = source.wi.startTriplet;
+            this.multiplier = this.startTriplet===2?1.5:(this.startTriplet-1)/this.startTriplet;
+        }
+//        if( source.wi.endTriplet){
+//            this.endTriplet = true;
+//            source.triplet = false;
+//            this.multiplier = 1;
+//        }
+        
         this.checkTies(source);
         source.st = (source.wi.el_type && source.wi.el_type === "bar") ? "waiting end of interval" : "processing";
         return (source.wi.el_type && source.wi.el_type === "bar") ? 1 : 2;
@@ -204,12 +217,13 @@ ABCXJS.tablature.Infer.prototype.extraiIntervalo = function(voices) {
     var minDur = 100;
     
     for( var i = 0; i < voices.length; i ++ ) {
-        if( voices[i].st === 'processing' && voices[i].wi.duration && voices[i].wi.duration > 0  && voices[i].wi.duration < minDur ) {
-            minDur = voices[i].wi.duration;
+        if( voices[i].st === 'processing' && voices[i].wi.duration && voices[i].wi.duration > 0  
+                && voices[i].wi.duration*(voices[i].triplet?this.multiplier:1) < minDur ) {
+            minDur = voices[i].wi.duration*(voices[i].triplet?this.multiplier:1);
         }
     }
     
-    var wf = { el_type: 'note', duration: minDur, startChar: 0, endChar: 0, pitches:[], bassNote: [] }; // wf - final working item
+    var wf = { el_type: 'note', duration: minDur/this.multiplier, startChar: 0, endChar: 0, pitches:[], bassNote: [] }; // wf - final working item
     
     for( var i = 0; i < voices.length; i ++ ) {
         if(voices[i].st !== 'processing' ) continue;
@@ -244,8 +258,8 @@ ABCXJS.tablature.Infer.prototype.extraiIntervalo = function(voices) {
         this.setTies(voices[i]);
         
         if( voices[i].wi.duration ) {
-            voices[i].wi.duration -= minDur;
-            if( voices[i].wi.duration <= 0 ) {
+            voices[i].wi.duration -= minDur/(voices[i].triplet?this.multiplier:1);
+            if( voices[i].wi.duration <= 0.0001 ) {
                voices[i].st = 'waiting for data';
             } else {
                 if(voices[i].wi.pitches) {
@@ -256,6 +270,16 @@ ABCXJS.tablature.Infer.prototype.extraiIntervalo = function(voices) {
             }
         }
     }
+    
+    for( var i = 0; i < voices.length; i ++ ) {
+        var elem = voices[i];
+        if( elem.wi.endTriplet){
+            this.endTriplet = true;
+            elem.triplet = false;
+            this.multiplier = 1;
+        }
+    }    
+        
     
     //trata intervalo vazio (quando há pausa em todas as vozes e não são visíveis)
     if(wf.pitches.length === 0 && wf.bassNote.length === 0 )
@@ -335,6 +359,17 @@ ABCXJS.tablature.Infer.prototype.addTABChild = function(token) {
     var inTie = false;
 
     var qtd = column.length;
+    
+    if( this.startTriplet ) {
+        child.startTriplet = this.startTriplet;
+        this.startTriplet = false;
+        this.registerLine( '(' + child.startTriplet + ' ' );
+    }
+    
+    if( this.endTriplet ) {
+        child.endTriplet = true;
+        this.endTriplet = false;
+    }
     
     // inicialmente as notas estão na posição "fechando". Se precisar alterar para "abrindo" este é offset da altura
     var offset = (qtd>=3?-(this.offset-(2.8*(qtd-2))):-this.offset);
@@ -471,6 +506,11 @@ ABCXJS.tablature.Infer.prototype.addTABChild = function(token) {
     }
     var dur = child.duration / this.vars.default_length;
     var xf = this.registerLine((qtd > 1 ? "]" : "") + (dur !== 1 ? dur.toString() : "") + " ");
+    
+    if( child.endTriplet ) {
+        this.registerLine( ') ' );
+    }
+    
     this.add(child, xi, xf-1);
 };
 

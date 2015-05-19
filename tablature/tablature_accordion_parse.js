@@ -21,7 +21,7 @@
 
            barra ::=  "|", "||", ":|", "|:", ":|:", ":||:", "::", ":||", ":||", "[|", "|]", "|[|", "|]|" [endings]
         
-           coluna ::=  [<bassNote>]<bellows><note>[<duration>] 
+           coluna ::=  ["("<triplet>][<bassNote>]<bellows><note>[<duration>] [")"] 
         
            bassNote ::=  { "abcdefgABCDEFG>xz" }*
           
@@ -149,6 +149,14 @@ ABCXJS.tablature.Parse.prototype.formatChild = function(token) {
     
   }
   
+  if( token.startTriplet) {
+      child.startTriplet = token.startTriplet;
+  }
+  
+  if( token.endTriplet) {
+      child.endTriplet = token.endTriplet;
+  }
+  
   return child;
 };
 
@@ -170,6 +178,7 @@ ABCXJS.tablature.Parse.prototype.getToken = function() {
         case '|':
         case ':':
           return this.getBarLine();
+          
         case '[': // se o proximo caracter não for um pipe, deve ser tratado como uma coluna de notas
           if( this.line.charAt(this.i+1) === '|' ) {
             return this.getBarLine();
@@ -204,6 +213,11 @@ ABCXJS.tablature.Parse.prototype.getBarLine = function() {
       , ":|]" : "bar_right_repeat"
   };
   
+  if(this.triplet) {
+    this.triplet = false;
+    this.warn( "Expected triplet end but found " + this.line.charAt(this.i) );
+  }
+
   var token = { el_type:"bar", type:"bar", token: undefined };
   var p = this.i;
   
@@ -242,16 +256,48 @@ ABCXJS.tablature.Parse.prototype.getColumn = function() {
     var token = {el_type: "note", type: "note", bassNote: undefined, bellows: "", buttons: [], duration: 1};
     token.bassNote = [];
     
+    if(this.line.charAt(this.i) === "(") {
+        token.startTriplet = this.getTripletDef();
+        this.triplet = true;
+    }
+    
     while (this.belSyms.indexOf(this.line.charAt(this.i)) < 0 ) {
       token.bassNote[token.bassNote.length] = this.getBassNote();
     }
+    
     token.bellows = this.getBelows();
     token.buttons = this.getNote();
     token.duration = this.getDuration();
+    
+    if( this.isTripletEnd() ) {
+        token.endTriplet = true;
+    }
+    
     this.finished = this.i >= this.line.length;
     return token;
 
 };
+
+ABCXJS.tablature.Parse.prototype.getTripletDef = function() {
+    this.i++;
+    this.parseMultiCharToken( ' \t' );
+    var t =  this.line.charAt(this.i); //espero um único número como indicador de triplet
+    this.i++;
+    this.parseMultiCharToken( ' \t' );
+    return t;    
+};
+
+ABCXJS.tablature.Parse.prototype.isTripletEnd = function() {
+    this.parseMultiCharToken( ' \t' );
+    if( this.line.charAt(this.i) === ')' ) {
+        this.i++;
+        this.triplet = false;
+        return true;
+    } 
+    
+    return false;
+};
+
 
 ABCXJS.tablature.Parse.prototype.getBassNote = function() {
   var note = "";
