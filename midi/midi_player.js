@@ -269,12 +269,14 @@ ABCXJS.midi.Player.prototype.executa = function(pl) {
     var delay = 0;
 
     try {
+        var plt = pl.time;
+        var ct = self.currentTime*self.tempo/1000;
         if( pl.start ) {
             
             pl.item.pitches.forEach( function( elem ) {
                 delay = ( (elem.delay * self.tempo ) / 1000);
                 MIDI.noteOn(elem.midipitch.channel, elem.midipitch.midipitch, loudness, delay);
-
+                //console.log( 'Spitch: ' + elem.midipitch.midipitch + ' T= ' + (ct + delay) + ' delay= ' + delay);
                 var k = 2.2, t = k, resto = ( (elem.midipitch.mididuration * self.tempo ) / 1000) - k;
                 
                 // a nota midi dura k segundos (k), então notas mais longas são reiniciadas quantas vezes forem necessárias
@@ -289,21 +291,25 @@ ABCXJS.midi.Player.prototype.executa = function(pl) {
 //                } else {
 //                }
 
-                t = ( (elem.midipitch.mididuration * self.tempo ) / 1000);
-                MIDI.noteOff(elem.midipitch.channel, elem.midipitch.midipitch,  t+delay);
+//                t = ( (elem.midipitch.mididuration * self.tempo ) / 1000);
+//                MIDI.noteOff(elem.midipitch.channel, elem.midipitch.midipitch,  t+delay);
                 
                 if(elem.button && elem.button.button) {
                     if(elem.button.closing) {
-                        elem.button.button.setClose(delay);
+                        elem.button.button.setClose((delay*1000));
                     }else{
-                        elem.button.button.setOpen(delay);
+                        elem.button.button.setOpen((delay*1000));
                     }
-                    if( self.type !== 'note' ) {
+                    //console.log( 'Sbutton: ' + elem.button.button.tabButton + ' T= ' + (ct + delay) + ' delay= ' + delay);
+                 if( self.type !== 'note' ) {
                         //o andamento é considerado somente para o modo didatico
                         var andamento = self.type?(1/self.currentAndamento):1;
                         //limpa o botão uma fração de tempo antes do fim da nota - para dar ideia visual de botão pressionado/liberado antes da proxima nota
                         var clearTime = (self.tempo * andamento) *.5;
-                        elem.button.button.clear( ( elem.midipitch.mididuration * self.tempo * andamento ) + delay  - clearTime );
+                        var tt = ( elem.midipitch.mididuration * self.tempo * andamento );
+                        elem.button.button.clear(  (tt - clearTime + (delay*1000) ) );
+                        //console.log( 'Tbutton: ' + elem.button.button.tabButton + ' T= ' 
+                          //      +( ct + (tt - clearTime)/1000 + delay )+ ' delay= ' + delay+ ' clear= ' + clearTime);
                     }    
                 }
                 
@@ -318,10 +324,11 @@ ABCXJS.midi.Player.prototype.executa = function(pl) {
                 self.highlight(elem.abcelem.abselem, true, delay);
             });
         } else {
-//            pl.item.pitches.forEach( function( elem ) {
-//                delay = ( (elem.delay * self.tempo ) / 1000);
-//                MIDI.noteOff(elem.midipitch.channel, elem.midipitch.midipitch, delay);
-//            });
+            pl.item.pitches.forEach( function( elem ) {
+                delay = ( (elem.delay * self.tempo ) / 1000);
+                MIDI.noteOff(elem.midipitch.channel, elem.midipitch.midipitch, delay);
+                //console.log( 'Tpitch: ' + elem.midipitch.midipitch + ' T= ' + (ct + delay) + ' delay= ' + delay);
+           });
             pl.item.abcelems.forEach( function( elem ) {
                 delay = ( (elem.delay * self.tempo ) / 1000);
                 self.highlight(elem.abcelem.abselem, false, delay);
