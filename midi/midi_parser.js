@@ -42,7 +42,7 @@ ABCXJS.midi.Parse = function( options ) {
 
 ABCXJS.midi.Parse.prototype.reset = function() {
     
-    this.vars.warnings = [];
+    this.vars = { warnings: [] };
     
     this.multiplier = 1;
     this.timecount = 0;
@@ -105,12 +105,9 @@ ABCXJS.midi.Parse.prototype.parse = function(tune, keyboard) {
         }
         
         if( item.start.pitches.length + item.start.abcelems.length + item.start.buttons.length > 0 ) {
-            if( item.start.barNumber ) {
-               this.lastBar = item.start.barNumber > currBar? item.start.barNumber:null;
-            }
-            
             self.handleButtons(item.start.pitches, item.start.buttons );
             if( item.start.barNumber ) {
+                this.lastBar = item.start.barNumber > currBar? item.start.barNumber:null;
                 if( item.start.barNumber > currBar ) {
                     currBar = item.start.barNumber;
                     self.midiTune.measures[currBar] = self.midiTune.playlist.length;
@@ -157,17 +154,17 @@ ABCXJS.midi.Parse.prototype.handleButtons = function(pitches, buttons, currBar) 
         // por hora, procuro a primeira nota que corresponda e não esteja com botão associado (! pitches[r].button)
         var hasBass=false, hasTreble=false;
         for( var r = 0; r < pitches.length; r ++ ) {
-            if(note.isBass && pitches[r].clef === 'bass') {
-                pitch = pitches[r].midipitch % 12;
+            if(note.isBass && pitches[r].midipitch.clef === 'bass') {
+                pitch = pitches[r].midipitch.midipitch % 12;
                 hasBass=true;
                 if( pitch === DIATONIC.map.key2number[ key ] && ! pitches[r].button ){
                     pitches[r].button = item.button;
                     item.button = null;
                     return;
                 }
-            } else if(!note.isBass && pitches[r].clef !== 'bass') { 
+            } else if(!note.isBass && pitches[r].midipitch.clef !== 'bass') { 
                 hasTreble=true;
-                if( pitches[r].midipitch === midipitch ) {
+                if( pitches[r].midipitch.midipitch === midipitch ) {
                     pitches[r].button = item.button;
                     item.button = null;
                     return;
@@ -241,6 +238,7 @@ ABCXJS.midi.Parse.prototype.writeNote = function(elem) {
         this.multiplier = (elem.startTriplet === 2) ? 3 / 2 : (elem.startTriplet - 1) / elem.startTriplet;
     }
 
+    //var mididuration = this.checkMinNote(parseFloat(Number(elem.duration * this.wholeNote * this.multiplier).toFixed(7)));
     var mididuration = this.checkMinNote(elem.duration * this.wholeNote * this.multiplier);
 
     var intervalo = { totalDur:0, elem:null, midipitch:null };
@@ -276,11 +274,11 @@ ABCXJS.midi.Parse.prototype.writeNote = function(elem) {
                     startInterval.elem.openTies --;
                     startInterval.totalDur += mididuration;
                     startInterval.midipitch.mididuration = startInterval.totalDur;
-                    this.addEnd( this.timecount+mididuration, startInterval.midipitch, null, null );
+                    this.addEnd( this.timecount+mididuration, startInterval.midipitch, null/*, null*/ );
                     
                     if( startInterval.elem.openTies === 0 ) {
                         delete startInterval.elem.openTies;
-                        this.addEnd( this.timecount+mididuration, null, startInterval.elem, null );
+                        this.addEnd( this.timecount+mididuration, null, startInterval.elem/*, null*/ );
                     } 
                     
                     //TIES EM SERIE: PASSO 2 - trar intervalos intermediários
@@ -290,12 +288,10 @@ ABCXJS.midi.Parse.prototype.writeNote = function(elem) {
                         interInter.totalDur += mididuration;
                         if( interInter.elem.openTies === 0 ) {
                             delete interInter.elem.openTies;
-                            this.addEnd( this.timecount+mididuration, null, interInter.elem, null );
+                            this.addEnd( this.timecount+mididuration, null, interInter.elem/*, null*/ );
                         } 
                     }
-                    
                     this.startTieInterval[midipitch] = [false];
-                    
                 }
             } else if (note.tie && note.tie.id_start ) { // só inicia
                 var mp = {channel:this.channel, midipitch:midipitch, mididuration:mididuration};
@@ -310,7 +306,7 @@ ABCXJS.midi.Parse.prototype.writeNote = function(elem) {
                   var mp = {channel:this.channel, midipitch:midipitch, mididuration:mididuration};
                   intervalo = { totalDur:mididuration, elem:elem, midipitch:mp }; 
                   this.addStart( this.timecount, mp, null, null );
-                  this.addEnd( this.timecount+mididuration, mp, null, null );
+                  this.addEnd( this.timecount+mididuration, mp, null/*, null*/ );
                 }
             } 
         }
@@ -318,18 +314,26 @@ ABCXJS.midi.Parse.prototype.writeNote = function(elem) {
 
     this.addStart( this.timecount, null, elem, null );
     if( ! elem.openTies ) {
-        this.addEnd( this.timecount+mididuration, null, elem, null );
+        this.addEnd( this.timecount+mididuration, null, elem/*, null*/ );
     }
     
-    this.timecount += mididuration;
-
+    this.setTimeCount( mididuration );
+    
     if (elem.endTriplet) {
         this.multiplier = 1;
     }
 };
 
+ABCXJS.midi.Parse.prototype.setTimeCount = function(dur) {
+    this.timecount += dur;
+    // corrigir erro de arredondamento
+    if( this.timecount%1.0 > 0.9999 ) {
+        this.timecount = Math.round( this.timecount );
+    }
+};
+
 ABCXJS.midi.Parse.prototype.checkMinNote = function(dur) {
-    if( dur < 1 ) {
+    if( dur < 0.99 ) {
         dur = 1;
         if( !this.alertedMin ) {
             this.addWarning( 'Nota(s) com duração menor que o mínimo suportado: 1/' + this.wholeNote + '.');
@@ -343,8 +347,11 @@ ABCXJS.midi.Parse.prototype.checkMinNote = function(dur) {
 
 ABCXJS.midi.Parse.prototype.selectButtons = function(elem) {
     
-    var mididuration = this.checkMinNote(elem.duration * this.wholeNote);
+    if (elem.startTriplet) {
+        this.multiplier = (elem.startTriplet === 2) ? 3 / 2 : (elem.startTriplet - 1) / elem.startTriplet;
+    }
     
+    var mididuration = elem.duration * this.wholeNote * this.multiplier;
     
     if (elem.pitches) {
         
@@ -377,14 +384,20 @@ ABCXJS.midi.Parse.prototype.selectButtons = function(elem) {
             }
             //if( ! tie ) {
                 this.addStart( this.timecount, null, null, { button: button, closing: (elem.bellows === '+'), duration: elem.duration } );
-                this.addEnd( this.timecount+mididuration, null, null, { button: button, closing: (elem.bellows === '+') } );
+                this.addEnd( this.timecount+mididuration, null, null/*, { button: button, closing: (elem.bellows === '+') } */);
             //}    
         }
     }
     
     this.addStart( this.timecount, null, elem, null );
-    this.addEnd( this.timecount+mididuration, null, elem, null );
-    this.timecount += mididuration;
+    this.addEnd( this.timecount+mididuration, null, elem/*, null*/ );
+    
+    this.setTimeCount( mididuration );
+    
+    if (elem.endTriplet) {
+        this.multiplier = 1;
+    }
+    
 };
 
 ABCXJS.midi.Parse.prototype.handleBar = function(elem) {
@@ -438,9 +451,9 @@ ABCXJS.midi.Parse.prototype.clearTies = function() {
         if( !arr[0] ) return;
         arr[0].elem.openTies--;
         if(arr[0].elem.openTies>0) {
-            self.addEnd( self.timecount, arr[0].midipitch, null, null ); 
+            self.addEnd( self.timecount, arr[0].midipitch, null/*, null*/ ); 
         } else {
-            self.addEnd( self.timecount, arr[0].midipitch, arr[0].elem, null ); 
+            self.addEnd( self.timecount, arr[0].midipitch, arr[0].elem/*, null*/ ); 
             delete arr[0].elem.openTies;
         }   
         self.startTieInterval[index] = [false];
@@ -466,24 +479,30 @@ ABCXJS.midi.Parse.prototype.getParsedElement = function(time) {
 };
 
 ABCXJS.midi.Parse.prototype.addStart = function( time, midipitch, abcelem, button ) {
+    var delay = (time%1.0);
+    time -= delay;
+    
     var pE = this.getParsedElement(time);
     if( abcelem ) {
-        pE.start.abcelems.push({abcelem:abcelem,channel:this.channel});
+        pE.start.abcelems.push({abcelem:abcelem,channel:this.channel, delay:delay});
         if(this.staff === 0 && this.voice === 0 && abcelem.barNumber ) 
             pE.start.barNumber = pE.start.barNumber || abcelem.barNumber;
     }    
     if( midipitch ) {
         midipitch.clef = this.getStaff().clef.type;
-        pE.start.pitches.push(midipitch);
+        //midipitch.startDelay = delay;
+        pE.start.pitches.push( {midipitch: midipitch, delay:delay} );
     }
-    if( button    ) pE.start.buttons.push({button:button,abcelem:abcelem});
+    if( button) pE.start.buttons.push({button:button,abcelem:abcelem, delay:delay});
 };
 
-ABCXJS.midi.Parse.prototype.addEnd = function( time, midipitch, abcelem, button ) {
+ABCXJS.midi.Parse.prototype.addEnd = function( time, midipitch, abcelem/*, button*/ ) {
+    var delay = (time%1);
+    time -= delay;
     var pE = this.getParsedElement(time);
-    if( abcelem   ) pE.end.abcelems.push({abcelem:abcelem});
-    if( midipitch ) pE.end.pitches.push(midipitch);
-    if( button    ) pE.end.buttons.push({button:button,abcelem:abcelem});
+    if( abcelem   ) pE.end.abcelems.push({abcelem:abcelem, delay:delay});
+    if( midipitch ) pE.end.pitches.push({midipitch: midipitch, delay:delay});
+    //if( button    ) pE.end.buttons.push({button:button,abcelem:abcelem, delay:delay});
 };
 
 ABCXJS.midi.Parse.prototype.getMark = function() {

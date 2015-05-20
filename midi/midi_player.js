@@ -168,6 +168,7 @@ ABCXJS.midi.Player.prototype.startDidacticPlay = function(what, type, value, val
         case 'note': // step-by-step
             what.printer.clearSelection();
             what.keyboard.clear(true);
+            if(!that.playlist[that.i]) return false;
             that.initTime = that.playlist[that.i].time;
             criteria = function () { 
                 return that.initTime === that.playlist[that.i].time;
@@ -202,7 +203,7 @@ ABCXJS.midi.Player.prototype.startDidacticPlay = function(what, type, value, val
             } else {
                console.log('play-measure: measure \''+value+'\' not found!');
                this.pausePlay(true);
-               return;
+               return false;
             }   
             break;
     }
@@ -265,51 +266,65 @@ ABCXJS.midi.Player.prototype.executa = function(pl) {
     
     var self = this;
     var loudness = 256;
+    var delay = 0;
 
     try {
         if( pl.start ) {
+            
             pl.item.pitches.forEach( function( elem ) {
-                MIDI.noteOn(elem.channel, elem.midipitch, loudness, 0);
+                delay = ( (elem.delay * self.tempo ) / 1000);
+                MIDI.noteOn(elem.midipitch.channel, elem.midipitch.midipitch, loudness, delay);
 
-                var k = 2.2, t = k, resto = ( (elem.mididuration * self.tempo ) / 1000) - k;
+                var k = 2.2, t = k, resto = ( (elem.midipitch.mididuration * self.tempo ) / 1000) - k;
+                
                 // a nota midi dura k segundos (k), então notas mais longas são reiniciadas quantas vezes forem necessárias
                 while( resto > 0 ) {
-                    MIDI.noteOff(elem.channel, elem.midipitch,  t);
-                    MIDI.noteOn(elem.channel, elem.midipitch, loudness, t);
+                    MIDI.noteOff(elem.midipitch.channel, elem.midipitch.midipitch,  t+delay);
+                    MIDI.noteOn(elem.midipitch.channel, elem.midipitch.midipitch, loudness, t+delay);
                     t += k;
                     resto -= k;
                 }
+                    
+//                if( resto > 0 ) {
+//                } else {
+//                }
+
+                t = ( (elem.midipitch.mididuration * self.tempo ) / 1000);
+                MIDI.noteOff(elem.midipitch.channel, elem.midipitch.midipitch,  t+delay);
                 
                 if(elem.button && elem.button.button) {
                     if(elem.button.closing) {
-                        elem.button.button.setClose();
+                        elem.button.button.setClose(delay);
                     }else{
-                        elem.button.button.setOpen();
+                        elem.button.button.setOpen(delay);
                     }
                     if( self.type !== 'note' ) {
                         //o andamento é considerado somente para o modo didatico
                         var andamento = self.type?(1/self.currentAndamento):1;
                         //limpa o botão uma fração de tempo antes do fim da nota - para dar ideia visual de botão pressionado/liberado antes da proxima nota
                         var clearTime = (self.tempo * andamento) *.5;
-                        elem.button.button.clear( ( elem.mididuration * self.tempo * andamento ) - clearTime  );
+                        elem.button.button.clear( ( elem.midipitch.mididuration * self.tempo * andamento ) + delay  - clearTime );
                     }    
                 }
                 
             });
             pl.item.abcelems.forEach( function( elem ) {
+                delay = ( (elem.delay * self.tempo ) / 1000);
                 if( self.callbackOnScroll ) {
                     self.currAbsElem = elem.abcelem.abselem;
                     self.currChannel = elem.channel;
                     self.callbackOnScroll(self);
                 }
-                if( self.printer ) self.printer.notifySelect(elem.abcelem.abselem);
+                self.highlight(elem.abcelem.abselem, true, delay);
             });
         } else {
-            pl.item.pitches.forEach( function( elem ) {
-                MIDI.noteOff(elem.channel, elem.midipitch, 0);
-            });
+//            pl.item.pitches.forEach( function( elem ) {
+//                delay = ( (elem.delay * self.tempo ) / 1000);
+//                MIDI.noteOff(elem.midipitch.channel, elem.midipitch.midipitch, delay);
+//            });
             pl.item.abcelems.forEach( function( elem ) {
-                elem.abcelem.abselem.unhighlight();
+                delay = ( (elem.delay * self.tempo ) / 1000);
+                self.highlight(elem.abcelem.abselem, false, delay);
             });
         }
     } catch( err ) {
@@ -318,6 +333,20 @@ ABCXJS.midi.Player.prototype.executa = function(pl) {
         this.addWarning( 'PlayList['+this.onError.idx+'] - Erro: ' + this.onError.erro + '.' );
     }
 };
+
+ABCXJS.midi.Player.prototype.highlight = function( abselem, select, delay ) {
+    var that = this;
+    if(delay) {
+        window.setTimeout(function(){ that.highlight(abselem, select); }, delay);
+        return;
+    }   
+    if(select) {
+        if( that.printer ) that.printer.notifySelect(abselem);
+    } else {
+        abselem.unhighlight();
+    }
+};
+
 
 ABCXJS.midi.Player.prototype.getTime = function() {
     var pad =  function(n, width, z) {

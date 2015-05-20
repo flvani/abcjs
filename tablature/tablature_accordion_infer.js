@@ -222,8 +222,8 @@ ABCXJS.tablature.Infer.prototype.extraiIntervalo = function(voices) {
             minDur = voices[i].wi.duration*(voices[i].triplet?this.multiplier:1);
         }
     }
-    
-    var wf = { el_type: 'note', duration: minDur/this.multiplier, startChar: 0, endChar: 0, pitches:[], bassNote: [] }; // wf - final working item
+    ;
+    var wf = { el_type: 'note', duration: Number((minDur/this.multiplier).toFixed(5)), startChar: 0, endChar: 0, pitches:[], bassNote: [] }; // wf - final working item
     
     for( var i = 0; i < voices.length; i ++ ) {
         if(voices[i].st !== 'processing' ) continue;
