@@ -670,6 +670,8 @@ window.ABCXJS.data.Tune = function() {
                 This.appendElement('scale', null, null, {size: params.scale});
         };
         var createStaff = function(params) {
+            if (params.transpose)
+                params.clef.transpose = params.transpose;
             This.lines[This.lineNum].staffs[This.staffNum] =
                     {voices: [], clef: params.clef, key: params.key, workingClef: params.clef, subtitle: params.subtitle, lyricsRows: 0};
             if (params.vocalfont)

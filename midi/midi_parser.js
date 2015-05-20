@@ -77,6 +77,11 @@ ABCXJS.midi.Parse.prototype.parse = function(tune, keyboard) {
 
     this.abctune = tune;
     
+    this.transposeTab = 0;
+    if(tune.hasTablature){
+        this.transposeTab = tune.lines[0].staffs[tune.tabStaffPos].clef.transpose || 0;
+    }
+    
     this.midiTune.keyboard = keyboard;
 
     if ( tune.metaText && tune.metaText.tempo) {
@@ -108,7 +113,7 @@ ABCXJS.midi.Parse.prototype.parse = function(tune, keyboard) {
         if( item.start.pitches.length + item.start.abcelems.length + item.start.buttons.length > 0 ) {
             var pl = {item: null, time: time, start: true };
             if( item.start.barNumber ) {
-                this.lastBar = null; // por hora, sem uso: objetivo seria identificar o compasso onde os botões da tablatura não condizem com a partitura
+                this.lastBar = null; // identifica o compasso onde os botões da tablatura não condizem com a partitura
                 if( item.start.barNumber > currBar ) {
                     currBar = this.lastBar = item.start.barNumber;
                     self.midiTune.measures[currBar] = self.midiTune.playlist.length;
@@ -137,9 +142,9 @@ ABCXJS.midi.Parse.prototype.handleButtons = function(pitches, buttons ) {
             return;
         }
         if( item.button.closing )  {
-            note = item.button.button.closeNote;
+            note = ABCXJS.parse.clone(item.button.button.closeNote);
         } else {
-            note = item.button.button.openNote;
+            note = ABCXJS.parse.clone(item.button.button.openNote);
         }
         if(note.isBass) {
             if(note.isChord){
@@ -148,6 +153,16 @@ ABCXJS.midi.Parse.prototype.handleButtons = function(pitches, buttons ) {
                 key = note.key;
             }
         } else {
+            
+            if( self.transposeTab ) {
+                switch(self.transposeTab){
+                    case 8: note.octave --; break;
+                    case -8: note.octave ++; break;
+                    default:
+                        this.addWarning('Possível transpor a tablatura uma oitava acima ou abaixo +/-8. Ignorando transpose.') ;
+                }
+            }
+            
             midipitch = 12 + 12 * note.octave + DIATONIC.map.key2number[ note.key ];
         }
         
@@ -173,7 +188,6 @@ ABCXJS.midi.Parse.prototype.handleButtons = function(pitches, buttons ) {
                 }
             }
         }
-        // está quase certo: precisa tratar o caso de ter mais de uma voz sobreposta.
         if(this.lastBar && ((note.isBass && hasBass) || (!note.isBass && hasTreble && this.lastBar ))) {
             self.addWarning( 'Compasso '+this.lastBar+': Botao '+item.button.button.tabButton+' ('+item.button.button.closeLabel+'/'+item.button.button.openLabel+') não corresponde a nenhuma nota em execução.');
         }    

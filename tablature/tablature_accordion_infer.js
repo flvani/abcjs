@@ -32,13 +32,15 @@ ABCXJS.tablature.Infer = function( accordion, tune/*, strTune*/, vars ) {
     this.offset = 8.9;
     this.reset();
     
+    this.transposeTab = tune.lines[0].staffs[tune.tabStaffPos].clef.transpose || 0;
+    
     this.addWarning = function(str) {
         if (!this.vars.warnings) this.vars.warnings = [];
         this.vars.warnings.push(str);
     };
     
     this.barTypes = { 
-        "bar"         : "|"
+        "bar"              : "|"
       , "bar_thin"         : "|"
       , "bar_thin_thin"    : "||"
       , "bar_thick_thin"   : "[|"
@@ -419,6 +421,16 @@ ABCXJS.tablature.Infer.prototype.addTABChild = function(token) {
                 break
             default:
                 var note = this.accordion.getNoteName(item, this.accTrebKey, this.trebBarAcc, false);
+                
+                if( this.transposeTab ) {
+                    switch(this.transposeTab){
+                        case 8: note.octave ++; break;
+                        case -8: note.octave --; break;
+                        default:
+                            this.addWarning('Possível transpor a tablatura uma oitava acima ou abaixo +/-8. Ignorando transpose.') ;
+                    }
+                }
+                
                 item.buttons = this.accordion.getKeyboard().getButtons(note);
                 item.note = note.key + note.octave;
                 item.c = item.inTie ? '-->' :  item.note;

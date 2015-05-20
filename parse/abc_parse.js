@@ -1014,6 +1014,8 @@ window.ABCXJS.parse.Parse = function(transposer_, accordion_) {
                 params.scale = multilineVars.currentVoice.scale;
             if (multilineVars.currentVoice.style)
                 params.style = multilineVars.currentVoice.style;
+            if (multilineVars.currentVoice.transpose)
+                params.transpose = multilineVars.currentVoice.transpose;
         }
         tune.startNewLine(params);
 
