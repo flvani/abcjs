@@ -103,7 +103,7 @@ DIATONIC.map.Button.prototype.clear = function(delay) {
     if(!this.closeSide) return;
     var that = this;
     if(delay) {
-        window.setTimeout(function(){ that.clear(); }, delay);
+        window.setTimeout(function(){ that.clear(); }, delay*1000);
         return;
     }    
     this.openSide.attr({"fill": "none", "stroke": "none", "stroke-width": 0});
@@ -114,7 +114,7 @@ DIATONIC.map.Button.prototype.setOpen = function(delay) {
     if(!this.openSide) return;
     var that = this;
     if(  delay ) {
-        window.setTimeout(function(){that.setOpen();}, delay );
+        window.setTimeout(function(){that.setOpen();}, delay*1000 );
         return;
     } 
     this.openSide.attr({"fill": this.openColor, "stroke": this.openColor, "stroke-width": 0});
@@ -124,7 +124,7 @@ DIATONIC.map.Button.prototype.setClose = function(delay) {
     if(!this.closeSide) return;
     var that = this;
     if(  delay ) {
-        window.setTimeout(function(){that.setClose();}, delay);
+        window.setTimeout(function(){that.setClose();}, delay*1000);
         return;
     } 
     this.closeSide.attr({"fill": this.closeColor, "stroke": this.closeColor, "stroke-width": 0});

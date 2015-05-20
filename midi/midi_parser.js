@@ -71,7 +71,7 @@ ABCXJS.midi.Parse.prototype.reset = function() {
 ABCXJS.midi.Parse.prototype.parse = function(tune, keyboard) {
     
     var self = this;
-    var currBar = 0;
+    var currBar = 0; // marcador do compasso corrente - não conta os compassos repetidos por ritornellos
     
     this.reset();
 
@@ -100,23 +100,25 @@ ABCXJS.midi.Parse.prototype.parse = function(tune, keyboard) {
     
     //cria a playlist a partir dos elementos obtidos acima  
     this.parsedElements.forEach( function( item, time ) {
+        
         if( item.end.pitches.length + item.end.abcelems.length + item.end.buttons.length > 0 ) {
             self.midiTune.playlist.push( {item: item.end, time: time, start: false } );
         }
         
         if( item.start.pitches.length + item.start.abcelems.length + item.start.buttons.length > 0 ) {
-            self.handleButtons(item.start.pitches, item.start.buttons );
+            var pl = {item: null, time: time, start: true };
             if( item.start.barNumber ) {
-                this.lastBar = item.start.barNumber > currBar? item.start.barNumber:null;
+                this.lastBar = null; // por hora, sem uso: objetivo seria identificar o compasso onde os botões da tablatura não condizem com a partitura
                 if( item.start.barNumber > currBar ) {
-                    currBar = item.start.barNumber;
+                    currBar = this.lastBar = item.start.barNumber;
                     self.midiTune.measures[currBar] = self.midiTune.playlist.length;
                 }
-                self.midiTune.playlist.push( {item: item.start, time: time, barNumber: item.start.barNumber, start: true } );
-            } else {
-                self.midiTune.playlist.push( {item: item.start, time: time, start: true } );
-            }
+                pl.barNumber = item.start.barNumber;
+            } 
             delete item.start.barNumber;
+            self.handleButtons(item.start.pitches, item.start.buttons );
+            pl.item = item.start;
+            self.midiTune.playlist.push( pl );
         }
     });
     
@@ -126,7 +128,7 @@ ABCXJS.midi.Parse.prototype.parse = function(tune, keyboard) {
     return this.midiTune;
 };
 
-ABCXJS.midi.Parse.prototype.handleButtons = function(pitches, buttons, currBar) {
+ABCXJS.midi.Parse.prototype.handleButtons = function(pitches, buttons ) {
     var note, midipitch, key, pitch;
     var self = this;
     buttons.forEach( function( item ) {
@@ -172,9 +174,9 @@ ABCXJS.midi.Parse.prototype.handleButtons = function(pitches, buttons, currBar) 
             }
         }
         // está quase certo: precisa tratar o caso de ter mais de uma voz sobreposta.
-        //if((note.isBass && hasBass) || (!note.isBass && hasTreble && this.lastBar )) {
-        //    self.addWarning( 'Compasso '+this.lastBar+': Botao '+item.button.button.tabButton+' ('+item.button.button.closeLabel+'/'+item.button.button.openLabel+') não corresponde a nenhuma nota em execução.');
-        //}    
+        if(this.lastBar && ((note.isBass && hasBass) || (!note.isBass && hasTreble && this.lastBar ))) {
+            self.addWarning( 'Compasso '+this.lastBar+': Botao '+item.button.button.tabButton+' ('+item.button.button.closeLabel+'/'+item.button.button.openLabel+') não corresponde a nenhuma nota em execução.');
+        }    
     });
     
     
@@ -382,10 +384,10 @@ ABCXJS.midi.Parse.prototype.selectButtons = function(elem) {
                     this.lastTabElem[10+i-bassCounter] = button;
                 }
             }
-            //if( ! tie ) {
+            if( ! tie ) {
                 this.addStart( this.timecount, null, null, { button: button, closing: (elem.bellows === '+'), duration: elem.duration } );
-                this.addEnd( this.timecount+mididuration, null, null/*, { button: button, closing: (elem.bellows === '+') } */);
-            //}    
+                //this.addEnd( this.timecount+mididuration, null, null/*, { button: button, closing: (elem.bellows === '+') } */);
+            }    
         }
     }
     

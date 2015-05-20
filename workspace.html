@@ -111,32 +111,51 @@
 <div id="editControl" style="display:inline-block;"> 
 
 <textarea id="abc" cols="120" rows="10" >
-X:1008
-%%barnumbers 0
+X:1
 %%papersize A4
-T:Prenda Minha
-C:Tradicional
-M:C
-L:1/8
-Q:120
+%%barnumbers 0
+%%score (0 1) 2 3
+T:Rincão dos Maciel
+C:Reduzino Malaquias
+L:1/16
+Q:78
+M:2/4
 K:G
-V:1 clef=treble
-V:2 clef=bass
-[V:1]| (3DGB  | d2G2G2 (3DGc                  | B2A2A2 d3/2e1/2                | d2 c2 B2 A2                   |            B4 z2  (3DGB   |
-[V:2]| z2     | "G"G,,2 [G,B,D]2 [G,B,D]2 z2  | "D"D,,2 [D,F,A,]2 [D,F,A,]2 z2 | D,,2 [D,F,A,]2 D,,2 [D,F,A,]2 | "G"G,,2 [G,B,D]2 [G,B,D]2 z2 |
-[V:1]| d2G2G2 (3DGc               | B2A2A2 d3/2e1/2             | d2 c2 B2 A2                   | G8 |] G3 G GGFE |
-[V:2]| G,,2 [G,B,D]2 [G,B,D]2 z2  | "D"D,,2 [D,F,A,]2 [D,F,A,]2 z2 | D,,2 [D,F,A,]2 D,,2 [D,F,A,]2 | "G"G,,2 [G,B,D]2 [G,B,D]4 |] G,,2 [G,B,D]2 [G,B,D]2 z2  | 
-[V:1]| DDCB, A,A,B,C  | D2 F2 D2 C2 | B,8 | G3 G GGFE | DDCB, A,A,B,C  | 
-[V:2]| "D"D,,2 [D,F,A,]2 [D,F,A,]2 z2 | D,,2 [D,F,A,]2 D,,2 [D,F,A,]2 | "G"G,,2 [G,B,D]2 [G,B,D]4 | G,,2 [G,B,D]2 [G,B,D]2 z2  | "D"D,,2 [D,F,A,]2 [D,F,A,]2 z2 |
-[V:1]| D2 F2 D2 C2 | B,6  B,C | D3 E E2 D2 | CCCB, A,A,A,B, | C2 D2 D2 C2 |
-[V:2]| D,,2 [D,F,A,]2 D,,2 [D,F,A,]2 | "G"G,,2 [G,B,D]2 [G,B,D]2 z2 | G,,2 [G,B,D]2 [G,B,D]2 z2 |"D"D,,2 [D,F,A,]2 [D,F,A,]2 z2 | D,,2 [D,F,A,]2  [D,F,A,]2 z2 |
-[V:1]| B,6  B,C |  D3 E E2 D2 | CCCB, A,A,A,B, | C2 D2 D2 C2 | B,8 |]
-[V:2]|"G"G,,2 [G,B,D]2 [G,B,D]2 z2  | G,,2 [G,B,D]2 [G,B,D]2 z2  | "D"D,,2 [D,F,A,]2 [D,F,A,]2 z2 | D,,2 [D,F,A,]2 [D,F,A,]2 z2 | G,,2 [G,B,D]2 [G,B,D]2 z2  |]
-Z:Flavio Vani
+V:0 treble stem=up
+V:1 treble
+V:2 bass
+[V:0]|:x8|d8-| %5
+[V:1]|: [DB]2[Ec]2[DB]2d2 | A2C2A,2C2 |
+[V:2]|: G,,3[G,B,D] G,,2[G,B,D]2 | D,,3[D,F,A,] D,,2[D,F,A,]2 |
+[V:0]|-d8| x8 :| %6
+[V:1]|D2C2B,2A,2 | B,2[B,DG]2 z B,CD :|
+[V:2]| D,,3[D,F,A,] D,,2[D,F,A,]2 | G,,3[G,B,D] G,,2[G,B,D]2 :|
 V:3 accordionTab
 </textarea>
     
 <textarea id="abcx" cols="120" rows="10" style="display: none;" >
+% TODO: este trecho do rincao expoe um problema de continuidade da nota "inTie" na transição de uma linh para outra
+X:1
+%%papersize A4
+%%barnumbers 0
+%%score (0 1) 2 3
+T:Rincão dos Maciel
+C:Reduzino Malaquias
+L:1/16
+Q:78
+M:2/4
+K:G
+V:0 treble stem=up
+V:1 treble
+V:2 bass
+[V:0]|:x8|d8-| %5
+[V:1]|: [DB]2[Ec]2[DB]2d2 | A2C2A,2C2 |
+[V:2]|: G,,3[G,B,D] G,,2[G,B,D]2 | D,,3[D,F,A,] D,,2[D,F,A,]2 |
+[V:0]|-d8| x8 :| %6
+[V:1]|D2C2B,2A,2 | B,2[B,DG]2 z B,CD :|
+[V:2]| D,,3[D,F,A,] D,,2[D,F,A,]2 | G,,3[G,B,D] G,,2[G,B,D]2 :|
+V:3 accordionTab
+
 X:1008
 %%barnumbers 0
 %%papersize A4

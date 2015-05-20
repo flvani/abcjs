@@ -25,8 +25,10 @@ if (!window.ABCXJS.midi)
     window.ABCXJS.midi = {}; 
 
 ABCXJS.midi.Player = function( options ) {
+    
     this.reset(options);
     
+    this.playableClefs = "TB"; // indica que baixo (B) e melodia (T) serao executadas.
     this.ticksPerInterval = 1;
     
     this.callbackOnStart = null;
@@ -35,6 +37,14 @@ ABCXJS.midi.Player = function( options ) {
     this.callbackOnScroll = null;
     this.callbackOnChangeBar = null;
     
+};
+
+ABCXJS.midi.Player.prototype.setPlayableClefs = function(letters) {
+    this.playableClefs = letters;
+};
+
+ABCXJS.midi.Player.prototype.playClef = function(letter) {
+    return this.playableClefs.indexOf( letter.toUpperCase() )>=0;
 };
 
 ABCXJS.midi.Player.prototype.reset = function(options) {
@@ -269,53 +279,43 @@ ABCXJS.midi.Player.prototype.executa = function(pl) {
     var delay = 0;
 
     try {
-        var plt = pl.time;
-        var ct = self.currentTime*self.tempo/1000;
         if( pl.start ) {
             
             pl.item.pitches.forEach( function( elem ) {
-                delay = ( (elem.delay * self.tempo ) / 1000);
-                MIDI.noteOn(elem.midipitch.channel, elem.midipitch.midipitch, loudness, delay);
-                //console.log( 'Spitch: ' + elem.midipitch.midipitch + ' T= ' + (ct + delay) + ' delay= ' + delay);
-                var k = 2.2, t = k, resto = ( (elem.midipitch.mididuration * self.tempo ) / 1000) - k;
                 
-                // a nota midi dura k segundos (k), então notas mais longas são reiniciadas quantas vezes forem necessárias
-                while( resto > 0 ) {
-                    MIDI.noteOff(elem.midipitch.channel, elem.midipitch.midipitch,  t+delay);
-                    MIDI.noteOn(elem.midipitch.channel, elem.midipitch.midipitch, loudness, t+delay);
-                    t += k;
-                    resto -= k;
-                }
-                    
-//                if( resto > 0 ) {
-//                } else {
-//                }
+                delay = self.calcTempo( elem.delay );
+                
+                if(  self.playClef( elem.midipitch.clef.charAt(0) ) ) {
+                    MIDI.noteOn(elem.midipitch.channel, elem.midipitch.midipitch, loudness, delay);
+                    var k = 2.2, t = k, resto = self.calcTempo( elem.midipitch.mididuration ) - k;
 
-//                t = ( (elem.midipitch.mididuration * self.tempo ) / 1000);
-//                MIDI.noteOff(elem.midipitch.channel, elem.midipitch.midipitch,  t+delay);
+                    // a nota midi dura k segundos (k), então notas mais longas são reiniciadas quantas vezes forem necessárias
+                    while( resto > 0 ) {
+                        MIDI.noteOff(elem.midipitch.channel, elem.midipitch.midipitch,  t+delay);
+                        MIDI.noteOn(elem.midipitch.channel, elem.midipitch.midipitch, loudness, t+delay);
+                        t += k;
+                        resto -= k;
+                    }
+                }
                 
                 if(elem.button && elem.button.button) {
                     if(elem.button.closing) {
-                        elem.button.button.setClose((delay*1000));
+                        elem.button.button.setClose(delay);
                     }else{
-                        elem.button.button.setOpen((delay*1000));
+                        elem.button.button.setOpen(delay);
                     }
-                    //console.log( 'Sbutton: ' + elem.button.button.tabButton + ' T= ' + (ct + delay) + ' delay= ' + delay);
-                 if( self.type !== 'note' ) {
+                    if( self.type !== 'note' ) {
                         //o andamento é considerado somente para o modo didatico
                         var andamento = self.type?(1/self.currentAndamento):1;
                         //limpa o botão uma fração de tempo antes do fim da nota - para dar ideia visual de botão pressionado/liberado antes da proxima nota
-                        var clearTime = (self.tempo * andamento) *.5;
-                        var tt = ( elem.midipitch.mididuration * self.tempo * andamento );
-                        elem.button.button.clear(  (tt - clearTime + (delay*1000) ) );
-                        //console.log( 'Tbutton: ' + elem.button.button.tabButton + ' T= ' 
-                          //      +( ct + (tt - clearTime)/1000 + delay )+ ' delay= ' + delay+ ' clear= ' + clearTime);
+                        elem.button.button.clear( self.calcTempo( (elem.midipitch.mididuration-0.5)*andamento ) + delay );
                     }    
                 }
                 
             });
             pl.item.abcelems.forEach( function( elem ) {
-                delay = ( (elem.delay * self.tempo ) / 1000);
+                
+                delay = self.calcTempo( elem.delay );
                 if( self.callbackOnScroll ) {
                     self.currAbsElem = elem.abcelem.abselem;
                     self.currChannel = elem.channel;
@@ -325,12 +325,13 @@ ABCXJS.midi.Player.prototype.executa = function(pl) {
             });
         } else {
             pl.item.pitches.forEach( function( elem ) {
-                delay = ( (elem.delay * self.tempo ) / 1000);
-                MIDI.noteOff(elem.midipitch.channel, elem.midipitch.midipitch, delay);
-                //console.log( 'Tpitch: ' + elem.midipitch.midipitch + ' T= ' + (ct + delay) + ' delay= ' + delay);
+                if(  self.playClef( elem.midipitch.clef.charAt(0) ) ) {
+                    delay = self.calcTempo( elem.delay );
+                    MIDI.noteOff(elem.midipitch.channel, elem.midipitch.midipitch, delay);
+                }
            });
             pl.item.abcelems.forEach( function( elem ) {
-                delay = ( (elem.delay * self.tempo ) / 1000);
+                delay = self.calcTempo( elem.delay );
                 self.highlight(elem.abcelem.abselem, false, delay);
             });
         }
@@ -341,10 +342,13 @@ ABCXJS.midi.Player.prototype.executa = function(pl) {
     }
 };
 
+ABCXJS.midi.Player.prototype.calcTempo = function( val ) {
+  return  val * this.tempo / 1000;   
+}
 ABCXJS.midi.Player.prototype.highlight = function( abselem, select, delay ) {
     var that = this;
     if(delay) {
-        window.setTimeout(function(){ that.highlight(abselem, select); }, delay);
+        window.setTimeout(function(){ that.highlight(abselem, select); }, delay*1000);
         return;
     }   
     if(select) {
