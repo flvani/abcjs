@@ -573,7 +573,7 @@ ABCXJS.write.Printer.prototype.printSubtitleLine = function(subtitle) {
 
 ABCXJS.write.Printer.prototype.printStaffLine = function (abctune, line) {
     var n = this.staffgroups.length;
-    this.staffgroups[n] = this.layouter.layoutABCLine(abctune, line);
+    this.staffgroups[n] = this.layouter.layoutABCLine(abctune, line, this.width);
     this.staffgroups[n].draw( this, line );
     return this.staffgroups[n];
 };

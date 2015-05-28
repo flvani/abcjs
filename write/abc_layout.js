@@ -94,11 +94,12 @@ ABCXJS.write.Layout.prototype.getNextElem = function() {
     return this.currVoice[this.pos + 1];
 };
 
-ABCXJS.write.Layout.prototype.layoutABCLine = function( abctune, line ) {
+ABCXJS.write.Layout.prototype.layoutABCLine = function( abctune, line, width ) {
 
     this.tune = abctune;
     this.tuneCurrLine = line;
     this.staffgroup = new ABCXJS.write.StaffGroupElement();
+    this.width = width;
 
     for (this.tuneCurrStaff = 0; this.tuneCurrStaff < this.tune.lines[this.tuneCurrLine].staffs.length; this.tuneCurrStaff++) {
         var abcstaff = this.tune.lines[this.tuneCurrLine].staffs[this.tuneCurrStaff];
@@ -149,8 +150,7 @@ ABCXJS.write.Layout.prototype.layoutStaffGroup = function() {
     for (var it = 0; it < 3; it++) { // TODO shouldn't need this triple pass any more
         this.staffgroup.layout(newspace, this.printer, false);
         if (this.tuneCurrLine && this.tuneCurrLine === this.tune.lines.length - 1 &&
-                this.staffgroup.w / this.width < 0.66
-                && !this.tune.formatting.stretchlast)
+                this.staffgroup.w / this.width < 0.66 && !this.tune.formatting.stretchlast)
             break; // don't stretch last line too much unless it is 1st
         var relspace = this.staffgroup.spacingunits * newspace;
         var constspace = this.staffgroup.w - relspace;
@@ -161,7 +161,6 @@ ABCXJS.write.Layout.prototype.layoutStaffGroup = function() {
             }
         }
     }
-    
 };
 
 ABCXJS.write.Layout.prototype.printABCVoice = function() {
