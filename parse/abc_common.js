@@ -55,6 +55,15 @@ window.ABCXJS.parse.clone = function(obj) {
     throw new Error("Unable to copy obj! Its type isn't supported.");
 };
 
+window.ABCXJS.parse.normalizeAcc = function ( cKey ) {
+    return cKey.replace(/([ABCDEFG])#/g,'$1♯').replace(/([ABCDEFG])b/g,'$1♭');
+};
+
+window.ABCXJS.parse.denormalizeAcc = function ( cKey ) {
+    return cKey.replace(/([ABCDEFG])♯/g,'$1#').replace(/([ABCDEFG])♭/g,'$1b');
+};
+
+
 window.ABCXJS.parse.gsub = function(source, pattern, replacement) {
 	return source.split(pattern).join(replacement);
 };
