@@ -325,10 +325,10 @@ ABCXJS.midi.Player.prototype.executa = function(pl) {
             });
         } else {
             pl.item.pitches.forEach( function( elem ) {
-                if(  self.playClef( elem.midipitch.clef.charAt(0) ) ) {
-                    delay = self.calcTempo( elem.delay );
-                    MIDI.noteOff(elem.midipitch.channel, elem.midipitch.midipitch, delay);
-                }
+                //if(  self.playClef( elem.midipitch.clef.charAt(0) ) ) {
+                delay = self.calcTempo( elem.delay );
+                MIDI.noteOff(elem.midipitch.channel, elem.midipitch.midipitch, delay);
+                //}
            });
             pl.item.abcelems.forEach( function( elem ) {
                 delay = self.calcTempo( elem.delay );
