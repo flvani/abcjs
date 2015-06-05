@@ -73,6 +73,7 @@ ABCXJS.tablature.Infer.prototype.reset = function() {
     // limite para inversão o movimento do fole - baseado no tempo de um compasso
     if( this.tune.lines &&
         this.tune.lines[0].staffs &&      
+        this.tune.lines[0].staffs[0].meter &&
         this.tune.lines[0].staffs[0].meter.type === 'specified' ) {
         var ritmo = this.tune.lines[0].staffs[0].meter.value[0];
         this.limit = ritmo.num / ritmo.den;
