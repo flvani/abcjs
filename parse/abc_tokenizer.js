@@ -616,11 +616,19 @@ window.ABCXJS.parse.tokenizer = function() {
 	this.getFraction = function(line, index) {
 		var num = 1;
 		var den = 1;
-		if (line.charAt(index) !== '/') {
+		if (line.charAt(index) !== '/' && line.charAt(index) !== '.') {
 			var ret = this.getNumber(line, index);
 			num = ret.num;
 			index = ret.index;
 		}
+		if (line.charAt(index) === '.') {
+			index++;
+			var ret = this.getNumber(line, index);
+			var frac = ret.num;
+			index = ret.index;
+                        num = parseFloat(num+'.'+frac);
+                    
+                }
 		if (line.charAt(index) === '/') {
 			index++;
 			if (line.charAt(index) === '/') {
