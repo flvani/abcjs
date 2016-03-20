@@ -539,17 +539,17 @@ ABCXJS.write.Printer.prototype.printTune = function(abctune) {
         extraText = "";
     }
     if (abctune.metaText.book)
-        extraText += "Book: " + abctune.metaText.book + "\n";
+        extraText += "Livro: " + abctune.metaText.book + "\n";
     if (abctune.metaText.source)
-        extraText += "Source: " + abctune.metaText.source + "\n";
+        extraText += "Fonte: " + abctune.metaText.source + "\n";
     if (abctune.metaText.discography)
-        extraText += "Discography: " + abctune.metaText.discography + "\n";
+        extraText += "Discografia: " + abctune.metaText.discography + "\n";
     if (abctune.metaText.notes)
-        extraText += "Notes: " + abctune.metaText.notes + "\n";
+        extraText += abctune.metaText.notes + "\n";
     if (abctune.metaText.transcription)
-        extraText += "Transcription: " + abctune.metaText.transcription + "\n";
+        extraText += "Transcrito por " + abctune.metaText.transcription + "\n";
     if (abctune.metaText.history)
-        extraText += "History: " + abctune.metaText.history + "\n";
+        extraText += "Histórico: " + abctune.metaText.history + "\n";
     text2 = this.paper.text(this.paddingleft, this.y * this.scale + 25 * this.scale, extraText).attr({"text-anchor": "start", "font-family": "serif", "font-size": 17 * this.scale});
     height = text2.getBBox().height;
     if (!height)

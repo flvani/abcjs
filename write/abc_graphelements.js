@@ -22,6 +22,8 @@ if (!window.ABCXJS)
 if (!window.ABCXJS.write)
     window.ABCXJS.write = {};
 
+ABCXJS.write.highLightColor = "#5151ff";
+
 ABCXJS.write.StaffGroupElement = function() {
     this.voices = [];
 };
@@ -556,7 +558,7 @@ ABCXJS.write.AbsoluteElement.prototype.setClass = function(addClass, removeClass
 };
 
 ABCXJS.write.AbsoluteElement.prototype.highlight = function() {
-    this.setClass("note_selected", "", "#ff0000");
+    this.setClass("note_selected", "", ABCXJS.write.highLightColor );
 };
 
 ABCXJS.write.AbsoluteElement.prototype.unhighlight = function() {
