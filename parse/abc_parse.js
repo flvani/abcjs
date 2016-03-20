@@ -853,6 +853,7 @@ window.ABCXJS.parse.Parse = function(transposer_, accordion_) {
                 case '9':
                 case '0':
                 case '/':
+                case '.':
                     if (state === 'octave' || state === 'duration') {
                         var fraction = tokenizer.getFraction(line, index);
                         if (!durationSetByPreviousNote)
@@ -1452,7 +1453,9 @@ window.ABCXJS.parse.Parse = function(transposer_, accordion_) {
                                             case '7':
                                             case '8':
                                             case '9':
+                                            case '0':
                                             case '/':
+                                            case '.':
                                                 var fraction = tokenizer.getFraction(line, i);
                                                 chordDuration = fraction.value;
                                                 i = fraction.index;
