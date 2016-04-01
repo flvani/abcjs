@@ -188,7 +188,8 @@ ABCXJS.tablature.Layout.prototype.printBarLine = function (elem) {
   }
 
   if (elem.decoration) {
-    this.printDecoration(elem.decoration, 12, (thick)?3:1, abselem, 0, "down", 2);
+     // não há decorations na tablatura
+    //this.printDecoration(elem.decoration, 12, (thick)?3:1, abselem, 0, "down", 2);
   }
 
   if (thick) {
