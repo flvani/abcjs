@@ -44,21 +44,25 @@ ABCXJS.midi.Parse.prototype.reset = function() {
     
     this.vars = { warnings: [] };
     
-    this.multiplier = 1;
+    this.channel = -1;
     this.timecount = 0;
-    this.alertedMin = false;
-    this.repeating = false;
-    this.skipping = false;
-    this.inEnding = false;
+    this.playlistpos = 0;
+    this.pass = 1;
+    this.maxPass = 2;
+    this.currEnding = null;
+    this.afterRepeatBlock = false;
     this.next = null;
-    this.visited = {};
-    this.lastMark = {};       
+    this.restarting = false;
     this.restart = {line: 0, staff: 0, voice: 0, pos: 0};
+    this.startSegno = null;
+    this.segnoUsed = false;
+    
+    this.multiplier = 1;
+    this.alertedMin = false;
     
     this.startTieInterval = [];
     this.lastTabElem = [];
     this.baraccidentals = [];
-    this.channel = -1;
     this.parsedElements = [];
     
     this.midiTune = { 
@@ -188,7 +192,7 @@ ABCXJS.midi.Parse.prototype.handleButtons = function(pitches, buttons ) {
                 }
             }
         }
-        if(this.lastBar && ((note.isBass && hasBass) || (!note.isBass && hasTreble && this.lastBar ))) {
+        if(this.lastBar && ((note.isBass && hasBass) || (!note.isBass && hasTreble /* flavio && this.lastBar */))) {
             self.addWarning( 'Compasso '+this.lastBar+': Botao '+item.button.button.tabButton+' ('+item.button.button.closeLabel+'/'+item.button.button.openLabel+') não corresponde a nenhuma nota em execução.');
         }    
     });
@@ -416,47 +420,64 @@ ABCXJS.midi.Parse.prototype.selectButtons = function(elem) {
     
 };
 
-ABCXJS.midi.Parse.prototype.handleBar = function(elem) {
-    this.baraccidentals = [];
-    
-    var repeat     = (elem.type === "bar_right_repeat" || elem.type === "bar_dbl_repeat");
-    var setrestart = (elem.type === "bar_left_repeat" || elem.type === "bar_dbl_repeat" || 
-                      elem.type === "bar_thick_thin" || elem.type === "bar_thin_thick" || 
+ABCXJS.midi.Parse.prototype.handleBar = function (elem) {
+
+
+    var repeat = (elem.type === "bar_right_repeat" || (elem.type === "bar_dbl_repeat" && !this.restarting));
+
+    var setrestart = (elem.type === "bar_left_repeat" || elem.type === "bar_dbl_repeat" ||
+                      elem.type === "bar_thick_thin" || elem.type === "bar_thin_thick" ||
                       elem.type === "bar_thin_thin" || elem.type === "bar_right_repeat");
 
-    if ( this.isVisited() ) {
-        if( ! this.repeating && this.getMarkString(this.lastMark) !== this.getMarkString() )
-            this.next = this.lastMark;
-    } else {
-        if( this.repeating ) {
-            this.repeating = false;
+    var restart_next = this.restart;
+
+    this.baraccidentals = [];
+    this.restarting = false;
+
+    if (elem.decoration) {
+        for (var d = 0; d < elem.decoration.length; d++) {
+            if (elem.decoration[d] === 'segno') {
+                if (this.startSegno !== null && !this.segnoUsed && this.getMarkString(this.startSegno) !== this.getMarkString()) {
+                    this.next = this.startSegno;
+                    this.segnoUsed = true;
+                    return;
+                } else {
+                    this.startSegno = this.getMark();
+                }
+            }
+        }
+    }
+
+    if (elem.endEnding) {
+        this.currEnding = null;
+    }
+
+    if (elem.startEnding && !repeat && !this.afterRepeatBlock) {
+        var a = elem.startEnding.split('-');
+        this.currEnding = {};
+        this.currEnding.min = parseInt(a[0]);
+        this.currEnding.max = a.length > 1 ? parseInt(a[1]) : this.currEnding.min;
+        this.maxPass = Math.max(this.currEnding.max, 2);
+    }
+
+    this.skipping = (this.currEnding !== null && (this.currEnding.min > this.pass || this.pass > this.currEnding.max));
+
+    if (setrestart) {
+        this.afterRepeatBlock = false;
+        this.restart = this.getMark();
+    }
+
+    if (repeat) {
+        if (this.pass < this.maxPass) {
+            this.pass++;
+            this.next = restart_next;
+            this.restarting = true;
+            this.clearTies();
+            return;
         } else {
-            
-            this.inEnding   = elem.endEnding && !elem.startEnding ? false : this.inEnding;
-            this.skipping   = this.skipping || this.inEnding && elem.startEnding !== undefined && elem.startEnding !== this.inEnding;
-            this.inEnding   = elem.startEnding || this.inEnding;
-
-            if( this.skipping ) {
-                if( elem.startEnding ) this.lastMark = this.getMark();
-                if( ! repeat ) return;
-            }
-
-            if( !this.skipping && (repeat || this.inEnding) ) {
-                this.setVisited();
-            }
-            
-            if ( repeat ) {
-                this.clearTies();
-                if(!this.skipping)
-                    this.lastMark = this.getMark();
-                this.skipping = false;
-                this.inEnding = false;
-                this.repeating = true;
-                this.next = this.restart;
-            }
-            if ( setrestart ) {
-                this.restart = this.getMark();
-            }
+            this.pass = 1;
+            this.maxPass = 2;
+            this.afterRepeatBlock = true;
         }
     }
 };
@@ -474,14 +495,6 @@ ABCXJS.midi.Parse.prototype.clearTies = function() {
         }   
         self.startTieInterval[index] = [false];
     });
-};
-
-ABCXJS.midi.Parse.prototype.setVisited = function() {
-    this.visited[this.getMarkString()] = true;
-};
-
-ABCXJS.midi.Parse.prototype.isVisited = function() {
-    return  this.visited[this.getMarkString()];
 };
 
 ABCXJS.midi.Parse.prototype.getParsedElement = function(time) {
@@ -556,6 +569,15 @@ ABCXJS.midi.Parse.prototype.startTrack = function() {
     this.channel ++;
     this.timecount = 0;
     this.playlistpos = 0;
+    this.pass = 1;
+    this.maxPass = 2;
+    this.currEnding = null;
+    this.afterRepeatBlock = false;
+    this.next = null;
+    this.restarting = false;
+    this.restart = {line: 0, staff: 0, voice: 0, pos: 0};
+    this.startSegno = null;
+    this.segnoUsed = false;
 };
 
 ABCXJS.midi.Parse.prototype.endTrack = function() {
