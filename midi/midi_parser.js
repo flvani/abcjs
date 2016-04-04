@@ -43,12 +43,14 @@ ABCXJS.midi.Parse = function( options ) {
 ABCXJS.midi.Parse.prototype.reset = function() {
     
     this.vars = { warnings: [] };
+    this.globalJumps = [];
     
     this.channel = -1;
     this.timecount = 0;
     this.playlistpos = 0;
     this.pass = 1;
     this.maxPass = 2;
+    this.countBar = 0;
     this.currEnding = null;
     this.afterRepeatBlock = false;
     this.next = null;
@@ -420,39 +422,39 @@ ABCXJS.midi.Parse.prototype.selectButtons = function(elem) {
     
 };
 
+// Esta função é fundamental pois controla todo o fluxo de execução das notas do MIDI
 ABCXJS.midi.Parse.prototype.handleBar = function (elem) {
+    
+    this.countBar++; // contagem das barras de compasso de uma linha, para auxiliar na execução de saltos como "segno".
 
-
+   // bar_dbl_repeat só pode ser considerada repetição se não for encontrada após salto de repetição, caso em que será apenas, o ponto de restart.
     var repeat = (elem.type === "bar_right_repeat" || (elem.type === "bar_dbl_repeat" && !this.restarting));
-
+    
+    // todas estas barras indicam ponto de restart em caso de repetição
     var setrestart = (elem.type === "bar_left_repeat" || elem.type === "bar_dbl_repeat" ||
                       elem.type === "bar_thick_thin" || elem.type === "bar_thin_thick" ||
                       elem.type === "bar_thin_thin" || elem.type === "bar_right_repeat");
-
+              
+    // salva o ponto prévio de restart (que pode ser modificado durante a interpreatação da barra corrente
     var restart_next = this.restart;
 
+    //reset de váriaveis para o processamento das notas dentro do compasso
     this.baraccidentals = [];
     this.restarting = false;
 
-    if (elem.decoration) {
-        for (var d = 0; d < elem.decoration.length; d++) {
-            if (elem.decoration[d] === 'segno') {
-                if (this.startSegno !== null && !this.segnoUsed && this.getMarkString(this.startSegno) !== this.getMarkString()) {
-                    this.next = this.startSegno;
-                    this.segnoUsed = true;
-                    return;
-                } else {
-                    this.startSegno = this.getMark();
-                }
-            }
-        }
-    }
-
+   // este bloco trata os "endings" ou chaves de 1ª e  2ª vez  (ou chaves de finalização).
+   // são importantes para determinar a quantidade de vezes que o bloco será repetido e quais compassos
+   // devem ser ignorados em cada passada
+   
+   // encerra uma chave de finalização
     if (elem.endEnding) {
         this.currEnding = null;
     }
 
-    if (elem.startEnding && !repeat && !this.afterRepeatBlock) {
+   // inicia uma chave de finalização e faz o parse da quantidade repetições necessarias
+   // a chave de finalização imediatamente  após um bloco de repetição ter sido terminado será ignorada
+   // e enquanto o bloco estiver sendo repetido, também
+    if (elem.startEnding &&  !this.afterRepeatBlock &&  !repeat ) {
         var a = elem.startEnding.split('-');
         this.currEnding = {};
         this.currEnding.min = parseInt(a[0]);
@@ -460,13 +462,16 @@ ABCXJS.midi.Parse.prototype.handleBar = function (elem) {
         this.maxPass = Math.max(this.currEnding.max, 2);
     }
 
+    //ignora notas em função da quantidade de vezes que o bloco foi repetido e o tipo de "ending"
     this.skipping = (this.currEnding !== null && (this.currEnding.min > this.pass || this.pass > this.currEnding.max));
 
+    // marca um ponto de recomeço
     if (setrestart) {
         this.afterRepeatBlock = false;
         this.restart = this.getMark();
     }
 
+    // verifica se deve encerrar a repetição do bloco
     if (repeat) {
         if (this.pass < this.maxPass) {
             this.pass++;
@@ -478,6 +483,38 @@ ABCXJS.midi.Parse.prototype.handleBar = function (elem) {
             this.pass = 1;
             this.maxPass = 2;
             this.afterRepeatBlock = true;
+        }
+    }
+    
+/*
+    Tratamento das decorações, especialmente o "segno", mas anda incompleto.
+    Característica: apenas as decorações da primeira staff são consideradas e aplicadas a todas as outras
+*/
+    
+    if ( this.staff === 0 )   {
+        if (elem.decoration)  {
+            for (var d = 0; d < elem.decoration.length; d++) {
+                if (elem.decoration[d] === 'segno') {
+                    if (this.startSegno !== null && !this.segnoUsed && this.getMarkString(this.startSegno) !== this.getMarkString()) {
+                        this.globalJumps[this.countBar] = this.getMark();
+                        this.next = this.startSegno;
+                        this.segnoUsed = true;
+                        //return;
+                    } else if (this.startSegno === null ) {
+                        this.startSegno = this.getMark();
+                        this.globalJumps[this.countBar] = this.startSegno;
+                    }
+                }
+            }
+        }
+    } else {
+        if( this.globalJumps[this.countBar]) {
+                if (this.startSegno !== null && !this.segnoUsed && this.getMarkString(this.startSegno) !== this.getMarkString()) {
+                    this.next = this.startSegno;
+                    this.segnoUsed = true;
+                } else if (this.startSegno === null ) {
+                    this.startSegno = this.getMark();
+                }
         }
     }
 };
@@ -571,6 +608,7 @@ ABCXJS.midi.Parse.prototype.startTrack = function() {
     this.playlistpos = 0;
     this.pass = 1;
     this.maxPass = 2;
+    this.countBar = 0;
     this.currEnding = null;
     this.afterRepeatBlock = false;
     this.next = null;
