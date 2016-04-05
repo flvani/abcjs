@@ -1748,6 +1748,14 @@ window.ABCXJS.parse.Parse = function(transposer_, accordion_) {
                     }
                 }
             }
+            // flavio
+            if(multilineVars.missingButtons){
+                for( var m in multilineVars.missingButtons ) {
+                    addWarning('Nota ' + m + ' não disponível nos compassos: ' + multilineVars.missingButtons[m].join(", ") + '.' ) ;
+                }
+            }
+    
+            
         //} catch (err) {
         //    if (err !== "normal_abort")
         //        throw err;

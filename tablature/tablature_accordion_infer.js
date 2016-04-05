@@ -28,6 +28,8 @@ ABCXJS.tablature.Infer = function( accordion, tune/*, strTune*/, vars ) {
     this.accordion = accordion;
     //this.abcText = strTune;
     this.vars = vars || {} ;
+    this.vars.missingButtons = this.vars.missingButtons || {};
+
     this.tune = tune;
     this.offset = 8.9;
     this.reset();
@@ -154,12 +156,6 @@ ABCXJS.tablature.Infer.prototype.inferTabVoice = function(line) {
                 break;
         }
     } 
-    
-    if(this.missingButtons){
-        for( var m in this.missingButtons ) {
-            this.addWarning('Nota ' + m + ' não disponível nos compassos: ' + this.missingButtons[m].join(",") + '.' ) ;
-        }
-    }
     
     this.accordion.setTabLine(this.producedLine);
     
@@ -511,7 +507,7 @@ ABCXJS.tablature.Infer.prototype.addTABChild = function(token) {
                         item.c = this.elegeBotao(this.closing ? item.buttons.close : item.buttons.open);
                         this.registerLine(this.button2Hex(item.c));
                         if( item.c === 'x'){
-                            this.registerMissingButton(this.closing, item);
+                            this.registerMissingButton(item);
                        }
                     }
             }
@@ -527,10 +523,14 @@ ABCXJS.tablature.Infer.prototype.addTABChild = function(token) {
     this.add(child, xi, xf-1);
 };
 
-ABCXJS.tablature.Infer.prototype.registerMissingButton = function(close,item) {
-    if( ! this.missingButtons ) this.missingButtons = {};
-    if( ! this.missingButtons[item.note] )  this.missingButtons[item.note] = [];
-    this.missingButtons[item.note].push(parseInt(this.currInterval));
+ABCXJS.tablature.Infer.prototype.registerMissingButton = function(item) {
+    if( ! this.vars.missingButtons[item.note] )  
+        this.vars.missingButtons[item.note] = [];
+    var bar = parseInt(this.currInterval);
+    for( var i=0; i < this.vars.missingButtons[item.note].length; i++) {
+        if ( this.vars.missingButtons[item.note][i] === bar ) return; // already listed
+    }
+    this.vars.missingButtons[item.note].push(bar);
 };
 
 ABCXJS.tablature.Infer.prototype.getXi = function() {
