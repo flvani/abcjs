@@ -237,6 +237,11 @@ ABCXJS.edit.EditArea.prototype.getElem = function() {
 
 ABCXJS.Editor = function(editarea, params) {
     
+  this.fireTime =0;
+  this.printTimeStart =0;
+  this.printTimeEnd =0;
+  this.endTime =0;
+    
   this.oldt = "";
   this.bReentry = false;
   this.accordion = null;
@@ -352,7 +357,7 @@ ABCXJS.Editor = function(editarea, params) {
   };
   
   if( this.parseABC(0) ) {
-      this.showUp();
+      this.modelChanged();
   }
 
 };
@@ -392,23 +397,31 @@ ABCXJS.Editor.prototype.setString = function(text, noRefresh) {
     this.editarea.setString( text, noRefresh );
 };
 
-ABCXJS.Editor.prototype.showUp = function() {
-  this.modelChanged();
-};
+ABCXJS.Editor.prototype.renderTune = function (abc, params, div) {
 
-ABCXJS.Editor.prototype.renderTune = function(abc, params, div) {
+    var tunebook = new ABCXJS.TuneBook(abc);
+    var abcParser = new ABCXJS.parse.Parse(this.transposer, this.accordion);
+    abcParser.parse(tunebook.tunes[0].abc, params); //TODO handle multiple tunes
+    var tune = abcParser.getTune();
+    var paper = Raphael(div, 800, 400);
+    var printer = new ABCXJS.write.Printer(paper, {});// TODO: handle printer params
+    printer.printABC(tune);
 
-  var tunebook = new ABCXJS.TuneBook(abc);
-  var abcParser = new ABCXJS.parse.Parse(this.transposer, this.accordion);
-  abcParser.parse(tunebook.tunes[0].abc, params); //TODO handle multiple tunes
-  var tune = abcParser.getTune();
-  var paper = Raphael(div, 800, 400);
-  var printer = new ABCXJS.write.Printer(paper, {});// TODO: handle printer params
-  printer.printABC(tune);
- 
 };
 
 ABCXJS.Editor.prototype.modelChanged = function() {
+    var self = this;
+    var loader = this.startLoader( "ModelChanged" );
+    this.warningsdiv.innerHTML = '<hr>Aguarde...' ;
+    loader.start(  function() { self.modelChanged2(loader); }, '<br>&nbsp;&nbsp;&nbsp;Atualizando abc...<br><br>' );
+};
+
+ABCXJS.Editor.prototype.modelChanged2 = function(loader) {
+    var self = this;
+    
+    MIDI.loader = new widgets.Loader();
+    
+    this.fireTime = new Date();
     
     if (this.tunes === undefined) {
         this.div.innerHTML = "";
@@ -421,18 +434,17 @@ ABCXJS.Editor.prototype.modelChanged = function() {
     this.bReentry = true;
     this.timerId = null;
     this.div.innerHTML = "";
+//    var paper = DOMRaphael(this.div, 1100, 700);
     var paper = Raphael(this.div, 1100, 700);
     this.printer = new ABCXJS.write.Printer(paper, this.printerparams );
+    this.printTimeStart = new Date();
     this.printer.printABC(this.tunes);
+    this.printTimeEnd = new Date();
+    this.warnings.push('Tempo da impressão: ' + ( (this.printTimeEnd.getTime() -this.printTimeStart.getTime()) /1000).toFixed(2)  + 's');
     
     if (this.target) {
         var textprinter = new ABCXJS.transform.TextPrinter(this.target, true);
         textprinter.printABC(this.tunes[0]); //TODO handle multiple tunes
-    }
-    
-    if (this.warningsdiv) {
-        this.warningsdiv.style.color = this.warnings.length > 0 ? "red" : "green";
-        this.warningsdiv.innerHTML = '<hr>' + (this.warnings.length > 0 ? this.warnings.join("<br>") : "No warnings or errors.") + '<hr>';
     }
     
     this.printer.addSelectListener(this);
@@ -442,7 +454,47 @@ ABCXJS.Editor.prototype.modelChanged = function() {
     if (this.onchangeCallback)
         this.onchangeCallback(this);
     
+   loader.update( false, '<br>&nbsp;&nbsp;&nbsp;Finalizando...<br><br>' );
+   loader.stop();
+    
+//    window.setTimeout(function() {
+            self.printWarnings();
+//    }, 1);
+    
+    
 };
+
+ABCXJS.Editor.prototype.callback = function()  {
+    window.scrollTo( 0, window.lastYpos );
+};
+
+ABCXJS.Editor.prototype.printWarnings = function()  {
+    this.endTime = new Date();
+    this.warnings.push('Tempo total: ' + ( (this.endTime.getTime() -this.fireTime.getTime()) /1000).toFixed(2)  + 's');
+    
+    if (this.warningsdiv) {
+        this.warningsdiv.style.color = this.warnings.length > 0 ? "red" : "green";
+        this.warningsdiv.innerHTML = '<hr>' + (this.warnings.length > 0 ? this.warnings.join("<br>") : "No warnings or errors.") + '<hr>';
+    }
+};
+
+ABCXJS.Editor.prototype.startLoader = function(id, start, stop) {
+
+    var loader = new window.widgets.Loader({
+         id: id
+        ,bars: 0
+        ,radius: 0
+        ,lineWidth: 20
+        ,lineHeight: 70
+        ,timeout: 1 // maximum timeout in seconds.
+        ,background: "rgba(0,0,0,0.5)"
+        ,container: document.body
+        ,oncomplete: stop // call function once loader has started	
+        ,onstart: start // call function once loader has started	
+    });
+    return loader;
+};
+
 
 // Call this to reparse in response to the printing parameters changing
 ABCXJS.Editor.prototype.paramChanged = function(printerparams) {
