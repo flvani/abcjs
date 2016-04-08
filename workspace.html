@@ -115,9 +115,9 @@
 
 <textarea id="abc" cols="120" rows="10" >
 X:1
-%%score (0 1) 
 %%papersize A4
 %%barnumbers 0
+%%score (0 1) 2 3
 T:Rincão dos Maciel
 C:Reduzino Malaquias
 Z:Flávio Vani
@@ -129,13 +129,14 @@ M:2/4
 K:G
 V:0 treble stem=up
 V:1 treble
-%V:2 bass
-[V:0]|x8| %3
-[V:1]| DD,G,B, D4-| 
-%[V:2]| G,,3[G,B,D] G,,2[G,B,D]2 |
-[V:0]|x8|x8| %4
-[V:1]|D4 D4- | DD,G,B, D2C2 |
-%[V:2]| G,,3[G,B,D] G,,2[G,B,D]2 | D,,3[D,F,A,] D,,2[D,F,A,]2 |
+V:2 bass
+[V:0]|x8|x8|x8|x8|x8|:x8|d8-| %5
+[V:1]|CD,G,B, D4- | DD,G,B, D4- | DD,G,B, D2C2- | CD,F,A, D2C2 | B,2[DG]2 z B,CD |: [DB]2[Ec]2[DB]2d2 | A2C2A,2C2 |
+[V:2]| G,,3[G,B,D] G,,2[G,B,D]2 | G,,8 | D,,3[D,F,A,] D,,2[D,F,A,]2 | D,,3[D,F,A,] D,,2[D,F,A,]2 | G,,3[G,B,D] G,,2[G,B,D]2 |: G,,3[G,B,D] G,,2[G,B,D]2 | D,,3[D,F,A,] D,,2[D,F,A,]2 |
+[V:0]|d8|d8-|d8|d8-|d8|1 x8 :|2 x8 | %6
+[V:1]|D2C2B,2A,2 | G,2D2B,2C2 | D2C2B,2A,2 | A,2C2A,2C2 |D2C2B,2A,2 |1 B,2[B,DG]2 z B,CD :|2 B,2[B,DG]2 z dBG |
+[V:2]| D,,3[D,F,A,] D,,2[D,F,A,]2 | G,,3[G,B,D] G,,2[G,B,D]2 | G,,3[G,B,D] G,,2[G,B,D]2 | D,,3[D,F,A,] D,,2[D,F,A,]2 | D,,3[D,F,A,] D,,2[D,F,A,]2 |1 G,,3[G,B,D] G,,2[G,B,D]2 :|2 G,,3[G,B,D] G,,2[G,B,D]2 |
+V:3 accordionTab
 </textarea>
     
 <textarea id="abcx2" cols="120" rows="10" style="display:none;">
@@ -314,7 +315,8 @@ V:3 accordionTab
                         ,generate_warnings: true
                         ,generate_tablature: 'accordion'
                         ,accordion_options: {
-                                 id: 'GAITA_LETICCE_CF_NE'
+                                 //id: 'GAITA_LETICCE_CF_NE'
+                                 id: 'GAITA_HOHNER_GC   '
                                 ,keyboardDiv_id:"keyboardDiv"
                                 ,accordionMaps: DIATONIC.map.accordionMaps
                                 ,render_keyboard_opts:{transpose:false, mirror: false, scale:0.8, draggable:true, show:false, label:false}}

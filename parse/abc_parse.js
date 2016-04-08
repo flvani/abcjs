@@ -1738,27 +1738,31 @@ Elas foram incluídas em this.staves - ver:  abc_parse_key_voice e abc_parse_dir
                         }
                     }
                     if (this.accordion) {
+                        multilineVars.closing = true;
+                        multilineVars.missingButtons = {};
                         for (var t = 0; t < tune.lines.length; t++) {
                            if (tune.lines[t].staffs ) {
-                              var voice = this.accordion.inferTabVoice(t, tune/*, strTune*/, multilineVars);
+                              var voice = this.accordion.inferTabVoice(t, tune, multilineVars);
                               if (voice.length > 0) {
                                   tune.lines[t].staffs[tune.tabStaffPos].voices[0] = voice;
                                   tune.restsInTab = multilineVars.restsintab || false;
                               }
                            }  
                         }
+                        if(multilineVars.missingButtons){
+                            for( var m in multilineVars.missingButtons ) {
+                                addWarning('Nota ' + m + ' não disponível nos compassos: ' + multilineVars.missingButtons[m].join(", ") + '.' ) ;
+                            }
+                        }
+                        delete multilineVars.closing;
+                        delete multilineVars.missingButtons;
+                        
                         // obtem possiveis linhas inferidas para tablatura
                         strTune = this.appendString( this.accordion.updateEditor() );
                         
                     } else {
                         addWarning("+Warn: Cannot infer tablature line: no accordion defined!");
                     }
-                }
-            }
-            // flavio
-            if(multilineVars.missingButtons){
-                for( var m in multilineVars.missingButtons ) {
-                    addWarning('Nota ' + m + ' não disponível nos compassos: ' + multilineVars.missingButtons[m].join(", ") + '.' ) ;
                 }
             }
     
