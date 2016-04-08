@@ -320,13 +320,16 @@ window.ABCXJS.parse.parseDirective = {};
 				multilineVars.score_is_present = true;
 				var addVoice = function(id, newStaff, bracket, brace, continueBar) {
 					if (newStaff || multilineVars.staves.length === 0) {
-						multilineVars.staves.push({index: multilineVars.staves.length, numVoices: 0});
+						multilineVars.staves.push({index: multilineVars.staves.length, numVoices: 0, inEnding : [], inTie : [], inTieChord : [] });
 					}
 					var staff = window.ABCXJS.parse.last(multilineVars.staves);
 					if (bracket !== undefined) staff.bracket = bracket;
 					if (brace !== undefined) staff.brace = brace;
 					if (continueBar) staff.connectBarLines = 'end';
 					if (multilineVars.voices[id] === undefined) {
+                                                                                                            staff.inEnding[staff.numVoices] = false;
+                                                                                                            staff.inTie[staff.numVoices] = false;
+                                                                                                            staff.inTieChord[staff.numVoices] ={};
 						multilineVars.voices[id] = {staffNum: staff.index, index: staff.numVoices};
 						staff.numVoices++;
 					}

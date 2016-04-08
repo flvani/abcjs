@@ -79,9 +79,16 @@ window.ABCXJS.parse.Parse = function(transposer_, accordion_) {
             this.ignoredDecorations = [];
             this.textBlock = "";
             this.score_is_present = false;	// Can't have original V: lines when there is the score directive
+/*
+
+Estas variávies foram modificadas de tal forma que existe um controle para voz diferente na partitura.
+Elas foram incluídas em this.staves - ver:  abc_parse_key_voice e abc_parse_directive
+            
             this.inEnding = false;
             this.inTie = false;
             this.inTieChord = {};
+
+ */
         }
     };
 
@@ -1297,20 +1304,20 @@ window.ABCXJS.parse.Parse = function(transposer_, accordion_) {
                     if (bar.type.length === 0)
                         warn("Unknown bar type", line, i);
                     else {
-                        if (multilineVars.inEnding ) {
+                        if (multilineVars.staves[multilineVars.currentVoice.staffNum].inEnding[multilineVars.currentVoice.index] ) {
                             bar.endDrawEnding = true;
                             if(  bar.type !== 'bar_thin') {
                                 bar.endEnding = true;
-                                multilineVars.inEnding = false;
+                                multilineVars.staves[multilineVars.currentVoice.staffNum].inEnding[multilineVars.currentVoice.index] = false;
                             }
                         }
                         if (ret[2]) {
                             bar.startEnding = ret[2];
-                            if (multilineVars.inEnding) {
+                            if (multilineVars.staves[multilineVars.currentVoice.staffNum].inEnding[multilineVars.currentVoice.index]) {
                                 bar.endDrawEnding = true;
                                 bar.endEnding = true;
                             }
-                            multilineVars.inEnding = true;
+                            multilineVars.staves[multilineVars.currentVoice.staffNum].inEnding[multilineVars.currentVoice.index] = true;
                         }
                         if (el.decoration !== undefined)
                             bar.decoration = el.decoration;
@@ -1375,12 +1382,12 @@ window.ABCXJS.parse.Parse = function(transposer_, accordion_) {
                                     } else	// Just ignore the note lengths of all but the first note. The standard isn't clear here, but this seems less confusing.
                                         el.pitches.push(chordNote);
 
-                                    if (multilineVars.inTieChord[el.pitches.length]) {
+                                    if (multilineVars.staves[multilineVars.currentVoice.staffNum].inTieChord[multilineVars.currentVoice.index][el.pitches.length]) {
                                         chordNote.endTie = true;
-                                        multilineVars.inTieChord[el.pitches.length] = undefined;
+                                        multilineVars.staves[multilineVars.currentVoice.staffNum].inTieChord[multilineVars.currentVoice.index][el.pitches.length] = undefined;
                                     }
                                     if (chordNote.startTie)
-                                        multilineVars.inTieChord[el.pitches.length] = true;
+                                        multilineVars.staves[multilineVars.currentVoice.staffNum].inTieChord[multilineVars.currentVoice.index][el.pitches.length] = true;
 
                                 }
                                 i = chordNote.endChar;
@@ -1397,17 +1404,17 @@ window.ABCXJS.parse.Parse = function(transposer_, accordion_) {
 
                                     if (multilineVars.next_note_duration !== 0) {
                                         el.duration = el.duration * multilineVars.next_note_duration;
-//											window.ABCXJS.parse.each(el.pitches, function(p) {
-//												p.duration = p.duration * multilineVars.next_note_duration;
-//											});
+                                        //  window.ABCXJS.parse.each(el.pitches, function(p) {
+                                        //      p.duration = p.duration * multilineVars.next_note_duration;
+                                        //  });
                                         multilineVars.next_note_duration = 0;
                                     }
 
-                                    if (multilineVars.inTie) {
+                                    if (multilineVars.staves[multilineVars.currentVoice.staffNum].inTie[multilineVars.currentVoice.index]) {
                                         window.ABCXJS.parse.each(el.pitches, function(pitch) {
                                             pitch.endTie = true;
                                         });
-                                        multilineVars.inTie = false;
+                                        multilineVars.staves[multilineVars.currentVoice.staffNum].inTie[multilineVars.currentVoice.index] = false;
                                     }
 
                                     if (tripletNotesLeft > 0) {
@@ -1435,7 +1442,7 @@ window.ABCXJS.parse.Parse = function(transposer_, accordion_) {
                                                 window.ABCXJS.parse.each(el.pitches, function(pitch) {
                                                     pitch.startTie = {};
                                                 });
-                                                multilineVars.inTie = true;
+                                                multilineVars.staves[multilineVars.currentVoice.staffNum].inTie[multilineVars.currentVoice.index] = true;
                                                 break;
                                             case '>':
                                             case '<':
@@ -1502,7 +1509,7 @@ window.ABCXJS.parse.Parse = function(transposer_, accordion_) {
                         var el2 = {};
                         var core = getCoreNote(line, i, el2, true);
                         if (el2.endTie !== undefined)
-                            multilineVars.inTie = true;
+                            multilineVars.staves[multilineVars.currentVoice.staffNum].inTie[multilineVars.currentVoice.index] = true;
                         if (core !== null) {
                             if (core.pitch !== undefined) {
                                 el.pitches = [{}];
@@ -1546,15 +1553,15 @@ window.ABCXJS.parse.Parse = function(transposer_, accordion_) {
                             if (core.graceNotes !== undefined)
                                 el.graceNotes = core.graceNotes;
                             delete el.startSlur;
-                            if (multilineVars.inTie) {
+                            if (multilineVars.staves[multilineVars.currentVoice.staffNum].inTie[multilineVars.currentVoice.index]) {
                                 if (el.pitches !== undefined)
                                     el.pitches[0].endTie = true;
                                 else
                                     el.rest.endTie = true;
-                                multilineVars.inTie = false;
+                                multilineVars.staves[multilineVars.currentVoice.staffNum].inTie[multilineVars.currentVoice.index] = false;
                             }
                             if (core.startTie || el.startTie)
-                                multilineVars.inTie = true;
+                                multilineVars.staves[multilineVars.currentVoice.staffNum].inTie[multilineVars.currentVoice.index] = true;
                             i = core.endChar;
 
                             if (tripletNotesLeft > 0) {

@@ -774,7 +774,7 @@ window.ABCXJS.parse.parseKeyVoice = {};
 		// now we've filled up staffInfo, figure out what to do with this voice
 		// TODO-PER: It is unclear from the standard and the examples what to do with brace, bracket, and staves, so they are ignored for now.
 		if (staffInfo.startStaff || multilineVars.staves.length === 0) {
-			multilineVars.staves.push({index: multilineVars.staves.length, meter: multilineVars.origMeter});
+			multilineVars.staves.push({index: multilineVars.staves.length, meter: multilineVars.origMeter, inEnding : [false], inTie : [false], inTieChord : [{}] });
 			if (!multilineVars.score_is_present)
 				multilineVars.staves[multilineVars.staves.length-1].numVoices = 0;
 		}
