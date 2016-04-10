@@ -535,7 +535,7 @@ ABCXJS.write.Printer.prototype.printTune = function(abctune) {
     
     this.y -= (this.landscape?30:28); // corrigir problema com pagina extra após o pagenumber
     
-    var sizetoset = {w: (maxwidth + this.paddingright) * this.scale, h: (this.y) * this.scale};
+    var sizetoset = {w: Math.ceil((maxwidth + this.paddingright) * this.scale), h: (this.y) * this.scale};
     this.paper.setSize(sizetoset.w, sizetoset.h);
     
     // Correct for IE problem in calculating height
@@ -544,7 +544,7 @@ ABCXJS.write.Printer.prototype.printTune = function(abctune) {
         this.paper.canvas.parentNode.style.width = "" +  sizetoset.w + "px";
         this.paper.canvas.parentNode.style.height = "" + sizetoset.h + "px";
     } else {
-        this.paper.canvas.parentNode.setAttribute("style", "'width':" + sizetoset.w + "px; 'height':" + sizetoset.h + "px;");
+        this.paper.canvas.parentNode.setAttribute("style", "width:" + sizetoset.w + "px"); //; 'height':" + sizetoset.h + "px;");
     }
 
     
