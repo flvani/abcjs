@@ -37,6 +37,8 @@ ABCXJS.write.spacing.STAVEHEIGHT = 100;
 ABCXJS.write.Printer = function(paper, params ) {
   params = params || {};
   this.y = 0;
+  this.pageNumber = 1;
+  this.estimatedPageLength = 0;
   this.paper = paper;
   this.space = 3*ABCXJS.write.spacing.SPACE;
   this.glyphs = new ABCXJS.write.Glyphs();
@@ -51,15 +53,7 @@ ABCXJS.write.Printer = function(paper, params ) {
   this.paddingleft = params.paddingleft || 15;
   this.editable = params.editable || false;
   this.staffgroups = [];
-  this.reset();
   
-};
-
-ABCXJS.write.Printer.prototype.reset = function () {
-  this.pageNumber = 1;
-  this.groupHeightAvg = 0;
-  this.groupHeightSum = 0;
-  this.estimatedPageLength = 0;
 };
 
 // notify all listeners that a graphical element has been selected
@@ -407,47 +401,18 @@ ABCXJS.write.Printer.prototype.printTempo = function (tempo, paper, layouter, y,
 	return y;
 };
 
-ABCXJS.write.Printer.prototype.skipPage = function() {
-    this.printPageNumber();  
-    this.y = this.estimatedPageLength*this.pageNumber + this.paddingtop + this.paddingbottom;
-    this.pageNumber++;
-};
-
-ABCXJS.write.Printer.prototype.printPageNumber = function() {
-    this.y =this.estimatedPageLength*this.pageNumber -13;
-    this.paper.text((this.width)*this.scale, this.y*this.scale, "- pág. "+this.pageNumber+" -").attr({"font-size": 12 * this.scale, "font-family": "serif", 'font-weight': 'bold'}); // code duplicated below  // don't scale this as we ask for the bbox
-};
-
-
 ABCXJS.write.Printer.prototype.printTune = function(abctune) {
     
     if( abctune.lines.length === 0 ) return;
     
-    this.reset();
-    
     if( abctune.midi) {
         abctune.midi.printer = this;
     }
+    this.landscape = abctune.formatting.landscape;
+    this.pagenumbering = abctune.formatting.pagenumbering;
     
     this.layouter = new ABCXJS.write.Layout( this, abctune.formatting.bagpipes );
     
-    if (abctune.media === 'print') {
-        // TODO create the page the size of
-        //  tune.formatting.pageheight by tune.formatting.pagewidth
-        // create margins the size of
-        // TODO-PER: setting the defaults to 3/4" for now. What is the real value?
-        var m = abctune.formatting.topmargin === undefined ? 54 : abctune.formatting.topmargin;
-        this.y += m;
-        // TODO tune.formatting.botmargin
-        //    m = abctune.formatting.leftmargin === undefined ? 54 : abctune.formatting.leftmargin;
-        //    this.paddingleft = m;
-        //      m = abctune.formatting.rightmargin === undefined ? 54 : abctune.formatting.rightmargin;
-        //    this.paddingright = m;
-    }
-    else
-        this.y += this.paddingtop;
-
-    // FIXED BELOW, NEEDS CHECKING if (abctune.formatting.stretchlast) { this.paper.text(200, this.y, "Format: stretchlast"); this.y += 20; }
     if (abctune.formatting.staffwidth) {
         this.width = abctune.formatting.staffwidth;
     } else {
@@ -455,6 +420,8 @@ ABCXJS.write.Printer.prototype.printTune = function(abctune) {
     }
 
     this.width += this.paddingleft;
+    
+    this.y += this.paddingtop;
     
     this.estimatedPageLength = this.width*abctune.formatting.pageratio;
 
@@ -505,7 +472,7 @@ ABCXJS.write.Printer.prototype.printTune = function(abctune) {
     for (var line = 0; line < abctune.lines.length; line++) {
         var abcline = abctune.lines[line];
         if (abcline.text) {
-            alert('abcline.text should should no longer exists!');
+            console.log('abcline.text should should no longer exists!');
             continue;
         }
         if(abcline.newpage) {
@@ -517,7 +484,7 @@ ABCXJS.write.Printer.prototype.printTune = function(abctune) {
             maxwidth = Math.max(staffgroup.w, maxwidth);
         }
     }
-
+    
     var extraText = "";
     var text2;
     var height;
@@ -557,19 +524,43 @@ ABCXJS.write.Printer.prototype.printTune = function(abctune) {
     if (!height)
         height = 25 * this.scale;	// TODO-PER: Hack! Don't know why Raphael chokes on this sometimes and returns NaN. Perhaps only when printing to PDF? Possibly if the SVG is hidden?
     text2.translate(0, height / 2);
+
+    if( ( this.pageNumber - ((this.y+height)/this.estimatedPageLength) ) < 0 ) {
+       this.skipPage();
+    }
+
+    this.y += height;
     
-    this.printPageNumber();
-   
-    this.y += 25 * this.scale + height * this.scale;
-    var sizetoset = {w: (maxwidth + this.paddingright) * this.scale, h: (this.y + this.paddingbottom) * this.scale};
+    this.skipPage();
+    
+    this.y -= (this.landscape?30:28); // corrigir problema com pagina extra após o pagenumber
+    
+    var sizetoset = {w: (maxwidth + this.paddingright) * this.scale, h: (this.y) * this.scale};
     this.paper.setSize(sizetoset.w, sizetoset.h);
+    
     // Correct for IE problem in calculating height
     var isIE = /*@cc_on!@*/false;//IE detector
     if (isIE) {
-        this.paper.canvas.parentNode.style.width = sizetoset.w + "px";
+        this.paper.canvas.parentNode.style.width = "" +  sizetoset.w + "px";
         this.paper.canvas.parentNode.style.height = "" + sizetoset.h + "px";
-    } else
-        this.paper.canvas.parentNode.setAttribute("style", "width:" + sizetoset.w + "px");
+    } else {
+        this.paper.canvas.parentNode.setAttribute("style", "'width':" + sizetoset.w + "px; 'height':" + sizetoset.h + "px;");
+    }
+
+    
+};
+
+ABCXJS.write.Printer.prototype.skipPage = function() {
+    if( this.pagenumbering ) {
+        this.y = (this.estimatedPageLength*this.pageNumber) - (this.landscape?20:20);
+        this.paper.text(this.width+18*this.scale, this.y*this.scale, "- "+this.pageNumber+" -")
+                .attr({"font-size": 13 * this.scale, "font-family": "serif", 'font-weight': 'bold'}); 
+//        this.paper.text(this.width*this.scale, this.y*this.scale, "- pág. "+this.pageNumber+" -")
+//                .attr({"font-size": 12 * this.scale, "font-family": "serif", 'font-weight': 'bold'}); 
+    }
+    
+    this.y = this.estimatedPageLength*this.pageNumber + this.paddingtop;
+    this.pageNumber++;
 };
 
 ABCXJS.write.Printer.prototype.printSubtitleLine = function(subtitle) {

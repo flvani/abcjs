@@ -165,11 +165,13 @@ ABCXJS.write.StaffGroupElement.prototype.calcHeight = function(voz) {
 
 ABCXJS.write.StaffGroupElement.prototype.draw = function(printer, groupNumber) {
 
-    var y = printer.y;
-    this.y = y;
-    this.height = 0;
-    var shiftabove = 0;
     
+    var height = 0;
+    var shiftabove = 0;
+    var y =  printer.y;
+    var yi = printer.y;
+    
+    // posiciona cada pauta do grupo e determina a altura final da impressão
     for (var i = 0; i < this.voices.length; i++) {
 
         var h = 0;
@@ -203,7 +205,7 @@ ABCXJS.write.StaffGroupElement.prototype.draw = function(printer, groupNumber) {
             h = this.calcHeight(this.voices[i]);
 
             if( h > lastH ) {
-                this.height += (h-lastH);
+                height += (h-lastH);
                 y += (h-lastH);
             }
             
@@ -221,11 +223,33 @@ ABCXJS.write.StaffGroupElement.prototype.draw = function(printer, groupNumber) {
             this.voices[i].stave.top = y;
             this.voices[i].stave.y = y + shiftabove;
 
-            this.height += h;
+            height += h;
             y += h;
             
             this.voices[i].stave.bottom = y;
         }
+    }
+    
+    // verifica se deve iniciar nova pagina
+    var nexty = printer.y + height + ABCXJS.write.spacing.STEP*8*printer.scale ; 
+    if( nexty >= printer.estimatedPageLength*printer.pageNumber )  {
+        printer.skipPage();
+    } else  if (groupNumber > 0) {
+     // ou espaco entre os grupos de pautas
+      printer.y += ABCXJS.write.spacing.STEP*8*printer.scale; 
+    }
+    
+    var delta = printer.y - yi; 
+
+    // ajusta a grupo para a nova posição
+    if( delta !== 0 ) {
+        for (var i = 0; i < this.voices.length; i++) {
+            //this.voices[i].stave.lowest = x;
+            //this.voices[i].stave.highest = x;
+            this.voices[i].stave.bottom += delta;
+            this.voices[i].stave.top += delta;
+            this.voices[i].stave.y += delta;
+        }    
     }
     
     for (i = 0; i < this.voices.length; i++) {
@@ -264,22 +288,7 @@ ABCXJS.write.StaffGroupElement.prototype.draw = function(printer, groupNumber) {
         printer.printStave(this.startx, this.w-1, this.voices[i].stave);
     }
     
-    printer.groupHeightSum += this.height;
-    printer.groupHeightAvg = printer.groupHeightSum/(groupNumber+1);
-    
-    // para o último grupo o salto é menor ou se a proxima linha é um page break
-    if( groupNumber === printer.layouter.tune.lines.length-1 || ( printer.layouter.tune.lines[groupNumber+1] && printer.layouter.tune.lines[groupNumber+1].newpage ) ) {
-          printer.y = this.y + this.height + ABCXJS.write.spacing.STEP*3*printer.scale; 
-    } else {
-        //para os demais grupos, verifica se é o caso de iniciar nova pagica
-        var nexty = this.y + this.height + ABCXJS.write.spacing.STEP*8*printer.scale + printer.groupHeightAvg; 
-        if( nexty >= printer.estimatedPageLength*printer.pageNumber )  {
-            printer.skipPage();
-        } else {
-         // ou espaco entre os grupos de pautas
-          printer.y = this.y + this.height + ABCXJS.write.spacing.STEP*8*printer.scale; 
-        }
-    }
+    printer.y = yi + delta + height; // nova posição da impressora
     
 };
 

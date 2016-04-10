@@ -74,6 +74,7 @@ window.ABCXJS.data.Tune = function() {
         var ph, pw;
         var ps = vars.papersize || 'letter';
         var ls = vars.landscape || false;
+        var pn = vars.pagenumbering || false;
         
         switch (ps.toLowerCase()) {
             case "letter":
@@ -102,11 +103,13 @@ window.ABCXJS.data.Tune = function() {
             this.formatting.pagewidth = pw;
         if (!this.formatting.pageheight)
             this.formatting.pageheight = ph;
+        if (!this.formatting.pagenumbering)
+            this.formatting.pagenumbering = pn;
         
         if(ls)
-            this.formatting.pageratio = ph/pw; 
+            this.formatting.pageratio = (ph+(0.68*72))/(pw+(0.68*72)); // ??? 
         else
-            this.formatting.pageratio = (ph-(1.5*72))/(pw-(1.5*72)); // ???
+            this.formatting.pageratio = (ph-(1.58*72))/(pw-(1.58*72)); // ???
     };
 
     this.cleanUp = function( barsperstaff, staffnonote) {

@@ -245,6 +245,9 @@ window.ABCXJS.parse.parseDirective = {};
 				scratch = addMultilineVarBool('printTempo', cmd, tokens);
 				if (scratch !== null) return scratch;
 				break;
+                        case "pagenumbering":
+				multilineVars.pagenumbering = true;
+				break;
 			case "measurenb":
 			case "barnumbers":
 				scratch = addMultilineVar('barNumbers', cmd, tokens);
