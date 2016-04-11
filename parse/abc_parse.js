@@ -123,18 +123,67 @@ Elas foram incluídas em this.staves - ver:  abc_parse_key_voice e abc_parse_dir
         return multilineVars.warnings;
     };
     
-    this.addTuneElement = function(type, startOfLine, xi, xf, elem) {
-        this.handleTie( elem );
-        this.handleSlur( elem );
+    this.addTuneElement = function(type, startOfLine, xi, xf, elem, line) {
+        switch(type) {
+            case 'bar':
+                multilineVars.barAccidentals = [];                        
+                break;
+            case 'note':
+                if( elem.pitches )  {
+                    elem.pitches.forEach( function( p ) { 
+                        if(p.accidental === undefined && multilineVars.barAccidentals[p.pitch]!==undefined ) {
+                            p.barAccidental = multilineVars.barAccidentals[p.pitch]; // apenas um marcador para instruir o tratamento de slur e tie abaixo
+                        }
+                    });
+                }
+                break;
+        }
+
+        this.handleTie( elem, line, xi );
+        this.handleSlur( elem, line, xi );
         tune.appendElement(type, startOfLine + xi, startOfLine + xf, elem);
     };
     
-    this.handleSlur = function(elem) {
+
+    this.handleTie = function(elem, line, i ) {
+        var self = this;
+        if( ! elem.pitches ) return;
+        if( this.anyTieEnd(elem) )  {
+            var tieCnt = this.tieCnt;
+            var startEl = this.aTies.pop();
+            if( startEl && startEl.pitches ) {
+                startEl.pitches.forEach( function( startPitch ) {
+                    if(elem.pitches) { 
+                        elem.pitches.forEach( function( pitch ) { 
+                            if(self.equalsPitch( pitch, startPitch )  ) {
+                                startPitch.tie = { id_start: tieCnt };
+                                pitch.tie =  { id_end: tieCnt };
+                                tieCnt ++;
+                            }
+                        });
+                    }
+                });
+            }
+            this.tieCnt = tieCnt;
+        }
+        if( this.anyTieStart(elem) )  {
+            if( !this.aTies ) this.aTies = [];
+            this.aTies.push(elem);
+        }
+    };
+    
+    this.handleSlur = function(elem, line, i) {
+        var self = this;
         if( !elem.pitches ) return;
         var ss = this.anySlurEnd(elem);
         while( ss )  {
             var tieCnt = this.tieCnt;
             var el = this.aSlurs.pop();
+            if( el === undefined ) {
+                //throw "Slur not open";
+                warn("Slur not open", line, i);
+                return;
+            }
             if(el.qtd > 1 ) {
                 el.qtd--;
                 this.aSlurs.push(el);
@@ -144,7 +193,7 @@ Elas foram incluídas em this.staves - ver:  abc_parse_key_voice e abc_parse_dir
                 startEl.pitches.forEach( function( startPitch ) {
                     if(elem.pitches) { 
                         elem.pitches.forEach( function( pitch ) { 
-                            if(pitch.pitch === startPitch.pitch ) {
+                            if( self.equalsPitch( pitch, startPitch )  ) {
                                 
                                 if(startPitch.tie) {
                                     startPitch.tie.id_start = tieCnt;
@@ -182,6 +231,23 @@ Elas foram incluídas em this.staves - ver:  abc_parse_key_voice e abc_parse_dir
         return found;
     };
     
+    this.equalsPitch = function(p1, p2) {
+        var p1acc='noacc', p2acc = 'noacc';
+        if( p1.accidental !== undefined ) {
+            p1acc= p1.accidental;
+        } else if ( p1.barAccidental !== undefined ) {
+            p1acc= p1.barAccidental;
+        } 
+        if( p2.accidental !== undefined ) {
+            p2acc= p2.accidental;
+        } else if ( p2.barAccidental !== undefined ) {
+            p2acc= p2.barAccidental;
+        } 
+        
+        return ( p1.pitch === p2.pitch && p1acc === p2acc );
+        
+    };
+    
     this.anySlurStart = function(elem) {
         var found = 0;
         if( elem.startSlur ) return elem.startSlur;
@@ -191,32 +257,6 @@ Elas foram incluídas em this.staves - ver:  abc_parse_key_voice e abc_parse_dir
             });
         }
         return found;
-    };
-
-    this.handleTie = function(elem) {
-        if( ! elem.pitches ) return;
-        if( this.anyTieEnd(elem) )  {
-            var tieCnt = this.tieCnt;
-            var startEl = this.aTies.pop();
-            if( startEl && startEl.pitches ) {
-                startEl.pitches.forEach( function( startPitch ) {
-                    if(elem.pitches) { 
-                        elem.pitches.forEach( function( pitch ) { 
-                            if(pitch.pitch === startPitch.pitch ) {
-                                startPitch.tie = { id_start: tieCnt };
-                                pitch.tie =  { id_end: tieCnt };
-                                tieCnt ++;
-                            }
-                        });
-                    }
-                });
-            }
-            this.tieCnt = tieCnt;
-        }
-        if( this.anyTieStart(elem) )  {
-            if( !this.aTies ) this.aTies = [];
-            this.aTies.push(elem);
-        }
     };
     
     this.anyTieEnd = function(elem) {
@@ -1153,6 +1193,9 @@ Elas foram incluídas em this.staves - ver:  abc_parse_key_voice e abc_parse_dir
     var nonDecorations = "ABCDEFGabcdefgxyzZ[]|^_{";	// use this to prescreen so we don't have to look for a decoration at every note.
 
     this.parseRegularMusicLine = function(line) {
+        
+        multilineVars.barAccidentals = [];
+        
         header.resolveTempo();
         //multilineVars.havent_set_length = false;	// To late to set this now.
         multilineVars.is_in_header = false;	// We should have gotten a key header by now, but just in case, this is definitely out of the header.
@@ -1514,9 +1557,11 @@ Elas foram incluídas em this.staves - ver:  abc_parse_key_voice e abc_parse_dir
                             if (core.pitch !== undefined) {
                                 el.pitches = [{}];
                                 // TODO-PER: straighten this out so there is not so much copying: getCoreNote shouldn't change e'
-                                if (core.accidental !== undefined)
-                                    el.pitches[0].accidental = core.accidental;
                                 el.pitches[0].pitch = core.pitch;
+                                if (core.accidental !== undefined) {
+                                    el.pitches[0].accidental = core.accidental;
+                                    multilineVars.barAccidentals[core.pitch] = core.accidental;
+                                }    
                                 if (core.endSlur !== undefined)
                                     el.pitches[0].endSlur = core.endSlur;
                                 if (core.endTie !== undefined)
@@ -1581,7 +1626,7 @@ Elas foram incluídas em this.staves - ver:  abc_parse_key_voice e abc_parse_dir
                                 multilineVars.barNumOnNextNote = null;
                                 multilineVars.barNumOnNextNoteVisible = null;
                             }
-                            this.addTuneElement('note', startOfLine, startI, i, el);
+                            this.addTuneElement('note', startOfLine, startI, i, el, line);
                             multilineVars.measureNotEmpty = true;
                             el = {};
                         }
