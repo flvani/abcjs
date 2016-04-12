@@ -443,7 +443,7 @@ ABCXJS.write.Printer.prototype.printTune = function(abctune) {
     }
 
     if (abctune.metaText.rhythm) {
-        this.paper.text(this.paddingleft, this.y, abctune.metaText.rhythm).attr({"text-anchor": "start", "font-style": "italic", "font-family": "serif", "font-size": 12 * this.scale});
+        this.paper.text(this.paddingleft*3*this.scale, this.y, abctune.metaText.rhythm).attr({"text-anchor": "start", "font-style": "italic", "font-family": "serif", "font-size": 12 * this.scale});
         !(abctune.metaText.author || abctune.metaText.origin || abctune.metaText.composer) && (this.y += 15 * this.scale);
     }
 
@@ -565,8 +565,8 @@ ABCXJS.write.Printer.prototype.printTune = function(abctune) {
         this.paper.canvas.parentNode.style.height = "" + sizetoset.h + "px";
     } else {
         this.paper.canvas.parentNode.setAttribute("style", "width:" + sizetoset.w + "px"); 
-        this.paper.canvas.parentNode.setAttribute("style", "height:" + sizetoset.h + "px");
-        this.paper.canvas.setAttribute("style", "background-color: #ffe"); 
+       // this.paper.canvas.parentNode.setAttribute("style", "height:" + sizetoset.h + "px");
+       // this.paper.canvas.setAttribute("style", "background-color: #ffe"); 
     }
 };
 
