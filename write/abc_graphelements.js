@@ -231,12 +231,12 @@ ABCXJS.write.StaffGroupElement.prototype.draw = function(printer, groupNumber) {
     }
     
     // verifica se deve iniciar nova pagina
-    var nexty = printer.y + height + ABCXJS.write.spacing.STEP*8*printer.scale ; 
+    var nexty = printer.y + height + printer.staffsep*printer.scale ; 
     if( nexty >= printer.estimatedPageLength*printer.pageNumber )  {
         printer.skipPage();
     } else  if (groupNumber > 0) {
      // ou espaco entre os grupos de pautas
-      printer.y += ABCXJS.write.spacing.STEP*8*printer.scale; 
+      printer.y += printer.staffsep*printer.scale; 
     }
     
     var delta = printer.y - yi; 
@@ -244,8 +244,6 @@ ABCXJS.write.StaffGroupElement.prototype.draw = function(printer, groupNumber) {
     // ajusta a grupo para a nova posição
     if( delta !== 0 ) {
         for (var i = 0; i < this.voices.length; i++) {
-            //this.voices[i].stave.lowest = x;
-            //this.voices[i].stave.highest = x;
             this.voices[i].stave.bottom += delta;
             this.voices[i].stave.top += delta;
             this.voices[i].stave.y += delta;
@@ -260,14 +258,19 @@ ABCXJS.write.StaffGroupElement.prototype.draw = function(printer, groupNumber) {
         this.voices[i].draw(printer);
     }
 
-    if (this.voices.length > 1) {
+    if (this.voices.length > 0) {
         var top = this.voices[0].stave.y;
         var clef = this.voices[this.voices.length - 1].stave.clef.type;
         var bottom = printer.calcY(clef==="accordionTab"?0:2);
         printer.printStem(this.startx, 0.6, top, bottom);
         printer.printStem(this.w-1, 0.6, top, bottom);
-
+        if (this.voices.length > 1)  {
+            printer.drawArc2(this.startx-12, this.startx, top-1, top-10, true) ;
+            printer.drawArc2(this.startx-11, this.startx, bottom-3, bottom+8, false) ;
+            printer.printStem(this.startx-6, 2, top-2, bottom+2);
+        }
     }
+    
 
     for (i = 0; i < this.voices.length; i++) {
         if (this.voices[i].stave.numLines === 0 || this.voices[i].duplicate)

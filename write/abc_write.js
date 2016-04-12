@@ -286,6 +286,40 @@ ABCXJS.write.Printer.prototype.printPath = function (attrs) {
   return ret;
 };
 
+ABCXJS.write.Printer.prototype.drawArc2 = function(x1, x2, y1, y2, above) {
+
+
+  x1 = x1 + 6;
+  x2 = x2 + 4;
+  y1 = y1 + ((above)?1.5:-1.5);
+  y2 = y2 + ((above)?1.5:-1.5);
+
+  //unit direction vector
+  var dx = x2-x1;
+  var dy = y2-y1;
+  var norm= Math.sqrt(dx*dx+dy*dy);
+  var ux = dx/norm;
+  var uy = dy/norm;
+
+  var flatten = norm/3.5;
+  var curve = ((above)?-1:1)*Math.min(25, Math.max(4, flatten));
+
+  var controlx1 = x1+flatten*ux-curve*uy;
+  var controly1 = y1+flatten*uy+curve*ux;
+  var controlx2 = x2-flatten*ux-curve*uy;
+  var controly2 = y2-flatten*uy+curve*ux;
+  var thickness = 3;
+  var pathString = ABCXJS.write.sprintf("M %f %f C %f %f %f %f %f %f C %f %f %f %f %f %f z", x1, y1,
+			   controlx1, controly1, controlx2, controly2, x2, y2, 
+			   controlx2-thickness*uy, controly2+thickness*ux, controlx1-thickness*uy, controly1+thickness*ux, x1, y1);
+  var ret = this.paper.path().attr({path:pathString, stroke:"none", fill:"#000000"});
+  if (this.scale!==1) {
+    ret.scale(this.scale, this.scale, 0, 0);
+  }
+  return ret;
+};
+
+
 ABCXJS.write.Printer.prototype.drawArc = function(x1, x2, pitch1, pitch2, above) {
 
 
@@ -359,8 +393,8 @@ ABCXJS.write.Printer.prototype.printTempo = function (tempo, paper, layouter, y,
 		x += (text.getBBox().width + 20*printer.scale);
 	}
 	if (tempo.duration) {
-		var temposcale = 0.75 * printer.scale;
-    		var tempopitch = 4.5; // flavio - was 14.5;
+		var temposcale = 0.9 * printer.scale;
+    		var tempopitch = 4.5;
 		var duration = tempo.duration[0]; // TODO when multiple durations
 		var abselem = new ABCXJS.write.AbsoluteElement(tempo, duration, 1);
 		var durlog = Math.floor(Math.log(duration) / Math.log(2));
@@ -381,7 +415,7 @@ ABCXJS.write.Printer.prototype.printTempo = function (tempo, paper, layouter, y,
 		);
 		abselem.addHead(temponote);
 		if (duration < 1) {
-			var p1 = tempopitch + 1 / 3 * temposcale;
+			var p1 = tempopitch + 1/2 * temposcale;
 			var p2 = tempopitch + 7 * temposcale;
 			var dx = temponote.dx + temponote.w;
 			var width = -0.6*printer.scale;
@@ -410,6 +444,7 @@ ABCXJS.write.Printer.prototype.printTune = function(abctune) {
     
     this.landscape = abctune.formatting.landscape;
     this.pagenumbering = abctune.formatting.pagenumbering;
+    this.staffsep = abctune.formatting.staffsep ||  ABCXJS.write.spacing.STEP*8;
     
     this.paddingtop = this.landscape? 10 : 15;
     this.paddingright = this.landscape? 50 : 30;
@@ -443,7 +478,7 @@ ABCXJS.write.Printer.prototype.printTune = function(abctune) {
     }
 
     if (abctune.metaText.rhythm) {
-        this.paper.text(this.paddingleft*3*this.scale, this.y, abctune.metaText.rhythm).attr({"text-anchor": "start", "font-style": "italic", "font-family": "serif", "font-size": 12 * this.scale});
+        this.paper.text(this.paddingleft*3*this.scale, this.y*this.scale, abctune.metaText.rhythm).attr({"text-anchor": "start", "font-style": "italic", "font-family": "serif", "font-size": 12 * this.scale});
         !(abctune.metaText.author || abctune.metaText.origin || abctune.metaText.composer) && (this.y += 15 * this.scale);
     }
 
@@ -455,11 +490,11 @@ ABCXJS.write.Printer.prototype.printTune = function(abctune) {
         composerLine += ' (' + abctune.metaText.origin + ')';
 
     if (composerLine.length > 0) {
-        this.paper.text(this.width * this.scale, this.y, composerLine).attr({"text-anchor": "end", "font-style": "italic", "font-family": "serif", 'font-weight': 'bold', "font-size": 14 * this.scale});
+        this.paper.text(this.width * this.scale, this.y*this.scale, composerLine).attr({"text-anchor": "end", "font-style": "italic", "font-family": "serif", 'font-weight': 'bold', "font-size": 14 * this.scale});
         meta = true;
     }
     if (abctune.metaText.author) {
-        this.paper.text(this.width * this.scale, this.y, abctune.metaText.author).attr({"text-anchor": "end", "font-style": "italic", "font-family": "serif", 'font-weight': 'bold', "font-size": 14 * this.scale});
+        this.paper.text(this.width * this.scale, this.y*this.scale, abctune.metaText.author).attr({"text-anchor": "end", "font-style": "italic", "font-family": "serif", 'font-weight': 'bold', "font-size": 14 * this.scale});
         meta = true;
     }
 
@@ -549,10 +584,10 @@ ABCXJS.write.Printer.prototype.printTune = function(abctune) {
         }
     }
     
-    //for(var r=0; r < 10; r++) 
+   //for(var r=0; r < 10; r++) 
         this.skipPage();
     
-    this.y -=(this.paddingtop+10);
+    this.y -= (this.landscape ? 15 : 15);
     
     var sizetoset = {w: (maxwidth + this.paddingright) * this.scale, h: this.y* this.scale};
     
@@ -573,8 +608,8 @@ ABCXJS.write.Printer.prototype.printTune = function(abctune) {
 ABCXJS.write.Printer.prototype.skipPage = function() {
     this.y = this.estimatedPageLength*this.pageNumber + this.paddingtop;
     if (this.pagenumbering) {
-         this.paper.text(this.width + 18 * this.scale, (this.y - this.paddingtop - (this.landscape ? 15 : 15)) * this.scale, "- " + this.pageNumber + " -")
-              .attr({"font-size": 13 * this.scale, "font-family": "serif", 'font-weight': 'bold'});
+         this.paper.text((this.width+25)* this.scale, (this.y - this.paddingtop - (this.landscape ? 13 : 13)) * this.scale, "- " + this.pageNumber + " -")
+              .attr({"text-anchor": "end", "font-size": 13 * this.scale, "font-family": "serif", 'font-weight': 'bold'});
     }
     this.pageNumber++;
 };

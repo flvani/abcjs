@@ -75,8 +75,9 @@ window.ABCXJS.data.Tune = function() {
         var ps = vars.papersize || 'letter';
         var ls = vars.landscape || false;
         var pn = vars.pagenumbering || false;
+        var ss = vars.staffsep|| 0;
         
-        var defaultMargin = 10/25.4; // 10mm
+        var defaultMargin = 10/25.4; // 10mm (in inches)
                 
         switch (ps.toLowerCase()) {
             case "letter":
@@ -98,9 +99,9 @@ window.ABCXJS.data.Tune = function() {
         }
         
         if(ls)
-            this.formatting.pageratio = (ph-(1*defaultMargin*72))/(pw-(2.05*defaultMargin*72)); // ???
+            this.formatting.pageratio = (ph-(1*defaultMargin*72))/(pw-(2.08*defaultMargin*72)); // ???
         else
-            this.formatting.pageratio = (ph-(1*defaultMargin*72))/(pw-(1.96*defaultMargin*72)); // ???
+            this.formatting.pageratio = (ph-(1*defaultMargin*72))/(pw-(1.98*defaultMargin*72)); // ???
 
         if (!this.formatting.landscape)
             this.formatting.landscape = ls;
@@ -112,6 +113,9 @@ window.ABCXJS.data.Tune = function() {
             this.formatting.pageheight = ph;
         if (!this.formatting.pagenumbering)
             this.formatting.pagenumbering = pn;
+        
+        if (!this.formatting.staffsep)
+            this.formatting.staffsep = ss;
         
     };
 

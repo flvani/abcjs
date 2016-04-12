@@ -1,4 +1,11 @@
+
+
 var glyphnames = {
+  "\ue1a6":"uterm", 
+  "\ue1a7":"dterm" 
+};
+        
+var glyphnames_old = {
   "\ue100":"rests.whole", // whole
   "\ue101":"rests.half", // half
   "\ue107":"rests.quarter", // quarter

@@ -163,6 +163,7 @@ V:1 treble
 |2 "Dm" D2D2- DBBB |
 V:3 accordionTab
 </textarea>
+    
 <textarea id="abcx" cols="120" rows="10" style="display: none;" >
 % TODO: este trecho do rincao expoe um problema de continuidade da nota "inTie" na transição de uma linh para outra
 X:1
@@ -334,6 +335,11 @@ V:3 accordionTab
                     } );
 
                 printButton.addEventListener("click", function() {
+                    var style = document.createElement('style');
+                    var orientation = myEditor.tunes[0].formatting.landscape?'landscape':'portrait';
+                    document.head.appendChild(style);
+                    style.innerHTML = '@page {margin: 1cm; size: ' + orientation + '}';
+                    
                     document.getElementById("editorDiv").style.display = "none";
                     document.getElementById("warningsDiv").style.display = "none";
                     document.body.style.paddingTop = '0px';
