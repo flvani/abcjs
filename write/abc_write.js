@@ -49,8 +49,8 @@ ABCXJS.write.Printer = function(paper, params ) {
   this.staffwidth = params.staffwidth || 1024;
   this.paddingtop = params.paddingtop || 15;
   this.paddingbottom = params.paddingbottom || 30;
-  this.paddingright = params.paddingright || 50;
   this.paddingleft = params.paddingleft || 15;
+  this.paddingright = params.paddingright || 30;
   this.editable = params.editable || false;
   this.staffgroups = [];
   
@@ -58,7 +58,6 @@ ABCXJS.write.Printer = function(paper, params ) {
 
 // notify all listeners that a graphical element has been selected
 ABCXJS.write.Printer.prototype.notifySelect = function (abselem) {
-  //this.selected = [abselem];
   this.selected[this.selected.length]=abselem;
   abselem.highlight();
   for (var i=0; i<this.listeners.length;i++) {
@@ -408,8 +407,12 @@ ABCXJS.write.Printer.prototype.printTune = function(abctune) {
     if( abctune.midi) {
         abctune.midi.printer = this;
     }
+    
     this.landscape = abctune.formatting.landscape;
     this.pagenumbering = abctune.formatting.pagenumbering;
+    
+    this.paddingtop = this.landscape? 10 : 15;
+    this.paddingright = this.landscape? 50 : 30;
     
     this.layouter = new ABCXJS.write.Layout( this, abctune.formatting.bagpipes );
     
@@ -469,6 +472,7 @@ ABCXJS.write.Printer.prototype.printTune = function(abctune) {
 
     var maxwidth = this.width;
     
+    // impressão dos grupos de pautas
     for (var line = 0; line < abctune.lines.length; line++) {
         var abcline = abctune.lines[line];
         if (abcline.text) {
@@ -485,57 +489,73 @@ ABCXJS.write.Printer.prototype.printTune = function(abctune) {
         }
     }
     
-    var extraText = "";
-    var text2;
-    var height;
-    if (abctune.metaText.partOrder)
-        extraText += "Part Order: " + abctune.metaText.partOrder + "\n";
+    var extraText1 = "", extraText2 = "",  t, height = 0, h1=0, h2=0;
+    
     if (abctune.metaText.unalignedWords) {
         for (var j = 0; j < abctune.metaText.unalignedWords.length; j++) {
-            if (typeof abctune.metaText.unalignedWords[j] === 'string')
-                extraText += abctune.metaText.unalignedWords[j] + "\n";
-            else {
-                for (var k = 0; k < abctune.metaText.unalignedWords[j].length; k++) {
-                    extraText += " FONT " + abctune.metaText.unalignedWords[j][k].text;
-                }
-                extraText += "\n";
+            if (typeof abctune.metaText.unalignedWords[j] === 'string') {
+                extraText1 += abctune.metaText.unalignedWords[j] + "\n";
+                h1 ++;
             }
         }
-        text2 = this.paper.text(this.paddingleft * this.scale + 50 * this.scale, this.y * this.scale + 25 * this.scale, extraText).attr({"text-anchor": "start", "font-family": "serif", "font-size": 17 * this.scale});
-        height = text2.getBBox().height + 17 * this.scale;
-        text2.translate(0, height / 2);
-        this.y += height;
-        extraText = "";
     }
-    if (abctune.metaText.book)
-        extraText += "Livro: " + abctune.metaText.book + "\n";
-    if (abctune.metaText.source)
-        extraText += "Fonte: " + abctune.metaText.source + "\n";
-    if (abctune.metaText.discography)
-        extraText += "Discografia: " + abctune.metaText.discography + "\n";
-    if (abctune.metaText.notes)
-        extraText += abctune.metaText.notes + "\n";
-    if (abctune.metaText.transcription)
-        extraText += "Transcrito por " + abctune.metaText.transcription + "\n";
-    if (abctune.metaText.history)
-        extraText += "Histórico: " + abctune.metaText.history + "\n";
-    text2 = this.paper.text(this.paddingleft, this.y * this.scale + 25 * this.scale, extraText).attr({"text-anchor": "start", "font-family": "serif", "font-size": 17 * this.scale});
-    height = text2.getBBox().height;
-    if (!height)
-        height = 25 * this.scale;	// TODO-PER: Hack! Don't know why Raphael chokes on this sometimes and returns NaN. Perhaps only when printing to PDF? Possibly if the SVG is hidden?
-    text2.translate(0, height / 2);
-
-    if( ( this.pageNumber - ((this.y+height)/this.estimatedPageLength) ) < 0 ) {
-       this.skipPage();
+    if (abctune.metaText.book) {
+         h2 ++;
+         extraText2 += "Livro: " + abctune.metaText.book + "\n";
+    }    
+    if (abctune.metaText.source) {
+         h2 ++;
+        extraText2+= "Fonte: " + abctune.metaText.source + "\n";
+    }    
+    if (abctune.metaText.discography) {
+         h2 ++;
+        extraText2 += "Discografia: " + abctune.metaText.discography + "\n";
+    }    
+    if (abctune.metaText.notes) {
+         h2 ++;
+        extraText2 += abctune.metaText.notes + "\n";
+    }    
+    if (abctune.metaText.transcription) {
+         h2 ++;
+        extraText2 += "Transcrito por " + abctune.metaText.transcription + "\n";
+    }    
+    if (abctune.metaText.history) {
+         h2 ++;
+        extraText2+= "Histórico: " + abctune.metaText.history + "\n";
+    }    
+    
+    if( h1+h2 ===  0)  {
+         this.skipPage(); // nada mais para imprimir
+    } else  {
+        
+        if(h1> 0) {
+            height = ABCXJS.write.spacing.STEP*3*this.scale + h1*1.5*17* this.scale; // 1.5??? ver translate...
+            if( ( this.pageNumber - ((this.y+height)/this.estimatedPageLength) ) < 0 ) {
+               this.skipPage();
+            } else {
+                this.y += ABCXJS.write.spacing.STEP*3*this.scale; 
+            }
+            this.y += this.printExtraText( extraText1, this.paddingleft+50);
+        }
+        
+        if(h2> 0) {
+            height = ABCXJS.write.spacing.STEP*3*this.scale + h2*1.5*17* this.scale;
+            if( ( this.pageNumber - ((this.y+height)/this.estimatedPageLength) ) < 0 ) {
+               this.skipPage();
+            } else {
+                this.y += ABCXJS.write.spacing.STEP*3*this.scale; 
+            }
+            this.y += this.printExtraText( extraText2, this.paddingleft);
+        }
     }
-
-    this.y += height;
     
-    this.skipPage();
+    //for(var r=0; r < 10; r++) 
+        this.skipPage();
     
-    this.y -= (this.landscape?30:28); // corrigir problema com pagina extra após o pagenumber
+    this.y -=(this.paddingtop+10);
     
-    var sizetoset = {w: Math.ceil((maxwidth + this.paddingright) * this.scale), h: (this.y) * this.scale};
+    var sizetoset = {w: (maxwidth + this.paddingright) * this.scale, h: this.y* this.scale};
+    
     this.paper.setSize(sizetoset.w, sizetoset.h);
     
     // Correct for IE problem in calculating height
@@ -544,23 +564,27 @@ ABCXJS.write.Printer.prototype.printTune = function(abctune) {
         this.paper.canvas.parentNode.style.width = "" +  sizetoset.w + "px";
         this.paper.canvas.parentNode.style.height = "" + sizetoset.h + "px";
     } else {
-        this.paper.canvas.parentNode.setAttribute("style", "width:" + sizetoset.w + "px"); //; 'height':" + sizetoset.h + "px;");
+        this.paper.canvas.parentNode.setAttribute("style", "width:" + sizetoset.w + "px"); 
+        this.paper.canvas.parentNode.setAttribute("style", "height:" + sizetoset.h + "px");
+        this.paper.canvas.setAttribute("style", "background-color: #ffe"); 
     }
-
-    
 };
 
 ABCXJS.write.Printer.prototype.skipPage = function() {
-    if( this.pagenumbering ) {
-        this.y = (this.estimatedPageLength*this.pageNumber) - (this.landscape?20:20);
-        this.paper.text(this.width+18*this.scale, this.y*this.scale, "- "+this.pageNumber+" -")
-                .attr({"font-size": 13 * this.scale, "font-family": "serif", 'font-weight': 'bold'}); 
-//        this.paper.text(this.width*this.scale, this.y*this.scale, "- pág. "+this.pageNumber+" -")
-//                .attr({"font-size": 12 * this.scale, "font-family": "serif", 'font-weight': 'bold'}); 
-    }
-    
     this.y = this.estimatedPageLength*this.pageNumber + this.paddingtop;
+    if (this.pagenumbering) {
+         this.paper.text(this.width + 18 * this.scale, (this.y - this.paddingtop - (this.landscape ? 15 : 15)) * this.scale, "- " + this.pageNumber + " -")
+              .attr({"font-size": 13 * this.scale, "font-family": "serif", 'font-weight': 'bold'});
+    }
     this.pageNumber++;
+};
+
+ABCXJS.write.Printer.prototype.printExtraText = function(text, x) {
+    var t = this.paper.text(x*this.scale, this.y * this.scale, text).attr({"text-anchor": "start", "font-family": "serif", "font-size": 17 * this.scale});
+    var height = t.getBBox().height;
+    if (!height)  height = 25 * this.scale; // TODO-PER: Hack! Raphael sometimes and returns NaN. Perhaps only when printing to PDF? Possibly if the SVG is hidden?
+    t.translate(0, height / 2);
+    return height;
 };
 
 ABCXJS.write.Printer.prototype.printSubtitleLine = function(subtitle) {

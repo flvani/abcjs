@@ -76,6 +76,8 @@ window.ABCXJS.data.Tune = function() {
         var ls = vars.landscape || false;
         var pn = vars.pagenumbering || false;
         
+        var defaultMargin = 10/25.4; // 10mm
+                
         switch (ps.toLowerCase()) {
             case "letter":
                 ph = 11 * 72;
@@ -85,15 +87,20 @@ window.ABCXJS.data.Tune = function() {
                 pw = 8.5 * 72;
                 break;
             case "a4":
-                ph = 11.7 * 72;
-                pw = 8.3 * 72;
+                ph = 11.69 * 72;
+                pw = 8.27 * 72;
                 break;
         }
-        if (ls) {
+        if (ls) { // landscape
             var x = ph;
             ph = pw;
             pw = x;
         }
+        
+        if(ls)
+            this.formatting.pageratio = (ph-(1*defaultMargin*72))/(pw-(2.05*defaultMargin*72)); // ???
+        else
+            this.formatting.pageratio = (ph-(1*defaultMargin*72))/(pw-(1.96*defaultMargin*72)); // ???
 
         if (!this.formatting.landscape)
             this.formatting.landscape = ls;
@@ -106,13 +113,9 @@ window.ABCXJS.data.Tune = function() {
         if (!this.formatting.pagenumbering)
             this.formatting.pagenumbering = pn;
         
-        if(ls)
-            this.formatting.pageratio = (ph+(0.68*72))/(pw+(0.68*72)); // ??? 
-        else
-            this.formatting.pageratio = (ph-(1.58*72))/(pw-(1.58*72)); // ???
     };
 
-    this.cleanUp = function( barsperstaff, staffnonote) {
+    this.cleanUp = function(barsperstaff) {
         this.closeLine();	// Close the last line.
 
         // Remove any blank lines
