@@ -99,9 +99,9 @@ window.ABCXJS.data.Tune = function() {
         }
         
         if(ls)
-            this.formatting.pageratio = (ph-(1*defaultMargin*72))/(pw-(2.08*defaultMargin*72)); // ???
+            this.formatting.pageratio = (ph-(1*defaultMargin*72))/(pw-(1.80*defaultMargin*72)); // ???
         else
-            this.formatting.pageratio = (ph-(1*defaultMargin*72))/(pw-(1.98*defaultMargin*72)); // ???
+            this.formatting.pageratio = (ph-(1*defaultMargin*72))/(pw-(1.85*defaultMargin*72)); // ???
 
         if (!this.formatting.landscape)
             this.formatting.landscape = ls;
