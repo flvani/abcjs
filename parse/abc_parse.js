@@ -1760,9 +1760,12 @@ Elas foram incluídas em this.staves - ver:  abc_parse_key_voice e abc_parse_dir
                     this.parseLine(line, lineNumber);
                 multilineVars.iChar += line.length + 1;
             }
+            
             tune.setFormat(multilineVars);
             
-            tune.cleanUp(multilineVars.barsperstaff);
+            tune.handleBarsPerStaff();
+
+            tune.cleanUp();
             
             if( this.transposer && this.transposer.offSet !== 0 ) {
                 strTune = this.transposer.updateEditor( lines );

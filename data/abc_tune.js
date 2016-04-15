@@ -72,10 +72,10 @@ window.ABCXJS.data.Tune = function() {
     
     this.setFormat = function(vars) {
         var ph, pw;
-        var ps = vars.papersize || 'letter';
+        var ss = vars.staffsep|| 0;
+        var ps = vars.papersize || 'a4';
         var ls = vars.landscape || false;
         var pn = vars.pagenumbering || false;
-        var ss = vars.staffsep|| 0;
         
         var defaultMargin = 10/25.4; // 10mm (in inches)
                 
@@ -88,151 +88,146 @@ window.ABCXJS.data.Tune = function() {
                 pw = 8.5 * 72;
                 break;
             case "a4":
+            default:    
                 ph = 11.69 * 72;
                 pw = 8.27 * 72;
                 break;
         }
+        
         if (ls) { // landscape
             var x = ph;
             ph = pw;
             pw = x;
-        }
-        
-        if(ls)
             this.formatting.pageratio = (ph-(1*defaultMargin*72))/(pw-(1.80*defaultMargin*72)); // ???
-        else
+        } else {
             this.formatting.pageratio = (ph-(1*defaultMargin*72))/(pw-(1.85*defaultMargin*72)); // ???
+        }
 
-        if (!this.formatting.landscape)
-            this.formatting.landscape = ls;
-        if (!this.formatting.papersize)
-            this.formatting.papersize = ps.toLowerCase();
-        if (!this.formatting.pagewidth)
-            this.formatting.pagewidth = pw;
-        if (!this.formatting.pageheight)
-            this.formatting.pageheight = ph;
-        if (!this.formatting.pagenumbering)
-            this.formatting.pagenumbering = pn;
-        
-        if (!this.formatting.staffsep)
-            this.formatting.staffsep = ss;
+        if (!this.formatting.landscape)     this.formatting.landscape = ls;
+        if (!this.formatting.papersize)     this.formatting.papersize = ps.toLowerCase();
+        if (!this.formatting.pagewidth)     this.formatting.pagewidth = pw;
+        if (!this.formatting.pageheight)    this.formatting.pageheight = ph;
+        if (!this.formatting.pagenumbering) this.formatting.pagenumbering = pn;
+        if (!this.formatting.staffsep)      this.formatting.staffsep = ss;
+        if (!this.formatting.barsperstaff)  this.formatting.barsperstaff = vars.barsperstaff;
         
     };
-
-    this.cleanUp = function(barsperstaff) {
-        this.closeLine();	// Close the last line.
-
-        // Remove any blank lines
-        var anyDeleted = false;
-        var i, s, v;
-        for (i = 0; i < this.lines.length; i++) {
-            if (this.lines[i].staffs !== undefined) {
-                var hasAny = false;
-                for (s = 0; s < this.lines[i].staffs.length; s++) {
-                    if (this.lines[i].staffs[s] === undefined) {
-                        anyDeleted = true;
-                        this.lines[i].staffs[s] = null;
-                        //this.lines[i].staffs[s] = { voices: []};	// TODO-PER: There was a part missing in the abc music. How should we recover?
-                    } else {
-                        for (v = 0; v < this.lines[i].staffs[s].voices.length; v++) {
-                            if (this.lines[i].staffs[s].voices[v] === undefined)
-                                this.lines[i].staffs[s].voices[v] = [];	// TODO-PER: There was a part missing in the abc music. How should we recover?
-                            else
-                            if (this.containsNotes(this.lines[i].staffs[s].voices[v]))
-                                hasAny = true;
-                        }
-                    }
-                }
-                if (!hasAny) {
-                    this.lines[i] = null;
-                    anyDeleted = true;
-                }
+    
+    
+    this.handleBarsPerStaff = function() {
+        function splitBar(left, right) {
+            
+            delete left.startEnding;
+            switch( left.type ) {
+                case 'bar_dbl_repeat': 
+                case 'bar_right_repeat': 
+                   left.type = 'bar_right_repeat';
+                   break;
+                case 'bar_thin': 
+                case 'bar_left_repeat':
+                  left.type = 'bar_thin'; 
             }
-        }
-        if (anyDeleted) {
-            this.lines = window.ABCXJS.parse.compact(this.lines);
-            window.ABCXJS.parse.each(this.lines, function(line) {
-                if (line.staffs)
-                    line.staffs = window.ABCXJS.parse.compact(line.staffs);
-            });
-        }
+            
+            delete right.endEnding;
+            delete right.endDrawEnding;
+            switch( right.type ) {
+                case 'bar_dbl_repeat': 
+                case 'bar_left_repeat': 
+                   right.type = 'bar_left_repeat';
+                   break;
+                case 'bar_thin': 
+                case 'bar_right_repeat':
+                  right.type = 'bar_thin'; 
+            }
+        };
+        
+        function joinBar(left, right) {
+            if(right === undefined ) {
+                return;
+            }
 
-        // if we exceeded the number of bars allowed on a line, then force a new line
-        if (barsperstaff) {
-            for (i = 0; i < this.lines.length; i++) {
-                if (this.lines[i].staffs !== undefined) {
-                    for (s = 0; s < this.lines[i].staffs.length; s++) {
-                        for (v = 0; v < this.lines[i].staffs[s].voices.length; v++) {
-                            var barNumThisLine = 0;
-                            for (var n = 0; n < this.lines[i].staffs[s].voices[v].length; n++) {
-                                if (this.lines[i].staffs[s].voices[v][n].el_type === 'bar') {
-                                    barNumThisLine++;
-                                    if (barNumThisLine >= barsperstaff) {
-                                        // push everything else to the next line, if there is anything else,
-                                        // and there is a next line. If there isn't a next line, create one.
-                                        if (n < this.lines[i].staffs[s].voices[v].length - 1) {
-                                            if (i === this.lines.length - 1) {
-                                                var cp = JSON.parse(JSON.stringify(this.lines[i]));
-                                                this.lines.push(window.ABCXJS.parse.clone(cp));
-                                                for (var ss = 0; ss < this.lines[i + 1].staffs.length; ss++) {
-                                                    for (var vv = 0; vv < this.lines[i + 1].staffs[ss].voices.length; vv++)
-                                                        this.lines[i + 1].staffs[ss].voices[vv] = [];
-                                                }
-                                            }
-                                            var startElement = n + 1;
-                                            var section = this.lines[i].staffs[s].voices[v].slice(startElement);
-                                            this.lines[i].staffs[s].voices[v] = this.lines[i].staffs[s].voices[v].slice(0, startElement);
-                                            this.lines[i + 1].staffs[s].voices[v] = section.concat(this.lines[i + 1].staffs[s].voices[v]);
-                                        }
+            if(right.startEnding){
+                left.startEnding = right.startEnding;
+            }
+
+            if( left.type === 'bar_right_repeat' ) {
+                left.type  = right.type === 'bar_left_repeat'?'bar_dbl_repeat':'bar_right_repeat';
+            } else {
+                left.type  = right.type === 'bar_left_repeat'?'bar_left_repeat':'bar_thin';
+            }
+        };
+
+        
+        if (!this.formatting.barsperstaff) return;
+        
+        var limite = this.formatting.barsperstaff + 1; // assumir n compassos === n + 1 bars
+        var split_pos = 0, original_bar;
+        var nextline = 0;
+                
+        for (var i = 0; i < this.lines.length; i++) {
+            if (this.lines[i].staffs !== undefined) {
+                nextline = (this.lines[i+1]=== undefined || this.lines[i+1].staffs !== undefined)? i+1 : i+2; // assume que não há duas linhas newpage em seguida
+                for (var s = 0; s < this.lines[i].staffs.length; s++) {
+                    for (var v = 0; v < this.lines[i].staffs[s].voices.length; v++) {
+                        var barNumThisLine = 0;
+                        for (var n = 0; n < this.lines[i].staffs[s].voices[v].length; n++) {
+                            if(this.lines[i].staffs[s].voices[v][n].el_type === 'bar') {
+                               barNumThisLine ++;
+                               if(limite===barNumThisLine) {
+                                   split_pos = n;
+                                   original_bar = this.lines[i].staffs[s].voices[v][n].type;
+                               }
+                            }
+                            if( n === this.lines[i].staffs[s].voices[v].length-1 && barNumThisLine < limite && i < this.lines.length - 1){
+                                //fim da voz, quantidade de compassos inferior ao limite e existe linhas baixo = unir com a linha de baixo
+                                var cp = JSON.parse(JSON.stringify(this.lines[nextline]));
+                                this.lines.splice(nextline,1);
+                                for (var ss = 0; ss < this.lines[i].staffs.length; ss++) {
+                                    for (var vv = 0; vv < this.lines[i].staffs[ss].voices.length; vv++){
+                                        var section1 = this.lines[i].staffs[ss].voices[vv];
+                                        var section2 = cp.staffs[ss].voices[vv].splice(1);
+                                        joinBar(section1[section1.length-1], cp.staffs[ss].voices[vv][0] );
+                                        this.lines[i].staffs[ss].voices[vv] = section1.concat(section2);
                                     }
                                 }
                             }
-
-                        }
-                    }
-                }
-            }
-        }
-
-        // If we were passed staffnonote, then we want to get rid of all staffs that contain only rests.
-        if (barsperstaff) {
-            anyDeleted = false;
-            for (i = 0; i < this.lines.length; i++) {
-                if (this.lines[i].staffs !== undefined) {
-                    for (s = 0; s < this.lines[i].staffs.length; s++) {
-                        var keepThis = false;
-                        for (v = 0; v < this.lines[i].staffs[s].voices.length; v++) {
-                            if (this.containsNotesStrict(this.lines[i].staffs[s].voices[v])) {
-                                keepThis = true;
+                        }    
+                        if( barNumThisLine > limite ) {
+                            // move o excesso para a proxima linha, 
+                            // se necessário cria uma nova linha.
+                            if (i === this.lines.length - 1) {
+                                var cp = JSON.parse(JSON.stringify(this.lines[i]));
+                                this.lines.push(window.ABCXJS.parse.clone(cp));
+                                for (var ss = 0; ss < this.lines[i + 1].staffs.length; ss++) {
+                                    for (var vv = 0; vv < this.lines[i + 1].staffs[ss].voices.length; vv++)
+                                        this.lines[nextline].staffs[ss].voices[vv] = [];
+                                }
                             }
-                        }
-                        if (!keepThis) {
-                            anyDeleted = true;
-                            this.lines[i].staffs[s] = null;
+
+                            var section1 = this.lines[i].staffs[s].voices[v].slice(0, split_pos+1);
+                            var section2 = this.lines[i].staffs[s].voices[v].slice(split_pos);
+                            var section3 = this.lines[nextline].staffs[s].voices[v].slice(1);
+                            
+                            section2[0] = window.ABCXJS.parse.clone(section2[0]);
+
+                            splitBar( section1[section1.length-1], section2[0] );
+                            joinBar( section2[section2.length-1], this.lines[nextline].staffs[s].voices[v][0] );
+
+                            this.lines[i].staffs[s].voices[v] = section1;
+                            this.lines[nextline].staffs[s].voices[v] = section2.concat(section3);
+
                         }
                     }
                 }
             }
-            if (anyDeleted) {
-                window.ABCXJS.parse.each(this.lines, function(line) {
-                    if (line.staffs)
-                        line.staffs = window.ABCXJS.parse.compact(line.staffs);
-                });
-            }
         }
+    };
 
-        // Remove the temporary working variables
-        for (i = 0; i < this.lines.length; i++) {
-            if (this.lines[i].staffs) {
-                for (s = 0; s < this.lines[i].staffs.length; s++)
-                    delete this.lines[i].staffs[s].workingClef;
-            }
-        }
-
+    this.cleanUp = function() {
+        
         function cleanUpSlursInLine(line) {
             var currSlur = [];
             var x;
-            //	var lyr = null;	// TODO-PER: debugging.
 
             var addEndSlur = function(obj, num, chordPos) {
                 if (currSlur[chordPos] === undefined) {
@@ -256,7 +251,6 @@ window.ABCXJS.data.Tune = function() {
                 for (var i = 0; i < num; i++) {
                     slurNum = currSlur[chordPos].pop();
                     obj.endSlur.push(slurNum);
-//					lyr.syllable += '<' + slurNum;	// TODO-PER: debugging
                 }
                 if (currSlur[chordPos].length === 0)
                     delete currSlur[chordPos];
@@ -302,10 +296,6 @@ window.ABCXJS.data.Tune = function() {
 
             for (var i = 0; i < line.length; i++) {
                 var el = line[i];
-//				if (el.lyric === undefined)	// TODO-PER: debugging
-//					el.lyric = [{ divider: '-' }];	// TODO-PER: debugging
-//				lyr = el.lyric[0];	// TODO-PER: debugging
-//				lyr.syllable = '';	// TODO-PER: debugging
                 if (el.el_type === 'note') {
                     if (el.gracenotes) {
                         for (var g = 0; g < el.gracenotes.length; g++) {
@@ -375,15 +365,51 @@ window.ABCXJS.data.Tune = function() {
         function fixClefPlacement(el) {
             window.ABCXJS.parse.parseKeyVoice.fixClef(el);
         }
+        
+        this.closeLine();	// Close the last line.
 
+        // Remove any blank lines
+        var anyDeleted = false;
+        var i, s, v;
+        for (i = 0; i < this.lines.length; i++) {
+            if (this.lines[i].staffs !== undefined) {
+                var hasAny = false;
+                for (s = 0; s < this.lines[i].staffs.length; s++) {
+                    if (this.lines[i].staffs[s] === undefined) {
+                        anyDeleted = true;
+                        this.lines[i].staffs[s] = null;
+                    } else {
+                        delete this.lines[i].staffs[s].workingClef; // not necessary anymore
+                        for (v = 0; v < this.lines[i].staffs[s].voices.length; v++) {
+                            if (this.lines[i].staffs[s].voices[v] === undefined)
+                                this.lines[i].staffs[s].voices[v] = [];	// TODO-PER: There was a part missing in the abc music. How should we recover?
+                            else
+                            if (this.containsNotes(this.lines[i].staffs[s].voices[v]))
+                                hasAny = true;
+                        }
+                    }
+                }
+                if (!hasAny) {
+                    this.lines[i] = null;
+                    anyDeleted = true;
+                }
+            }
+        }
+        
+        if (anyDeleted) {
+            this.lines = window.ABCXJS.parse.compact(this.lines);
+            window.ABCXJS.parse.each(this.lines, function(line) {
+                if (line.staffs)
+                    line.staffs = window.ABCXJS.parse.compact(line.staffs);
+            });
+        }
+        
         for (this.lineNum = 0; this.lineNum < this.lines.length; this.lineNum++) {
             if (this.lines[this.lineNum].staffs)
                 for (this.staffNum = 0; this.staffNum < this.lines[this.lineNum].staffs.length; this.staffNum++) {
                     if (this.lines[this.lineNum].staffs[this.staffNum].clef)
                         fixClefPlacement(this.lines[this.lineNum].staffs[this.staffNum].clef);
                     for (this.voiceNum = 0; this.voiceNum < this.lines[this.lineNum].staffs[this.staffNum].voices.length; this.voiceNum++) {
-                        //var el = this.getLastNote();
-                        //if (el) el.end_beam = true;
                         cleanUpSlursInLine(this.lines[this.lineNum].staffs[this.staffNum].voices[this.voiceNum]);
                         for (var j = 0; j < this.lines[this.lineNum].staffs[this.staffNum].voices[this.voiceNum].length; j++)
                             if (this.lines[this.lineNum].staffs[this.staffNum].voices[this.voiceNum][j].el_type === 'clef')
@@ -396,13 +422,9 @@ window.ABCXJS.data.Tune = function() {
         delete this.staffNum;
         delete this.voiceNum;
         delete this.lineNum;
-        delete this.potentialStartBeam;
-        delete this.potentialEndBeam;
         delete this.vskipPending;
         
     };
-
-    this.reset();
 
     this.getLastNote = function() {
         if (this.lines[this.lineNum] && this.lines[this.lineNum].staffs && this.lines[this.lineNum].staffs[this.staffNum] &&
@@ -428,10 +450,7 @@ window.ABCXJS.data.Tune = function() {
     };
 
     this.getDuration = function(el) {
-        if (el.duration)
-            return el.duration;
-        //if (el.pitches && el.pitches.length > 0) return el.pitches[0].duration;
-        return 0;
+         return el.duration?el.duration:0;
     };
 
     this.closeLine = function() {
@@ -507,15 +526,6 @@ window.ABCXJS.data.Tune = function() {
                     This.potentialEndBeam = hashParams;	// Continue the beaming, look for the end next note.
                 }
             }
-
-            //  end_beam goes on rests and notes which precede rests _except_ when a rest (or set of adjacent rests) has normal notes on both sides (no spaces)
-//			if (hashParams.rest !== undefined)
-//			{
-//				hashParams.end_beam = true;
-//				var el2 = this.getLastNote();
-//				if (el2) el2.end_beam = true;
-//				// TODO-PER: implement exception mentioned in the comment.
-//			}
         } else {	// It's not a note, so there definitely isn't beaming after it.
             endBeamLast();
         }
@@ -781,4 +791,7 @@ window.ABCXJS.data.Tune = function() {
     this.addMetaTextObj = function(key, value) {
         this.metaText[key] = value;
     };
+    
+    this.reset();
+
 };

@@ -97,15 +97,53 @@ ABCXJS.midi.Parse.prototype.parse = function(tune, keyboard) {
     }
 
     //faz o parse dos elementos abcx 
-    this.staffcount = 1; 
+    this.staffcount = 1;
     for (this.staff = 0; this.staff < this.staffcount; this.staff++) {
         this.voicecount = 1;
         for (this.voice = 0; this.voice < this.voicecount; this.voice++) {
             this.startTrack();
             for (this.line = 0; this.line < this.abctune.lines.length; this.line++) {
-                this.writeABCLine();
+                if ( this.getStaff() ) {
+                    this.pos = 0;
+                    this.next = null;
+                    this.staffcount = this.getLine().staffs.length;
+                    this.voicecount = this.getStaff().voices.length;
+                    this.setKeySignature(this.getStaff().key);
+                    while (this.pos < this.getVoice().length) {
+                        var elem = this.getElem();
+                        switch (elem.el_type) {
+                            case "note":
+                                if( this.skipping ) break;
+                                if (this.getStaff().clef.type !== "accordionTab") {
+                                  this.writeNote(elem);
+                                } else {
+                                  this.selectButtons(elem);
+                                }
+                                break;
+                            case "key":
+                                if( this.skipping ) break;
+                                this.setKeySignature(elem);
+                                break;
+                            case "bar":
+                                this.handleBar(elem);
+                                break;
+                            case "meter":
+                            case "clef":
+                                break;
+                            default:
+                        }
+                        if (this.next) {
+                            this.line = this.next.line;
+                            this.staff = this.next.staff;
+                            this.voice = this.next.voice;
+                            this.pos = this.next.pos;
+                            this.next = null;
+                        } else {
+                            this.pos++;
+                        }
+                    }
+                }
             }
-            this.endTrack();
         }
     }
     
@@ -198,62 +236,8 @@ ABCXJS.midi.Parse.prototype.handleButtons = function(pitches, buttons ) {
             self.addWarning( 'Compasso '+this.lastBar+': Botao '+item.button.button.tabButton+' ('+item.button.button.closeLabel+'/'+item.button.button.openLabel+') não corresponde a nenhuma nota em execução.');
         }    
     });
-    
-    
 };
             
-ABCXJS.midi.Parse.prototype.writeABCLine = function() {
-    
-    if ( this.abctune.lines[this.line].staffs ) {
-        this.staffcount = this.getLine().staffs.length;
-        if( ! this.getStaff() ) return;
-        this.voicecount = this.getStaff().voices.length;
-        this.setKeySignature(this.getStaff().key);
-        this.writeABCVoiceLine();
-    }    
-};
-
-ABCXJS.midi.Parse.prototype.writeABCVoiceLine = function() {
-    this.pos = 0;
-    this.next = null;
-    while (this.pos < this.getVoice().length) {
-        this.writeABCElement(this.getElem());
-        if (this.next) {
-            this.line = this.next.line;
-            this.staff = this.next.staff;
-            this.voice = this.next.voice;
-            this.pos = this.next.pos;
-            this.next = null;
-        } else {
-            this.pos++;
-        }
-    }
-};
-
-ABCXJS.midi.Parse.prototype.writeABCElement = function(elem) {
-    switch (elem.el_type) {
-        case "note":
-            if( this.skipping ) return;
-            if (this.getStaff().clef.type !== "accordionTab") {
-              this.writeNote(elem);
-            } else {
-              this.selectButtons(elem);
-            }
-            break;
-        case "key":
-            if( this.skipping ) return;
-            this.setKeySignature(elem);
-            break;
-        case "bar":
-            this.handleBar(elem);
-            break;
-        case "meter":
-        case "clef":
-            break;
-        default:
-    }
-};
-
 ABCXJS.midi.Parse.prototype.writeNote = function(elem) {
     
     if (elem.startTriplet) {
@@ -591,7 +575,9 @@ ABCXJS.midi.Parse.prototype.getLine = function() {
 };
 
 ABCXJS.midi.Parse.prototype.getStaff = function() {
-    return this.getLine().staffs[this.staff];
+    var l = this.getLine();
+    if ( !l.staffs ) return undefined;
+    return l.staffs[this.staff];
 };
 
 ABCXJS.midi.Parse.prototype.getVoice = function() {
@@ -616,10 +602,6 @@ ABCXJS.midi.Parse.prototype.startTrack = function() {
     this.restart = {line: 0, staff: 0, voice: 0, pos: 0};
     this.startSegno = null;
     this.segnoUsed = false;
-};
-
-ABCXJS.midi.Parse.prototype.endTrack = function() {
-    // need to do anything?
 };
 
 ABCXJS.midi.Parse.prototype.getAccOffset = function(txtAcc) {

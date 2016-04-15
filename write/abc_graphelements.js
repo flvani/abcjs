@@ -265,12 +265,11 @@ ABCXJS.write.StaffGroupElement.prototype.draw = function(printer, groupNumber) {
         printer.printStem(this.startx, 0.6, top, bottom);
         printer.printStem(this.w-1, 0.6, top, bottom);
         if (this.voices.length > 1)  {
-            printer.drawArc2(this.startx-12, this.startx, top-1, top-10, true) ;
-            printer.drawArc2(this.startx-11, this.startx, bottom-3, bottom+8, false) ;
+            printer.drawArcForStaffGroup(this.startx-12, this.startx, top-1, top-10, true) ;
+            printer.drawArcForStaffGroup(this.startx-11, this.startx, bottom-3, bottom+8, false) ;
             printer.printStem(this.startx-6, 2, top-2, bottom+2);
         }
     }
-    
 
     for (i = 0; i < this.voices.length; i++) {
         if (this.voices[i].stave.numLines === 0 || this.voices[i].duplicate)

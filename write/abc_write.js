@@ -48,7 +48,7 @@ ABCXJS.write.Printer = function(paper, params ) {
   this.scale = params.scale || 1;
   this.staffwidth = params.staffwidth || 1024;
   this.paddingtop = params.paddingtop || 15;
-  this.paddingbottom = params.paddingbottom || 30;
+  this.paddingbottom = params.paddingbottom || 15;
   this.paddingleft = params.paddingleft || 15;
   this.paddingright = params.paddingright || 30;
   this.editable = params.editable || false;
@@ -286,8 +286,7 @@ ABCXJS.write.Printer.prototype.printPath = function (attrs) {
   return ret;
 };
 
-ABCXJS.write.Printer.prototype.drawArc2 = function(x1, x2, y1, y2, above) {
-
+ABCXJS.write.Printer.prototype.drawArcForStaffGroup = function(x1, x2, y1, y2, above) {
 
   x1 = x1 + 6;
   x2 = x2 + 4;
@@ -435,6 +434,10 @@ ABCXJS.write.Printer.prototype.printTempo = function (tempo, paper, layouter, y,
 };
 
 ABCXJS.write.Printer.prototype.printTune = function(abctune) {
+//    function scalePageRatio(s){
+//        var r = 1/s * (-0.3705*(1/s) +0.3705+1);
+//        return r;
+//    }
     
     if( abctune.lines.length === 0 ) return;
     
@@ -451,21 +454,15 @@ ABCXJS.write.Printer.prototype.printTune = function(abctune) {
     
     this.layouter = new ABCXJS.write.Layout( this, abctune.formatting.bagpipes );
     
-    if (abctune.formatting.staffwidth) {
-        this.width = abctune.formatting.staffwidth;
-    } else {
-        this.width = this.staffwidth;
-    }
-
-    this.width += this.paddingleft;
+    this.scale = abctune.formatting.scale ? abctune.formatting.scale: this.scale;
     
+    this.width = ( abctune.formatting.staffwidth ? abctune.formatting.staffwidth : this.staffwidth ) + this.paddingleft ;
+
     this.y += this.paddingtop;
     
-    this.estimatedPageLength = this.width*abctune.formatting.pageratio;
+    this.estimatedPageLength = (this.width*abctune.formatting.pageratio) ; // ainda não consigo escalar * scalePageRatio(this.scale);
+            //* ;
 
-    if (abctune.formatting.scale) {
-        this.scale = abctune.formatting.scale;
-    }
     if (abctune.metaText.title) {
         this.y += 5 * this.scale;
         this.paper.text(this.width * this.scale / 2, this.y, abctune.metaText.title).attr({"font-size": 20 * this.scale, "font-family": "serif"});
@@ -511,7 +508,7 @@ ABCXJS.write.Printer.prototype.printTune = function(abctune) {
     for (var line = 0; line < abctune.lines.length; line++) {
         var abcline = abctune.lines[line];
         if (abcline.text) {
-            console.log('abcline.text should should no longer exists!');
+            console.log('abcline.text should no longer exists!');
             continue;
         }
         if(abcline.newpage) {
@@ -579,10 +576,15 @@ ABCXJS.write.Printer.prototype.printTune = function(abctune) {
         this.y += this.printExtraText( extraText2, this.paddingleft);
     }
     
-   //for(var r=0; r < 10; r++) 
-        this.skipPage();
+//    for(var r=0; r < 10; r++) // para debug: testar a posição do número ao final da página
+//        this.skipPage();
     
-    this.y -= (this.paddingtop+5); // to avoid extra page at end of the print
+    if( this.pageNumber > 1) {
+        this.skipPage();
+        this.y -= (this.paddingtop+5)*this.scale; // to avoid extra page at end of the print
+    } else {
+        this.y += (this.paddingbottom-5)*this.scale; 
+    }    
     
     var sizetoset = {w: (maxwidth + this.paddingright) * this.scale, h: this.y* this.scale};
     
@@ -601,7 +603,7 @@ ABCXJS.write.Printer.prototype.printTune = function(abctune) {
 };
 
 ABCXJS.write.Printer.prototype.skipPage = function() {
-    this.y = this.estimatedPageLength*this.pageNumber + this.paddingtop;
+    this.y = this.estimatedPageLength*this.pageNumber + this.paddingtop*this.scale;
     if (this.pagenumbering) {
          this.paper.text((this.width+25)* this.scale, (this.y - this.paddingtop - 13) * this.scale, "- " + this.pageNumber + " -")
               .attr({"text-anchor": "end", "font-size": 13 * this.scale, "font-family": "serif", 'font-weight': 'bold'});
