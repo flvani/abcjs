@@ -1,0 +1,89 @@
+/*
+To change this license header, choose License Headers in Project Properties.
+To change this template file, choose Tools | Templates
+and open the template in the editor.
+*/
+/* 
+    Created on : 27/04/2016, 10:55:16
+    Author     : flavio.vani@gmail.com
+*/
+
+body, html {height: 90%;}
+svg {display:block}
+text tspan {white-space:pre; fill:currentColor}
+#dright:hover {z-index: 10 !important}
+#dright:active {z-index: 10 !important}
+.help { position:relative; display:none;}
+.help>aside {
+        display: none;
+        position: absolute; width:400px; left:-150px; top:20px;
+        background-color:#e0e0e0; font-size:small;
+        border:1px solid black}
+.help:hover>aside {display:block; z-index: 20 }
+
+@media screen {
+        #dright {
+                width: auto;
+                position: absolute; top: 0; bottom:0; right:0;
+                background-color: white;
+                overflow: auto
+        }
+}
+
+@media print {
+        #dright>div {
+                visibility: visible
+        }
+        #dleft, #dright {
+                visibility: hidden
+        }
+}
+
+//body {margin:0; padding:0; border:0} 
+//@page {margin:0} 
+//text, tspan {white-space:pre; fill:currentColor} 
+//svg {display:block} 
+
+@media print { 
+        div.newpage {page-break-before: always} 
+        div.nobrk {page-break-inside: avoid} 
+} 
+
+.fill {fill: currentColor;}
+.stroke {stroke: currentColor; fill: none; stroke-width: .7;}
+
+.stroke3 {stroke: currentColor; fill: none; stroke-width: 3;}
+
+rect.abcr {fill:#a08000; fill-opacity:0;}
+rect.abcr:hover {fill-opacity:0.3;}
+
+
+.abc_title {
+    font-size: 20px;
+    font-family: serif;
+}
+
+.abc_subtitle {
+    font-size: 16px;
+    font-family: serif;
+}
+
+.abc_author {
+    font-size: 14px;
+    font-family: serif;
+    font-style: italic;
+    font-weight: bold;
+}
+
+.abc_rhythm {
+    font-size: 12px;
+    font-family: serif;
+    font-style: italic;
+    font-weight: bold;
+}
+
+.abc_tempo {
+    font-size: 12px;
+    font-family: serif;
+    font-weight: bold;
+}
