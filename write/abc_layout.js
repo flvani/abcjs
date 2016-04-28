@@ -223,9 +223,6 @@ ABCXJS.write.Layout.prototype.printABCElement = function() {
     abselem.addChild(new ABCXJS.write.RelativeElement(elem.title, 0, 0, 18, {type:"text", attributes:{"font-weight":"bold", "font-size":""+16*this.printer.scale+"px", "font-family":"serif"}}));
     elemset[0] = abselem;
     break;
-//case "tempo":
-//  this.printer.y = this.printer.printTempo(elem, this.printer.paper, this.printer.layouter, this.printer.y, this.printer, this.printer.x);
-//  break;
   default: 
     var abselem2 = new ABCXJS.write.AbsoluteElement(elem,0,0);
     abselem2.addChild(new ABCXJS.write.RelativeElement("element type "+elem.el_type, 0, 0, 0, {type:"debug"}));

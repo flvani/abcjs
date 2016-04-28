@@ -435,7 +435,7 @@ ABCXJS.Editor.prototype.modelChanged2 = function(loader) {
     this.timerId = null;
     this.div.innerHTML = "";
 //    var paper = DOMRaphael(this.div, 1100, 700);
-    var paper = Raphael(this.div, 1100, 700);
+    var paper = new SVG(this.div, 1100, 700);
     this.printer = new ABCXJS.write.Printer(paper, this.printerparams );
     this.printTimeStart = new Date();
     this.printer.printABC(this.tunes);

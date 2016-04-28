@@ -504,45 +504,53 @@ ABCXJS.write.AbsoluteElement.prototype.pushBottom = function(bottom) {
 };
 
 ABCXJS.write.AbsoluteElement.prototype.draw = function(printer, staveInfo ) {
+    
+    if (this.invisible) return;
 
-    this.elemset = printer.paper.set();
-    if (this.invisible)
-        return;
+    var self = this;
+
+    this.elemset = {};// printer.paper.set();
+    
     printer.beginGroup();
+    
     for (var i = 0; i < this.children.length; i++) {
-        this.elemset.push(this.children[i].draw(printer, this.x, staveInfo ));
+        //this.elemset.push(this.children[i].draw(printer, this.x, staveInfo ));
+        this.children[i].draw(printer, this.x, staveInfo );
     }
-    this.elemset.push(printer.endGroup());
+    //this.elemset.push(printer.endGroup());
+    printer.endGroup();
+    
     if (this.klass)
         this.setClass("mark", "", "#00ff00");
-    var self = this;
-    this.elemset.mouseup(function(e) {
-        printer.notifyClearNSelect(self);
-    });
+    
+//    this.elemset.mouseup(function(e) {
+//        printer.notifyClearNSelect(self);
+//    });
+
     this.abcelem.abselem = this;
     this.abcelem.abselem.y = printer.y;
 
-    var spacing = ABCXJS.write.spacing.STEP * printer.scale;
+//    var spacing = ABCXJS.write.spacing.STEP * printer.scale;
 
-    var start = function() {
-        // storing original relative coordinates
-        this.dy = 0;
-    },
-            move = function(dx, dy) {
-                // move will be called with dx and dy
-                dy = Math.round(dy / spacing) * spacing;
-                this.translate(0, -this.dy);
-                this.dy = dy;
-                this.translate(0, this.dy);
-            },
-            up = function() {
-                var delta = -Math.round(this.dy / spacing);
-                self.abcelem.pitches[0].pitch += delta;
-                self.abcelem.pitches[0].verticalPos += delta;
-                printer.notifyChange();
-            };
-    if (this.abcelem.el_type === "note" && printer.editable)
-        this.elemset.drag(move, start, up);
+//    var start = function() {
+//        // storing original relative coordinates
+//        this.dy = 0;
+//    },
+//    move = function(dx, dy) {
+//        // move will be called with dx and dy
+//        dy = Math.round(dy / spacing) * spacing;
+//        this.translate(0, -this.dy);
+//        this.dy = dy;
+//        this.translate(0, this.dy);
+//    },
+//    up = function() {
+//        var delta = -Math.round(this.dy / spacing);
+//        self.abcelem.pitches[0].pitch += delta;
+//        self.abcelem.pitches[0].verticalPos += delta;
+//        printer.notifyChange();
+//    };
+//    if (this.abcelem.el_type === "note" && printer.editable)
+//        this.elemset.drag(move, start, up);
 };
 
 ABCXJS.write.AbsoluteElement.prototype.isIE = /*@cc_on!@*/false;//IE detector

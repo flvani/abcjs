@@ -11,26 +11,6 @@ if (!window.DIATONIC)
 if (!window.DIATONIC.map)
     window.DIATONIC.map = {};
 
-//if (!window.Raphael)
-//    window.Raphael= {};
-//
-//if (!window.Raphael.fn)
-//    window.Raphael.fn = {};
-
-
-Raphael.fn.arc = function(startX, startY, endX, endY, radius1, radius2, angle) {
-  var arcSVG = [radius1, radius2, angle, 0, 1, endX, endY].join(' ');
-  return this.path('M'+startX+' '+startY + " a " + arcSVG);
-};
-
-Raphael.fn.circularArc = function(centerX, centerY, radius, startAngle, endAngle) {
-  var startX = centerX+radius*Math.cos(startAngle*Math.PI/180); 
-  var startY = centerY+radius*Math.sin(startAngle*Math.PI/180);
-  var endX = centerX+radius*Math.cos(endAngle*Math.PI/180); 
-  var endY = centerY+radius*Math.sin(endAngle*Math.PI/180);
-  return this.arc(startX, startY, endX-startX, endY-startY, radius, radius, 0);
-};
-
 DIATONIC.map.Button = function( x, y, options ) {
 
     var opt = options || {};
