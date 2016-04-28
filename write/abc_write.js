@@ -404,7 +404,7 @@ ABCXJS.write.Printer.prototype.printTempo = function (tempo, x, y) {
         
 	if (tempo.duration) {
             var temposcale = 0.9;
-            var tempopitch = 4.5;
+            var tempopitch = 5;
             var duration = tempo.duration[0]; // TODO when multiple durations
             var abselem = new ABCXJS.write.AbsoluteElement(tempo, duration, 1);
             var durlog = ABCXJS.write.getDurlog(duration);
@@ -500,6 +500,11 @@ ABCXJS.write.Printer.prototype.printTune = function(abctune) {
     }
 
     this.paper.print_teste(100, 100, 'brace2');
+    this.paper.print_teste(110, 100, 'clefs.G');
+    this.paper.print_teste(110, 200, 'clefs.F');
+    this.paper.print_teste(140, 200, 'clefs.C');
+    this.paper.print_teste(140, 100, 'clefs.tab');
+    
     this.paper.endPage();
     
     this.paper.topDiv.innerHTML = this.paper.svg_pages[0];

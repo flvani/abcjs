@@ -16,8 +16,9 @@ SVG = function (d, x, y) {
 };
 
 SVG.prototype.initPage = function(pageNumber, wid, hei, scl) {
-    var head = '<div class="nobrk"><svg xmlns="http://www.w3.org/2000/svg" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" '
-                    +'color="black" width="'+wid*scl+'px" height="'+hei*scl+'px">';
+    var head = '<div class="nobrk">\n<svg xmlns="http://www.w3.org/2000/svg" version="1.1" '
+                    +'xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" '
+                    +'color="black" width="'+wid*scl+'px" height="'+hei*scl+'px">\n';
     this.scale = scl;
     this.currentPage = pageNumber;
     this.svg_pages[this.currentPage] = head;
@@ -29,10 +30,13 @@ SVG.prototype.initPage = function(pageNumber, wid, hei, scl) {
 
 SVG.prototype.setDefs = function () {
     this.def_use('clefs.G');
+    this.def_use('clefs.F');
+    this.def_use('clefs.C');
+    this.def_use('clefs.tab');
     this.def_use('noteheads.quarter');
     this.def_use('noteheads.half');
     this.def_use('brace2');
-    this.svg_pages[this.currentPage] += '<defs>'+SVG.defs+'</defs>';
+    this.svg_pages[this.currentPage] += '<defs>'+SVG.defs+'</defs>\n';
 };
 
 SVG.prototype.beginGroup = function () {

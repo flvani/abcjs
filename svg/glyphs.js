@@ -11,12 +11,15 @@ SVG.defined_glyph = [];
 SVG.defs = "";
 
 SVG.glyphs = {
-  "clefs.G": '<path id="clefsG" class="fill" transform="scale(0.4)"\nd="@@"/>',
+  "clefs.G": '<path id="clefs.G" class="fill" transform="scale(0.8)"\nd="@@"/>',
+  "clefs.F": '<path id="clefs.F" class="fill" transform="scale(0.8)"\nd="@@"/>',
+  "clefs.C": '<path id="clefs.C" class="fill" transform="scale(0.8)"\nd="@@"/>',
+  "clefs.tab": '<path id="clefs.tab" class="fill" transform="scale(0.8)"\nd="@@"/>',
   "noteheads.quarter": '<path id="hq" transform="scale(0.7)" class="fill" \nd="@@"/>',
   "noteheads.half": '<path id="hh" class="fill" \nd="@@"/>',
   "noteheads.whole": '<path id="hw" class="fill" \nd="@@"/>',
   "notehesad.dbl": '<g id="hd">\n\
-	<use xlink:href="#dw"/>\n\
+	<use xlink:href="#hw"/>\n\
 	<path d="m-6 -4v8m12 0v-8" class="stroke"/>\n\
         </g>',
   bbrace: '<path id="bbrace" class="fill"\n\
@@ -41,76 +44,6 @@ SVG.glyphs = {
             xlink:href="#bbrace"/>',    
     brace2: '<use id="brace2" class="fill" transform="scale(0.05)"\n\\n\
             xlink:href="#bbrace"/>',    
-  "clefs.G.old": '<path id="utclef" class="fill" transform="scale(0.045)"\n\
-	d="m-50 44\n\
-	c-72 -41 -72 -158 52 -188\n\
-	150 -10 220 188 90 256\n\
-	-114 52 -275 0 -293 -136\n\
-	-15 -181 93 -229 220 -334\n\
-	88 -87 79 -133 62 -210\n\
-	-51 33 -94 105 -89 186\n\
-	17 267 36 374 49 574\n\
-	6 96 -19 134 -77 135\n\
-	-80 1 -126 -93 -61 -133\n\
-	85 -41 133 101 31 105\n\
-	23 17 92 37 90 -92\n\
-	-10 -223 -39 -342 -50 -617\n\
-	0 -90 0 -162 96 -232\n\
-	56 72 63 230 22 289\n\
-	-74 106 -257 168 -255 316\n\
-	9 153 148 185 252 133\n\
-	86 -65 29 -192 -80 -176\n\
-	-71 12 -105 67 -59 124"/>',
-  tclef: '<use id="tclef" xlink:href="#utclef"/>',
-  stclef: '<use id="stclef" transform="scale(0.8)"\n\
-	xlink:href="#utclef"/>',
-  "clefs.F": '<path id="ubclef" class="fill" transform="scale(0.045)"\n\
-	d="m-200 312\n\
-	c124 -35 222 -78 254 -236\n\
-	43 -228 -167 -246 -192 -103\n\
-	59 -80 157 22 92 78\n\
-	-62 47 -115 -22 -106 -88\n\
-	21 -141 270 -136 274 52\n\
-	-1 175 -106 264 -322 297\n\
-	m357 -250\n\
-	c0 -36 51 -34 51 0\n\
-	0 37 -51 36 -51 0\n\
-	m-2 -129\n\
-	c0 -36 51 -34 51 0\n\
-	0 38 -51 37 -51 0"/>',
-  bclef: '<use id="bclef" xlink:href="#ubclef"/>',
-  sbclef: '<use id="sbclef" transform="scale(0.8)"\n\
-	xlink:href="#ubclef"/>',
-  "clefs.C": '<path id="ucclef" class="fill" transform="scale(0.045)"\n\
-	d="m-51 3\n\
-	v262\n\
-	h-13\n\
-	v-529\n\
-	h13\n\
-	v256\n\
-	c25 -20 41 -36 63 -109\n\
-	14 31 13 51 56 70\n\
-	90 34 96 -266 -41 -185\n\
-	52 19 27 80 -11 77\n\
-	-90 -38 33 -176 139 -69\n\
-	72 79 1 241 -134 186\n\
-	l-16 39 16 38\n\
-	c135 -55 206 107 134 186\n\
-	-106 108 -229 -31 -139 -69\n\
-	38 -3 63 58 11 77\n\
-	137 81 131 -219 41 -185\n\
-	-43 19 -45 30 -56 64\n\
-	-22 -73 -38 -89 -63 -109\n\
-	m-99 -267\n\
-	h57\n\
-	v529\n\
-	h-57\n\
-	v-529"/>',
-  cclef: '<use id="cclef" xlink:href="#ucclef"/>',
-  scclef: '<use id="scclef" transform="scale(0.8)"\n\
-	xlink:href="#ucclef"/>',
-  pclef: '<path id="pclef" class="stroke" style="stroke-width:1.4"\n\
-	d="m-4 10h5.4v-20h-5.4v20"/>',
   breve: '<g id="breve" class="stroke">\n\
 	<path d="m-6 -2.7h12m0 5.4h-12" style="stroke-width:2.5"/>\n\
 	<path d="m-6 -5v10m12 0v-10"/>\n\
