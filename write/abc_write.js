@@ -186,12 +186,15 @@ ABCXJS.write.Printer.prototype.doPrintStaveLine = function (x1,x2, y, attrs ) {
   
   //var y = this.calcY(pitch);
   var pathString = ABCXJS.write.sprintf("M %f %f L %f %f L %f %f L %f %f z", x1, y-dy, x2, y-dy, x2, y+dy, x1, y+dy);
-  var ret = this.paper.path().attr({path:pathString, fill:fill, stroke: stroke, 'stroke-width':strokeWidth, 'stroke-dasharray':strokeDashArray}).toBack();
+  
+  this.paper.printPath({path:pathString, fill:fill, stroke: stroke, 'stroke-width':strokeWidth, 'stroke-dasharray':strokeDashArray})
+  
+  //var ret = this.paper.path().attr({path:pathString, fill:fill, stroke: stroke, 'stroke-width':strokeWidth, 'stroke-dasharray':strokeDashArray}).toBack();
 
   if (this.scale!==1) {
     ret.scale(this.scale, this.scale, 0, 0);
   }
-  return ret;
+  //return ret;
 };
 
 ABCXJS.write.Printer.prototype.printStem = function (x, dx, y1, y2) {
@@ -224,77 +227,88 @@ ABCXJS.write.Printer.prototype.printStem = function (x, dx, y1, y2) {
 };
 
 ABCXJS.write.Printer.prototype.printTabText = function (x, offset, text, size, anchor) {
-  //anchor = anchor || "start"; 
   anchor = anchor || "middle";
-  size = size || 14;
+  size = size || 'abc_tabtext';
   if(text==="-->") anchor = "middle";
-  var ret = this.paper.text(x, this.calcY(offset), text).attr({"text-anchor":anchor, "font-size":size});
-  return ret;
+  this.paper.text(x, this.calcY(offset), text, size, anchor );
+  //var ret = this.paper.text(x, this.calcY(offset), text).attr({"text-anchor":anchor, "font-size":size});
+  //return ret;
 };
 
-    ABCXJS.write.Printer.prototype.printTabText2 = function (x, offset, text, size, anchor) {
-    return this.printTabText(x, offset, text, 12, anchor);
+    ABCXJS.write.Printer.prototype.printTabText2 = function (x, offset, text) {
+    return this.printTabText(x, offset, text, 'abc_tabtext2');
 };
 
-ABCXJS.write.Printer.prototype.printTabText3 = function (x, offset, text, size, anchor) {
-    return this.printTabText(x, offset, text, 10, anchor);
+ABCXJS.write.Printer.prototype.printTabText3 = function (x, offset, text) {
+    return this.printTabText(x, offset, text, 'abc_tabtext3');
 };
 
 ABCXJS.write.Printer.prototype.printText = function (x, offset, text, anchor) {
   anchor = anchor || "start";
-  var ret = this.paper.text(x, this.calcY(offset), text).attr({"text-anchor":anchor, "font-size":12});
-  return ret;
+  //var ret = this.paper.text(x, this.calcY(offset), text).attr({"text-anchor":anchor, "font-size":12});
+  this.paper.text(x, this.calcY(offset), text, 'abc_text', anchor );
+  //return ret;
 };
 
-// assumes this.y is set appropriately
-// if symbol is a multichar string without a . (as in scripts.staccato) 1 symbol per char is assumed
-// not scaled if not in printgroup
-ABCXJS.write.Printer.prototype.printSymbol = function(x, offset, symbol, scalex, scaley) {
-	var el;
-  if (!symbol) return null;
-  if (symbol.length>0 && symbol.indexOf(".")<0) {
-    var elemset = this.paper.set();
-    var dx =0;
-    for (var i=0; i<symbol.length; i++) {
-      var ycorr = this.glyphs.getYCorr(symbol.charAt(i));
-      el = this.glyphs.printSymbol(x+dx, this.calcY(offset+ycorr), symbol.charAt(i), this.paper);
-      if (el) {
-	elemset.push(el);
-	dx+=this.glyphs.getSymbolWidth(symbol.charAt(i));
-      } else {
-	this.printDebugMsg(x, this.calcY(offset), "no symbol:" +symbol);
-      }
-    }
-    if (this.scale!==1) {
-      elemset.scale(this.scale, this.scale, 0, 0);
-    }
-    return elemset;
-  } else {
+ABCXJS.write.Printer.prototype.printSymbol = function (x, offset, symbol, scalex, scaley) {
+    // assumes this.y is set appropriately
+    if (!symbol) return null;
+    
     var ycorr = this.glyphs.getYCorr(symbol);
-    if (this.ingroup) {
-      //this.addPath(this.glyphs.getPathForSymbol(x, this.calcY(offset+ycorr), symbol, scalex, scaley));
-      this.paper.print_hq(x,this.calcY(offset+ycorr));
+    this.paper.printSymbol(x, this.calcY(offset + ycorr), symbol);
+    return null;
+
+    // if symbol is a multichar string without a . (as in scripts.staccato) 1 symbol per char is assumed
+    // not scaled if not in printgroup
+    var el;
+    if (symbol.length > 0 && symbol.indexOf(".") < 0) {
+        var elemset = this.paper.set();
+        var dx = 0;
+        for (var i = 0; i < symbol.length; i++) {
+            var ycorr = this.glyphs.getYCorr(symbol.charAt(i));
+            el = this.glyphs.printSymbol(x + dx, this.calcY(offset + ycorr), symbol.charAt(i), this.paper);
+            if (el) {
+                elemset.push(el);
+                dx += this.glyphs.getSymbolWidth(symbol.charAt(i));
+            } else {
+                this.printDebugMsg(x, this.calcY(offset), "no symbol:" + symbol);
+            }
+        }
+        if (this.scale !== 1) {
+            elemset.scale(this.scale, this.scale, 0, 0);
+        }
+        return elemset;
     } else {
-      el = this.glyphs.printSymbol(x, this.calcY(offset+ycorr), symbol, this.paper);
-      if (el) {
-	if (this.scale!==1) {
-	  el.scale(this.scale, this.scale, 0, 0);
-	}
-	return el;
-      } else
-	this.printDebugMsg(x, this.calcY(offset), "no symbol:" +symbol);
+        var ycorr = this.glyphs.getYCorr(symbol);
+        if (this.ingroup) {
+            this.addPath(this.glyphs.getPathForSymbol(x, this.calcY(offset + ycorr), symbol, scalex, scaley));
+        } else {
+            el = this.glyphs.printSymbol(x, this.calcY(offset + ycorr), symbol, this.paper);
+            if (el) {
+                if (this.scale !== 1) {
+                    el.scale(this.scale, this.scale, 0, 0);
+                }
+                return el;
+            } else
+                this.printDebugMsg(x, this.calcY(offset), "no symbol:" + symbol);
+        }
+        return null;
     }
-    return null;    
-  }
 };
 
 ABCXJS.write.Printer.prototype.printPath = function (attrs) {
+  this.paper.printPath(attrs);
+  return;
   var ret = this.paper.path().attr(attrs);
   if (this.scale!==1) ret.scale(this.scale, this.scale, 0, 0);
   return ret;
 };
 
 ABCXJS.write.Printer.prototype.drawArcForStaffGroup = function(x1, x2, y1, y2, above) {
+    
+        this.paper.endPage();
+        this.paper.flush();
+        throw 'Interrrompendo por curiosidade';
 
   x1 = x1 + 6;
   x2 = x2 + 4;
@@ -372,9 +386,11 @@ ABCXJS.write.Printer.prototype.printLyrics = function(x, ypos, msg) {
     var i = msg.indexOf( "\n " );
     if( i >= 0) msg = msg.substr(0, i) + "\n...";
     
-    var el = this.paper.text(x, y, msg).attr({"font-family":"Times New Roman", "font-weight":'bold', "font-size":14, "text-anchor":"start"}).scale(this.scale, this.scale, 0, 0);
-    el[0].setAttribute("class", "abc-lyric");
-    return el;
+    this.paper.text(x, y, msg, 'abc_lyrics', 'start');
+    
+    //var el = this.paper.text(x, y, msg).attr({"font-family":"Times New Roman", "font-weight":'bold', "font-size":14, "text-anchor":"start"}).scale(this.scale, this.scale, 0, 0);
+    //el[0].setAttribute("class", "abc-lyric");
+    //return el;
 };
 
 ABCXJS.write.Printer.prototype.calcY = function(ofs) {
@@ -393,18 +409,21 @@ ABCXJS.write.Printer.prototype.printABC = function(abctunes) {
 
 };
 
-ABCXJS.write.Printer.prototype.printTempo = function (tempo, x, y) {
+ABCXJS.write.Printer.prototype.printTempo = function (x, tempo) {
+    
+        this.y -= 5;
+
+        var tempopitch = 5;
     
 	if (tempo.preString) {
-            this.paper.text(x, y, tempo.preString, 'abc_tempo', 'start');
+            this.paper.text(x, this.calcY(tempopitch-0.8), tempo.preString, 'abc_tempo', 'start');
             //x += (text.getBBox().width + 20*printer.scale);
             //fixme: obter a largura do texto
-            x+=10;
+            x += tempo.preString.length*5 + 5;
 	}
         
 	if (tempo.duration) {
             var temposcale = 0.9;
-            var tempopitch = 5;
             var duration = tempo.duration[0]; // TODO when multiple durations
             var abselem = new ABCXJS.write.AbsoluteElement(tempo, duration, 1);
             var durlog = ABCXJS.write.getDurlog(duration);
@@ -419,19 +438,21 @@ ABCXJS.write.Printer.prototype.printTempo = function (tempo, x, y) {
                 var width = 0.6;
                 abselem.addExtra(new ABCXJS.write.RelativeElement(null, dx, 0, 0, {type:"stem", pitch2:tempopitch, linewidth:width}));
             }
-            abselem.x = x;
+            abselem.x = x+4;
             abselem.draw(this, null);
 
-            x += (abselem.w+2 );
-            this.paper.text(x, y, "= " + tempo.bpm, 'abc_tempo', 'start');
-            x += 20; //fixme:obter a largura do texto // text.getBBox().width + 10*printer.scale;
+            x += (abselem.w+4 );
+            var tempostr = "= " + tempo.bpm;
+            this.paper.text(x, this.calcY(tempopitch-0.8), tempostr, 'abc_tempo', 'start');
+            //fixme: obter a largura do texto // text.getBBox().width + 10*printer.scale;
+            x += tempostr.length*5 + 5;
 	}
         
 	if (tempo.postString) {
-            this.paper.text( x, y, tempo.postString, 'abc_tempo', 'start');
+            this.paper.text( x, this.calcY(tempopitch-0.8), tempo.postString, 'abc_tempo', 'start');
 	}
         
-	return y-5;
+        this.y += 5;
 };
 
 ABCXJS.write.Printer.prototype.printTune = function(abctune) {
@@ -472,43 +493,28 @@ ABCXJS.write.Printer.prototype.printTune = function(abctune) {
         this.y += 20;
     }
     
-    if (abctune.metaText.rhythm) {
-        this.paper.text(this.paddingleft*3, this.y, abctune.metaText.rhythm, 'abc_rhythm', 'start');
-        !(abctune.metaText.author || abctune.metaText.origin || abctune.metaText.composer) && (this.y += 15);
-    }
-
-    var composerLine = "";
-    var meta = false;
+    var composerLine = "", meta = false;
     if (abctune.metaText.composer)
         composerLine += abctune.metaText.composer;
     if (abctune.metaText.origin)
         composerLine += ' (' + abctune.metaText.origin + ')';
+    if (abctune.metaText.author) 
+        composerLine += (composerLine.length> 0?'\n':'') + abctune.metaText.author;
 
     if (composerLine.length > 0) {
-        this.paper.text(this.width, this.y, composerLine, 'abc_author', 'end' );
+        this.paper.text(this.width, this.y-10, composerLine, 'abc_author', 'end' );
+        meta = true;
+    } 
+    
+    if (abctune.metaText.rhythm) {
+        this.paper.text(this.paddingleft*3, this.y, abctune.metaText.rhythm, 'abc_rhythm', 'start');
         meta = true;
     }
-    if (abctune.metaText.author) {
-        this.paper.text(this.width, this.y, abctune.metaText.author, 'abc_author', 'end' );
-        meta = true;
-    }
-
-
     if (abctune.metaText.tempo && !abctune.metaText.tempo.suppress) {
-        this.y = this.printTempo(abctune.metaText.tempo, this.paddingleft + 10, this.y+20 );
+        this.printTempo(this.paddingleft*2, abctune.metaText.tempo );
         meta = true;
     }
-
-    this.paper.print_teste(100, 100, 'brace2');
-    this.paper.print_teste(110, 100, 'clefs.G');
-    this.paper.print_teste(110, 200, 'clefs.F');
-    this.paper.print_teste(140, 200, 'clefs.C');
-    this.paper.print_teste(140, 100, 'clefs.tab');
     
-    this.paper.endPage();
-    
-    this.paper.topDiv.innerHTML = this.paper.svg_pages[0];
-    return;
     (meta) && (this.y += 15);
 
     var maxwidth = this.width;
@@ -529,6 +535,18 @@ ABCXJS.write.Printer.prototype.printTune = function(abctune) {
             maxwidth = Math.max(staffgroup.w, maxwidth);
         }
     }
+
+//    this.paper.printSymbol(100, 150, 'brace2');
+//    this.paper.printSymbol(110, 150, 'clefs.G');
+//    this.paper.printSymbol(110, 250, 'clefs.F');
+//    this.paper.printSymbol(140, 250, 'clefs.C');
+//    this.paper.printSymbol(140, 150, 'clefs.tab');
+    
+    this.paper.endPage();
+    this.paper.flush();
+    
+    return;
+
     
     var extraText1 = "", extraText2 = "",  height = 0, h1=0, h2=0;
     
