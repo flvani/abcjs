@@ -90,7 +90,7 @@ ABCXJS.write.Glyphs = function () {
     this.getTextSymbol = function (symb) {
         if (!glyphs[symb])
             return null;
-        return this.stringfy(glyphs[symb].d);
+        return this.stringify(glyphs[symb].d);
     };
 
     this.printSymbol = function (x, y, symb, paper) {
@@ -149,10 +149,10 @@ ABCXJS.write.Glyphs = function () {
         return res;
     };
 
-    this.stringfy = function (pathArray) {
+    this.stringify = function (pathArray) {
         var res = "";
         for (var i = 0, ii = pathArray.length; i < ii; i++) {
-            if (i > 0 && !(pathArray[i].length === 1 && pathArray[i][0] === "z")) {
+            if (i > 0 && (i%3===0) && !(pathArray[i].length === 1 && pathArray[i][0] === "z")) {
                 res += '\n';
             }
             res += pathArray[i][0] + pathArray[i].slice(1).join(' ');

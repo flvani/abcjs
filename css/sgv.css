@@ -49,14 +49,22 @@ text tspan {white-space:pre; fill:currentColor}
         div.nobrk {page-break-inside: avoid} 
 } 
 
-.fill {fill: currentColor;}
+.fill { fill: black; stroke: none; }
+
+.stave { stroke:black; }
+
+.ledger { stroke:gray; stroke-dasharray: 3 1; }
+
+.tabLine { stroke:gray; stroke-dasharray: 1 1; }
+
+.debug {stroke: red;}
+
+
 .stroke {stroke: currentColor; fill: none; stroke-width: .7;}
 
-.stroke3 {stroke: currentColor; fill: none; stroke-width: 3;}
-
 rect.abcr {fill:#a08000; fill-opacity:0;}
-rect.abcr:hover {fill-opacity:0.3;}
 
+rect.abcr:hover {fill-opacity:0.3;}
 
 .abc_title {
     font-size: 20px;

@@ -150,93 +150,45 @@ ABCXJS.write.Printer.prototype.endGroup = function () {
 
 ABCXJS.write.Printer.prototype.printStave = function (startx, endx, staff ) {
     if(staff.numLines === 4) {
-      this.printStaveLine(startx,endx,0); // 2
-      this.printStaveLine(startx,endx,7.5, {stroke:"#666666", strokeDashArray:'.', strokeWidth:0.3, fill:"white"}); // 8.5
-      this.printStaveLine(startx,endx,15, {stroke:"black", strokeDashArray:'.', strokeWidth:1, fill:"black"}); // 15
-      this.printStaveLine(startx,endx,19.5, {stroke:"#666666", strokeDashArray:'.', strokeWidth:0.3, fill:"white"}); // 19.5
+      this.paper.printStaveLine(startx,endx,this.calcY(19.5), 'tabLine' ); 
+      
+      // imprimo duas linhas para efeito
+      this.paper.printStaveLine(startx,endx,this.calcY(15)-0.5 ); 
+      this.paper.printStaveLine(startx,endx,this.calcY(15) ); 
+      
+      this.paper.printStaveLine(startx,endx,this.calcY(7.5), 'tabLine' ); 
+      
+      this.paper.printStaveLine(startx,endx,this.calcY(0)); 
     } else {
       for (var i = 0; i < staff.numLines; i++) {
-        this.printStaveLine(startx,endx,(i+1)*2);
+        this.paper.printStaveLine(startx,endx,this.calcY((i+1)*2));
       }
     }
 };
 
 ABCXJS.write.Printer.prototype.printDebugLine = function (x1,x2, y, fill ) {
-   this.doPrintStaveLine(x1,x2, y, {fill:fill} ) ; 
+   this.paper.printStaveLine(x1,x2, y, 'stave', fill ) ; 
 };
 
-ABCXJS.write.Printer.prototype.printStaveLine = function (x1,x2, pitch, attrs) {
-    return  this.doPrintStaveLine(x1, x2, this.calcY(pitch), attrs || {} );
-};
-
-ABCXJS.write.Printer.prototype.printLedger = function (x1, x2, pitch, attrs) {
+ABCXJS.write.Printer.prototype.printLedger = function (x1, x2, pitch) {
     if( pitch < 2 || pitch > 10 ) {
-      return this.doPrintStaveLine(x1, x2, this.calcY(pitch), attrs || {stroke:"black", strokeDashArray:'--', strokeWidth:0.3, fill:"white"} );
+      this.paper.printStaveLine(x1, x2, this.calcY(pitch), 'ledger' );
     } else {
       return null;
     }  
 };
 
-ABCXJS.write.Printer.prototype.doPrintStaveLine = function (x1,x2, y, attrs ) {
-  var dy = .3;
-  var fill = attrs.fill || "#000000";
-  var stroke = attrs.stroke || "none";
-  var strokeWidth = attrs.strokeWidth || 1;
-  var strokeDashArray = attrs.strokeDashArray || "";
-  
-  //var y = this.calcY(pitch);
-  var pathString = ABCXJS.write.sprintf("M %f %f L %f %f L %f %f L %f %f z", x1, y-dy, x2, y-dy, x2, y+dy, x1, y+dy);
-  
-  this.paper.printPath({path:pathString, fill:fill, stroke: stroke, 'stroke-width':strokeWidth, 'stroke-dasharray':strokeDashArray})
-  
-  //var ret = this.paper.path().attr({path:pathString, fill:fill, stroke: stroke, 'stroke-width':strokeWidth, 'stroke-dasharray':strokeDashArray}).toBack();
 
-  if (this.scale!==1) {
-    ret.scale(this.scale, this.scale, 0, 0);
-  }
-  //return ret;
+ABCXJS.write.Printer.prototype.printText = function (x, offset, text, anchor) {
+    anchor = anchor || "start";
+    this.paper.text(x, this.calcY(offset), text, 'abc_text', anchor);
+};
+ABCXJS.write.Printer.prototype.printTabText = function (x, offset, text, klass) {
+    klass = klass || 'abc_tabtext';
+    this.paper.text(x, this.calcY(offset), text, klass, 'middle');
 };
 
-ABCXJS.write.Printer.prototype.printStem = function (x, dx, y1, y2) {
-  
-  
-  this.paper.printStem(x, dx, y1, y2);
-  return;
-  
-  if (y1>y2) { // correct path "handedness" for intersection with other elements
-    var tmp = y2;
-    y2 = y1;
-    y1 = tmp;
-  }
-  var isIE=/*@cc_on!@*/false;//IE detector
-  var fill = "#000000";
-  if (isIE && dx<1) {
-    dx = 1;
-    fill = "#666666";
-  }
-  if (~~x === x) x+=0.05; // raphael does weird rounding (for VML)
-  var pathArray = [["M",x,y1],["L", x, y2],["L", x+dx, y2],["L",x+dx,y1],["z"]];
-  if (!isIE && this.ingroup) {
-    this.addPath(pathArray);
-  } else {
-    var ret = this.paper.path().attr({path:pathArray, stroke:"none", fill:fill}).toBack();
-    if (this.scale!==1) {
-      ret.scale(this.scale, this.scale, 0, 0);
-    }
-    return ret;
-  }
-};
-
-ABCXJS.write.Printer.prototype.printTabText = function (x, offset, text, size, anchor) {
-  anchor = anchor || "middle";
-  size = size || 'abc_tabtext';
-  if(text==="-->") anchor = "middle";
-  this.paper.text(x, this.calcY(offset), text, size, anchor );
-  //var ret = this.paper.text(x, this.calcY(offset), text).attr({"text-anchor":anchor, "font-size":size});
-  //return ret;
-};
-
-    ABCXJS.write.Printer.prototype.printTabText2 = function (x, offset, text) {
+ABCXJS.write.Printer.prototype.printTabText2 = function (x, offset, text) {
     return this.printTabText(x, offset, text, 'abc_tabtext2');
 };
 
@@ -244,102 +196,49 @@ ABCXJS.write.Printer.prototype.printTabText3 = function (x, offset, text) {
     return this.printTabText(x, offset, text, 'abc_tabtext3');
 };
 
-ABCXJS.write.Printer.prototype.printText = function (x, offset, text, anchor) {
-  anchor = anchor || "start";
-  //var ret = this.paper.text(x, this.calcY(offset), text).attr({"text-anchor":anchor, "font-size":12});
-  this.paper.text(x, this.calcY(offset), text, 'abc_text', anchor );
-  //return ret;
+ABCXJS.write.Printer.prototype.printStem = function (x, dx, y1, y2) {
+    this.paper.printStem(x, dx, y1, y2);
 };
 
-ABCXJS.write.Printer.prototype.printSymbol = function (x, offset, symbol, scalex, scaley) {
-    // assumes this.y is set appropriately
+ABCXJS.write.Printer.prototype.printSymbol = function (x, offset, symbol ) {
     if (!symbol) return null;
-    
-    var ycorr = this.glyphs.getYCorr(symbol);
-    this.paper.printSymbol(x, this.calcY(offset + ycorr), symbol);
-    return null;
-
-    // if symbol is a multichar string without a . (as in scripts.staccato) 1 symbol per char is assumed
-    // not scaled if not in printgroup
-    var el;
-    if (symbol.length > 0 && symbol.indexOf(".") < 0) {
-        var elemset = this.paper.set();
-        var dx = 0;
-        for (var i = 0; i < symbol.length; i++) {
-            var ycorr = this.glyphs.getYCorr(symbol.charAt(i));
-            el = this.glyphs.printSymbol(x + dx, this.calcY(offset + ycorr), symbol.charAt(i), this.paper);
-            if (el) {
-                elemset.push(el);
-                dx += this.glyphs.getSymbolWidth(symbol.charAt(i));
-            } else {
-                this.printDebugMsg(x, this.calcY(offset), "no symbol:" + symbol);
-            }
-        }
-        if (this.scale !== 1) {
-            elemset.scale(this.scale, this.scale, 0, 0);
-        }
-        return elemset;
-    } else {
-        var ycorr = this.glyphs.getYCorr(symbol);
-        if (this.ingroup) {
-            this.addPath(this.glyphs.getPathForSymbol(x, this.calcY(offset + ycorr), symbol, scalex, scaley));
-        } else {
-            el = this.glyphs.printSymbol(x, this.calcY(offset + ycorr), symbol, this.paper);
-            if (el) {
-                if (this.scale !== 1) {
-                    el.scale(this.scale, this.scale, 0, 0);
-                }
-                return el;
-            } else
-                this.printDebugMsg(x, this.calcY(offset), "no symbol:" + symbol);
-        }
-        return null;
-    }
+    this.paper.printSymbol(x, this.calcY(offset + this.glyphs.getYCorr(symbol)), symbol);
 };
 
-ABCXJS.write.Printer.prototype.printPath = function (attrs) {
-  this.paper.printPath(attrs);
-  return;
-  var ret = this.paper.path().attr(attrs);
-  if (this.scale!==1) ret.scale(this.scale, this.scale, 0, 0);
-  return ret;
-};
-
-ABCXJS.write.Printer.prototype.drawArcForStaffGroup = function(x1, x2, y1, y2, above) {
-
-  x1 = x1 + 6;
-  x2 = x2 + 4;
-  y1 = y1 + ((above)?1.5:-1.5);
-  y2 = y2 + ((above)?1.5:-1.5);
-
-  //unit direction vector
-  var dx = x2-x1;
-  var dy = y2-y1;
-  var norm= Math.sqrt(dx*dx+dy*dy);
-  var ux = dx/norm;
-  var uy = dy/norm;
-
-  var flatten = norm/3.5;
-  var curve = ((above)?-1:1)*Math.min(25, Math.max(4, flatten));
-
-  var controlx1 = x1+flatten*ux-curve*uy;
-  var controly1 = y1+flatten*uy+curve*ux;
-  var controlx2 = x2-flatten*ux-curve*uy;
-  var controly2 = y2-flatten*uy+curve*ux;
-  var thickness = 3;
-  var pathString = ABCXJS.write.sprintf("M %f %f C %f %f %f %f %f %f C %f %f %f %f %f %f z", x1, y1,
-			   controlx1, controly1, controlx2, controly2, x2, y2, 
-			   controlx2-thickness*uy, controly2+thickness*ux, controlx1-thickness*uy, controly1+thickness*ux, x1, y1);
-  var ret = this.paper.path().attr({path:pathString, stroke:"none", fill:"#000000"});
-  if (this.scale!==1) {
-    ret.scale(this.scale, this.scale, 0, 0);
-  }
-  return ret;
-};
+//ABCXJS.write.Printer.prototype.drawArcForStaffGroup = function(x1, x2, y1, y2, above) {
+//
+//  x1 = x1 + 6;
+//  x2 = x2 + 4;
+//  y1 = y1 + ((above)?1.5:-1.5);
+//  y2 = y2 + ((above)?1.5:-1.5);
+//
+//  //unit direction vector
+//  var dx = x2-x1;
+//  var dy = y2-y1;
+//  var norm= Math.sqrt(dx*dx+dy*dy);
+//  var ux = dx/norm;
+//  var uy = dy/norm;
+//
+//  var flatten = norm/3.5;
+//  var curve = ((above)?-1:1)*Math.min(25, Math.max(4, flatten));
+//
+//  var controlx1 = x1+flatten*ux-curve*uy;
+//  var controly1 = y1+flatten*uy+curve*ux;
+//  var controlx2 = x2-flatten*ux-curve*uy;
+//  var controly2 = y2-flatten*uy+curve*ux;
+//  var thickness = 3;
+//  var pathString = ABCXJS.write.sprintf("M %f %f C %f %f %f %f %f %f C %f %f %f %f %f %f z", x1, y1,
+//			   controlx1, controly1, controlx2, controly2, x2, y2, 
+//			   controlx2-thickness*uy, controly2+thickness*ux, controlx1-thickness*uy, controly1+thickness*ux, x1, y1);
+//  var ret = this.paper.path().attr({path:pathString, stroke:"none", fill:"#000000"});
+//  if (this.scale!==1) {
+//    ret.scale(this.scale, this.scale, 0, 0);
+//  }
+//  return ret;
+//};
 
 
-ABCXJS.write.Printer.prototype.drawArc = function(x1, x2, pitch1, pitch2, above) {
-
+ABCXJS.write.Printer.prototype.drawTieArc = function(x1, x2, pitch1, pitch2, above) {
 
   x1 = x1 + 6;
   x2 = x2 + 4;
@@ -348,35 +247,11 @@ ABCXJS.write.Printer.prototype.drawArc = function(x1, x2, pitch1, pitch2, above)
   var y1 = this.calcY(pitch1);
   var y2 = this.calcY(pitch2);
 
-  //unit direction vector
-  var dx = x2-x1;
-  var dy = y2-y1;
-  var norm= Math.sqrt(dx*dx+dy*dy);
-  var ux = dx/norm;
-  var uy = dy/norm;
-
-  var flatten = norm/3.5;
-  var curve = ((above)?-1:1)*Math.min(25, Math.max(4, flatten));
-
-  var controlx1 = x1+flatten*ux-curve*uy;
-  var controly1 = y1+flatten*uy+curve*ux;
-  var controlx2 = x2-flatten*ux-curve*uy;
-  var controly2 = y2-flatten*uy+curve*ux;
-  var thickness = 2;
-  var pathString = ABCXJS.write.sprintf("M %f %f C %f %f %f %f %f %f C %f %f %f %f %f %f z", x1, y1,
-			   controlx1, controly1, controlx2, controly2, x2, y2, 
-			   controlx2-thickness*uy, controly2+thickness*ux, controlx1-thickness*uy, controly1+thickness*ux, x1, y1);
-  //var ret = 
-  this.paper.printPath({path:pathString, stroke:"none", fill:"#000000"});
-  
-  if (this.scale!==1) {
-    ret.scale(this.scale, this.scale, 0, 0);
-  }
-  //return ret;
+  this.paper.printTieArc(x1,y1,x2,y2,above);
 };
 
 ABCXJS.write.Printer.prototype.printDebugMsg = function(x, y, msg ) {
-  return this.paper.text(x, y, msg).scale(this.scale, this.scale, 0, 0);
+  return this.paper.text(x, y, msg, 'abc_ending', 'start');
 };
 
 ABCXJS.write.Printer.prototype.printLyrics = function(x, ypos, msg) {
@@ -480,6 +355,12 @@ ABCXJS.write.Printer.prototype.printTune = function(abctune) {
     this.estimatedPageLength = (this.width*abctune.formatting.pageratio) ; // ainda não consigo escalar * scalePageRatio(this.scale);
     
     this.paper.initPage(0, this.width, this.estimatedPageLength, this.scale );
+    this.paper.printBrace( 100, 500, 400);  
+    this.paper.endPage();
+    this.paper.flush();
+    return;
+    
+    
 
     if (abctune.metaText.title) {
         this.y += 5;
@@ -610,8 +491,7 @@ ABCXJS.write.Printer.prototype.printTune = function(abctune) {
     this.paper.setSize(sizetoset.w, sizetoset.h);
     
     // Correct for IE problem in calculating height
-    var isIE = /*@cc_on!@*/false;//IE detector
-    if (isIE) {
+    if (isIE()) {
         this.paper.canvas.parentNode.style.width = "" +  sizetoset.w + "px";
         this.paper.canvas.parentNode.style.height = "" + sizetoset.h + "px";
     } else {

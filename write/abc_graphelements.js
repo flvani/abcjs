@@ -265,7 +265,7 @@ ABCXJS.write.StaffGroupElement.prototype.draw = function(printer, groupNumber) {
         printer.printStem(this.startx, 0.6, top, bottom);
         printer.printStem(this.w-1, 0.6, top, bottom);
         if (this.voices.length > 1)  {
-            printer.paper.printSymbol(this.startx-10,bottom+10, 'brace');  
+            printer.paper.printBrace(this.startx-10, top-2, bottom+10);  
             
            // printer.drawArcForStaffGroup(this.startx-12, this.startx, top-1, top-10, true) ;
            // printer.drawArcForStaffGroup(this.startx-11, this.startx, bottom-3, bottom+8, false) ;
@@ -555,11 +555,9 @@ ABCXJS.write.AbsoluteElement.prototype.draw = function(printer, staveInfo ) {
 //        this.elemset.drag(move, start, up);
 };
 
-ABCXJS.write.AbsoluteElement.prototype.isIE = /*@cc_on!@*/false;//IE detector
-
 ABCXJS.write.AbsoluteElement.prototype.setClass = function(addClass, removeClass, color) {
     this.elemset.attr({fill: color});
-    if (!this.isIE) {
+    if (!isIE()) {
         for (var i = 0; i < this.elemset.length; i++) {
             if (this.elemset[i][0].setAttribute) {
                 var kls = this.elemset[i][0].getAttribute("class");
@@ -643,12 +641,14 @@ ABCXJS.write.RelativeElement.prototype.draw = function(printer, x, staveInfo ) {
             this.graphelem = printer.printLedger(this.x, this.x + this.w, this.pitch);
             break;
     }
-    if (this.scalex !== 1 && this.graphelem) {
-        this.graphelem.scale(this.scalex, this.scaley, this.x, printer.calcY(this.pitch));
-    }
-    if (this.attributes) {
-        this.graphelem.attr(this.attributes);
-    }
+    
+//    if (this.scalex !== 1 && this.graphelem) {
+//        this.graphelem.scale(this.scalex, this.scaley, this.x, printer.calcY(this.pitch));
+//    }
+//    if (this.attributes) {
+//        this.graphelem.attr(this.attributes);
+//    }
+
     return this.graphelem;
 };
 
@@ -695,20 +695,7 @@ ABCXJS.write.TieElem.prototype.draw = function(printer, linestartx, lineendx, st
         }
     }
 
-//  if (this.anchor1 && this.anchor2) {
-//    if ((!this.force && this.anchor1.parent.beam && this.anchor2.parent.beam &&
-//	 this.anchor1.parent.beam.asc===this.anchor2.parent.beam.asc) ||
-//	((this.force==="up") || this.force==="down") && this.anchor1.parent.beam && this.anchor2.parent.beam && this.anchor1.parent.beam===this.anchor2.parent.beam) {
-//      this.above = !this.anchor1.parent.beam.asc;
-//      preservebeamdir = true;
-//    }
-//  }
-
-//  var pitchshift = 0;
-//  if (this.force==="up" && !preservebeamdir) pitchshift = 7;
-//  if (this.force==="down" && !preservebeamdir) pitchshift = -7;
-
-    printer.drawArc(linestartx, lineendx, startpitch, endpitch, this.above);
+    printer.drawTieArc(linestartx, lineendx, startpitch, endpitch, this.above);
 
 };
 
@@ -731,29 +718,19 @@ ABCXJS.write.EndingElem = function(text, anchor1, anchor2) {
 ABCXJS.write.EndingElem.prototype.draw = function(printer, linestartx, lineendx, staveInfo, staffnumber, voicenumber) {
     if(staffnumber > 0  || voicenumber > 0)  return;
 
-    var pathString;
     var y = printer.calcY(staveInfo.highest + 4);
-    var scale = printer.scale || 1.0;
 
     if (this.anchor1) {
         linestartx = this.anchor1.x + this.anchor1.w;
-        pathString = ABCXJS.write.sprintf("M %f %f L %f %f", linestartx, y, linestartx, y + 10);
-        printer.paper.printPath({path: pathString, stroke: "#000000", fill: "#000000"})
-        //printer.printPath({path: pathString, stroke: "#000000", fill: "#000000"});
-        printer.paper.text( linestartx + 5, y + 6, this.text, 'abc_ending', 'start' )
-                //.attr({"font-size": "10px", "text-anchor":"start"}).scale(scale, scale, 0, 0);
+        printer.paper.printLine( linestartx, y, linestartx, y + 10 );
+        printer.paper.text( linestartx + 5, y + 6, this.text, 'abc_ending', 'start' );
     }
 
     if (this.anchor2) {
         lineendx = this.anchor2.x;
-        //pathString = ABCXJS.write.sprintf("M %f %f L %f %f", lineendx, y, lineendx, y + 10*scale);
-        //printer.printPath({path: pathString, stroke: "#000000", fill: "#000000"});
     }   
     
-    //lineendx = linestartx + Math.min(lineendx-linestartx, 180 );
-
-    pathString = ABCXJS.write.sprintf("M %f %f L %f %f", linestartx, y, lineendx-5, y);
-    printer.paper.printPath({path: pathString, stroke: "#000000", fill: "#000000"});  
+    printer.paper.printLine(linestartx, y, lineendx-5, y);  
 };
 
 
@@ -768,17 +745,12 @@ ABCXJS.write.CrescendoElem.prototype.draw = function(printer, linestartx, lineen
     var ypos = printer.calcY(staveInfo.lowest - 1);
 
     if (this.dir === "<") {
-        this.drawLine(printer, ypos, ypos - 4);
-        this.drawLine(printer, ypos, ypos + 4);
+        printer.paper.printLine(this.anchor1.x, ypos, this.anchor2.x, ypos-4);
+        printer.paper.printLine(this.anchor1.x, ypos, this.anchor2.x, ypos+4);
     } else {
-        this.drawLine(printer, ypos - 4, ypos);
-        this.drawLine(printer, ypos + 4, ypos);
+        printer.paper.printLine(this.anchor1.x, ypos-4, this.anchor2.x, ypos);
+        printer.paper.printLine(this.anchor1.x, ypos+4, this.anchor2.x, ypos);
     }
-};
-
-ABCXJS.write.CrescendoElem.prototype.drawLine = function(printer, y1, y2) {
-    var pathString = ABCXJS.write.sprintf("M %f %f L %f %f", this.anchor1.x, y1, this.anchor2.x, y2);
-    printer.printPath({path: pathString, stroke: "#000000"});
 };
 
 ABCXJS.write.TripletElem = function(number, anchor1, anchor2, above) {
@@ -799,7 +771,13 @@ ABCXJS.write.TripletElem.prototype.draw = function(printer, linestartx, lineendx
             this.above = beam.asc;
             ypos = beam.pos;
         } else {
-            this.drawLine(printer, printer.calcY(ypos));
+            var y = printer.calcY(ypos);
+            var linestartx = this.anchor1.x;
+            var lineendx = this.anchor2.x + this.anchor2.w;
+            printer.paper.printLine(linestartx, y, linestartx, y + 5);
+            printer.paper.printLine(lineendx, y, lineendx, y + 5);
+            printer.paper.printLine(linestartx, y, (linestartx + lineendx) / 2 - 5, y);
+            printer.paper.printLine((linestartx + lineendx) / 2 + 5, y, lineendx, y);
         }
         var xsum = this.anchor1.x + this.anchor2.x;
         var ydelta = 0;
@@ -818,29 +796,6 @@ ABCXJS.write.TripletElem.prototype.draw = function(printer, linestartx, lineendx
         printer.printText(xsum / 2, ypos + ydelta, this.number, "middle").attr({"font-size": "10px", 'font-style': 'italic'});
 
     }
-};
-
-ABCXJS.write.TripletElem.prototype.drawLine = function(printer, y) {
-    var pathString;
-    var linestartx = this.anchor1.x;
-    pathString = ABCXJS.write.sprintf("M %f %f L %f %f",
-            linestartx, y, linestartx, y + 5);
-    printer.printPath({path: pathString, stroke: "#000000"});
-
-    var lineendx = this.anchor2.x + this.anchor2.w;
-    pathString = ABCXJS.write.sprintf("M %f %f L %f %f",
-            lineendx, y, lineendx, y + 5);
-    printer.printPath({path: pathString, stroke: "#000000"});
-
-    pathString = ABCXJS.write.sprintf("M %f %f L %f %f",
-            linestartx, y, (linestartx + lineendx) / 2 - 5, y);
-    printer.printPath({path: pathString, stroke: "#000000"});
-
-
-    pathString = ABCXJS.write.sprintf("M %f %f L %f %f",
-            (linestartx + lineendx) / 2 + 5, y, lineendx, y);
-    printer.printPath({path: pathString, stroke: "#000000"});
-
 };
 
 ABCXJS.write.BeamElem = function(type, flat) {
@@ -932,10 +887,10 @@ ABCXJS.write.BeamElem.prototype.drawBeam = function(printer) {
         this.starty = printer.calcY(6);
         this.endy = printer.calcY(6);
     }
-
-    var pathString = "M" + this.startx + " " + this.starty + " L" + this.endx + " " + this.endy +
-            "L" + this.endx + " " + (this.endy + this.dy) + " L" + this.startx + " " + (this.starty + this.dy) + "z";
-    printer.printPath({path: pathString, stroke: "none", fill: "#000000"});
+    var pathString = ABCXJS.write.sprintf("M %f %f L %f %f L %f %f L %f %fz", 
+                        this.startx, this.starty, this.endx, this.endy, this.endx, (this.endy + this.dy), this.startx, this.starty + this.dy);
+            
+    printer.paper.printBeam(this.startx, this.starty, this.endx, this.endy, this.endx, (this.endy + this.dy), this.startx, this.starty + this.dy);
 };
 
 ABCXJS.write.BeamElem.prototype.drawStems = function(printer) {
@@ -977,10 +932,7 @@ ABCXJS.write.BeamElem.prototype.drawStems = function(printer) {
                     auxbeamendy = this.getBarYAt(auxbeamendx) + sy * (j + 1);
                 }
                 // TODO I think they are drawn from front to back, hence the small x difference with the main beam
-
-                var pathString = "M" + auxbeams[j].x + " " + auxbeams[j].y + " L" + auxbeamendx + " " + auxbeamendy +
-                        "L" + auxbeamendx + " " + (auxbeamendy + this.dy) + " L" + auxbeams[j].x + " " + (auxbeams[j].y + this.dy) + "z";
-                printer.printPath({path: pathString, stroke: "none", fill: "#000000"});
+                printer.paper.printBeam(auxbeams[j].x,auxbeams[j].y, auxbeamendx,auxbeamendy,auxbeamendx,(auxbeamendy + this.dy), auxbeams[j].x,(auxbeams[j].y + this.dy));
                 auxbeams = auxbeams.slice(0, j);
             }
         }
