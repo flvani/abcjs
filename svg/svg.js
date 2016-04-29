@@ -43,7 +43,7 @@ SVG.Printer.prototype.init = function() {
 SVG.Printer.prototype.initPage = function( pageNumber, wid, hei, scl) {
     var head = '<div class="nobrk">\n<svg xmlns="http://www.w3.org/2000/svg" version="1.1" '
                     +'xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" '
-                    +'color="black" width="'+wid*scl+'px" height="'+hei*scl+'px">\n';
+                    +'color="black" width="'+wid*scl+'px" height="'+hei*scl*10+'px">\n';
     this.scale = scl || this.scale;
     this.currentPage = pageNumber;
     this.output = head;
@@ -72,18 +72,21 @@ SVG.Printer.prototype.endGroup = function () {
 };
 
 SVG.Printer.prototype.printStem = function (x, dx, y1, y2) {
-
-    if (y1 > y2) { // correct path "handedness" for intersection with other elements
+    if (dx < 0) { // correct path "handedness" for intersection with other elements
         var tmp = y2;
         y2 = y1;
         y1 = tmp;
     }
 
-    this.path('m' + x + ' ' + y1 + 'v-' + (y2 - y1) + '');
+    var pathString = ABCXJS.write.sprintf("M %f %f L %f %f L %f %f L %f %f z", x, y1, x, y2, x + dx, y2, x + dx, y1);
+ 
+
+    this.path(pathString);
 };
 
-SVG.Printer.prototype.printPath = function (atr) {
-  console.log('ignoring');
+SVG.Printer.prototype.printPath = function (attrs) {
+    this.path(attrs.path);
+//  console.log('ignoring');
   //var ret = this.paper.path().attr({path:pathString, fill:fill, stroke: stroke, 'stroke-width':strokeWidth, 'stroke-dasharray':strokeDashArray}).toBack();
   
 };
@@ -93,9 +96,11 @@ SVG.Printer.prototype.setDefine = function (s) {
     var p =  this.glyphs.getDefinition(s);
     
     if(p.length === 0 ) return false;
-  
-    this.defines += p;
     
+    if(!this.defined_glyph[s]) {
+        this.defines += p;
+        this.defined_glyph[s] = true;
+    }
     return true;
 };
 
@@ -122,7 +127,7 @@ SVG.Printer.prototype.flush = function() {
 
 
 SVG.Printer.prototype.path = function(str) {
-   this.svg_pages[this.currentPage] += '<path class="stroke"	d="'+str+'"/>\n';
+   this.svg_pages[this.currentPage] += '<path class="stroke" d="'+str+'"/>\n';
 };
 
 SVG.Printer.prototype.text = function( x, y, str, clss, anch ) {

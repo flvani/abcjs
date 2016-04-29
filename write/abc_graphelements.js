@@ -265,9 +265,11 @@ ABCXJS.write.StaffGroupElement.prototype.draw = function(printer, groupNumber) {
         printer.printStem(this.startx, 0.6, top, bottom);
         printer.printStem(this.w-1, 0.6, top, bottom);
         if (this.voices.length > 1)  {
-            printer.drawArcForStaffGroup(this.startx-12, this.startx, top-1, top-10, true) ;
-            printer.drawArcForStaffGroup(this.startx-11, this.startx, bottom-3, bottom+8, false) ;
-            printer.printStem(this.startx-6, 2, top-2, bottom+2);
+            printer.paper.printSymbol(this.startx-10,bottom+10, 'brace');  
+            
+           // printer.drawArcForStaffGroup(this.startx-12, this.startx, top-1, top-10, true) ;
+           // printer.drawArcForStaffGroup(this.startx-11, this.startx, bottom-3, bottom+8, false) ;
+           // printer.printStem(this.startx-6, 2, top-2, bottom+2);
         }
     }
 
@@ -735,9 +737,11 @@ ABCXJS.write.EndingElem.prototype.draw = function(printer, linestartx, lineendx,
 
     if (this.anchor1) {
         linestartx = this.anchor1.x + this.anchor1.w;
-        pathString = ABCXJS.write.sprintf("M %f %f L %f %f", linestartx, y, linestartx, y + 10*scale);
-        printer.printPath({path: pathString, stroke: "#000000", fill: "#000000"});
-        printer.paper.text( linestartx + 5*scale, y + 6*scale, this.text).attr({"font-size": "10px", "text-anchor":"start"}).scale(scale, scale, 0, 0);
+        pathString = ABCXJS.write.sprintf("M %f %f L %f %f", linestartx, y, linestartx, y + 10);
+        printer.paper.printPath({path: pathString, stroke: "#000000", fill: "#000000"})
+        //printer.printPath({path: pathString, stroke: "#000000", fill: "#000000"});
+        printer.paper.text( linestartx + 5, y + 6, this.text, 'abc_ending', 'start' )
+                //.attr({"font-size": "10px", "text-anchor":"start"}).scale(scale, scale, 0, 0);
     }
 
     if (this.anchor2) {
@@ -748,8 +752,8 @@ ABCXJS.write.EndingElem.prototype.draw = function(printer, linestartx, lineendx,
     
     //lineendx = linestartx + Math.min(lineendx-linestartx, 180 );
 
-    pathString = ABCXJS.write.sprintf("M %f %f L %f %f", linestartx, y, lineendx-5, y)
-    printer.printPath({path: pathString, stroke: "#000000", fill: "#000000"});  
+    pathString = ABCXJS.write.sprintf("M %f %f L %f %f", linestartx, y, lineendx-5, y);
+    printer.paper.printPath({path: pathString, stroke: "#000000", fill: "#000000"});  
 };
 
 

@@ -199,6 +199,7 @@ ABCXJS.write.Printer.prototype.doPrintStaveLine = function (x1,x2, y, attrs ) {
 
 ABCXJS.write.Printer.prototype.printStem = function (x, dx, y1, y2) {
   
+  
   this.paper.printStem(x, dx, y1, y2);
   return;
   
@@ -305,10 +306,6 @@ ABCXJS.write.Printer.prototype.printPath = function (attrs) {
 };
 
 ABCXJS.write.Printer.prototype.drawArcForStaffGroup = function(x1, x2, y1, y2, above) {
-    
-        this.paper.endPage();
-        this.paper.flush();
-        throw 'Interrrompendo por curiosidade';
 
   x1 = x1 + 6;
   x2 = x2 + 4;
@@ -369,11 +366,13 @@ ABCXJS.write.Printer.prototype.drawArc = function(x1, x2, pitch1, pitch2, above)
   var pathString = ABCXJS.write.sprintf("M %f %f C %f %f %f %f %f %f C %f %f %f %f %f %f z", x1, y1,
 			   controlx1, controly1, controlx2, controly2, x2, y2, 
 			   controlx2-thickness*uy, controly2+thickness*ux, controlx1-thickness*uy, controly1+thickness*ux, x1, y1);
-  var ret = this.paper.path().attr({path:pathString, stroke:"none", fill:"#000000"});
+  //var ret = 
+  this.paper.printPath({path:pathString, stroke:"none", fill:"#000000"});
+  
   if (this.scale!==1) {
     ret.scale(this.scale, this.scale, 0, 0);
   }
-  return ret;
+  //return ret;
 };
 
 ABCXJS.write.Printer.prototype.printDebugMsg = function(x, y, msg ) {
@@ -434,14 +433,14 @@ ABCXJS.write.Printer.prototype.printTempo = function (x, tempo) {
             var temponote = this.layouter.printNoteHead( abselem, c, {verticalPos:tempopitch}, "up", 0, 0, flag, dot, 0, temposcale );
             abselem.addHead(temponote);
             if (duration < 1) {
-                var dx = 6.4;
-                var width = 0.6;
-                abselem.addExtra(new ABCXJS.write.RelativeElement(null, dx, 0, 0, {type:"stem", pitch2:tempopitch, linewidth:width}));
+                var dx = 8;
+                var width = -0.6;
+                abselem.addExtra(new ABCXJS.write.RelativeElement(null, dx, 0, tempopitch, {type:"stem", pitch2:tempopitch+6, linewidth:width}));
             }
             abselem.x = x+4;
             abselem.draw(this, null);
 
-            x += (abselem.w+4 );
+            x += (abselem.w+dx );
             var tempostr = "= " + tempo.bpm;
             this.paper.text(x, this.calcY(tempopitch-0.8), tempostr, 'abc_tempo', 'start');
             //fixme: obter a largura do texto // text.getBBox().width + 10*printer.scale;
@@ -502,7 +501,7 @@ ABCXJS.write.Printer.prototype.printTune = function(abctune) {
         composerLine += (composerLine.length> 0?'\n':'') + abctune.metaText.author;
 
     if (composerLine.length > 0) {
-        this.paper.text(this.width, this.y-10, composerLine, 'abc_author', 'end' );
+        this.paper.text(this.width, this.y-40, composerLine, 'abc_author', 'end' );
         meta = true;
     } 
     
@@ -515,7 +514,7 @@ ABCXJS.write.Printer.prototype.printTune = function(abctune) {
         meta = true;
     }
     
-    (meta) && (this.y += 15);
+    (meta) && (this.y += 20);
 
     var maxwidth = this.width;
     
@@ -536,18 +535,7 @@ ABCXJS.write.Printer.prototype.printTune = function(abctune) {
         }
     }
 
-//    this.paper.printSymbol(100, 150, 'brace2');
-//    this.paper.printSymbol(110, 150, 'clefs.G');
-//    this.paper.printSymbol(110, 250, 'clefs.F');
-//    this.paper.printSymbol(140, 250, 'clefs.C');
-//    this.paper.printSymbol(140, 150, 'clefs.tab');
-    
-    this.paper.endPage();
-    this.paper.flush();
-    
-    return;
-
-    
+  
     var extraText1 = "", extraText2 = "",  height = 0, h1=0, h2=0;
     
     if (abctune.metaText.unalignedWords) {
@@ -611,7 +599,11 @@ ABCXJS.write.Printer.prototype.printTune = function(abctune) {
         this.y -= (this.paddingtop+5); // to avoid extra page at end of the print
     } else {
         this.y += (this.paddingbottom-5); 
-    }    
+    } 
+    
+    this.paper.endPage();
+    this.paper.flush();
+    return;
     
     var sizetoset = {w: (maxwidth + this.paddingright) , h: this.y};
     
@@ -632,17 +624,18 @@ ABCXJS.write.Printer.prototype.printTune = function(abctune) {
 ABCXJS.write.Printer.prototype.skipPage = function() {
     this.y = this.estimatedPageLength*this.pageNumber + this.paddingtop;
     if (this.pagenumbering) {
-         this.paper.text((this.width+25), (this.y - this.paddingtop - 13) , "- " + this.pageNumber + " -")
-              .attr({"text-anchor": "end", "font-size": 13 , "font-family": "serif", 'font-weight': 'bold'});
+         this.paper.text((this.width+25), (this.y - this.paddingtop - 13) , "- " + this.pageNumber + " -", 'abc_tempo', 'end');
+             // .attr({"text-anchor": "end", "font-size": 13 , "font-family": "serif", 'font-weight': 'bold'});
     }
     this.pageNumber++;
 };
 
 ABCXJS.write.Printer.prototype.printExtraText = function(text, x) {
-    var t = this.paper.text(x, this.y , text).attr({"text-anchor": "start", "font-family": "serif", "font-size": 17 });
-    var height = t.getBBox().height;
+    var t = this.paper.text(x, this.y , text, 'abc_title', 'start');
+            //.attr({"text-anchor": "start", "font-family": "serif", "font-size": 17 });
+    var height ;//= t.getBBox().height;
     if (!height)  height = 25 ; // TODO-PER: Hack! Raphael sometimes and returns NaN. Perhaps only when printing to PDF? Possibly if the SVG is hidden?
-    t.translate(0, height / 2);
+    //t.translate(0, height / 2);
     return height;
 };
 

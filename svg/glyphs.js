@@ -15,12 +15,22 @@ SVG.Glyphs = function () {
     var abc_glyphs = new ABCXJS.write.Glyphs();
 
     var glyphs = {
+      "1": '<path id="1" class="fill" transform="scale(0.8)"\nd="@@"/>',
+      "2": '<path id="2" class="fill" transform="scale(0.8)"\nd="@@"/>',
+      "3": '<path id="3" class="fill" transform="scale(0.8)"\nd="@@"/>',
+      "4": '<path id="4" class="fill" transform="scale(0.8)"\nd="@@"/>',
+      "5": '<path id="5" class="fill" transform="scale(0.8)"\nd="@@"/>',
+      "6": '<path id="6" class="fill" transform="scale(0.8)"\nd="@@"/>',
+      "7": '<path id="7" class="fill" transform="scale(0.8)"\nd="@@"/>',
+      "8": '<path id="8" class="fill" transform="scale(0.8)"\nd="@@"/>',
+      "9": '<path id="9" class="fill" transform="scale(0.8)"\nd="@@"/>',
       "clefs.G": '<path id="clefs.G" class="fill" transform="scale(0.8)"\nd="@@"/>',
       "clefs.F": '<path id="clefs.F" class="fill" transform="scale(0.8)"\nd="@@"/>',
       "clefs.C": '<path id="clefs.C" class="fill" transform="scale(0.8)"\nd="@@"/>',
       "clefs.tab": '<path id="clefs.tab" class="fill" transform="scale(0.8)"\nd="@@"/>',
       "timesig.common": '<path id="timesig.common" class="fill" transform="scale(0.8)"\nd="@@"/>',
       "dots.dot": '<path id="dots.dot" class="fill" \nd="@@"/>',
+      "accidentals.nat": '<path id="accidentals.nat" class="fill" \nd="@@"/>',
       "accidentals.sharp": '<path id="accidentals.sharp" class="fill" \nd="@@"/>',
       "noteheads.quarter": '<path id="noteheads.quarter" class="fill" \nd="@@"/>',
       "noteheads.half": '<path id="noteheads.half" class="fill" \nd="@@"/>',
@@ -32,8 +42,10 @@ SVG.Glyphs = function () {
       "rests.quarter": '<path id="rests.quarter" class="fill" \nd="@@"/>',
       "rests.half": '<path id="rests.half" class="fill" \nd="@@"/>',
       "rests.8th": '<path id="rests.8th" class="fill" \nd="@@"/>',
+      "rests.16th": '<path id="rests.16th" class="fill" \nd="@@"/>',
+      "flags.d8th": '<path id="flags.d8th" class="fill" \nd="@@"/>',
       "flags.u8th": '<path id="flags.u8th" class="fill" \nd="@@"/>',
-      bbrace: '<path id="bbrace" class="fill"\n\
+       bbrace: '<path id="bbrace" class="fill"\n\
             d="M-20 -515v-2\n\
             c35 -16 53 -48 53 -91\n\
             c0 -34 -11 -84 -35 -150\n\
@@ -51,9 +63,7 @@ SVG.Glyphs = function () {
             c0 -33 5 -68 18 -109\n\
             c24 -66 35 -116 35 -150\n\
             c0 -44 -18 -80 -53 -96z"/>',
-        brace: '<use id="brace" class="fill" transform="scale(0.0235)"\n\\n\
-                xlink:href="#bbrace"/>',    
-        brace2: '<use id="brace2" class="fill" transform="scale(0.05)"\n\\n\
+        brace: '<use id="brace" class="fill" transform="scale(0.11,0.31)"\n\\n\
                 xlink:href="#bbrace"/>',    
       breve: '<g id="breve" class="stroke">\n\
             <path d="m-6 -2.7h12m0 5.4h-12" style="stroke-width:2.5"/>\n\
