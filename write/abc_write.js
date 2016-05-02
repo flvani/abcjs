@@ -44,7 +44,7 @@ ABCXJS.write.Printer = function(paper, params ) {
   this.glyphs = new ABCXJS.write.Glyphs();
   this.listeners = [];
   this.selected = [];
-  this.ingroup = false;
+  //this.ingroup = false;
   this.scale = params.scale || 1;
   this.staffwidth = params.staffwidth || 1024;
   this.paddingtop = params.paddingtop || 15;
@@ -111,52 +111,53 @@ ABCXJS.write.Printer.prototype.rangeHighlight = function(start,end)
     return this.selected;
 };
 
-ABCXJS.write.Printer.prototype.beginGroup = function () {
-    this.ingroup = true;
+ABCXJS.write.Printer.prototype.beginGroup = function (abselem) {
+    //this.ingroup = true;
     this.paper.beginGroup();
+    abselem.gid = this.paper.gid; // associa o elemento absoluto com o futuro elemento sgv selecionavel
 };
 
-ABCXJS.write.Printer.prototype.addPath = function (path) {
-  path = path || [];
-  if (path.length===0) return;
-  path[0][0]="m";
-  path[0][1]-=this.lastM[0];
-  path[0][2]-=this.lastM[1];
-  this.lastM[0]+=path[0][1];
-  this.lastM[1]+=path[0][2];
-  this.path.push(path[0]);
-  for (var i=1,ii=path.length;i<ii;i++) {
-    if (path[i][0]==="m") {
-      this.lastM[0]+=path[i][1];
-      this.lastM[1]+=path[i][2];
-    }
-    this.path.push(path[i]);
-  }
-};
+//ABCXJS.write.Printer.prototype.addPath = function (path) {
+//  path = path || [];
+//  if (path.length===0) return;
+//  path[0][0]="m";
+//  path[0][1]-=this.lastM[0];
+//  path[0][2]-=this.lastM[1];
+//  this.lastM[0]+=path[0][1];
+//  this.lastM[1]+=path[0][2];
+//  this.path.push(path[0]);
+//  for (var i=1,ii=path.length;i<ii;i++) {
+//    if (path[i][0]==="m") {
+//      this.lastM[0]+=path[i][1];
+//      this.lastM[1]+=path[i][2];
+//    }
+//    this.path.push(path[i]);
+//  }
+//};
 
 ABCXJS.write.Printer.prototype.endGroup = function () {
   
-  this.ingroup = false;
+  //this.ingroup = false;
   this.paper.endGroup();
   return;
   
-  if (this.path.length===0) return null;
-  var ret = this.paper.path().attr({path:this.path, stroke:"none", fill:"#000000"});
-  if (this.scale!==1) {
-    ret.scale(this.scale, this.scale, 0, 0);
-  }
-  return ret;
+//  if (this.path.length===0) return null;
+//  var ret = this.paper.path().attr({path:this.path, stroke:"none", fill:"#000000"});
+//  if (this.scale!==1) {
+//    ret.scale(this.scale, this.scale, 0, 0);
+//  }
+//  return ret;
 };
 
 ABCXJS.write.Printer.prototype.printStave = function (startx, endx, staff ) {
     if(staff.numLines === 4) {
-      this.paper.printStaveLine(startx,endx,this.calcY(19.5), 'tabLine' ); 
+      this.paper.printStaveLine(startx,endx,this.calcY(19.5), 'ledger' ); 
       
       // imprimo duas linhas para efeito
       this.paper.printStaveLine(startx,endx,this.calcY(15)-0.5 ); 
       this.paper.printStaveLine(startx,endx,this.calcY(15) ); 
       
-      this.paper.printStaveLine(startx,endx,this.calcY(7.5), 'tabLine' ); 
+      this.paper.printStaveLine(startx,endx,this.calcY(7.5), 'ledger' ); 
       
       this.paper.printStaveLine(startx,endx,this.calcY(0)); 
     } else {
@@ -178,14 +179,13 @@ ABCXJS.write.Printer.prototype.printLedger = function (x1, x2, pitch) {
     }  
 };
 
-
 ABCXJS.write.Printer.prototype.printText = function (x, offset, text, anchor) {
     anchor = anchor || "start";
     this.paper.text(x, this.calcY(offset), text, 'abc_text', anchor);
 };
 ABCXJS.write.Printer.prototype.printTabText = function (x, offset, text, klass) {
     klass = klass || 'abc_tabtext';
-    this.paper.text(x, this.calcY(offset), text, klass, 'middle');
+    this.paper.tabText(x, this.calcY(offset)+5, text, klass, 'middle');
 };
 
 ABCXJS.write.Printer.prototype.printTabText2 = function (x, offset, text) {
@@ -202,7 +202,11 @@ ABCXJS.write.Printer.prototype.printStem = function (x, dx, y1, y2) {
 
 ABCXJS.write.Printer.prototype.printSymbol = function (x, offset, symbol ) {
     if (!symbol) return null;
-    this.paper.printSymbol(x, this.calcY(offset + this.glyphs.getYCorr(symbol)), symbol);
+    try {
+        this.paper.printSymbol(x, this.calcY(offset + this.glyphs.getYCorr(symbol)), symbol);
+    } catch(e){
+        this.paper.text(x, this.calcY(offset + this.glyphs.getYCorr(symbol)), e );
+    }
 };
 
 //ABCXJS.write.Printer.prototype.drawArcForStaffGroup = function(x1, x2, y1, y2, above) {
@@ -285,48 +289,49 @@ ABCXJS.write.Printer.prototype.printABC = function(abctunes) {
 
 ABCXJS.write.Printer.prototype.printTempo = function (x, tempo) {
     
-        this.y -= 5;
+    this.y -= 5;
 
-        var tempopitch = 5;
-    
-	if (tempo.preString) {
-            this.paper.text(x, this.calcY(tempopitch-0.8), tempo.preString, 'abc_tempo', 'start');
-            //x += (text.getBBox().width + 20*printer.scale);
-            //fixme: obter a largura do texto
-            x += tempo.preString.length*5 + 5;
-	}
-        
-	if (tempo.duration) {
-            var temposcale = 0.9;
-            var duration = tempo.duration[0]; // TODO when multiple durations
-            var abselem = new ABCXJS.write.AbsoluteElement(tempo, duration, 1);
-            var durlog = ABCXJS.write.getDurlog(duration);
-            var dot = 0;
-            for (var tot = Math.pow(2, durlog), inc = tot / 2; tot < duration; dot++, tot += inc, inc /= 2);
-            var c = ABCXJS.write.chartable.note[-durlog];
-            var flag = ABCXJS.write.chartable.uflags[-durlog];
-            var temponote = this.layouter.printNoteHead( abselem, c, {verticalPos:tempopitch}, "up", 0, 0, flag, dot, 0, temposcale );
-            abselem.addHead(temponote);
-            if (duration < 1) {
-                var dx = 8;
-                var width = -0.6;
-                abselem.addExtra(new ABCXJS.write.RelativeElement(null, dx, 0, tempopitch, {type:"stem", pitch2:tempopitch+6, linewidth:width}));
-            }
-            abselem.x = x+4;
-            abselem.draw(this, null);
+    var tempopitch = 5;
 
-            x += (abselem.w+dx );
-            var tempostr = "= " + tempo.bpm;
-            this.paper.text(x, this.calcY(tempopitch-0.8), tempostr, 'abc_tempo', 'start');
-            //fixme: obter a largura do texto // text.getBBox().width + 10*printer.scale;
-            x += tempostr.length*5 + 5;
-	}
-        
-	if (tempo.postString) {
-            this.paper.text( x, this.calcY(tempopitch-0.8), tempo.postString, 'abc_tempo', 'start');
-	}
-        
-        this.y += 5;
+    if (tempo.preString) {
+        this.paper.text(x, this.calcY(tempopitch-0.8), tempo.preString, 'abc_tempo', 'start');
+        //x += (text.getBBox().width + 20*printer.scale);
+        //fixme: obter a largura do texto
+        x += tempo.preString.length*5 + 5;
+    }
+
+    if (tempo.duration) {
+        var temposcale = 0.9;
+        var duration = tempo.duration[0]; // TODO when multiple durations
+        var abselem = new ABCXJS.write.AbsoluteElement(tempo, duration, 1);
+        var durlog = ABCXJS.write.getDurlog(duration);
+        var dot = 0;
+        for (var tot = Math.pow(2, durlog), inc = tot / 2; tot < duration; dot++, tot += inc, inc /= 2);
+        var c = ABCXJS.write.chartable.note[-durlog];
+        var flag = ABCXJS.write.chartable.uflags[-durlog];
+        var temponote = this.layouter.printNoteHead( abselem, c, {verticalPos:tempopitch}, "up", 0, 0, flag, dot, 0, temposcale );
+        abselem.addHead(temponote);
+        if (duration < 1) {
+            var dx = 9.5;
+            var width = -0.6;
+            abselem.addExtra(new ABCXJS.write.RelativeElement(null, dx, 0, tempopitch, {type:"stem", pitch2:tempopitch+6, linewidth:width}));
+        }
+        abselem.x = x+4;
+        abselem.draw(this, null);
+
+        x += (abselem.w+dx );
+        var tempostr = "= " + tempo.bpm;
+        this.paper.text(x, this.calcY(tempopitch-0.8), tempostr, 'abc_tempo', 'start');
+        //fixme: obter a largura do texto // text.getBBox().width + 10*printer.scale;
+        x += tempostr.length*5 + 5;
+    }
+
+    if (tempo.postString) {
+        this.paper.text( x, this.calcY(tempopitch-0.8), tempo.postString, 'abc_tempo', 'start');
+    }
+
+    this.y += 5;
+    return abselem.x + abselem.w +4;
 };
 
 ABCXJS.write.Printer.prototype.printTune = function(abctune) {
@@ -342,7 +347,7 @@ ABCXJS.write.Printer.prototype.printTune = function(abctune) {
     this.staffsep = abctune.formatting.staffsep ||  ABCXJS.write.spacing.STEP*8;
     
     this.paddingtop = this.landscape? 10 : 15;
-    this.paddingright = this.landscape? 50 : 30;
+    this.paddingright = this.landscape? 45 : 30;
     
     this.layouter = new ABCXJS.write.Layout( this, abctune.formatting.bagpipes );
     
@@ -355,12 +360,6 @@ ABCXJS.write.Printer.prototype.printTune = function(abctune) {
     this.estimatedPageLength = (this.width*abctune.formatting.pageratio) ; // ainda não consigo escalar * scalePageRatio(this.scale);
     
     this.paper.initPage(0, this.width, this.estimatedPageLength, this.scale );
-    this.paper.printBrace( 100, 500, 400);  
-    this.paper.endPage();
-    this.paper.flush();
-    return;
-    
-    
 
     if (abctune.metaText.title) {
         this.y += 5;
@@ -382,16 +381,17 @@ ABCXJS.write.Printer.prototype.printTune = function(abctune) {
         composerLine += (composerLine.length> 0?'\n':'') + abctune.metaText.author;
 
     if (composerLine.length > 0) {
-        this.paper.text(this.width, this.y-40, composerLine, 'abc_author', 'end' );
+        this.paper.text(this.width, 30, composerLine, 'abc_author', 'end' );
         meta = true;
     } 
     
-    if (abctune.metaText.rhythm) {
-        this.paper.text(this.paddingleft*3, this.y, abctune.metaText.rhythm, 'abc_rhythm', 'start');
+    var xtempo ;
+    if (abctune.metaText.tempo && !abctune.metaText.tempo.suppress) {
+        xtempo = this.printTempo(this.paddingleft*2, abctune.metaText.tempo );
         meta = true;
     }
-    if (abctune.metaText.tempo && !abctune.metaText.tempo.suppress) {
-        this.printTempo(this.paddingleft*2, abctune.metaText.tempo );
+    if (abctune.metaText.rhythm) {
+        this.paper.text( xtempo || this.paddingleft*3, this.y, abctune.metaText.rhythm, 'abc_rhythm', 'start');
         meta = true;
     }
     
@@ -402,22 +402,19 @@ ABCXJS.write.Printer.prototype.printTune = function(abctune) {
     // impressão dos grupos de pautas
     for (var line = 0; line < abctune.lines.length; line++) {
         var abcline = abctune.lines[line];
-        if (abcline.text) {
-            console.log('abcline.text should no longer exists!');
-            continue;
-        }
         if(abcline.newpage) {
             this.skipPage();
             continue;
         }
         if(abcline.staffs) {
-            var staffgroup = this.printStaffLine(abctune, line);
+            var staffgroup =  this.layouter.layoutABCLine(abctune, line, this.width);
+            staffgroup.draw( this, line );
+            this.staffgroups.push(staffgroup);
             maxwidth = Math.max(staffgroup.w, maxwidth);
         }
     }
 
-  
-    var extraText1 = "", extraText2 = "",  height = 0, h1=0, h2=0;
+      var extraText1 = "", extraText2 = "",  height = 0, h1=0, h2=0;
     
     if (abctune.metaText.unalignedWords) {
         for (var j = 0; j < abctune.metaText.unalignedWords.length; j++) {
@@ -459,7 +456,8 @@ ABCXJS.write.Printer.prototype.printTune = function(abctune) {
         } else {
             this.y += ABCXJS.write.spacing.STEP*3; 
         }
-        this.y += this.printExtraText( extraText1, this.paddingleft+50);
+        this.printExtraText( extraText1, this.paddingleft+50);
+        this.y += height; 
     }
 
     if(h2> 0) {
@@ -469,11 +467,12 @@ ABCXJS.write.Printer.prototype.printTune = function(abctune) {
         } else {
             this.y += ABCXJS.write.spacing.STEP*3; 
         }
-        this.y += this.printExtraText( extraText2, this.paddingleft);
+        this.printExtraText( extraText2, this.paddingleft);
+        this.y += height; 
     }
     
-//    for(var r=0; r < 10; r++) // para debug: testar a posição do número ao final da página
-//        this.skipPage();
+    for(var r=0; r < 10; r++) // para debug: testar a posição do número ao final da página
+        this.skipPage();
     
     if( this.pageNumber > 1) {
         this.skipPage();
@@ -483,10 +482,15 @@ ABCXJS.write.Printer.prototype.printTune = function(abctune) {
     } 
     
     this.paper.endPage();
-    this.paper.flush();
-    return;
+    this.paper.flush(abctune.lines);
     
     var sizetoset = {w: (maxwidth + this.paddingright) , h: this.y};
+    
+    var s = document.getElementById('master');
+    s.style.width = "" +  sizetoset.w + "px";
+    s.style.height = "" + sizetoset.h + "px";
+    
+    return;
     
     this.paper.setSize(sizetoset.w, sizetoset.h);
     
@@ -504,7 +508,7 @@ ABCXJS.write.Printer.prototype.printTune = function(abctune) {
 ABCXJS.write.Printer.prototype.skipPage = function() {
     this.y = this.estimatedPageLength*this.pageNumber + this.paddingtop;
     if (this.pagenumbering) {
-         this.paper.text((this.width+25), (this.y - this.paddingtop - 13) , "- " + this.pageNumber + " -", 'abc_tempo', 'end');
+         this.paper.text((this.width), (this.y - this.paddingtop - 13) , "- " + this.pageNumber + " -", 'abc_tempo', 'end');
              // .attr({"text-anchor": "end", "font-size": 13 , "font-family": "serif", 'font-weight': 'bold'});
     }
     this.pageNumber++;
@@ -523,9 +527,3 @@ ABCXJS.write.Printer.prototype.printSubtitleLine = function(subtitle) {
     this.paper.text(this.width/2, this.y, subtitle, 'abc_subtitle', 'middle');
 };
 
-ABCXJS.write.Printer.prototype.printStaffLine = function (abctune, line) {
-    var n = this.staffgroups.length;
-    this.staffgroups[n] = this.layouter.layoutABCLine(abctune, line, this.width);
-    this.staffgroups[n].draw( this, line );
-    return this.staffgroups[n];
-};

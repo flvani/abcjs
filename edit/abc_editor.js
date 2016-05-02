@@ -457,9 +457,9 @@ ABCXJS.Editor.prototype.modelChanged2 = function(loader) {
    loader.update( false, '<br>&nbsp;&nbsp;&nbsp;Finalizando...<br><br>' );
    loader.stop();
     
-//    window.setTimeout(function() {
+    window.setTimeout(function() {
             self.printWarnings();
-//    }, 1);
+    }, 1);
     
     
 };

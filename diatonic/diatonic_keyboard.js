@@ -137,7 +137,8 @@ DIATONIC.map.Keyboard.prototype.print = function (div, options ) {
     options = options || {};
     
     div.innerHTML = "";
-    this.paper = Raphael(div, "100%", "100%");
+    //this.sgv = new SVG.Printer(div, "100%", "100%");
+    this.paper = new SVG.Printer(div, "100%", "100%"); //this.sgv.paper; //Raphael(div, "100%", "100%");
     
     options.scale = options.scale || 1;
     options.mirror = options.mirror || false;

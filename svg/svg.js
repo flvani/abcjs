@@ -17,7 +17,8 @@ SVG.Printer = function (d, w, h) {
     this.height = h;
     
     this.scale = 1;
-    
+    this.gid=0;
+   
     this.defines = "";
     this.defined_glyph = [];
 
@@ -31,23 +32,29 @@ SVG.Printer = function (d, w, h) {
 
 SVG.Printer.prototype.init = function() {
     this.scale = 1.0;
-    
-    this.defines = "";
+    this.defines = '';
     this.defined_glyph = [];
 
     this.svg_pages = [];
     this.currentPage = 0;
     this.output = "";
+    this.gid=0;
 };
 
 SVG.Printer.prototype.initPage = function( pageNumber, wid, hei, scl) {
-    var head = '<div class="nobrk">\n<svg xmlns="http://www.w3.org/2000/svg" version="1.1" '
-                    +'xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" '
-                    +'color="black" width="'+wid*scl+'px" height="'+hei*scl*10+'px">\n';
+    var stillo = '<style type="text/css">\n\
+.stave { stroke:black; }\n\
+.ledger { stroke:gray; fill:white; stroke-dasharray: 1 1; }\n\
+</style>\n';
+    var head = '<div width="auto" height="auto" class="nobrk">\n\
+<svg id="master" xmlns="http://www.w3.org/2000/svg" version="1.1"\n\
+xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" width="'+wid*scl+'px" height="'+hei*scl+'px">\n';
+    
     this.scale = scl || this.scale;
     this.currentPage = pageNumber;
     this.svg_pages[this.currentPage] = '';  
     this.output = head;
+    this.output += stillo;
     if( this.scale !== 1.0 ) {
         this.output += '<g transform="scale( '+ this.scale +')">';
     }
@@ -65,7 +72,7 @@ SVG.Printer.prototype.endPage = function() {
 };
 
 SVG.Printer.prototype.beginGroup = function () {
-    this.svg_pages[this.currentPage] += '<g class="">\n';  
+    this.svg_pages[this.currentPage] += '<g id="g'+(++this.gid)+'">\n';  
 };
 
 SVG.Printer.prototype.endGroup = function () {
@@ -74,7 +81,7 @@ SVG.Printer.prototype.endGroup = function () {
 
 SVG.Printer.prototype.printLine = function (x,y,dx,dy,stroke) {
     stroke = stroke || 'black';
-    var pathString = ABCXJS.write.sprintf('<path stroke="%s" d="M %.3f %.3f L %.3f %.3f"/>\n', stroke, x, y, dx, dy);
+    var pathString = ABCXJS.write.sprintf('<path stroke="%s" d="M %.2f %.2f L %.2f %.2f"/>\n', stroke, x, y, dx, dy);
     this.svg_pages[this.currentPage] += pathString;
 };
 
@@ -86,7 +93,7 @@ SVG.Printer.prototype.printStaveLine = function (x1, x2, y, klass, debug) {
         klass='debug';
     }
     
-    var pathString = ABCXJS.write.sprintf('<path class="%s" d="M %.3f %.3f L %.3f %.3f"/>\n', klass, x1, y, x2, y);
+    var pathString = ABCXJS.write.sprintf('<path class="%s" d="M%.2f %.2f H%.2f"/>\n', klass, x1, y, x2);
     this.svg_pages[this.currentPage] += pathString;
 };
 
@@ -101,13 +108,13 @@ SVG.Printer.prototype.printStem = function (x, dx, y1, y2) {
     var dy = Math.abs(y2-y1);
     dx = Math.abs(dx); 
     
-    var pathString = ABCXJS.write.sprintf('<rect class="fill" x="%.3f" y="%.3f" width="%.3f" height="%.3f"/>\n', Math.min(x,x2), Math.min(y1,y2), dx, dy );
+    var pathString = ABCXJS.write.sprintf('<rect x="%.2f" y="%.2f" width="%.2f" height="%.2f"/>\n', Math.min(x,x2), Math.min(y1,y2), dx, dy );
 
     this.svg_pages[this.currentPage] += pathString;
 };
 
 SVG.Printer.prototype.printBeam = function (x1,y1,x2,y2,x3,y3,x4,y4) {
-    var pathString = ABCXJS.write.sprintf('<path class="fill" d="M %.3f %.3f L %.3f %.3f L %.3f %.3f L %.3f %.3f z"/>\n',  x1, y1, x2, y2, x3, y3, x4, y4);
+    var pathString = ABCXJS.write.sprintf('<path d="M %.2f %.2f L %.2f %.2f L %.2f %.2f L %.2f %.2f z"/>\n',  x1, y1, x2, y2, x3, y3, x4, y4);
     this.svg_pages[this.currentPage] += pathString;
 };
 
@@ -129,16 +136,13 @@ SVG.Printer.prototype.printTieArc = function (x1,y1,x2,y2,up) {
     var controly2 = y2-flatten*uy+curve*ux;
     var thickness = 2;
     
-    var pathString = ABCXJS.write.sprintf('<path class="fill" d="M %.3f %.3f C %.3f %.3f %.3f %.3f %.3f %.3f C %.3f %.3f %.3f %.3f %.3f %.3f z"/>\n', 
+    var pathString = ABCXJS.write.sprintf('<path d="M %.2f %.2f C %.2f %.2f %.2f %.2f %.2f %.2f C %.2f %.2f %.2f %.2f %.2f %.2f z"/>\n', 
                             x1, y1,
                             controlx1, controly1, controlx2, controly2, x2, y2, 
                             controlx2-thickness*uy, controly2+thickness*ux, controlx1-thickness*uy, controly1+thickness*ux, x1, y1 );
     
     this.svg_pages[this.currentPage] += pathString;
 };
-
-//SVG.Printer.prototype.addDefine = function (s) {
-//};
     
 SVG.Printer.prototype.setDefine = function (s) {
     var p =  this.glyphs.getDefinition(s);
@@ -156,33 +160,49 @@ SVG.Printer.prototype.printBrace = function (x, y1, y2) {
     var sz = Math.abs(y1-y2); // altura esperada
     var rh = 1027; // altura real do simbolo
     var scale = sz/rh;
-    this.printSymbol(x,y1,'bbrace', scale);
+    this.setDefine('scripts.lbrace');
+    var pathString = ABCXJS.write.sprintf('<use x="0" y="0" xlink:href="#scripts.lbrace" transform="translate(%.2f %.2f) scale(0.13 %.5f)" />\n',
+         x, y2, scale );
+    this.svg_pages[this.currentPage] += pathString;
 };
 
-SVG.Printer.prototype.printSymbol = function (x, y, symbol, scale) {
+SVG.Printer.prototype.printSymbol = function (x, y, symbol) {
     if (this.setDefine(symbol)) {
-        var pathString = ABCXJS.write.sprintf('<svg x="100" y=1000"><use x="%.3f" y="%.3f" xlink:href="#%s" transform="scale(%.5f)"></use></svg>\n', 0, 0, symbol, scale );
+        var pathString = ABCXJS.write.sprintf('<use x="%.2f" y="%.2f" xlink:href="#%s" />\n', x, y, symbol );
         this.svg_pages[this.currentPage] += pathString;
     } else {
-        this.endPage();
-        this.flush();
-        console.log('Simbolo não definido: ' + s + '.');
-        throw 'simobolo indefinido';
+        throw 'Undefined: ' + symbol;
     }
 };
 
-SVG.Printer.prototype.print_hq = function (x, y) {
-  this.printSymbol(x,y, 'hq');
-};
-
-
-SVG.Printer.prototype.flush = function() {
+SVG.Printer.prototype.flush = function(lines) {
     this.topDiv.innerHTML = this.output;
+    //fixme: mover isso para quem criou a impressora
+//    setTimeout(function(){
+        for(var l=0; l<lines.length;l++){
+            for(var s=0; lines[l].staffs && s <lines[l].staffs.length;s++){
+                for(var v=0; v <lines[l].staffs[s].voices.length;v++){
+                    for(var a=0; a <lines[l].staffs[s].voices[v].length;a++){
+                       var abs = lines[l].staffs[s].voices[v][a].abselem;
+                       if( !abs || !abs.gid ) continue;
+                       abs.setMouse(document.getElementById('g'+abs.gid));
+                    }
+                }
+            }
+        }
+//    }, 300);
 };
 
 
-SVG.Printer.prototype.path = function(str) {
-   this.svg_pages[this.currentPage] += '<path class="stroke" d="'+str+'"/>\n';
+SVG.Printer.prototype.tabText = function( x, y, str, clss, anch ) {
+   str = ""+str;
+   if( str.length===0) return;
+   
+   anch = anch || 'start';
+   x = x.toFixed(2);
+   y = y.toFixed(2);
+   
+   this.svg_pages[this.currentPage] += '<text class="'+clss+'" x="'+x+'" y="'+y+'" >'+str+'</text>\n';
 };
 
 SVG.Printer.prototype.text = function( x, y, str, clss, anch ) {
@@ -193,6 +213,8 @@ SVG.Printer.prototype.text = function( x, y, str, clss, anch ) {
    t = str.split('\n');
    
    anch = anch || 'start';
+   x = x.toFixed(2);
+   y = y.toFixed(2);
    
    if(t.length < 2) {
        this.svg_pages[this.currentPage] += '<text class="'+clss+'" x="'+x+'" y="'+y+'" text-anchor="'+anch+'">'+t[0]+'</text>\n';
@@ -218,7 +240,3 @@ SVG.Printer.prototype.circularArc = function(centerX, centerY, radius, startAngl
 SVG.Printer.prototype.arc = function(startX, startY, arcSVG) {
   return this.path('M'+startX+' '+startY + " a " + arcSVG);
 };
-
-
-
-
