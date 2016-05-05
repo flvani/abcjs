@@ -22,6 +22,8 @@ cat write/abc_glyphs.js write/abc_graphelements.js \
 
 cat midi/midi_common.js  midi/midi_parser.js  midi/midi_player.js > tmp/midi.js
 
+cat svg/svg.js  svg/glyphs.js > tmp/svg.js
+
 cat api/abc_tunebook.js data/abc_tune.js tmp/parse.js tmp/write.js > tmp/abcjs-noraphael-nomidi.js
 cat tmp/abcjs-noraphael-nomidi.js  tmp/midi.js > tmp/abcjs-noraphael.js
 #cat raphael/raphael_2.1.3-min.js tmp/abcjs-noraphael-nomidi.js > tmp/abcjs_nomidi.js
@@ -34,7 +36,7 @@ cat tmp/abcjs_nomidi.js edit/abc_editor.js > tmp/abcjs_editor-nomidi.js
 cat tmp/abcjs-noraphael.js edit/abc_editor.js > tmp/abcjs_editor-noraphael.js
 cat tmp/abcjs-noraphael-nomidi.js edit/abc_editor.js > tmp/abcjs_editor-noraphael-nomidi.js
 
-cat tmp/abcjs-all.js tmp/tablature.js > tmp/abcxjs.js
+cat tmp/abcjs-all.js tmp/tablature.js tmp/svg.js > tmp/abcxjs.js
 cat tmp/abcjs-nomidi.js tmp/tablature.js > tmp/abcxjs-nomidi.js
 cat tmp/abcjs-noraphael.js tmp/tablature.js > tmp/abcxjs-noraphael.js
 cat tmp/abcjs-noraphael-nomidi.js tmp/tablature.js > tmp/abcxjs-noraphael-nomidi.js
