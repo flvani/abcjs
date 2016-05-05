@@ -50,6 +50,12 @@ SVG.Glyphs = function () {
       ,"graceflags.u8th": '<g id="graceflags.u8th" transform="scale(0.6)" ><use xlink:href="#flags.u8th" /></g>'
       ,"scripts.segno": '<path id="scripts.segno" \nd="@@"/>'
       ,"scripts.lbrace": '<path id="scripts.lbrace" \nd="@@"/>'
+      ,"button": '<symbol id="button" viewBox= "0 0 56 56">\n\
+    <circle cx="28" cy="28" r="26" style="fill: var(--fill-color, white); stroke=: var(--fill-color, white); stroke-width=0;" ></circle>\n\
+    <path d="M 2 34 a26 26 0 0 1 52 -12" style="fill: var(--close-color, none)" stroke="none" stroke-width="0"></path>\n\
+    <path d="M 54 22 a26 26 0 0 1 -52 12" style="fill: var(--open-color, none)" stroke-width="0"></path>\n\
+    <circle cx="28" cy="28" r="26" style="fill:none; stroke: var(--border-color, black ); stroke-width: var(--border-width, 1);" ></circle>\n\
+    <path d="m 2 34 l 52 -12" style="stroke: var(--border-color, black); stroke-width: var(--border-width, 1);" ></path>\n\</symbol>\n'
     };
     
     this.getDefinition = function (gl) {

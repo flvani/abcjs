@@ -232,7 +232,7 @@ ABCXJS.write.StaffGroupElement.prototype.draw = function(printer, groupNumber) {
     
     // verifica se deve iniciar nova pagina
     var nexty = printer.y + height + printer.staffsep ; 
-    if( nexty >= printer.estimatedPageLength*printer.pageNumber )  {
+    if( nexty >= printer.estimatedPageLength )  {
         printer.skipPage();
     } else  if (groupNumber > 0) {
      // ou espaco entre os grupos de pautas

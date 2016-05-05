@@ -34,26 +34,25 @@ ABCXJS.write.spacing.STAVEHEIGHT = 100;
 
 //--------------------------------------------------------------------PRINTER
 
-ABCXJS.write.Printer = function(paper, params ) {
-  params = params || {};
-  this.y = 0;
-  this.pageNumber = 1;
-  this.estimatedPageLength = 0;
-  this.paper = paper;
-  this.space = 3*ABCXJS.write.spacing.SPACE;
-  this.glyphs = new ABCXJS.write.Glyphs();
-  this.listeners = [];
-  this.selected = [];
-  //this.ingroup = false;
-  this.scale = params.scale || 1;
-  this.staffwidth = params.staffwidth || 1024;
-  this.paddingtop = params.paddingtop || 15;
-  this.paddingbottom = params.paddingbottom || 15;
-  this.paddingleft = params.paddingleft || 15;
-  this.paddingright = params.paddingright || 30;
-  this.editable = params.editable || false;
-  this.staffgroups = [];
-  
+ABCXJS.write.Printer = function (paper, params) {
+
+    params = params || {};
+    this.y = 0;
+    this.pageNumber = 1;
+    this.estimatedPageLength = 0;
+    this.paper = paper;
+    this.space = 3 * ABCXJS.write.spacing.SPACE;
+    this.glyphs = new ABCXJS.write.Glyphs();
+    this.listeners = [];
+    this.selected = [];
+    this.scale = params.scale || 1;
+    this.paddingtop = params.paddingtop || 15;
+    this.paddingbottom = params.paddingbottom || 15;
+    this.paddingleft = params.paddingleft || 15;
+    this.paddingright = params.paddingright || 30;
+    this.editable = params.editable || false;
+    this.staffgroups = [];
+
 };
 
 // notify all listeners that a graphical element has been selected
@@ -112,41 +111,15 @@ ABCXJS.write.Printer.prototype.rangeHighlight = function(start,end)
 };
 
 ABCXJS.write.Printer.prototype.beginGroup = function (abselem) {
-    //this.ingroup = true;
     this.paper.beginGroup();
     abselem.gid = this.paper.gid; // associa o elemento absoluto com o futuro elemento sgv selecionavel
 };
 
-//ABCXJS.write.Printer.prototype.addPath = function (path) {
-//  path = path || [];
-//  if (path.length===0) return;
-//  path[0][0]="m";
-//  path[0][1]-=this.lastM[0];
-//  path[0][2]-=this.lastM[1];
-//  this.lastM[0]+=path[0][1];
-//  this.lastM[1]+=path[0][2];
-//  this.path.push(path[0]);
-//  for (var i=1,ii=path.length;i<ii;i++) {
-//    if (path[i][0]==="m") {
-//      this.lastM[0]+=path[i][1];
-//      this.lastM[1]+=path[i][2];
-//    }
-//    this.path.push(path[i]);
-//  }
-//};
-
 ABCXJS.write.Printer.prototype.endGroup = function () {
   
-  //this.ingroup = false;
   this.paper.endGroup();
   return;
   
-//  if (this.path.length===0) return null;
-//  var ret = this.paper.path().attr({path:this.path, stroke:"none", fill:"#000000"});
-//  if (this.scale!==1) {
-//    ret.scale(this.scale, this.scale, 0, 0);
-//  }
-//  return ret;
 };
 
 ABCXJS.write.Printer.prototype.printStave = function (startx, endx, staff ) {
@@ -209,39 +182,6 @@ ABCXJS.write.Printer.prototype.printSymbol = function (x, offset, symbol ) {
     }
 };
 
-//ABCXJS.write.Printer.prototype.drawArcForStaffGroup = function(x1, x2, y1, y2, above) {
-//
-//  x1 = x1 + 6;
-//  x2 = x2 + 4;
-//  y1 = y1 + ((above)?1.5:-1.5);
-//  y2 = y2 + ((above)?1.5:-1.5);
-//
-//  //unit direction vector
-//  var dx = x2-x1;
-//  var dy = y2-y1;
-//  var norm= Math.sqrt(dx*dx+dy*dy);
-//  var ux = dx/norm;
-//  var uy = dy/norm;
-//
-//  var flatten = norm/3.5;
-//  var curve = ((above)?-1:1)*Math.min(25, Math.max(4, flatten));
-//
-//  var controlx1 = x1+flatten*ux-curve*uy;
-//  var controly1 = y1+flatten*uy+curve*ux;
-//  var controlx2 = x2-flatten*ux-curve*uy;
-//  var controly2 = y2-flatten*uy+curve*ux;
-//  var thickness = 3;
-//  var pathString = ABCXJS.write.sprintf("M %f %f C %f %f %f %f %f %f C %f %f %f %f %f %f z", x1, y1,
-//			   controlx1, controly1, controlx2, controly2, x2, y2, 
-//			   controlx2-thickness*uy, controly2+thickness*ux, controlx1-thickness*uy, controly1+thickness*ux, x1, y1);
-//  var ret = this.paper.path().attr({path:pathString, stroke:"none", fill:"#000000"});
-//  if (this.scale!==1) {
-//    ret.scale(this.scale, this.scale, 0, 0);
-//  }
-//  return ret;
-//};
-
-
 ABCXJS.write.Printer.prototype.drawTieArc = function(x1, x2, pitch1, pitch2, above) {
 
   x1 = x1 + 6;
@@ -266,9 +206,6 @@ ABCXJS.write.Printer.prototype.printLyrics = function(x, ypos, msg) {
     
     this.paper.text(x, y, msg, 'abc_lyrics', 'start');
     
-    //var el = this.paper.text(x, y, msg).attr({"font-family":"Times New Roman", "font-weight":'bold', "font-size":14, "text-anchor":"start"}).scale(this.scale, this.scale, 0, 0);
-    //el[0].setAttribute("class", "abc-lyric");
-    //return el;
 };
 
 ABCXJS.write.Printer.prototype.calcY = function(ofs) {
@@ -338,38 +275,115 @@ ABCXJS.write.Printer.prototype.printTune = function(abctune) {
     
     if( abctune.lines.length === 0 ) return;
     
+    var estilo = 
+'\n\
+   .abc_title {\n\
+        font-size: 20px;\n\
+        font-family: serif;\n\
+    }\n\
+    \n\
+    .abc_subtitle {\n\
+        font-size: 16px;\n\
+        font-family: serif;\n\
+        font-style: italic;\n\
+    }\n\
+    \n\
+    .abc_author {\n\
+        font-size: 14px;\n\
+        font-family: serif;\n\
+        font-style: italic;\n\
+        font-weight: bold;\n\
+    }\n\
+    \n\
+    .abc_rhythm {\n\
+        font-size: 12px;\n\
+        font-family: serif;\n\
+        font-style: italic;\n\
+    }\n\
+    \n\
+    .abc_voice_header {\n\
+        font-size: 12px;\n\
+        font-family: serif;\n\
+        font-style: italic;\n\
+        font-weight: bold;\n\
+    }\n\
+    \n\
+    .abc_tempo {\n\
+        font-size: 12px;\n\
+        font-family: serif;\n\
+        font-weight: bold;\n\
+    }\n\
+    \n\
+    .abc_text {\n\
+        font-size: 12px;\n\
+        font-family: serif;\n\
+    }\n\
+    \n\
+    .abc_lyrics {\n\
+        font-size: 13px;\n\
+        font-family: serif;\n\
+        font-weight: bold;\n\
+    }\n\
+    \n\
+    .abc_ending {\n\
+        font-size: 10px;\n\
+        font-family: serif;\n\
+    }\n\
+    \n\
+    .abc_tabtext\n\
+    ,.abc_tabtext2\n\
+    ,.abc_tabtext3 {\n\
+        font-family: arial;\n\
+        font-weight: bold;\n\
+        text-anchor:middle;\n\
+        font-size: 14px;\n\
+    }\n\
+    .abc_tabtext2 {\n\
+        font-size: 12px;\n\
+    }\n\
+    \n\
+    .abc_tabtext3 {\n\
+        font-size: 10px;\n\
+    }\n\
+    \n\
+    .debug {\n\
+        stroke: red;\n\
+    }\n\
+    \n\
+    .stave { stroke:black; }\n\
+    .ledger { stroke:gray; fill:white; stroke-dasharray: 1 1; }';
+    
+    var svg_title = 'Partitura ' + abctune.metaText.title + ' criada por ABCXJS.';
+    
     if( abctune.midi) {
         abctune.midi.printer = this;
     }
-    
-    this.landscape = abctune.formatting.landscape;
+    this.pageratio = abctune.formatting.pageratio;
     this.pagenumbering = abctune.formatting.pagenumbering;
     this.staffsep = abctune.formatting.staffsep ||  ABCXJS.write.spacing.STEP*8;
+    this.paddingtop = abctune.formatting.landscape? 15 : 15;
+    this.scale = abctune.formatting.scale ? abctune.formatting.scale: this.scale;
+    this.width = Math.min( abctune.formatting.staffwidth, abctune.formatting.usablewidth) - this.paddingright;
+    this.maxwidth = this.width;
     
-    this.paddingtop = this.landscape? 10 : 15;
-    this.paddingright = this.landscape? 45 : 30;
+    this.y = this.paddingtop;
     
     this.layouter = new ABCXJS.write.Layout( this, abctune.formatting.bagpipes );
     
-    this.scale = abctune.formatting.scale ? abctune.formatting.scale: this.scale;
     
-    this.width = ( abctune.formatting.staffwidth ? abctune.formatting.staffwidth : this.staffwidth ) + this.paddingleft ;
+    this.calcPageLength();
     
-    this.y += this.paddingtop;
-    
-    this.estimatedPageLength = (this.width*abctune.formatting.pageratio) ; // ainda não consigo escalar * scalePageRatio(this.scale);
-    
-    this.paper.initPage(0, this.width, this.estimatedPageLength, this.scale );
+    this.paper.initDoc( 'tune', svg_title, '#ffd', estilo );
+    this.paper.initPage( this.scale );
 
     if (abctune.metaText.title) {
-        this.y += 5;
         this.paper.text(this.width/2, this.y, abctune.metaText.title, "abc_title", "middle" );
         this.y += 20;
     }    
 
     if (abctune.lines[0].staffs[0].subtitle) {
         this.printSubtitleLine(abctune.lines[0].staffs[0].subtitle);
-        this.y += 20;
+        //this.y += 20;
     }
     
     var composerLine = "", meta = false;
@@ -391,14 +405,13 @@ ABCXJS.write.Printer.prototype.printTune = function(abctune) {
         meta = true;
     }
     if (abctune.metaText.rhythm) {
-        this.paper.text( xtempo || this.paddingleft*3, this.y, abctune.metaText.rhythm, 'abc_rhythm', 'start');
+        this.paper.text( xtempo || this.paddingleft*3+5, this.y, abctune.metaText.rhythm, 'abc_rhythm', 'start');
         meta = true;
     }
     
-    (meta) && (this.y += 20);
+    //(meta) && (this.y += 10);
+    this.y += 20;
 
-    var maxwidth = this.width;
-    
     // impressão dos grupos de pautas
     for (var line = 0; line < abctune.lines.length; line++) {
         var abcline = abctune.lines[line];
@@ -410,11 +423,12 @@ ABCXJS.write.Printer.prototype.printTune = function(abctune) {
             var staffgroup =  this.layouter.layoutABCLine(abctune, line, this.width);
             staffgroup.draw( this, line );
             this.staffgroups.push(staffgroup);
-            maxwidth = Math.max(staffgroup.w, maxwidth);
+            this.maxwidth = Math.max(staffgroup.w, this.maxwidth);
+            this.calcPageLength();
         }
     }
 
-      var extraText1 = "", extraText2 = "",  height = 0, h1=0, h2=0;
+    var extraText1 = "", extraText2 = "",  height = 0, h1=0, h2=0;
     
     if (abctune.metaText.unalignedWords) {
         for (var j = 0; j < abctune.metaText.unalignedWords.length; j++) {
@@ -471,47 +485,86 @@ ABCXJS.write.Printer.prototype.printTune = function(abctune) {
         this.y += height; 
     }
     
-    for(var r=0; r < 10; r++) // para debug: testar a posição do número ao final da página
-        this.skipPage();
+//    for(var r=0; r < 10; r++) // para debug: testar a posição do número ao final da página
+//        this.skipPage();
     
-    if( this.pageNumber > 1) {
-        this.skipPage();
-        this.y -= (this.paddingtop+5); // to avoid extra page at end of the print
-    } else {
-        this.y += (this.paddingbottom-5); 
-    } 
+    this.skipPage(true); 
     
-    this.paper.endPage();
-    this.paper.flush(abctune.lines);
+    this.paper.endDoc(abctune);
     
-    var sizetoset = {w: (maxwidth + this.paddingright) , h: this.y};
+    this.formatPage(abctune);
     
-    var s = document.getElementById('master');
-    s.style.width = "" +  sizetoset.w + "px";
-    s.style.height = "" + sizetoset.h + "px";
+//    // Correct for IE problem in calculating height
+//    if (isIE()) {
+//        this.paper.canvas.parentNode.style.width = "" +  sizetoset.w + "px";
+//        this.paper.canvas.parentNode.style.height = "" + sizetoset.h + "px";
+//    } else {
+//        this.paper.canvas.parentNode.setAttribute("style", "width:" + sizetoset.w + "px"); 
+//       // this.paper.canvas.parentNode.setAttribute("style", "height:" + sizetoset.h + "px");
+//       // this.paper.canvas.setAttribute("style", "background-color: #ffe"); 
+//    }
+
+};
+
+ABCXJS.write.Printer.prototype.calcPageLength = function() {
+    this.estimatedPageLength = (this.maxwidth+this.paddingright)*this.pageratio - this.paddingbottom;
+};
+
+ABCXJS.write.Printer.prototype.printPageNumber = function() {
+    //return; // vamos usar page format
     
-    return;
+    this.y = this.estimatedPageLength;
     
-    this.paper.setSize(sizetoset.w, sizetoset.h);
-    
-    // Correct for IE problem in calculating height
-    if (isIE()) {
-        this.paper.canvas.parentNode.style.width = "" +  sizetoset.w + "px";
-        this.paper.canvas.parentNode.style.height = "" + sizetoset.h + "px";
-    } else {
-        this.paper.canvas.parentNode.setAttribute("style", "width:" + sizetoset.w + "px"); 
-       // this.paper.canvas.parentNode.setAttribute("style", "height:" + sizetoset.h + "px");
-       // this.paper.canvas.setAttribute("style", "background-color: #ffe"); 
+    if (this.pagenumbering) {
+         this.paper.text(this.maxwidth+this.paddingright, this.y, "- " + this.pageNumber + " -", 'abc_tempo', 'end');
+             // .attr({"text-anchor": "end", "font-size": 13 , "font-family": "serif", 'font-weight': 'bold'});
     }
 };
 
-ABCXJS.write.Printer.prototype.skipPage = function() {
-    this.y = this.estimatedPageLength*this.pageNumber + this.paddingtop;
-    if (this.pagenumbering) {
-         this.paper.text((this.width), (this.y - this.paddingtop - 13) , "- " + this.pageNumber + " -", 'abc_tempo', 'end');
-             // .attr({"text-anchor": "end", "font-size": 13 , "font-family": "serif", 'font-weight': 'bold'});
+ABCXJS.write.Printer.prototype.skipPage = function(lastPage) {
+    
+    // se não for a última página ou possui mais de uma página
+    if( ! lastPage || this.pageNumber > 1) {
+        this.printPageNumber();
     }
-    this.pageNumber++;
+    this.paper.endPage({w: (this.maxwidth + this.paddingright) , h: this.y });
+    if( ! lastPage ) {
+        this.y = this.paddingtop;
+        this.pageNumber++;
+        this.paper.initPage( this.scale );
+    }
+};
+
+ABCXJS.write.Printer.prototype.formatPage = function(tune) {
+    //prepara a página para impressão de acordo com os parâmetros da canção.
+    var orientation = tune.formatting.landscape?'landscape':'portrait';
+    var style = document.getElementById('page_format');
+    
+//    var pgnumber = '';
+//
+//    if ( tune.formatting.pagenumbering ) {
+//        pgnumber = 
+//'   @page: right {\n\
+//        @bottom-right {\n\
+//            content: "Pág. " counter(page) "/" counter(pages)".";\n\
+//            }\n\
+//    }\n';
+//        
+//    }
+
+    var formato = 
+'   @page {\n\
+        margin: '+tune.formatting.defaultMargin+'; size: '+tune.formatting.papersize+' ' + orientation + ';\n\
+    }\n' ; //+ pgnumber;
+    
+    if( ! style ) {
+        style = document.createElement('style');
+        style.setAttribute( "id", "page_format" ); 
+        document.head.appendChild(style);
+    }
+    
+    style.innerHTML = formato;
+
 };
 
 ABCXJS.write.Printer.prototype.printExtraText = function(text, x) {

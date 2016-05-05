@@ -4,6 +4,49 @@
  * and open the template in the editor.
  */
 
+/* 
+    Created on : 27/04/2016, 10:55:16
+    Author     : flavio.vani@gmail.com
+*/
+
+/*
+
+Main document structure:
+
+<div style"..." >
+
+    Header:
+     Contains a title, the style definitions for the entire document and the defined symbols.
+    <svg id="tune" ... >
+        <title>Música criada por ABCXJS.</title><style type="text/css">
+        <style type="text/css">
+            @media print {
+                div.nobrk {page-break-inside: avoid} 
+                div.newpage {page-break-before: always} 
+            }    
+        </style>
+        <defs>
+        </defs>
+    </svg>
+
+    Page1:
+      Class nobrk, an optional group to control aspects like scaling and the content of the page 
+    <div class="nobrk" >
+        <svg id="page1"  ... >
+            <g id="gpage1" ... ></g>
+        </svg>
+    </div>
+
+    Page2 and subsequents:
+      Class newpage, an optional group to control aspects like scaling and the content of the page 
+    <div class="newpage" >
+        <svg id="page2"  ...>
+            <g id="gpage2" ... ></g>
+        </svg>
+    </div>
+
+</div>
+*/
 
 if (!window.SVG)
     window.SVG = {};
@@ -11,15 +54,18 @@ if (!window.SVG)
 if (! window.SVG.Printer )
     window.SVG.Printer = {};
 
-SVG.Printer = function (d, w, h) {
+SVG.Printer = function ( d ) {
     this.topDiv = d;
-    this.width = w;
-    this.height = h;
+//    this.width = w;
+//    this.height = h;
+//    this.name = n;
     
     this.scale = 1;
     this.gid=0;
    
-    this.defines = "";
+    this.title;
+    this.styles = '';
+    this.defines = '';
     this.defined_glyph = [];
 
     this.svg_pages = [];
@@ -27,48 +73,82 @@ SVG.Printer = function (d, w, h) {
     
     this.glyphs = new SVG.Glyphs();
     
-    this.init();
+    this.initDoc();
+    
+    this.svgHead = function( id, kls, size ) {
+        var w = size? size.w*this.scale + 'px' : '0';
+        var h = size? size.h*this.scale + 'px' : '0';
+        var d = size? '' : 'display: none; ';
+        kls = kls? 'class="'+kls+'"' : '' ;
+        
+        return '<svg id="'+id+'" '+kls+' xmlns="http://www.w3.org/2000/svg" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" style="'+d+'width:'+w+'; height: '+h+';" >\n';
+    };
 };
 
-SVG.Printer.prototype.init = function() {
+SVG.Printer.prototype.initDoc = function( docId, title, backgroundColor, add_styles ) {
+    this.docId = docId || 'dcto';
+    this.title = title || '';
+    this.backgroundColor = backgroundColor||'white';
     this.scale = 1.0;
     this.defines = '';
     this.defined_glyph = [];
 
     this.svg_pages = [];
-    this.currentPage = 0;
-    this.output = "";
+    this.currentPage = -1;
     this.gid=0;
-};
-
-SVG.Printer.prototype.initPage = function( pageNumber, wid, hei, scl) {
-    var stillo = '<style type="text/css">\n\
-.stave { stroke:black; }\n\
-.ledger { stroke:gray; fill:white; stroke-dasharray: 1 1; }\n\
-</style>\n';
-    var head = '<div width="auto" height="auto" class="nobrk">\n\
-<svg id="master" xmlns="http://www.w3.org/2000/svg" version="1.1"\n\
-xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" width="'+wid*scl+'px" height="'+hei*scl+'px">\n';
+    this.styles = 
+'<style type="text/css">\n\
+    @media print {\n\
+        div.nobrk {page-break-inside: avoid}\n\
+        div.newpage {page-break-before: always}\n\
+    }\n'+(add_styles||'')+'\n</style>\n';
     
-    this.scale = scl || this.scale;
-    this.currentPage = pageNumber;
-    this.svg_pages[this.currentPage] = '';  
-    this.output = head;
-    this.output += stillo;
-    if( this.scale !== 1.0 ) {
-        this.output += '<g transform="scale( '+ this.scale +')">';
+};
+
+SVG.Printer.prototype.endDoc = function( owner ) {
+
+    var output = '<div style="display:block; margin:0; padding: 0; width: fit-content;  background-color:'+this.backgroundColor+'; ">\n' + this.svgHead( this.docId );
+    
+    output += '<title>'+this.title+'</title>\n';
+    output += this.styles;
+    
+    if(this.defines.length > 0 ) {
+        output += '<defs>'+this.defines+'</defs>\n';
+    }
+    
+    output += '</svg>\n';
+    
+    for( var p=0; p <=  this.currentPage; p++ ) {
+        output += '<div class="'+(p>0?'newpage':'nobrk')+'">'+this.svg_pages[p]+'</div>\n';  
+    }
+    
+    output +='</div>';
+    
+    this.topDiv.innerHTML = output;
+    
+    if( owner && owner.afterPrint ) {
+//    setTimeout(function(){
+        owner.afterPrint();
+//    }, 300);
     }
 };
 
-SVG.Printer.prototype.endPage = function() {
-    if(this.defines.length > 0 ) {
-        this.output += '<defs>'+this.defines+'</defs>\n';
+SVG.Printer.prototype.initPage = function( scl ) {
+    this.scale = scl || this.scale;
+    this.currentPage++;
+    this.svg_pages[this.currentPage] = '';
+    var g = 'g' + this.docId + (this.currentPage+1);
+    if( this.scale !== 1.0 ) {
+        this.svg_pages[this.currentPage]  += '<g id="'+g+'" transform="scale( '+ this.scale +')">';
     }
-    this.output += this.svg_pages[this.currentPage];  
+};
+
+SVG.Printer.prototype.endPage = function( size ) {
     if( this.scale && this.scale !== 1.0 ) {
-        this.output += '</g>';
+        this.svg_pages[this.currentPage]  += '</g>';
     }
-    this.output += '</sgv></div>';
+    var pg = this.docId + (this.currentPage+1);
+    this.svg_pages[this.currentPage] = this.svgHead( pg, this.currentPage < 1 ? 'nobrk':'newpage', size ) + this.svg_pages[this.currentPage] + '</svg>\n';
 };
 
 SVG.Printer.prototype.beginGroup = function () {
@@ -77,6 +157,30 @@ SVG.Printer.prototype.beginGroup = function () {
 
 SVG.Printer.prototype.endGroup = function () {
     this.svg_pages[this.currentPage] += '</g>\n';  
+};
+
+//SVG.Printer.prototype.setStyle = function (s) {
+//    if(s.length === 0 ) return;
+//    this.styles += s;
+//};
+
+//SVG.Printer.prototype.setSize = function(w,h) {
+//    var s = document.getElementById(this.name);
+//    if(!s) return;
+//    s.style.width = "" +  w*this.scale + "px";
+//    s.style.height = "" + h*this.scale + "px";
+//};
+
+SVG.Printer.prototype.setDefine = function (s) {
+    var p =  this.glyphs.getDefinition(s);
+    
+    if(p.length === 0 ) return false;
+    
+    if(!this.defined_glyph[s]) {
+        this.defines += p;
+        this.defined_glyph[s] = true;
+    }
+    return true;
 };
 
 SVG.Printer.prototype.printLine = function (x,y,dx,dy,stroke) {
@@ -89,7 +193,7 @@ SVG.Printer.prototype.printStaveLine = function (x1, x2, y, klass, debug) {
     
     klass = klass || 'stave';
     
-    if( debug){ // debug
+    if( debug ){ // debug
         klass='debug';
     }
     
@@ -144,25 +248,26 @@ SVG.Printer.prototype.printTieArc = function (x1,y1,x2,y2,up) {
     this.svg_pages[this.currentPage] += pathString;
 };
     
-SVG.Printer.prototype.setDefine = function (s) {
-    var p =  this.glyphs.getDefinition(s);
+SVG.Printer.prototype.printButton = function (id, x, y, radius, t1, t2, button_class) {
     
-    if(p.length === 0 ) return false;
+    var scale = radius/26; // 26 é o raio inicial do botão
     
-    if(!this.defined_glyph[s]) {
-        this.defines += p;
-        this.defined_glyph[s] = true;
-    }
-    return true;
+    this.setDefine('button');
+    
+    var pathString = ABCXJS.write.sprintf( '<g transform="translate(%.2f %.2f) scale(%.5f)">\n\
+    <use id="%s" x="0" y="0" width="52" height="52" xlink:href="#button" />\n\
+    <text id="%s_tc" class="%s" x="26" y="20" >%s</text>\n\
+    <text id="%s_to" class="%s" x="26" y="42" >%s</text>\n</g>\n'
+    , x, y, scale, id, id, button_class, t1, id, button_class, t2 );
+    
+    this.svg_pages[this.currentPage] += pathString;
 };
 
 SVG.Printer.prototype.printBrace = function (x, y1, y2) {
     var sz = Math.abs(y1-y2); // altura esperada
-    var rh = 1027; // altura real do simbolo
-    var scale = sz/rh;
+    var scale = sz / 1027; // altura real do simbolo
     this.setDefine('scripts.lbrace');
-    var pathString = ABCXJS.write.sprintf('<use x="0" y="0" xlink:href="#scripts.lbrace" transform="translate(%.2f %.2f) scale(0.13 %.5f)" />\n',
-         x, y2, scale );
+    var pathString = ABCXJS.write.sprintf('<use x="0" y="0" xlink:href="#scripts.lbrace" transform="translate(%.2f %.2f) scale(0.13 %.5f)" />\n', x, y2, scale );
     this.svg_pages[this.currentPage] += pathString;
 };
 
@@ -174,25 +279,6 @@ SVG.Printer.prototype.printSymbol = function (x, y, symbol) {
         throw 'Undefined: ' + symbol;
     }
 };
-
-SVG.Printer.prototype.flush = function(lines) {
-    this.topDiv.innerHTML = this.output;
-    //fixme: mover isso para quem criou a impressora
-//    setTimeout(function(){
-        for(var l=0; l<lines.length;l++){
-            for(var s=0; lines[l].staffs && s <lines[l].staffs.length;s++){
-                for(var v=0; v <lines[l].staffs[s].voices.length;v++){
-                    for(var a=0; a <lines[l].staffs[s].voices[v].length;a++){
-                       var abs = lines[l].staffs[s].voices[v][a].abselem;
-                       if( !abs || !abs.gid ) continue;
-                       abs.setMouse(document.getElementById('g'+abs.gid));
-                    }
-                }
-            }
-        }
-//    }, 300);
-};
-
 
 SVG.Printer.prototype.tabText = function( x, y, str, clss, anch ) {
    str = ""+str;
@@ -238,5 +324,11 @@ SVG.Printer.prototype.circularArc = function(centerX, centerY, radius, startAngl
 };
 
 SVG.Printer.prototype.arc = function(startX, startY, arcSVG) {
-  return this.path('M'+startX+' '+startY + " a " + arcSVG);
+    var pathString = ABCXJS.write.sprintf('<path d="M %.2f %.2f a%s"/>\n', startX, startY, arcSVG);
+    this.svg_pages[this.currentPage] += pathString;
+};
+
+SVG.Printer.prototype.circle = function(startX, startY, radius) {
+    var pathString = ABCXJS.write.sprintf('<circle cx="%.2f" cy="%.2f" r="%.2f" stroke="black" stroke-width="2" fill="white" />\n', startX, startY, radius );
+    this.svg_pages[this.currentPage] += pathString;
 };
