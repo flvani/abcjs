@@ -10,7 +10,7 @@ copy /b/y parse\* tmp\parse.js
 copy /b/y tablature\* tmp\tablature.js
 copy /b/y write\* tmp\write.js
 copy /b/y midi\* tmp\midi.js
-copy /b/y sgv\* tmp\svg.js
+copy /b/y svg\* tmp\svg.js
 
 copy /b/y api\abc_tunebook.js+data\abc_tune.js+tmp\parse.js+tmp\write.js tmp\abcjs-noraphael-nomidi.js
 
