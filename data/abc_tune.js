@@ -135,7 +135,7 @@ window.ABCXJS.data.Tune = function() {
                     for(var a=0; a <lines[l].staffs[s].voices[v].length;a++){
                        var abs = lines[l].staffs[s].voices[v][a].abselem;
                        if( !abs || !abs.gid ) continue;
-                       abs.setMouse(document.getElementById('g'+abs.gid));
+                       abs.setMouse(document.getElementById(abs.gid));
                     }
                 }
             }

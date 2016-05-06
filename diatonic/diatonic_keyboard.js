@@ -10,7 +10,7 @@ if (!window.DIATONIC)
 if (!window.DIATONIC.map)
     window.DIATONIC.map = {};
 
-DIATONIC.map.Keyboard = function ( keyMap, pedalInfo) {
+DIATONIC.map.Keyboard = function ( keyMap, pedalInfo ) {
     this.pedalInfo = pedalInfo;
     this.layout = keyMap.layout;
     this.keys = keyMap.keys;
@@ -82,22 +82,20 @@ DIATONIC.map.Keyboard.prototype.setup = function (keyMap) {
             this.limits.maxX = Math.max(this.limits.maxX, x );
             this.limits.maxY = Math.max(this.limits.maxY, y );
 
-            var btn  = new DIATONIC.map.Button( x-this.radius, y-this.radius, {pedal: this.isPedal(i, j)} );
+            var btn  = new DIATONIC.map.Button( x-this.radius, y-this.radius, {kls: this.isPedal(i, j)? 'bpedal' : 'button' } );
             
             btn.tabButton = (i + 1) + Array(j + 1).join("'");
             btn.openNote = this.parseNote(openRow[i], bass);
             btn.closeNote = this.parseNote(closeRow[i], bass);
-            //btn.setText( false );
             
-            //noteName = btn.openNote.key + (bass?'':btn.openNote.octave);
             noteVal = this.getNoteVal(btn.openNote);
             if (!this.noteToButtonsOpen[ noteVal ]) this.noteToButtonsOpen[ noteVal ] = [];
             this.noteToButtonsOpen[ noteVal ].push(btn.tabButton);
 
-            //noteName = btn.closeNote.key + (bass?'':btn.closeNote.octave);
             noteVal = this.getNoteVal(btn.closeNote);
             if (!this.noteToButtonsClose[ noteVal ]) this.noteToButtonsClose[ noteVal ] = [];
             this.noteToButtonsClose[ noteVal ].push(btn.tabButton);
+            
             
             this.keyMap[j][i] = btn;
         }
@@ -109,10 +107,7 @@ DIATONIC.map.Keyboard.prototype.setup = function (keyMap) {
     
     // adiciona o botão de legenda
     var raio=36;
-    this.legenda = new DIATONIC.map.Button( 
-        this.limits.maxX-(raio+this.radius), this.limits.minY+(raio), 
-        {openLabel: 'Abre', closeLabel: 'Fecha', radius: 36, pedal: true, kls: 'legenda_font', xLabel: 0, textAnchor: 'middle', color: '#828282'}
-    );
+    this.legenda = new DIATONIC.map.Button( this.limits.maxX-(raio+this.radius), this.limits.minY+(raio), {radius: 36, kls: 'blegenda' } );
 };
 
 DIATONIC.map.Keyboard.prototype.getButtons = function (note) {
@@ -129,56 +124,59 @@ DIATONIC.map.Keyboard.prototype.getNoteVal = function ( note ) {
 };
 
 DIATONIC.map.Keyboard.prototype.print = function (div, options ) {
-    var sz;
     
-    var estilo = 
-'   #blegenda {\n\
-        --open-color: #00ff00;\n\
-        --close-color: #00b2ee;\n\
-        --border-color: black;\n\
-        --border-width: 2px;\n\
-        --fill-color:red;\n\
-    }\n\
-    \n\
-    .legenda_font,\n\
-    .button_font {\n\
-        font-size: 16px;\n\
-        font-family: serif;\n\
-        text-anchor: middle;\n\
-        font-weight: bold;\n\
-    }\n\
-    \n\
-    .legenda_font {\n\
-        font-size: 13px;\n\
-    }';
-
+    var sz;
     options = options || {};
     
+    options.fillColor = options.fillColor || 'none';
+    options.backgroundColor = options.backgroundColor || 'none';
+    options.openColor = options.openColor || '#00ff00';
+    options.closeColor = options.closeColor || '#00b2ee';
     options.scale = options.scale || 1;
     options.mirror = options.mirror || false;
     options.transpose = options.transpose || false;
     options.label = options.label|| false;
     
+    var estilo = 
+'   .blegenda,\n\
+    .bpedal,\n\
+    .button {\n\
+        --fill-color: '+options.fillColor+';\n\
+        --border-color: black;\n\
+        fill: black;\n\
+        font-family: serif;\n\
+        text-anchor: middle;\n\
+        font-size: 16px;\n\
+        font-weight: bold;\n\
+    }\n\
+    .bpedal {\n\
+        --border-color: red;\n\
+        --border-width: 2px;\n\
+    }\n\
+    .blegenda {\n\
+        --open-color: '+options.openColor+';\n\
+        --close-color: '+options.closeColor+';\n\
+        --border-width: 2px;\n\
+        font-weight: normal;\n\
+        font-size: 13px;\n\
+    }';
+
     this.paper = new SVG.Printer( div ); 
     
-    this.paper.initDoc( 'keyb', 'Diatonic Map Keyboard', 'white', estilo );
+    this.paper.initDoc( 'keyb', 'Diatonic Map Keyboard', estilo, options );
     
     this.paper.initPage( options.scale );
     
-    this.legenda.draw('blegenda', this.paper, this.limits, options);
+    this.legenda.draw('l00', this.paper, this.limits, options );
     
     if(options.transpose) {
         sz = {w:this.height, h:this.width};
-        //div.style.height = (this.width) + "px";
-        //div.style.width = this.height + "px";
         var mirr = options.mirror ? this.baseLine.x : this.limits.maxX - (this.baseLine.x - this.limits.minX);
         for (var x = mirr-10; x <= mirr+10; x+=10) {
             this.drawLine(this.baseLine.yi, x, this.baseLine.yf, x);
         }
     } else {
         sz = {w:this.width, h:this.height};
-        //div.style.height = this.height + "px";
-        //div.style.width = this.width + "px";
         var mirr = options.mirror ? this.limits.maxX - (this.baseLine.x - this.limits.minX) : this.baseLine.x;
         for (var x = mirr-10; x <= mirr+10; x+=10) {
             this.drawLine(x, this.baseLine.yi, x, this.baseLine.yf);
@@ -194,17 +192,11 @@ DIATONIC.map.Keyboard.prototype.print = function (div, options ) {
     this.paper.endPage(sz);
     this.paper.endDoc();
 
+    //binds SVG elements
+    this.legenda.setSVG(options.label, 'Abre', 'Fecha');
     for (var j = 0; j < this.keyMap.length; j++) {
         for (var i = 0; i < this.keyMap[j].length; i++) {
-            this.keyMap[j][i].SVG = {};
-            this.keyMap[j][i].SVG.button = document.getElementById('b'+j+i);
-            this.keyMap[j][i].SVG.openText = document.getElementById('b'+j+i+'_to');
-            this.keyMap[j][i].SVG.closeText = document.getElementById('b'+j+i+'_tc');
-            this.keyMap[j][i].setText( options.label );
-            if( this.keyMap[j][i].pedal ) {
-                this.keyMap[j][i].SVG.button.style.setProperty( '--border-color', 'red' );
-                this.keyMap[j][i].SVG.button.style.setProperty( '--border-width', 2 );
-            }
+            this.keyMap[j][i].setSVG(options.label); 
         }
     }
 };
@@ -244,11 +236,6 @@ DIATONIC.map.Keyboard.prototype.parseNote = function(txtNota, isBass) {
   return nota;
 };
 
-//DIATONIC.map.Keyboard.prototype.changeNotation = function() {
-//    this.showLabel = !this.showLabel;
-//    this.redra();
-//};
-
 DIATONIC.map.Keyboard.prototype.redraw = function(opts) {
     for (var j = 0; j < this.keyMap.length; j++) {
         for (var i = 0; i < this.keyMap[j].length; i++) {
@@ -273,5 +260,3 @@ DIATONIC.map.Keyboard.prototype.clear = function (full) {
     }
     this.modifiedItems = new Array();
 };
-
-

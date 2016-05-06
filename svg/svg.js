@@ -51,17 +51,17 @@ Main document structure:
 if (!window.SVG)
     window.SVG = {};
 
+if (! window.SVG.misc )
+    window.SVG.misc = { printerId: 0 };
+
 if (! window.SVG.Printer )
-    window.SVG.Printer = {};
+    window.SVG.Printer = { printerId: 0 };
 
 SVG.Printer = function ( d ) {
     this.topDiv = d;
-//    this.width = w;
-//    this.height = h;
-//    this.name = n;
-    
     this.scale = 1;
     this.gid=0;
+    this.printerId = ++SVG.misc.printerId;
    
     this.title;
     this.styles = '';
@@ -85,10 +85,11 @@ SVG.Printer = function ( d ) {
     };
 };
 
-SVG.Printer.prototype.initDoc = function( docId, title, backgroundColor, add_styles ) {
+SVG.Printer.prototype.initDoc = function( docId, title, add_styles, options ) {
+    options = options || {};
     this.docId = docId || 'dcto';
     this.title = title || '';
-    this.backgroundColor = backgroundColor||'white';
+    this.backgroundColor = options.backgroundColor || 'none';
     this.scale = 1.0;
     this.defines = '';
     this.defined_glyph = [];
@@ -98,10 +99,11 @@ SVG.Printer.prototype.initDoc = function( docId, title, backgroundColor, add_sty
     this.gid=0;
     this.styles = 
 '<style type="text/css">\n\
+    //<![CDATA[\n\
     @media print {\n\
         div.nobrk {page-break-inside: avoid}\n\
         div.newpage {page-break-before: always}\n\
-    }\n'+(add_styles||'')+'\n</style>\n';
+    }\n'+(add_styles||'')+'\n//]]>\n</style>\n';
     
 };
 
@@ -152,24 +154,14 @@ SVG.Printer.prototype.endPage = function( size ) {
 };
 
 SVG.Printer.prototype.beginGroup = function () {
-    this.svg_pages[this.currentPage] += '<g id="g'+(++this.gid)+'">\n';  
+    var id = 'p'+this.printerId+'g'+(++this.gid); 
+    this.svg_pages[this.currentPage] += '<g id="'+id+'">\n';  
+    return id;
 };
 
 SVG.Printer.prototype.endGroup = function () {
     this.svg_pages[this.currentPage] += '</g>\n';  
 };
-
-//SVG.Printer.prototype.setStyle = function (s) {
-//    if(s.length === 0 ) return;
-//    this.styles += s;
-//};
-
-//SVG.Printer.prototype.setSize = function(w,h) {
-//    var s = document.getElementById(this.name);
-//    if(!s) return;
-//    s.style.width = "" +  w*this.scale + "px";
-//    s.style.height = "" + h*this.scale + "px";
-//};
 
 SVG.Printer.prototype.setDefine = function (s) {
     var p =  this.glyphs.getDefinition(s);
@@ -183,15 +175,15 @@ SVG.Printer.prototype.setDefine = function (s) {
     return true;
 };
 
-SVG.Printer.prototype.printLine = function (x,y,dx,dy,stroke) {
-    stroke = stroke || 'black';
-    var pathString = ABCXJS.write.sprintf('<path stroke="%s" d="M %.2f %.2f L %.2f %.2f"/>\n', stroke, x, y, dx, dy);
+SVG.Printer.prototype.printLine = function (x,y,dx,dy,klass) {
+    klass = klass || 'beam';
+    var pathString = ABCXJS.write.sprintf('<path class="%s" d="M %.2f %.2f L %.2f %.2f"/>\n', klass, x, y, dx, dy);
     this.svg_pages[this.currentPage] += pathString;
 };
 
 SVG.Printer.prototype.printStaveLine = function (x1, x2, y, klass, debug) {
     
-    klass = klass || 'stave';
+    klass = klass || 'beam';
     
     if( debug ){ // debug
         klass='debug';
@@ -201,11 +193,27 @@ SVG.Printer.prototype.printStaveLine = function (x1, x2, y, klass, debug) {
     this.svg_pages[this.currentPage] += pathString;
 };
 
+SVG.Printer.prototype.printBar = function (x, dx, y1, y2) {
+    
+    var x2 = x+dx;
+    
+    if (ABCXJS.misc.isIE() && dx<1) {
+      dx = 1;
+    }
+    
+    var dy = Math.abs(y2-y1);
+    dx = Math.abs(dx); 
+    
+    var pathString = ABCXJS.write.sprintf('<rect class="beam" x="%.2f" y="%.2f" width="%.2f" height="%.2f"/>\n', Math.min(x,x2), Math.min(y1,y2), dx, dy );
+
+    this.svg_pages[this.currentPage] += pathString;
+};
+
 SVG.Printer.prototype.printStem = function (x, dx, y1, y2) {
     
     var x2 = x+dx;
     
-    if (isIE() && dx<1) {
+    if (ABCXJS.misc.isIE() && dx<1) {
       dx = 1;
     }
     
@@ -248,26 +256,27 @@ SVG.Printer.prototype.printTieArc = function (x1,y1,x2,y2,up) {
     this.svg_pages[this.currentPage] += pathString;
 };
     
-SVG.Printer.prototype.printButton = function (id, x, y, radius, t1, t2, button_class) {
+SVG.Printer.prototype.printButton = function (id, x, y, radius, button_class) {
     
     var scale = radius/26; // 26 é o raio inicial do botão
+    var gid = 'p'+this.printerId+id;
     
     this.setDefine('button');
     
-    var pathString = ABCXJS.write.sprintf( '<g transform="translate(%.2f %.2f) scale(%.5f)">\n\
+    var pathString = ABCXJS.write.sprintf( '<g class="%s" transform="translate(%.2f %.2f) scale(%.5f)">\n\
     <use id="%s" x="0" y="0" width="52" height="52" xlink:href="#button" />\n\
-    <text id="%s_tc" class="%s" x="26" y="20" >%s</text>\n\
-    <text id="%s_to" class="%s" x="26" y="42" >%s</text>\n</g>\n'
-    , x, y, scale, id, id, button_class, t1, id, button_class, t2 );
+    <text id="%s_tc" x="26" y="20" >...</text>\n\
+    <text id="%s_to" x="26" y="42" >...</text>\n</g>\n', button_class, x, y, scale, gid, gid, gid );
     
     this.svg_pages[this.currentPage] += pathString;
+    return gid;
 };
 
 SVG.Printer.prototype.printBrace = function (x, y1, y2) {
     var sz = Math.abs(y1-y2); // altura esperada
     var scale = sz / 1027; // altura real do simbolo
     this.setDefine('scripts.lbrace');
-    var pathString = ABCXJS.write.sprintf('<use x="0" y="0" xlink:href="#scripts.lbrace" transform="translate(%.2f %.2f) scale(0.13 %.5f)" />\n', x, y2, scale );
+    var pathString = ABCXJS.write.sprintf('<use class="beam" x="0" y="0" xlink:href="#scripts.lbrace" transform="translate(%.2f %.2f) scale(0.13 %.5f)" />\n', x, y2, scale );
     this.svg_pages[this.currentPage] += pathString;
 };
 
@@ -305,30 +314,31 @@ SVG.Printer.prototype.text = function( x, y, str, clss, anch ) {
    if(t.length < 2) {
        this.svg_pages[this.currentPage] += '<text class="'+clss+'" x="'+x+'" y="'+y+'" text-anchor="'+anch+'">'+t[0]+'</text>\n';
    } else {
-       this.svg_pages[this.currentPage] += '<g transform="translate('+x+' '+y+')">\n';
-       this.svg_pages[this.currentPage] += '<text class="'+clss+'"  text-anchor="'+anch+'" x="0" y="0">\n';
+       this.svg_pages[this.currentPage] += '<g class="'+clss+'" transform="translate('+x+' '+y+')">\n';
+       this.svg_pages[this.currentPage] += '<text text-anchor="'+anch+'" x="0" y="0">\n';
        for(var i = 0; i < t.length; i++ )
            this.svg_pages[this.currentPage] += '<tspan x="0" dy="1.2em" >'+t[i]+'</tspan>\n';
        this.svg_pages[this.currentPage] += '</text></g>\n';
    }
 };
 
-SVG.Printer.prototype.circularArc = function(centerX, centerY, radius, startAngle, endAngle) {
-  var angle = 0;
-  var startX = centerX+radius*Math.cos(startAngle*Math.PI/180); 
-  var startY = centerY+radius*Math.sin(startAngle*Math.PI/180);
-  var endX = centerX+radius*Math.cos(endAngle*Math.PI/180); 
-  var endY = centerY+radius*Math.sin(endAngle*Math.PI/180);
-  var arcSVG = [radius, radius, angle, 0, 1, endX-startX, endY-startY].join(' ');
-  return this.arc(startX, startY, arcSVG);
-};
-
-SVG.Printer.prototype.arc = function(startX, startY, arcSVG) {
-    var pathString = ABCXJS.write.sprintf('<path d="M %.2f %.2f a%s"/>\n', startX, startY, arcSVG);
-    this.svg_pages[this.currentPage] += pathString;
-};
-
-SVG.Printer.prototype.circle = function(startX, startY, radius) {
-    var pathString = ABCXJS.write.sprintf('<circle cx="%.2f" cy="%.2f" r="%.2f" stroke="black" stroke-width="2" fill="white" />\n', startX, startY, radius );
-    this.svg_pages[this.currentPage] += pathString;
-};
+//SVG.Printer.prototype.circularArc = function(centerX, centerY, radius, startAngle, endAngle) {
+//  var angle = 0;
+//  var startX = centerX+radius*Math.cos(startAngle*Math.PI/180); 
+//  var startY = centerY+radius*Math.sin(startAngle*Math.PI/180);
+//  var endX = centerX+radius*Math.cos(endAngle*Math.PI/180); 
+//  var endY = centerY+radius*Math.sin(endAngle*Math.PI/180);
+//  var arcSVG = [radius, radius, angle, 0, 1, endX-startX, endY-startY].join(' ');
+//  return this.arc(startX, startY, arcSVG);
+//};
+//
+//SVG.Printer.prototype.arc = function(startX, startY, arcSVG) {
+//    var pathString = ABCXJS.write.sprintf('<path d="M %.2f %.2f a%s"/>\n', startX, startY, arcSVG);
+//    this.svg_pages[this.currentPage] += pathString;
+//};
+//
+//SVG.Printer.prototype.circle = function(startX, startY, radius) {
+//    var pathString = ABCXJS.write.sprintf('<circle cx="%.2f" cy="%.2f" r="%.2f" stroke="black" stroke-width="2" fill="white" />\n', startX, startY, radius );
+//    this.svg_pages[this.currentPage] += pathString;
+//};
+//

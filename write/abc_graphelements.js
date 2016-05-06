@@ -282,8 +282,8 @@ ABCXJS.write.StaffGroupElement.prototype.draw = function(printer, groupNumber) {
         var top = this.voices[0].stave.y;
         var clef = this.voices[this.voices.length - 1].stave.clef.type;
         var bottom = printer.calcY(clef==="accordionTab"?0:2);
-        printer.printStem(this.startx, 0.6, top, bottom);
-        printer.printStem(this.w-1, 0.6, top, bottom);
+        printer.printBar(this.startx, 0.6, top, bottom);
+        printer.printBar(this.w-1, 0.6, top, bottom);
         if (this.voices.length > 1)  {
             printer.paper.printBrace(this.startx-10, top-10, bottom+10);  
         }
@@ -586,7 +586,7 @@ ABCXJS.write.AbsoluteElement.prototype.setMouse = function(svg) {
 
 //ABCXJS.write.AbsoluteElement.prototype.setClass = function(addClass, removeClass, color) {
 //    this.elemset.attr({fill: color});
-//    if (!isIE()) {
+//    if (!ABCXJS.misc.isIE()) {
 //        for (var i = 0; i < this.elemset.length; i++) {
 //            if (this.elemset[i][0].setAttribute) {
 //                var kls = this.elemset[i][0].getAttribute("class");
@@ -660,7 +660,7 @@ ABCXJS.write.RelativeElement.prototype.draw = function(printer, x, staveInfo ) {
             this.graphelem = printer.printTabText3(this.x, this.pitch, this.c);
             break;
         case "bar":
-            this.graphelem = printer.printStem(this.x, this.linewidth, printer.calcY(this.pitch), printer.calcY(this.pitch2));
+            this.graphelem = printer.printBar(this.x, this.linewidth, printer.calcY(this.pitch), printer.calcY(this.pitch2));
             break;
         case "stem":
             this.drawStem(printer);
@@ -736,7 +736,8 @@ ABCXJS.write.TieElem.prototype.draw = function(printer, linestartx, lineendx, st
         }
     }
 
-    printer.drawTieArc(linestartx, lineendx, startpitch, endpitch, this.above);
+
+    printer.printTieArc(linestartx, lineendx, startpitch, endpitch, this.above);
 
 };
 

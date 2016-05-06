@@ -212,7 +212,7 @@ V:3 accordionTab
                    ,instruments: "accordion"
                    ,callback: postLoadMIDI
                 });
-                }
+            }
             
             function postLoadMIDI() {
                 MIDI.loader.stop();
@@ -321,8 +321,9 @@ V:3 accordionTab
                         ,gui: false
                     } );
                     
-                    myEditor.accordion.printKeyboard('keyboardDiv');
-
+                //myEditor.accordion.printKeyboard('keyboardDiv' /*, {fillColor:'yellow', openColor:'navy', closeColor:'purple', backgroundColor:'gray' }*/ );
+                myEditor.accordion.printKeyboard('keyboardDiv' );
+                    
                 printButton.addEventListener("click", function() {
                     
                     var kd = document.getElementById("keyboardDiv").style.display;
@@ -358,7 +359,6 @@ V:3 accordionTab
                     myEditor.accordion.printKeyboard('keyboardDiv');
                 }, false);
                 
-                myEditor.accordion.printKeyboard('keyboardDiv');
             }
 
             function doTranspose(value) {
