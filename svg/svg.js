@@ -153,9 +153,10 @@ SVG.Printer.prototype.endPage = function( size ) {
     this.svg_pages[this.currentPage] = this.svgHead( pg, this.currentPage < 1 ? 'nobrk':'newpage', size ) + this.svg_pages[this.currentPage] + '</svg>\n';
 };
 
-SVG.Printer.prototype.beginGroup = function () {
+SVG.Printer.prototype.beginGroup = function (el_type) {
+    var kls = el_type==='bar'?' class="beam"':'';
     var id = 'p'+this.printerId+'g'+(++this.gid); 
-    this.svg_pages[this.currentPage] += '<g id="'+id+'">\n';  
+    this.svg_pages[this.currentPage] += '<g id="'+id+'"'+kls+'>\n';  
     return id;
 };
 

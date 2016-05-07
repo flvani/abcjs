@@ -575,13 +575,13 @@ ABCXJS.write.AbsoluteElement.prototype.setMouse = function(svg) {
     this.svgElem = svg;
     this.svgElem.onmouseover =  function() {self.highlight(this);};
     this.svgElem.onmouseout =  function() {self.unhighlight(this);};
-    //this.svgElem.onclick =  function() {self.click(this);};
+    this.svgElem.onclick =  function() {self.click(this);};
  };
  
  
-//ABCXJS.write.AbsoluteElement.prototype.click = function() {
-//    this.svgElem.style.fill='red'; 
-//};
+ABCXJS.write.AbsoluteElement.prototype.click = function() {
+   printer.notifyClearNSelect(self); 
+};
 
 
 //ABCXJS.write.AbsoluteElement.prototype.setClass = function(addClass, removeClass, color) {

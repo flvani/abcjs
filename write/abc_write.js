@@ -60,7 +60,11 @@ ABCXJS.write.Printer.prototype.printABC = function(abctunes, options) {
     abctunes = [abctunes];
   }
   this.y=0;
+  
+  options = options || {};
 
+  options.color='red';
+  
   for (var i = 0; i < abctunes.length; i++) {
     this.printTune( abctunes[i], options /*, {color:'red', backgroundColor:'#ffd', beamColor:'blue' }*/ );
   }
@@ -296,6 +300,21 @@ ABCXJS.write.Printer.prototype.printTune = function(abctune, options) {
     
     this.formatPage(abctune);
     
+    var lines = abctune.lines;
+    
+    for(var l=0; l<lines.length;l++){
+        for(var s=0; lines[l].staffs && s <lines[l].staffs.length;s++){
+            for(var v=0; v <lines[l].staffs[s].voices.length;v++){
+                for(var a=0; a <lines[l].staffs[s].voices[v].length;a++){
+                   var abs = lines[l].staffs[s].voices[v][a].abselem;
+                   if( !abs || !abs.gid ) continue;
+                   abs.setMouse(document.getElementById(abs.gid));
+                }
+            }
+        }
+    }
+
+    
 //    // Correct for IE problem in calculating height
 //    if (ABCXJS.misc.isIE()) {
 //        this.paper.canvas.parentNode.style.width = "" +  sizetoset.w + "px";
@@ -501,7 +520,7 @@ ABCXJS.write.Printer.prototype.rangeHighlight = function(start,end)
 };
 
 ABCXJS.write.Printer.prototype.beginGroup = function (abselem) {
-    abselem.gid = this.paper.beginGroup(); // associa o elemento absoluto com o futuro elemento sgv selecionavel
+    abselem.gid = this.paper.beginGroup(abselem.abcelem.el_type); // associa o elemento absoluto com o futuro elemento sgv selecionavel
 };
 
 ABCXJS.write.Printer.prototype.endGroup = function () {
