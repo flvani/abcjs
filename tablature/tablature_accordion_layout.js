@@ -127,7 +127,7 @@ ABCXJS.tablature.Layout.prototype.printClef = function(elem) {
   var clef = "clefs.tab";
   var dx = 8;
   var abselem = new ABCXJS.write.AbsoluteElement(elem,0,10);
-  abselem.addRight(new ABCXJS.write.RelativeElement(clef, dx, this.glyphs.getSymbolWidth(clef), elem.clefPos, {scalex:0.9, scaley:0.9})); 
+  abselem.addRight(new ABCXJS.write.RelativeElement(clef, dx, this.glyphs.getSymbolWidth(clef), elem.clefPos)); 
   return abselem;
 };
 

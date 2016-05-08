@@ -34,26 +34,433 @@ ABCXJS.write.spacing.STAVEHEIGHT = 100;
 
 //--------------------------------------------------------------------PRINTER
 
-ABCXJS.write.Printer = function(paper, params ) {
-  params = params || {};
-  this.y = 0;
-  this.pageNumber = 1;
-  this.estimatedPageLength = 0;
-  this.paper = paper;
-  this.space = 3*ABCXJS.write.spacing.SPACE;
-  this.glyphs = new ABCXJS.write.Glyphs();
-  this.listeners = [];
-  this.selected = [];
-  this.ingroup = false;
-  this.scale = params.scale || 1;
-  this.staffwidth = params.staffwidth || 1024;
-  this.paddingtop = params.paddingtop || 15;
-  this.paddingbottom = params.paddingbottom || 15;
-  this.paddingleft = params.paddingleft || 15;
-  this.paddingright = params.paddingright || 30;
-  this.editable = params.editable || false;
-  this.staffgroups = [];
+ABCXJS.write.Printer = function (paper, params) {
+
+    params = params || {};
+    this.y = 0;
+    this.pageNumber = 1;
+    this.estimatedPageLength = 0;
+    this.paper = paper;
+    this.space = 3 * ABCXJS.write.spacing.SPACE;
+    this.glyphs = new ABCXJS.write.Glyphs();
+    this.listeners = [];
+    this.selected = [];
+    this.scale = params.scale || 1;
+    this.paddingtop = params.paddingtop || 15;
+    this.paddingbottom = params.paddingbottom || 15;
+    this.paddingleft = params.paddingleft || 15;
+    this.paddingright = params.paddingright || 30;
+    this.editable = params.editable || false;
+    this.staffgroups = [];
+
+};
+
+ABCXJS.write.Printer.prototype.printABC = function(abctunes, options) {
+  if (abctunes[0]===undefined) {
+    abctunes = [abctunes];
+  }
+  this.y=0;
   
+  //options = options || {};
+  //options.color='red';
+  
+  for (var i = 0; i < abctunes.length; i++) {
+    this.printTune( abctunes[i], options /*, {color:'red', backgroundColor:'#ffd', beamColor:'blue' }*/ );
+  }
+
+};
+
+ABCXJS.write.Printer.prototype.printTune = function(abctune, options) {
+    
+    options = options || {};
+    options.color = options.color ||'black';
+    options.beamColor = options.beamColor ||'black';
+    options.backgroundColor = options.backgroundColor ||'none';
+    
+    
+    if( abctune.lines.length === 0 ) return;
+    
+    var estilo = 
+'\n\
+   .abc_title {\n\
+        font-size: 20px;\n\
+        font-family: serif;\n\
+    }\n\
+    \n\
+    .abc_subtitle {\n\
+        font-size: 16px;\n\
+        font-family: serif;\n\
+        font-style: italic;\n\
+    }\n\
+    \n\
+    .abc_author {\n\
+        font-size: 14px;\n\
+        font-family: serif;\n\
+        font-style: italic;\n\
+        font-weight: bold;\n\
+    }\n\
+    \n\
+    .abc_rhythm {\n\
+        font-size: 12px;\n\
+        font-family: serif;\n\
+        font-style: italic;\n\
+    }\n\
+    \n\
+    .abc_voice_header {\n\
+        font-size: 12px;\n\
+        font-family: serif;\n\
+        font-style: italic;\n\
+        font-weight: bold;\n\
+    }\n\
+    \n\
+    .abc_tempo {\n\
+        font-size: 12px;\n\
+        font-family: serif;\n\
+        font-weight: bold;\n\
+    }\n\
+    \n\
+    .abc_text {\n\
+        font-size: 12px;\n\
+        font-family: serif;\n\
+    }\n\
+    \n\
+    .abc_lyrics {\n\
+        font-size: 13px;\n\
+        font-family: serif;\n\
+        font-weight: bold;\n\
+    }\n\
+    \n\
+    .abc_ending {\n\
+        font-size: 10px;\n\
+        font-family: serif;\n\
+    }\n\
+    \n\
+    .abc_tabtext\n\
+    ,.abc_tabtext2\n\
+    ,.abc_tabtext3 {\n\
+        font-family: arial;\n\
+        font-weight: bold;\n\
+        text-anchor:middle;\n\
+        font-size: 14px;\n\
+    }\n\
+    .abc_tabtext2 {\n\
+        font-size: 12px;\n\
+    }\n\
+    \n\
+    .abc_tabtext3 {\n\
+        font-size: 10px;\n\
+    }\n\
+    \n\
+    .debug {\n\
+        stroke: red;\n\
+    }\n\
+    svg { fill:'+options.color+'; } \n\
+    .beam { fill:'+options.beamColor+'; stroke:'+options.beamColor+'; stroke-width:0.6; }\n\
+    .ledger { fill:none; stroke:'+options.beamColor+'; stroke-width:0.6; stroke-dasharray: 1 1; }';
+    
+    var svg_title = 'Partitura ' + abctune.metaText.title + ' criada por ABCXJS.';
+    
+    if( abctune.midi) {
+        abctune.midi.printer = this;
+    }
+    this.pageratio = abctune.formatting.pageratio;
+    this.pagenumbering = abctune.formatting.pagenumbering;
+    this.staffsep = abctune.formatting.staffsep ||  ABCXJS.write.spacing.STEP*8;
+    this.paddingtop = abctune.formatting.landscape? 15 : 15;
+    this.scale = abctune.formatting.scale ? abctune.formatting.scale: this.scale;
+    this.width = Math.min( abctune.formatting.staffwidth, abctune.formatting.usablewidth) - this.paddingright;
+    this.maxwidth = this.width;
+    
+    this.y = this.paddingtop;
+    
+    this.layouter = new ABCXJS.write.Layout( this, abctune.formatting.bagpipes );
+    
+    
+    this.calcPageLength();
+    
+    this.paper.initDoc( 'tune', svg_title, estilo, options );
+    this.paper.initPage( this.scale );
+
+    if (abctune.metaText.title) {
+        this.paper.text(this.width/2, this.y, abctune.metaText.title, "abc_title", "middle" );
+        this.y += 20;
+    }    
+
+    if (abctune.lines[0].staffs[0].subtitle) {
+        this.printSubtitleLine(abctune.lines[0].staffs[0].subtitle);
+        //this.y += 20;
+    }
+    
+    var composerLine = "", meta = false;
+    if (abctune.metaText.composer)
+        composerLine += abctune.metaText.composer;
+    if (abctune.metaText.origin)
+        composerLine += ' (' + abctune.metaText.origin + ')';
+    if (abctune.metaText.author) 
+        composerLine += (composerLine.length> 0?'\n':'') + abctune.metaText.author;
+
+    if (composerLine.length > 0) {
+        this.paper.text(this.width, 30, composerLine, 'abc_author', 'end' );
+        meta = true;
+    } 
+    
+    var xtempo ;
+    if (abctune.metaText.tempo && !abctune.metaText.tempo.suppress) {
+        xtempo = this.printTempo(this.paddingleft*2, abctune.metaText.tempo );
+        meta = true;
+    }
+    if (abctune.metaText.rhythm) {
+        this.paper.text( xtempo || this.paddingleft*3+5, this.y, abctune.metaText.rhythm, 'abc_rhythm', 'start');
+        meta = true;
+    }
+    
+    //(meta) && (this.y += 10);
+    this.y += 20;
+
+    // impressão dos grupos de pautas
+    for (var line = 0; line < abctune.lines.length; line++) {
+        var abcline = abctune.lines[line];
+        if(abcline.newpage) {
+            this.skipPage();
+            continue;
+        }
+        if(abcline.staffs) {
+            var staffgroup =  this.layouter.layoutABCLine(abctune, line, this.width);
+            staffgroup.draw( this, line );
+            this.staffgroups.push(staffgroup);
+            this.maxwidth = Math.max(staffgroup.w, this.maxwidth);
+            this.calcPageLength();
+        }
+    }
+
+    var extraText1 = "", extraText2 = "",  height = 0, h1=0, h2=0;
+    
+    if (abctune.metaText.unalignedWords) {
+        for (var j = 0; j < abctune.metaText.unalignedWords.length; j++) {
+            if (typeof abctune.metaText.unalignedWords[j] === 'string') {
+                extraText1 += abctune.metaText.unalignedWords[j] + "\n";
+                h1 ++;
+            }
+        }
+    }
+    if (abctune.metaText.book) {
+         h2 ++;
+         extraText2 += "Livro: " + abctune.metaText.book + "\n";
+    }    
+    if (abctune.metaText.source) {
+         h2 ++;
+        extraText2+= "Fonte: " + abctune.metaText.source + "\n";
+    }    
+    if (abctune.metaText.discography) {
+         h2 ++;
+        extraText2 += "Discografia: " + abctune.metaText.discography + "\n";
+    }    
+    if (abctune.metaText.notes) {
+         h2 ++;
+        extraText2 += abctune.metaText.notes + "\n";
+    }    
+    if (abctune.metaText.transcription) {
+         h2 ++;
+        extraText2 += "Transcrito por " + abctune.metaText.transcription + "\n";
+    }    
+    if (abctune.metaText.history) {
+         h2 ++;
+        extraText2+= "Histórico: " + abctune.metaText.history + "\n";
+    }    
+    
+    if(h1> 0) {
+        height = ABCXJS.write.spacing.STEP*3 + h1*1.5*17; // 1.5??? ver translate...
+        if( ( this.pageNumber - ((this.y+height)/this.estimatedPageLength) ) < 0 ) {
+           this.skipPage();
+        } else {
+            this.y += ABCXJS.write.spacing.STEP*3; 
+        }
+        this.printExtraText( extraText1, this.paddingleft+50);
+        this.y += height; 
+    }
+
+    if(h2> 0) {
+        height = ABCXJS.write.spacing.STEP*3 + h2*1.5*17;
+        if( ( this.pageNumber - ((this.y+height)/this.estimatedPageLength) ) < 0 ) {
+           this.skipPage();
+        } else {
+            this.y += ABCXJS.write.spacing.STEP*3; 
+        }
+        this.printExtraText( extraText2, this.paddingleft);
+        this.y += height; 
+    }
+    
+//    for(var r=0; r < 10; r++) // para debug: testar a posição do número ao final da página
+//        this.skipPage();
+    
+    this.skipPage(true); 
+    
+    this.paper.endDoc(abctune);
+    
+    this.formatPage(abctune);
+    
+    var lines = abctune.lines;
+    
+    for(var l=0; l<lines.length;l++){
+        for(var s=0; lines[l].staffs && s <lines[l].staffs.length;s++){
+            for(var v=0; v <lines[l].staffs[s].voices.length;v++){
+                for(var a=0; a <lines[l].staffs[s].voices[v].length;a++){
+                   var abs = lines[l].staffs[s].voices[v][a].abselem;
+                   if( !abs || !abs.gid ) continue;
+                   abs.setMouse(this);
+                }
+            }
+        }
+    }
+
+    
+//    // Correct for IE problem in calculating height
+//    if (ABCXJS.misc.isIE()) {
+//        this.paper.canvas.parentNode.style.width = "" +  sizetoset.w + "px";
+//        this.paper.canvas.parentNode.style.height = "" + sizetoset.h + "px";
+//    } else {
+//        this.paper.canvas.parentNode.setAttribute("style", "width:" + sizetoset.w + "px"); 
+//       // this.paper.canvas.parentNode.setAttribute("style", "height:" + sizetoset.h + "px");
+//       // this.paper.canvas.setAttribute("style", "background-color: #ffe"); 
+//    }
+
+};
+
+ABCXJS.write.Printer.prototype.printTempo = function (x, tempo) {
+    
+    this.y -= 5;
+
+    var tempopitch = 5;
+
+    if (tempo.preString) {
+        this.paper.text(x, this.calcY(tempopitch-0.8), tempo.preString, 'abc_tempo', 'start');
+        //x += (text.getBBox().width + 20*printer.scale);
+        //fixme: obter a largura do texto
+        x += tempo.preString.length*5 + 5;
+    }
+
+    if (tempo.duration) {
+        var temposcale = 0.9;
+        var duration = tempo.duration[0]; // TODO when multiple durations
+        var abselem = new ABCXJS.write.AbsoluteElement(tempo, duration, 1);
+        var durlog = ABCXJS.write.getDurlog(duration);
+        var dot = 0;
+        for (var tot = Math.pow(2, durlog), inc = tot / 2; tot < duration; dot++, tot += inc, inc /= 2);
+        var c = ABCXJS.write.chartable.note[-durlog];
+        var flag = ABCXJS.write.chartable.uflags[-durlog];
+        var temponote = this.layouter.printNoteHead( abselem, c, {verticalPos:tempopitch}, "up", 0, 0, flag, dot, 0, temposcale );
+        abselem.addHead(temponote);
+        if (duration < 1) {
+            var dx = 9.5;
+            var width = -0.6;
+            abselem.addExtra(new ABCXJS.write.RelativeElement(null, dx, 0, tempopitch, {type:"stem", pitch2:tempopitch+6, linewidth:width}));
+        }
+        abselem.x = x+4;
+        abselem.draw(this, null);
+
+        x += (abselem.w+dx );
+        var tempostr = "= " + tempo.bpm;
+        this.paper.text(x, this.calcY(tempopitch-0.8), tempostr, 'abc_tempo', 'start');
+        //fixme: obter a largura do texto // text.getBBox().width + 10*printer.scale;
+        x += tempostr.length*5 + 5;
+    }
+
+    if (tempo.postString) {
+        this.paper.text( x, this.calcY(tempopitch-0.8), tempo.postString, 'abc_tempo', 'start');
+    }
+
+    this.y += 5;
+    return abselem.x + abselem.w +4;
+};
+
+
+ABCXJS.write.Printer.prototype.printSymbol = function (x, offset, symbol ) {
+    if (!symbol) return null;
+    try {
+        this.paper.printSymbol(x, this.calcY(offset + this.glyphs.getYCorr(symbol)), symbol);
+    } catch(e){
+        this.paper.text(x, this.calcY(offset + this.glyphs.getYCorr(symbol)), e );
+    }
+};
+
+ABCXJS.write.Printer.prototype.printTieArc = function(x1, x2, pitch1, pitch2, above) {
+
+  x1 = x1 + 6;
+  x2 = x2 + 4;
+  pitch1 = pitch1 + ((above)?1.5:-1.5);
+  pitch2 = pitch2 + ((above)?1.5:-1.5);
+  var y1 = this.calcY(pitch1);
+  var y2 = this.calcY(pitch2);
+
+  this.paper.printTieArc(x1,y1,x2,y2,above);
+};
+
+ABCXJS.write.Printer.prototype.printStave = function (startx, endx, staff ) {
+    if(staff.numLines === 4) {
+      this.paper.printStaveLine(startx,endx,this.calcY(19.5), 'ledger' ); 
+      
+      // imprimo duas linhas para efeito
+      this.paper.printStaveLine(startx,endx,this.calcY(15)-0.5 ); 
+      this.paper.printStaveLine(startx,endx,this.calcY(15) ); 
+      
+      this.paper.printStaveLine(startx,endx,this.calcY(7.5), 'ledger' ); 
+      
+      this.paper.printStaveLine(startx,endx,this.calcY(0)); 
+    } else {
+      for (var i = 0; i < staff.numLines; i++) {
+        this.paper.printStaveLine(startx,endx,this.calcY((i+1)*2));
+      }
+    }
+};
+
+ABCXJS.write.Printer.prototype.printDebugLine = function (x1,x2, y, fill ) {
+   this.paper.printStaveLine(x1,x2, y, 'stave', fill ) ; 
+};
+
+ABCXJS.write.Printer.prototype.printLedger = function (x1, x2, pitch) {
+    if( pitch < 2 || pitch > 10 ) {
+      this.paper.printStaveLine(x1, x2, this.calcY(pitch), 'ledger' );
+    } else {
+      return null;
+    }  
+};
+
+ABCXJS.write.Printer.prototype.printText = function (x, offset, text, anchor) {
+    anchor = anchor || "start";
+    this.paper.text(x, this.calcY(offset), text, 'abc_text', anchor);
+};
+ABCXJS.write.Printer.prototype.printTabText = function (x, offset, text, klass) {
+    klass = klass || 'abc_tabtext';
+    this.paper.tabText(x, this.calcY(offset)+5, text, klass, 'middle');
+};
+
+ABCXJS.write.Printer.prototype.printTabText2 = function (x, offset, text) {
+    return this.printTabText(x, offset, text, 'abc_tabtext2');
+};
+
+ABCXJS.write.Printer.prototype.printTabText3 = function (x, offset, text) {
+    return this.printTabText(x, offset, text, 'abc_tabtext3');
+};
+
+ABCXJS.write.Printer.prototype.printBar = function (x, dx, y1, y2) {
+    this.paper.printBar(x, dx, y1, y2);
+};
+
+ABCXJS.write.Printer.prototype.printStem = function (x, dx, y1, y2) {
+    this.paper.printStem(x, dx, y1, y2);
+};
+ABCXJS.write.Printer.prototype.printDebugMsg = function(x, y, msg ) {
+  return this.paper.text(x, y, msg, 'abc_ending', 'start');
+};
+
+ABCXJS.write.Printer.prototype.printLyrics = function(x, ypos, msg) {
+    var y = this.calcY(ypos);
+    // para manter alinhado, quando uma das linhas for vazia, imprimo 3 pontos
+    var i = msg.indexOf( "\n " );
+    if( i >= 0) msg = msg.substr(0, i) + "\n...";
+    
+    this.paper.text(x, y, msg, 'abc_lyrics', 'start');
+    
 };
 
 // notify all listeners that a graphical element has been selected
@@ -111,521 +518,92 @@ ABCXJS.write.Printer.prototype.rangeHighlight = function(start,end)
     return this.selected;
 };
 
-ABCXJS.write.Printer.prototype.beginGroup = function () {
-  this.path = [];
-  this.lastM = [0,0];
-  this.ingroup = true;
-};
-
-ABCXJS.write.Printer.prototype.addPath = function (path) {
-  path = path || [];
-  if (path.length===0) return;
-  path[0][0]="m";
-  path[0][1]-=this.lastM[0];
-  path[0][2]-=this.lastM[1];
-  this.lastM[0]+=path[0][1];
-  this.lastM[1]+=path[0][2];
-  this.path.push(path[0]);
-  for (var i=1,ii=path.length;i<ii;i++) {
-    if (path[i][0]==="m") {
-      this.lastM[0]+=path[i][1];
-      this.lastM[1]+=path[i][2];
-    }
-    this.path.push(path[i]);
-  }
+ABCXJS.write.Printer.prototype.beginGroup = function (abselem) {
+    abselem.gid = this.paper.beginGroup(abselem.abcelem.el_type); // associa o elemento absoluto com o futuro elemento sgv selecionavel
 };
 
 ABCXJS.write.Printer.prototype.endGroup = function () {
-  this.ingroup = false;
-  if (this.path.length===0) return null;
-  var ret = this.paper.path().attr({path:this.path, stroke:"none", fill:"#000000"});
-  if (this.scale!==1) {
-    ret.scale(this.scale, this.scale, 0, 0);
-  }
-  return ret;
-};
-
-ABCXJS.write.Printer.prototype.printStave = function (startx, endx, staff ) {
-    if(staff.numLines === 4) {
-      this.printStaveLine(startx,endx,0); // 2
-      this.printStaveLine(startx,endx,7.5, {stroke:"#666666", strokeDashArray:'.', strokeWidth:0.3, fill:"white"}); // 8.5
-      this.printStaveLine(startx,endx,15, {stroke:"black", strokeDashArray:'.', strokeWidth:1, fill:"black"}); // 15
-      this.printStaveLine(startx,endx,19.5, {stroke:"#666666", strokeDashArray:'.', strokeWidth:0.3, fill:"white"}); // 19.5
-    } else {
-      for (var i = 0; i < staff.numLines; i++) {
-        this.printStaveLine(startx,endx,(i+1)*2);
-      }
-    }
-};
-
-ABCXJS.write.Printer.prototype.printDebugLine = function (x1,x2, y, fill ) {
-   this.doPrintStaveLine(x1,x2, y, {fill:fill} ) ; 
-};
-
-ABCXJS.write.Printer.prototype.printStaveLine = function (x1,x2, pitch, attrs) {
-    return  this.doPrintStaveLine(x1, x2, this.calcY(pitch), attrs || {} );
-};
-
-ABCXJS.write.Printer.prototype.printLedger = function (x1, x2, pitch, attrs) {
-    if( pitch < 2 || pitch > 10 ) {
-      return this.doPrintStaveLine(x1, x2, this.calcY(pitch), attrs || {stroke:"black", strokeDashArray:'--', strokeWidth:0.3, fill:"white"} );
-    } else {
-      return null;
-    }  
-};
-
-ABCXJS.write.Printer.prototype.doPrintStaveLine = function (x1,x2, y, attrs ) {
-  var dy = .3;
-  var fill = attrs.fill || "#000000";
-  var stroke = attrs.stroke || "none";
-  var strokeWidth = attrs.strokeWidth || 1;
-  var strokeDashArray = attrs.strokeDashArray || "";
   
-  //var y = this.calcY(pitch);
-  var pathString = ABCXJS.write.sprintf("M %f %f L %f %f L %f %f L %f %f z", x1, y-dy, x2, y-dy, x2, y+dy, x1, y+dy);
-  var ret = this.paper.path().attr({path:pathString, fill:fill, stroke: stroke, 'stroke-width':strokeWidth, 'stroke-dasharray':strokeDashArray}).toBack();
-
-  if (this.scale!==1) {
-    ret.scale(this.scale, this.scale, 0, 0);
-  }
-  return ret;
-};
-
-ABCXJS.write.Printer.prototype.printStem = function (x, dx, y1, y2) {
-  if (dx<0) { // correct path "handedness" for intersection with other elements
-    var tmp = y2;
-    y2 = y1;
-    y1 = tmp;
-  }
-  var isIE=/*@cc_on!@*/false;//IE detector
-  var fill = "#000000";
-  if (isIE && dx<1) {
-    dx = 1;
-    fill = "#666666";
-  }
-  if (~~x === x) x+=0.05; // raphael does weird rounding (for VML)
-  var pathArray = [["M",x,y1],["L", x, y2],["L", x+dx, y2],["L",x+dx,y1],["z"]];
-  if (!isIE && this.ingroup) {
-    this.addPath(pathArray);
-  } else {
-    var ret = this.paper.path().attr({path:pathArray, stroke:"none", fill:fill}).toBack();
-    if (this.scale!==1) {
-      ret.scale(this.scale, this.scale, 0, 0);
-    }
-    return ret;
-  }
-};
-
-ABCXJS.write.Printer.prototype.printTabText = function (x, offset, text, size, anchor) {
-  //anchor = anchor || "start"; 
-  anchor = anchor || "middle";
-  size = size || 14;
-  if(text==="-->") anchor = "middle";
-  var ret = this.paper.text(x*this.scale, this.calcY(offset)*this.scale, text).attr({"text-anchor":anchor, "font-size":size*this.scale});
-  return ret;
-};
-
-    ABCXJS.write.Printer.prototype.printTabText2 = function (x, offset, text, size, anchor) {
-    return this.printTabText(x, offset, text, 12, anchor);
-};
-
-ABCXJS.write.Printer.prototype.printTabText3 = function (x, offset, text, size, anchor) {
-    return this.printTabText(x, offset, text, 10, anchor);
-};
-
-ABCXJS.write.Printer.prototype.printText = function (x, offset, text, anchor) {
-  anchor = anchor || "start";
-  var ret = this.paper.text(x*this.scale, this.calcY(offset)*this.scale, text).attr({"text-anchor":anchor, "font-size":12*this.scale});
-  return ret;
-};
-
-// assumes this.y is set appropriately
-// if symbol is a multichar string without a . (as in scripts.staccato) 1 symbol per char is assumed
-// not scaled if not in printgroup
-ABCXJS.write.Printer.prototype.printSymbol = function(x, offset, symbol, scalex, scaley) {
-	var el;
-  if (!symbol) return null;
-  if (symbol.length>0 && symbol.indexOf(".")<0) {
-    var elemset = this.paper.set();
-    var dx =0;
-    for (var i=0; i<symbol.length; i++) {
-      var ycorr = this.glyphs.getYCorr(symbol.charAt(i));
-      el = this.glyphs.printSymbol(x+dx, this.calcY(offset+ycorr), symbol.charAt(i), this.paper);
-      if (el) {
-	elemset.push(el);
-	dx+=this.glyphs.getSymbolWidth(symbol.charAt(i));
-      } else {
-	this.printDebugMsg(x, this.calcY(offset), "no symbol:" +symbol);
-      }
-    }
-    if (this.scale!==1) {
-      elemset.scale(this.scale, this.scale, 0, 0);
-    }
-    return elemset;
-  } else {
-    var ycorr = this.glyphs.getYCorr(symbol);
-    if (this.ingroup) {
-      this.addPath(this.glyphs.getPathForSymbol(x, this.calcY(offset+ycorr), symbol, scalex, scaley));
-    } else {
-      el = this.glyphs.printSymbol(x, this.calcY(offset+ycorr), symbol, this.paper);
-      if (el) {
-	if (this.scale!==1) {
-	  el.scale(this.scale, this.scale, 0, 0);
-	}
-	return el;
-      } else
-	this.printDebugMsg(x, this.calcY(offset), "no symbol:" +symbol);
-    }
-    return null;    
-  }
-};
-
-ABCXJS.write.Printer.prototype.printPath = function (attrs) {
-  var ret = this.paper.path().attr(attrs);
-  if (this.scale!==1) ret.scale(this.scale, this.scale, 0, 0);
-  return ret;
-};
-
-ABCXJS.write.Printer.prototype.drawArcForStaffGroup = function(x1, x2, y1, y2, above) {
-
-  x1 = x1 + 6;
-  x2 = x2 + 4;
-  y1 = y1 + ((above)?1.5:-1.5);
-  y2 = y2 + ((above)?1.5:-1.5);
-
-  //unit direction vector
-  var dx = x2-x1;
-  var dy = y2-y1;
-  var norm= Math.sqrt(dx*dx+dy*dy);
-  var ux = dx/norm;
-  var uy = dy/norm;
-
-  var flatten = norm/3.5;
-  var curve = ((above)?-1:1)*Math.min(25, Math.max(4, flatten));
-
-  var controlx1 = x1+flatten*ux-curve*uy;
-  var controly1 = y1+flatten*uy+curve*ux;
-  var controlx2 = x2-flatten*ux-curve*uy;
-  var controly2 = y2-flatten*uy+curve*ux;
-  var thickness = 3;
-  var pathString = ABCXJS.write.sprintf("M %f %f C %f %f %f %f %f %f C %f %f %f %f %f %f z", x1, y1,
-			   controlx1, controly1, controlx2, controly2, x2, y2, 
-			   controlx2-thickness*uy, controly2+thickness*ux, controlx1-thickness*uy, controly1+thickness*ux, x1, y1);
-  var ret = this.paper.path().attr({path:pathString, stroke:"none", fill:"#000000"});
-  if (this.scale!==1) {
-    ret.scale(this.scale, this.scale, 0, 0);
-  }
-  return ret;
-};
-
-
-ABCXJS.write.Printer.prototype.drawArc = function(x1, x2, pitch1, pitch2, above) {
-
-
-  x1 = x1 + 6;
-  x2 = x2 + 4;
-  pitch1 = pitch1 + ((above)?1.5:-1.5);
-  pitch2 = pitch2 + ((above)?1.5:-1.5);
-  var y1 = this.calcY(pitch1);
-  var y2 = this.calcY(pitch2);
-
-  //unit direction vector
-  var dx = x2-x1;
-  var dy = y2-y1;
-  var norm= Math.sqrt(dx*dx+dy*dy);
-  var ux = dx/norm;
-  var uy = dy/norm;
-
-  var flatten = norm/3.5;
-  var curve = ((above)?-1:1)*Math.min(25, Math.max(4, flatten));
-
-  var controlx1 = x1+flatten*ux-curve*uy;
-  var controly1 = y1+flatten*uy+curve*ux;
-  var controlx2 = x2-flatten*ux-curve*uy;
-  var controly2 = y2-flatten*uy+curve*ux;
-  var thickness = 2;
-  var pathString = ABCXJS.write.sprintf("M %f %f C %f %f %f %f %f %f C %f %f %f %f %f %f z", x1, y1,
-			   controlx1, controly1, controlx2, controly2, x2, y2, 
-			   controlx2-thickness*uy, controly2+thickness*ux, controlx1-thickness*uy, controly1+thickness*ux, x1, y1);
-  var ret = this.paper.path().attr({path:pathString, stroke:"none", fill:"#000000"});
-  if (this.scale!==1) {
-    ret.scale(this.scale, this.scale, 0, 0);
-  }
-  return ret;
-};
-
-ABCXJS.write.Printer.prototype.printDebugMsg = function(x, y, msg ) {
-  return this.paper.text(x, y, msg).scale(this.scale, this.scale, 0, 0);
-};
-
-ABCXJS.write.Printer.prototype.printLyrics = function(x, ypos, msg) {
-    var y = this.calcY(ypos);
-    // para manter alinhado, quando uma das linhas for vazia, imprimo 3 pontos
-    var i = msg.indexOf( "\n " );
-    if( i >= 0) msg = msg.substr(0, i) + "\n...";
-    
-    var el = this.paper.text(x, y, msg).attr({"font-family":"Times New Roman", "font-weight":'bold', "font-size":14, "text-anchor":"start"}).scale(this.scale, this.scale, 0, 0);
-    el[0].setAttribute("class", "abc-lyric");
-    return el;
+  this.paper.endGroup();
+  return;
+  
 };
 
 ABCXJS.write.Printer.prototype.calcY = function(ofs) {
   return this.y+((ABCXJS.write.spacing.TOPNOTE-ofs)*ABCXJS.write.spacing.STEP); // flavio
 };
 
-ABCXJS.write.Printer.prototype.printABC = function(abctunes) {
-  if (abctunes[0]===undefined) {
-    abctunes = [abctunes];
-  }
-  this.y=0;
-
-  for (var i = 0; i < abctunes.length; i++) {
-    this.printTune(abctunes[i]);
-  }
-
+ABCXJS.write.Printer.prototype.calcPageLength = function() {
+    this.estimatedPageLength = (this.maxwidth+this.paddingright)*this.pageratio - this.paddingbottom;
 };
 
-ABCXJS.write.Printer.prototype.printTempo = function (tempo, paper, layouter, y, printer, x) {
-	var fontStyle = {"text-anchor":"start", 'font-size':12*printer.scale, 'font-weight':'bold'};
-	if (tempo.preString) {
-		var text = paper.text(x*printer.scale, y*printer.scale + 20*printer.scale, tempo.preString).attr(fontStyle);
-		x += (text.getBBox().width + 20*printer.scale);
-	}
-	if (tempo.duration) {
-		var temposcale = 0.9 * printer.scale;
-    		var tempopitch = 4.5;
-		var duration = tempo.duration[0]; // TODO when multiple durations
-		var abselem = new ABCXJS.write.AbsoluteElement(tempo, duration, 1);
-		var durlog = Math.floor(Math.log(duration) / Math.log(2));
-		var dot = 0;
-		for (var tot = Math.pow(2, durlog), inc = tot / 2; tot < duration; dot++, tot += inc, inc /= 2);
-		var c = ABCXJS.write.chartable.note[-durlog];
-		var flag = ABCXJS.write.chartable.uflags[-durlog];
-		var temponote = layouter.printNoteHead(abselem,
-				c,
-				{verticalPos:tempopitch},
-				"up",
-				0,
-				0,
-				flag,
-				dot,
-				0,
-				temposcale
-		);
-		abselem.addHead(temponote);
-		if (duration < 1) {
-			var p1 = tempopitch + 1/2 * temposcale;
-			var p2 = tempopitch + 7 * temposcale;
-			var dx = temponote.dx + temponote.w;
-			var width = -0.6*printer.scale;
-			abselem.addExtra(new ABCXJS.write.RelativeElement(null, dx, 0, p1, {"type":"stem", "pitch2":p2, linewidth:width}));
-		}
-		abselem.x = x*(1/printer.scale); // TODO-PER: For some reason it scales this element twice, so just compensate.
-		abselem.draw(printer, null);
-		x += (abselem.w + 5*printer.scale);
-		text = paper.text(x, y*printer.scale + 20*printer.scale, "= " + tempo.bpm).attr(fontStyle);
-		x += text.getBBox().width + 10*printer.scale;
-	}
-	if (tempo.postString) {
-		paper.text(x, y*printer.scale + 20*printer.scale, tempo.postString).attr(fontStyle);
-	}
-	y += 15*printer.scale;
-	return y;
-};
-
-ABCXJS.write.Printer.prototype.printTune = function(abctune) {
-//    function scalePageRatio(s){
-//        var r = 1/s * (-0.3705*(1/s) +0.3705+1);
-//        return r;
-//    }
+ABCXJS.write.Printer.prototype.printPageNumber = function() {
+    //return; // vamos usar page format
     
-    if( abctune.lines.length === 0 ) return;
+    this.y = this.estimatedPageLength;
     
-    if( abctune.midi) {
-        abctune.midi.printer = this;
-    }
-    
-    this.landscape = abctune.formatting.landscape;
-    this.pagenumbering = abctune.formatting.pagenumbering;
-    this.staffsep = abctune.formatting.staffsep ||  ABCXJS.write.spacing.STEP*8;
-    
-    this.paddingtop = this.landscape? 10 : 15;
-    this.paddingright = this.landscape? 50 : 30;
-    
-    this.layouter = new ABCXJS.write.Layout( this, abctune.formatting.bagpipes );
-    
-    this.scale = abctune.formatting.scale ? abctune.formatting.scale: this.scale;
-    
-    this.width = ( abctune.formatting.staffwidth ? abctune.formatting.staffwidth : this.staffwidth ) + this.paddingleft ;
-
-    this.y += this.paddingtop;
-    
-    this.estimatedPageLength = (this.width*abctune.formatting.pageratio) ; // ainda não consigo escalar * scalePageRatio(this.scale);
-            //* ;
-
-    if (abctune.metaText.title) {
-        this.y += 5 * this.scale;
-        this.paper.text(this.width * this.scale / 2, this.y, abctune.metaText.title).attr({"font-size": 20 * this.scale, "font-family": "serif"});
-        this.y += 20 * this.scale;
-    }    
-
-    if (abctune.lines[0].staffs[0].subtitle) {
-        this.printSubtitleLine(abctune.lines[0].staffs[0].subtitle);
-        this.y += 20 * this.scale;
-    }
-
-    if (abctune.metaText.rhythm) {
-        this.paper.text(this.paddingleft*3*this.scale, this.y*this.scale, abctune.metaText.rhythm).attr({"text-anchor": "start", "font-style": "italic", "font-family": "serif", "font-size": 12 * this.scale});
-        !(abctune.metaText.author || abctune.metaText.origin || abctune.metaText.composer) && (this.y += 15 * this.scale);
-    }
-
-    var composerLine = "";
-    var meta = false;
-    if (abctune.metaText.composer)
-        composerLine += abctune.metaText.composer;
-    if (abctune.metaText.origin)
-        composerLine += ' (' + abctune.metaText.origin + ')';
-
-    if (composerLine.length > 0) {
-        this.paper.text(this.width * this.scale, this.y*this.scale, composerLine).attr({"text-anchor": "end", "font-style": "italic", "font-family": "serif", 'font-weight': 'bold', "font-size": 14 * this.scale});
-        meta = true;
-    }
-    if (abctune.metaText.author) {
-        this.paper.text(this.width * this.scale, this.y*this.scale, abctune.metaText.author).attr({"text-anchor": "end", "font-style": "italic", "font-family": "serif", 'font-weight': 'bold', "font-size": 14 * this.scale});
-        meta = true;
-    }
-
-    if (abctune.metaText.tempo && !abctune.metaText.tempo.suppress) {
-        this.y = this.printTempo(abctune.metaText.tempo, this.paper, this.layouter, this.y, this, this.paddingleft + 10);
-        meta = true;
-    }
-
-    (meta) && (this.y += 15 * this.scale);
-
-    var maxwidth = this.width;
-    
-    // impressão dos grupos de pautas
-    for (var line = 0; line < abctune.lines.length; line++) {
-        var abcline = abctune.lines[line];
-        if (abcline.text) {
-            console.log('abcline.text should no longer exists!');
-            continue;
-        }
-        if(abcline.newpage) {
-            this.skipPage();
-            continue;
-        }
-        if(abcline.staffs) {
-            var staffgroup = this.printStaffLine(abctune, line);
-            maxwidth = Math.max(staffgroup.w, maxwidth);
-        }
-    }
-    
-    var extraText1 = "", extraText2 = "",  t, height = 0, h1=0, h2=0;
-    
-    if (abctune.metaText.unalignedWords) {
-        for (var j = 0; j < abctune.metaText.unalignedWords.length; j++) {
-            if (typeof abctune.metaText.unalignedWords[j] === 'string') {
-                extraText1 += abctune.metaText.unalignedWords[j] + "\n";
-                h1 ++;
-            }
-        }
-    }
-    if (abctune.metaText.book) {
-         h2 ++;
-         extraText2 += "Livro: " + abctune.metaText.book + "\n";
-    }    
-    if (abctune.metaText.source) {
-         h2 ++;
-        extraText2+= "Fonte: " + abctune.metaText.source + "\n";
-    }    
-    if (abctune.metaText.discography) {
-         h2 ++;
-        extraText2 += "Discografia: " + abctune.metaText.discography + "\n";
-    }    
-    if (abctune.metaText.notes) {
-         h2 ++;
-        extraText2 += abctune.metaText.notes + "\n";
-    }    
-    if (abctune.metaText.transcription) {
-         h2 ++;
-        extraText2 += "Transcrito por " + abctune.metaText.transcription + "\n";
-    }    
-    if (abctune.metaText.history) {
-         h2 ++;
-        extraText2+= "Histórico: " + abctune.metaText.history + "\n";
-    }    
-    
-    if(h1> 0) {
-        height = ABCXJS.write.spacing.STEP*3*this.scale + h1*1.5*17* this.scale; // 1.5??? ver translate...
-        if( ( this.pageNumber - ((this.y+height)/this.estimatedPageLength) ) < 0 ) {
-           this.skipPage();
-        } else {
-            this.y += ABCXJS.write.spacing.STEP*3*this.scale; 
-        }
-        this.y += this.printExtraText( extraText1, this.paddingleft+50);
-    }
-
-    if(h2> 0) {
-        height = ABCXJS.write.spacing.STEP*3*this.scale + h2*1.5*17* this.scale;
-        if( ( this.pageNumber - ((this.y+height)/this.estimatedPageLength) ) < 0 ) {
-           this.skipPage();
-        } else {
-            this.y += ABCXJS.write.spacing.STEP*3*this.scale; 
-        }
-        this.y += this.printExtraText( extraText2, this.paddingleft);
-    }
-    
-//    for(var r=0; r < 10; r++) // para debug: testar a posição do número ao final da página
-//        this.skipPage();
-    
-    if( this.pageNumber > 1) {
-        this.skipPage();
-        this.y -= (this.paddingtop+5)*this.scale; // to avoid extra page at end of the print
-    } else {
-        this.y += (this.paddingbottom-5)*this.scale; 
-    }    
-    
-    var sizetoset = {w: (maxwidth + this.paddingright) * this.scale, h: this.y* this.scale};
-    
-    this.paper.setSize(sizetoset.w, sizetoset.h);
-    
-    // Correct for IE problem in calculating height
-    var isIE = /*@cc_on!@*/false;//IE detector
-    if (isIE) {
-        this.paper.canvas.parentNode.style.width = "" +  sizetoset.w + "px";
-        this.paper.canvas.parentNode.style.height = "" + sizetoset.h + "px";
-    } else {
-        this.paper.canvas.parentNode.setAttribute("style", "width:" + sizetoset.w + "px"); 
-       // this.paper.canvas.parentNode.setAttribute("style", "height:" + sizetoset.h + "px");
-       // this.paper.canvas.setAttribute("style", "background-color: #ffe"); 
-    }
-};
-
-ABCXJS.write.Printer.prototype.skipPage = function() {
-    this.y = this.estimatedPageLength*this.pageNumber + this.paddingtop*this.scale;
     if (this.pagenumbering) {
-         this.paper.text((this.width+25)* this.scale, (this.y - this.paddingtop - 13) * this.scale, "- " + this.pageNumber + " -")
-              .attr({"text-anchor": "end", "font-size": 13 * this.scale, "font-family": "serif", 'font-weight': 'bold'});
+         this.paper.text(this.maxwidth+this.paddingright, this.y, "- " + this.pageNumber + " -", 'abc_tempo', 'end');
+             // .attr({"text-anchor": "end", "font-size": 13 , "font-family": "serif", 'font-weight': 'bold'});
     }
-    this.pageNumber++;
+};
+
+ABCXJS.write.Printer.prototype.skipPage = function(lastPage) {
+    
+    // se não for a última página ou possui mais de uma página
+    if( ! lastPage || this.pageNumber > 1) {
+        this.printPageNumber();
+    }
+    this.paper.endPage({w: (this.maxwidth + this.paddingright) , h: this.y });
+    if( ! lastPage ) {
+        this.y = this.paddingtop;
+        this.pageNumber++;
+        this.paper.initPage( this.scale );
+    }
+};
+
+ABCXJS.write.Printer.prototype.formatPage = function(tune) {
+    //prepara a página para impressão de acordo com os parâmetros da canção.
+    var orientation = tune.formatting.landscape?'landscape':'portrait';
+    var style = document.getElementById('page_format');
+    
+//    var pgnumber = '';
+//
+//    if ( tune.formatting.pagenumbering ) {
+//        pgnumber = 
+//'   @page: right {\n\
+//        @bottom-right {\n\
+//            content: "Pág. " counter(page) "/" counter(pages)".";\n\
+//            }\n\
+//    }\n';
+//        
+//    }
+
+    var formato = 
+'   @page {\n\
+        margin: '+tune.formatting.defaultMargin+'; size: '+tune.formatting.papersize+' ' + orientation + ';\n\
+    }\n' ; //+ pgnumber;
+    
+    if( ! style ) {
+        style = document.createElement('style');
+        style.setAttribute( "id", "page_format" ); 
+        document.head.appendChild(style);
+    }
+    
+    style.innerHTML = formato;
+
 };
 
 ABCXJS.write.Printer.prototype.printExtraText = function(text, x) {
-    var t = this.paper.text(x*this.scale, this.y * this.scale, text).attr({"text-anchor": "start", "font-family": "serif", "font-size": 17 * this.scale});
-    var height = t.getBBox().height;
-    if (!height)  height = 25 * this.scale; // TODO-PER: Hack! Raphael sometimes and returns NaN. Perhaps only when printing to PDF? Possibly if the SVG is hidden?
-    t.translate(0, height / 2);
+    var t = this.paper.text(x, this.y , text, 'abc_title', 'start');
+            //.attr({"text-anchor": "start", "font-family": "serif", "font-size": 17 });
+    var height ;//= t.getBBox().height;
+    if (!height)  height = 25 ; // TODO-PER: Hack! Raphael sometimes and returns NaN. Perhaps only when printing to PDF? Possibly if the SVG is hidden?
+    //t.translate(0, height / 2);
     return height;
 };
 
 ABCXJS.write.Printer.prototype.printSubtitleLine = function(subtitle) {
-    this.paper.text(this.width * this.scale / 2, this.y, subtitle).attr({"font-size": 16 * this.scale, "font-family": "serif"});
+    this.paper.text(this.width/2, this.y, subtitle, 'abc_subtitle', 'middle');
 };
 
-ABCXJS.write.Printer.prototype.printStaffLine = function (abctune, line) {
-    var n = this.staffgroups.length;
-    this.staffgroups[n] = this.layouter.layoutABCLine(abctune, line, this.width);
-    this.staffgroups[n].draw( this, line );
-    return this.staffgroups[n];
-};

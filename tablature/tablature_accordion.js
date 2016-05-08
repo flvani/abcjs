@@ -102,8 +102,17 @@ ABCXJS.tablature.Accordion.prototype.layoutKeyboard = function(options, div) {
     this.printKeyboard(div);
 };
 
-ABCXJS.tablature.Accordion.prototype.printKeyboard = function(div_id) {
+ABCXJS.tablature.Accordion.prototype.printKeyboard = function(div_id, options) {
+    
     var div =( typeof(div_id) === "string" ? document.getElementById(div_id) : div_id );
+
+    options = options || {};
+    
+    this.render_keyboard_opts.fillColor = options.fillColor || this.render_keyboard_opts.fillColor;
+    this.render_keyboard_opts.backgroundColor = options.backgroundColor || this.render_keyboard_opts.backgroundColor;
+    this.render_keyboard_opts.openColor = options.openColor || this.render_keyboard_opts.openColor;
+    this.render_keyboard_opts.closeColor = options.closeColor || this.render_keyboard_opts.closeColor;
+    
 
     if( this.render_keyboard_opts.show ) {
         div.style.display="inline-block";

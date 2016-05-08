@@ -142,7 +142,7 @@ ABCXJS.edit.EditArea.prototype.getSelection = function() {
     return {start: this.textarea.selectionStart, end: this.textarea.selectionEnd};
 };
 
-ABCXJS.edit.EditArea.prototype.setSelection = function (start, end) {
+ABCXJS.edit.EditArea.prototype.setSelection = function (start, end, line) {
     if (this.textarea.setSelectionRange)
         this.textarea.setSelectionRange(start, end);
     else if (this.textarea.createTextRange) {
@@ -153,7 +153,16 @@ ABCXJS.edit.EditArea.prototype.setSelection = function (start, end) {
         e.moveStart('character', start);
         e.select();
     }
+    this.scrollTo(line);
     this.textarea.focus();
+};
+
+ABCXJS.edit.EditArea.prototype.scrollTo = function(line)
+{
+  line = line || 0;
+  var lineHeight = this.textarea.clientHeight / this.textarea.rows;
+  var jump = (line - 1) * lineHeight;
+  this.textarea.scrollTop = jump;
 };
 
 ABCXJS.edit.EditArea.prototype.getString = function() {
@@ -434,8 +443,7 @@ ABCXJS.Editor.prototype.modelChanged2 = function(loader) {
     this.bReentry = true;
     this.timerId = null;
     this.div.innerHTML = "";
-//    var paper = DOMRaphael(this.div, 1100, 700);
-    var paper = Raphael(this.div, 1100, 700);
+    var paper = new SVG.Printer( this.div );
     this.printer = new ABCXJS.write.Printer(paper, this.printerparams );
     this.printTimeStart = new Date();
     this.printer.printABC(this.tunes);
@@ -457,9 +465,9 @@ ABCXJS.Editor.prototype.modelChanged2 = function(loader) {
    loader.update( false, '<br>&nbsp;&nbsp;&nbsp;Finalizando...<br><br>' );
    loader.stop();
     
-//    window.setTimeout(function() {
+    window.setTimeout(function() {
             self.printWarnings();
-//    }, 1);
+    }, 1);
     
     
 };
@@ -638,7 +646,7 @@ ABCXJS.Editor.prototype.isDirty = function() {
 };
 
 ABCXJS.Editor.prototype.highlight = function(abcelem) {
-  this.editarea.setSelection(abcelem.startChar, abcelem.endChar);
+  this.editarea.setSelection(abcelem.startChar, abcelem.endChar, abcelem.line);
 };
 
 ABCXJS.Editor.prototype.pause = function(shouldPause) {

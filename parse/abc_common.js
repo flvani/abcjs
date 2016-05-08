@@ -14,7 +14,82 @@
 //    You should have received a copy of the GNU General Public License
 //    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-/*global window */
+
+
+if (!window.ABCXJS)
+	window.ABCXJS = {};
+
+if (!window.ABCXJS.parse)
+	window.ABCXJS.misc = {};
+
+window.ABCXJS.misc.isOpera = function() {
+    return ( !!window.opera || navigator.userAgent.indexOf(' OPR/') >= 0 );
+    
+};
+
+window.ABCXJS.misc.isChrome= function() {
+    return (( !!window.chrome && !isOpera() ) > 0 ); // Chrome 1+
+};
+
+window.ABCXJS.misc.isFirefox = function() {
+    return ( typeof InstallTrigger !== 'undefined' );  // Firefox 1+ 
+};
+
+window.ABCXJS.misc.isSafari = function() {
+    return ( Object.prototype.toString.call(window.HTMLElement).indexOf('Constructor') > 0 ); 
+};
+
+window.ABCXJS.misc.isIE = function() {
+  // Test values; Uncomment to check result …
+
+  // IE 10
+  // ua = 'Mozilla/5.0 (compatible; MSIE 10.0; Windows NT 6.2; Trident/6.0)';
+  
+  // IE 11
+  // ua = 'Mozilla/5.0 (Windows NT 6.3; Trident/7.0; rv:11.0) like Gecko';
+  
+  // IE 12 / Spartan
+  // ua = 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.71 Safari/537.36 Edge/12.0';
+  
+  // Edge (IE 12+)
+  // ua = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/46.0.2486.0 Safari/537.36 Edge/13.10586';
+  
+  
+    if( /*@cc_on!@*/false || !!document.documentMode  ) { // At least IE6    
+      return true;
+  }
+
+  if( navigator.appName.indexOf("Internet Explorer")!==-1 ){     //yeah, he's using IE
+     return true;
+  }
+  
+  var ua = window.navigator.userAgent;
+  
+  var msie = ua.indexOf('MSIE ');
+  if (msie > 0) {
+    // IE 10 or older => return version number
+    //return parseInt(ua.substring(msie + 5, ua.indexOf('.', msie)), 10);
+    return true;
+  }
+
+  var trident = ua.indexOf('Trident/');
+  if (trident > 0) {
+    // IE 11 => return version number
+    var rv = ua.indexOf('rv:');
+    //return parseInt(ua.substring(rv + 3, ua.indexOf('.', rv)), 10);
+    return true;
+  }
+
+  var edge = ua.indexOf('Edge/');
+  if (edge > 0) {
+    // Edge (IE 12+) => return version number
+    //return parseInt(ua.substring(edge + 5, ua.indexOf('.', edge)), 10);
+    return true;
+}
+
+  // other browser
+  return false;
+};
 
 if (!window.ABCXJS)
 	window.ABCXJS = {};

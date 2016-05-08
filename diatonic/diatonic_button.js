@@ -11,131 +11,86 @@ if (!window.DIATONIC)
 if (!window.DIATONIC.map)
     window.DIATONIC.map = {};
 
-//if (!window.Raphael)
-//    window.Raphael= {};
-//
-//if (!window.Raphael.fn)
-//    window.Raphael.fn = {};
-
-
-Raphael.fn.arc = function(startX, startY, endX, endY, radius1, radius2, angle) {
-  var arcSVG = [radius1, radius2, angle, 0, 1, endX, endY].join(' ');
-  return this.path('M'+startX+' '+startY + " a " + arcSVG);
-};
-
-Raphael.fn.circularArc = function(centerX, centerY, radius, startAngle, endAngle) {
-  var startX = centerX+radius*Math.cos(startAngle*Math.PI/180); 
-  var startY = centerY+radius*Math.sin(startAngle*Math.PI/180);
-  var endX = centerX+radius*Math.cos(endAngle*Math.PI/180); 
-  var endY = centerY+radius*Math.sin(endAngle*Math.PI/180);
-  return this.arc(startX, startY, endX-startX, endY-startY, radius, radius, 0);
-};
-
 DIATONIC.map.Button = function( x, y, options ) {
 
     var opt = options || {};
     
     this.x = x;
     this.y = y;
-    this.paper = null;
     this.openNote = null;
     this.closeNote = null;
-    this.closeSide = null;
-    this.openSide = null;
-    this.closeNoteKey = null;
-    this.openNoteKey = null;
     this.tabButton = null;
+    this.SVG  = {gid: 0}; // futuro identificador
     
     this.openColor = opt.openColor || '#00ff00';
     this.closeColor = opt.closeColor || '#00b2ee';
-    this.openLabel = opt.openLabel|| '';
-    this.closeLabel = opt.closeLabel|| '';
-    this.xLabel = opt.xLabel || 0;
-    this.pedal = opt.pedal || false;
-    this.stroke = this.pedal ? 2 : 1;
-    this.textAnchor = opt.textAnchor || 'middle';
-    this.color = opt.color || (opt.pedal? 'red' :'black');
-    this.BTNRADIUS = opt.radius || DIATONIC.map.Units.BTNRADIUS;
-    this.FONTSIZE = opt.fontsize || DIATONIC.map.Units.FONTSIZE; 
+    this.radius = opt.radius || 26;
+    this.kls = opt.kls || 'button';
 
 };
 
-DIATONIC.map.Button.prototype.draw = function( paper, limits, options ) {
+DIATONIC.map.Button.prototype.draw = function( id, printer, limits, options ) {
     
-    var currX, currY, currRadius, currFontSize;
+    var currX, currY;
 
     if( options.transpose ) {
         //horizontal
         currX = this.y;
-        currY = options.mirror ? this.x : limits.maxX - (this.x - limits.minX);
+        currY = options.mirror ? this.x : limits.maxX - this.radius*2 - (this.x - limits.minX);
     } else {
         //vertical
-        currX = options.mirror ? limits.maxX - (this.x - limits.minX): this.x;
+        currX = options.mirror ? limits.maxX - this.radius*2 - (this.x - limits.minX): this.x;
         currY = this.y;
     }
-    
-    currX *= options.scale;
-    currY *= options.scale;
-    currRadius =  this.BTNRADIUS*options.scale;
-    currFontSize = this.FONTSIZE*options.scale;
-    
-    //background
-    this.paper = paper || this.paper;
-    
-    this.circle = this.paper.circle(currX, currY, currRadius);
-    this.circle.attr({"fill": "white", "stroke": "white", "stroke-width": 0});
+   
+    this.SVG.gid = printer.printButton( id, currX, currY, this.radius, this.kls );
 
-    this.closeSide = this.paper.circularArc(currX, currY, currRadius, 170, 350);
-    this.closeSide.attr({"fill": "none", "stroke": "none", "stroke-width": 0});
-
-    this.openSide = this.paper.circularArc(currX, currY, currRadius, 350, 170);
-    this.openSide.attr({"fill": "none", "stroke": "none", "stroke-width": 0});
-
-    this.closeNoteKey = this.paper.text(currX + (this.xLabel*options.scale), currY-(12*options.scale), this.closeLabel)
-            .attr({'text-anchor': this.textAnchor, "font-family": "Sans Serif", "font-size": currFontSize });
-    
-    this.openNoteKey = this.paper.text(currX + (this.xLabel*options.scale), currY+(12*options.scale), this.openLabel)
-            .attr({'text-anchor': this.textAnchor, "font-family": "Sans Serif", "font-size": currFontSize });
-    
-    // top circle and line
-    this.paper.circle(currX, currY, currRadius)
-            .attr({"fill": "none", "stroke": this.color, "stroke-width": this.stroke});
-    this.paper.path( ["M", currX-currRadius, currY+(5*options.scale), "L", currX+currRadius, currY-(5*options.scale) ] )
-            .attr({"fill": "none", "stroke": this.color, "stroke-width": this.stroke});
-    
-    this.setText( options.label );
 };
 
 DIATONIC.map.Button.prototype.clear = function(delay) {
-    if(!this.closeSide) return;
+    if(!this.SVG) return;
     var that = this;
     if(delay) {
         window.setTimeout(function(){ that.clear(); }, delay*1000);
         return;
     }    
-    this.openSide.attr({"fill": "none", "stroke": "none", "stroke-width": 0});
-    this.closeSide.attr({"fill": "none", "stroke": "none", "stroke-width": 0});
+    this.SVG.button.style.setProperty( '--close-color', 'none' );
+    this.SVG.button.style.setProperty( '--open-color', 'none' );
 };
 
 DIATONIC.map.Button.prototype.setOpen = function(delay) {
-    if(!this.openSide) return;
+    if(!this.SVG) return;
     var that = this;
     if(  delay ) {
         window.setTimeout(function(){that.setOpen();}, delay*1000 );
         return;
     } 
-    this.openSide.attr({"fill": this.openColor, "stroke": this.openColor, "stroke-width": 0});
+    this.SVG.button.style.setProperty( '--open-color', this.openColor );
 };
 
 DIATONIC.map.Button.prototype.setClose = function(delay) {
-    if(!this.closeSide) return;
+    if(!this.SVG) return;
     var that = this;
     if(  delay ) {
         window.setTimeout(function(){that.setClose();}, delay*1000);
         return;
     } 
-    this.closeSide.attr({"fill": this.closeColor, "stroke": this.closeColor, "stroke-width": 0});
-    
+    this.SVG.button.style.setProperty( '--close-color', this.closeColor );
+};
+
+DIATONIC.map.Button.prototype.setSVG = function(showLabel, open, close ) {
+    var b = this.SVG;
+    this.SVG.button = document.getElementById(b.gid);
+    this.SVG.openText = document.getElementById(b.gid+'_to');
+    this.SVG.closeText = document.getElementById(b.gid+'_tc');
+    this.setText(showLabel, open, close ); 
+};
+
+DIATONIC.map.Button.prototype.setText = function( showLabel, open, close ) {
+    if(this.SVG.openText) {
+        this.SVG.openText.textContent = open ? open : this.getLabel( this.openNote, showLabel );
+        this.SVG.closeText.textContent = close ? close : this.getLabel( this.closeNote, showLabel );
+    }    
 };
 
 DIATONIC.map.Button.prototype.getLabel = function(nota, showLabel) {
@@ -159,40 +114,4 @@ DIATONIC.map.Button.prototype.getLabel = function(nota, showLabel) {
     }
     return l;
 };
-  
 
-DIATONIC.map.Button.prototype.getLabelOld = function(nota, showLabel) {
-    var l = '';
-    if (nota.isChord) {
-        l = DIATONIC.map.number2key[ nota.value ].toLowerCase() + '';
-    } else {
-        if (showLabel) {
-            l= DIATONIC.map.number2key_br[nota.value ];
-        } else {
-            l = DIATONIC.map.number2key[nota.value ];
-        }
-    }
-    if( nota.isMinor ) {
-        l+='-';
-    }
-    return l;
-};
-
-DIATONIC.map.Button.prototype.setText = function( showLabel ) {
-    if(this.openNote) {
-        this.setTextOpen( this.getLabel( this.openNote, showLabel ) );
-        this.setTextClose( this.getLabel( this.closeNote, showLabel ) );
-    }    
-};
-
-DIATONIC.map.Button.prototype.setTextClose = function(t) {
-    this.closeLabel = t;
-    if(this.closeNoteKey)
-        this.closeNoteKey.attr('text', this.closeLabel );
-};
-
-DIATONIC.map.Button.prototype.setTextOpen = function(t) {
-    this.openLabel = t;
-    if(this.openNoteKey)
-        this.openNoteKey.attr('text', this.openLabel );
-};

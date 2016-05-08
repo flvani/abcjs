@@ -10,6 +10,7 @@ copy /b/y parse\* tmp\parse.js
 copy /b/y tablature\* tmp\tablature.js
 copy /b/y write\* tmp\write.js
 copy /b/y midi\* tmp\midi.js
+copy /b/y svg\* tmp\svg.js
 
 copy /b/y api\abc_tunebook.js+data\abc_tune.js+tmp\parse.js+tmp\write.js tmp\abcjs-noraphael-nomidi.js
 
@@ -22,7 +23,7 @@ copy /b/y tmp\abcjs-nomidi.js+edit\abc_editor.js tmp\abcjs_editor-nomidi.js
 copy /b/y tmp\abcjs-noraphael.js+edit\abc_editor.js tmp\abcjs_editor-noraphael.js
 copy /b/y tmp\abcjs-noraphael-nomidi.js+edit\abc_editor.js tmp\abcjs_editor-noraphael-nomidi.js
 
-copy /b/y tmp\abcjs-all.js+tmp\tablature.js tmp\abcxjs.js
+copy /b/y tmp\abcjs-all.js+tmp\tablature.js+tmp\svg.js tmp\abcxjs.js
 copy /b/y tmp\abcjs-nomidi.js+tmp\tablature.js tmp\abcxjs-nomidi.js
 copy /b/y tmp\abcjs-noraphael.js+tmp\tablature.js tmp\abcxjs-noraphael.js
 copy /b/y tmp\abcjs-noraphael-nomidi.js+tmp\tablature.js tmp\abcxjs-noraphael-nomidi.js
@@ -43,6 +44,7 @@ rem rm tmp\*
 
 copy /b/y tmp\abcxjs.js ..\diatonic-map\abcxjs\
 copy /b/y tmp\diatonic.js ..\diatonic-map\diatonic\
+copy /b/y file\filemanager.js ..\diatonic-map\file\
 
 copy /b/y bin\abcxjs_%versao%-min.js ..\diatonic-map\abcxjs\
 copy /b/y bin\diatonic_%versao%-min.js ..\diatonic-map\diatonic\

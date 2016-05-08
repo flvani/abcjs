@@ -73,24 +73,31 @@ window.ABCXJS.data.Tune = function() {
     this.setFormat = function(vars) {
         var ph, pw;
         var ss = vars.staffsep|| 0;
-        var ps = vars.papersize || 'a4';
+        var ps = (vars.papersize || 'a4').toLowerCase();
         var ls = vars.landscape || false;
         var pn = vars.pagenumbering || false;
         
-        var defaultMargin = 10/25.4; // 10mm (in inches)
+        // inicialmente se usava 72dpi. 
+        // atualmente qualquer impressora, imprime no mínimo em 300dpi
+        // como é apenas um número, vou garantir que a largura de tela de pelo menos 1024 pontos
+        // considerada a largura do papel a4, menos 1cm de margem em cada lado
+        var dpi = 136.8508560545; //72;
+        
+        var defaultMargin = 1; // cm
+        var defaultMarginDPI = defaultMargin / 2.54 * dpi; // (1cm / 1 inch * dots.per.inch)
                 
-        switch (ps.toLowerCase()) {
+        switch (ps) {
             case "letter":
-                ph = 11 * 72;
-                pw = 8.5 * 72;
+                ph = 11 * dpi;
+                pw = 8.5 * dpi;
             case "legal":
-                ph = 14 * 72;
-                pw = 8.5 * 72;
+                ph = 14 * dpi;
+                pw = 8.5 * dpi;
                 break;
             case "a4":
             default:    
-                ph = 11.69 * 72;
-                pw = 8.27 * 72;
+                ph = 11.69 * dpi;
+                pw = 8.27 * dpi;
                 break;
         }
         
@@ -98,21 +105,43 @@ window.ABCXJS.data.Tune = function() {
             var x = ph;
             ph = pw;
             pw = x;
-            this.formatting.pageratio = (ph-(1*defaultMargin*72))/(pw-(1.80*defaultMargin*72)); // ???
-        } else {
-            this.formatting.pageratio = (ph-(1*defaultMargin*72))/(pw-(1.85*defaultMargin*72)); // ???
         }
+        
+        // para garantir que a largura da estaff nunca seja maior que a proporcao gerada por pageratio (para não forçara impressora a reduzir a impressao)
+        // também garante um zoom de 20% na impressão em landscape, reduzindo o largura útil e forçando a impressora a imprimir com zoom
+        this.formatting.usablewidth = (pw-(2*defaultMarginDPI)) * (ls? 0.82 : 1);
 
+        // para estimar o comprimento da página
+        this.formatting.pageratio = (ph-(2*defaultMarginDPI))/(pw-(2*defaultMarginDPI));
+        
+        
         if (!this.formatting.landscape)     this.formatting.landscape = ls;
         if (!this.formatting.papersize)     this.formatting.papersize = ps.toLowerCase();
+        if (!this.formatting.defaultMargin) this.formatting.defaultMargin = ''+defaultMargin+'cm';
         if (!this.formatting.pagewidth)     this.formatting.pagewidth = pw;
         if (!this.formatting.pageheight)    this.formatting.pageheight = ph;
         if (!this.formatting.pagenumbering) this.formatting.pagenumbering = pn;
         if (!this.formatting.staffsep)      this.formatting.staffsep = ss;
         if (!this.formatting.barsperstaff)  this.formatting.barsperstaff = vars.barsperstaff;
+        if (!this.formatting.staffwidth)    this.formatting.staffwidth = this.formatting.usablewidth;
         
     };
     
+    this.afterPrint = function() {
+        return;
+        var lines = this.lines;
+        for(var l=0; l<lines.length;l++){
+            for(var s=0; lines[l].staffs && s <lines[l].staffs.length;s++){
+                for(var v=0; v <lines[l].staffs[s].voices.length;v++){
+                    for(var a=0; a <lines[l].staffs[s].voices[v].length;a++){
+                       var abs = lines[l].staffs[s].voices[v][a].abselem;
+                       if( !abs || !abs.gid ) continue;
+                       abs.setMouse(document.getElementById(abs.gid));
+                    }
+                }
+            }
+        }
+    };
     
     this.handleBarsPerStaff = function() {
         function splitBar(left, right) {
@@ -462,7 +491,7 @@ window.ABCXJS.data.Tune = function() {
         delete this.potentialEndBeam;
     };
 
-    this.appendElement = function(type, startChar, endChar, hashParams)
+    this.appendElement = function(type, line, startChar, endChar, hashParams)
     {
         var This = this;
         var pushNote = function(hp) {
@@ -481,6 +510,7 @@ window.ABCXJS.data.Tune = function() {
             This.lines[This.lineNum].staffs[This.staffNum].voices[This.voiceNum].push(hp);
         };
         hashParams.el_type = type;
+        hashParams.line =  line;
         if (startChar !== null)
             hashParams.startChar = startChar;
         if (endChar !== null)
@@ -669,9 +699,9 @@ window.ABCXJS.data.Tune = function() {
                 }
             }
             if (params.style)
-                This.appendElement('style', null, null, {head: params.style});
+                This.appendElement('style', null, null, null, {head: params.style});
             if (params.stem)
-                This.appendElement('stem', null, null, {direction: params.stem});
+                This.appendElement('stem', null, null, null, {direction: params.stem});
             else if (This.voiceNum > 0) {
                 if (This.lines[This.lineNum].staffs[This.staffNum].voices[0] !== undefined) {
                     var found = false;
@@ -684,10 +714,10 @@ window.ABCXJS.data.Tune = function() {
                         This.lines[This.lineNum].staffs[This.staffNum].voices[0].splice(0, 0, stem);
                     }
                 }
-                This.appendElement('stem', null, null, {direction: 'down'});
+                This.appendElement('stem', null, null, null, {direction: 'down'});
             }
             if (params.scale)
-                This.appendElement('scale', null, null, {size: params.scale});
+                This.appendElement('scale', null, null, null, {size: params.scale});
         };
         var createStaff = function(params) {
             if (params.transpose)
@@ -709,7 +739,7 @@ window.ABCXJS.data.Tune = function() {
             // Some stuff just happens for the first voice
             createVoice(params);
             if (params.part)
-                This.appendElement('part', params.startChar, params.endChar, {title: params.part});
+                This.appendElement('part', null, params.startChar, params.endChar, {title: params.part});
             if (params.meter !== undefined)
                 This.lines[This.lineNum].staffs[This.staffNum].meter = params.meter;
         };

@@ -19,15 +19,6 @@ DIATONIC.map.key2number =
 DIATONIC.map.number2key    = ["C", "C♯", "D", "E♭", "E", "F", "F♯", "G", "G♯", "A", "B♭", "B"];
 DIATONIC.map.number2key_br = ["Dó", "Dó♯", "Ré", "Mi♭", "Mi", "Fá", "Fá♯", "Sol", "Sol♯", "Lá", "Si♭", "Si"];
 
-DIATONIC.map.Units = {
-    // aspectos do botão
-     BTNSIZE: 52
-    ,BTNRADIUS: 26
-    ,BTNSPACE: 3
-    ,FONTSIZE: 18 // razoavel ser menor que metade do btnSize
-};
-
-
 DIATONIC.map.loadAccordionMaps = function ( files, cb )  {
     var toLoad = 0;
     for( var f = 0; f <  files.length; f ++ ) {
