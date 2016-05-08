@@ -141,7 +141,7 @@ Elas foram incluídas em this.staves - ver:  abc_parse_key_voice e abc_parse_dir
 
         this.handleTie( elem, line, xi );
         this.handleSlur( elem, line, xi );
-        tune.appendElement(type, startOfLine + xi, startOfLine + xf, elem);
+        tune.appendElement(type, multilineVars.currTexLineNum, startOfLine + xi, startOfLine + xf, elem);
     };
     
 
@@ -1657,7 +1657,7 @@ Elas foram incluídas em this.staves - ver:  abc_parse_key_voice e abc_parse_dir
                             startNewLine();
                             tune.restsInTab = multilineVars.restsintab || false;
                             for (var i = 0; i < voice.length; i++) {
-                                tune.appendElement(voice[i].el_type, startOfLine + voice[i].startChar, startOfLine + voice[i].endChar, voice[i]);
+                                tune.appendElement(voice[i].el_type, multilineVars.currTexLineNum, startOfLine + voice[i].startChar, startOfLine + voice[i].endChar, voice[i]);
                             }
                         }
                     }
@@ -1725,6 +1725,7 @@ Elas foram incluídas em this.staves - ver:  abc_parse_key_voice e abc_parse_dir
         var lines = this.strTuneHouseKeeping();
         //try {
             for (var lineNumber = 0; lineNumber < lines.length; lineNumber++) {
+                multilineVars.currTexLineNum = lineNumber;
                 var line = lines[lineNumber];
                 if (switches) {
                     if (switches.header_only && multilineVars.is_in_header === false)

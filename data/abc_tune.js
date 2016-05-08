@@ -128,6 +128,7 @@ window.ABCXJS.data.Tune = function() {
     };
     
     this.afterPrint = function() {
+        return;
         var lines = this.lines;
         for(var l=0; l<lines.length;l++){
             for(var s=0; lines[l].staffs && s <lines[l].staffs.length;s++){
@@ -490,7 +491,7 @@ window.ABCXJS.data.Tune = function() {
         delete this.potentialEndBeam;
     };
 
-    this.appendElement = function(type, startChar, endChar, hashParams)
+    this.appendElement = function(type, line, startChar, endChar, hashParams)
     {
         var This = this;
         var pushNote = function(hp) {
@@ -509,6 +510,7 @@ window.ABCXJS.data.Tune = function() {
             This.lines[This.lineNum].staffs[This.staffNum].voices[This.voiceNum].push(hp);
         };
         hashParams.el_type = type;
+        hashParams.line =  line;
         if (startChar !== null)
             hashParams.startChar = startChar;
         if (endChar !== null)
@@ -697,9 +699,9 @@ window.ABCXJS.data.Tune = function() {
                 }
             }
             if (params.style)
-                This.appendElement('style', null, null, {head: params.style});
+                This.appendElement('style', null, null, null, {head: params.style});
             if (params.stem)
-                This.appendElement('stem', null, null, {direction: params.stem});
+                This.appendElement('stem', null, null, null, {direction: params.stem});
             else if (This.voiceNum > 0) {
                 if (This.lines[This.lineNum].staffs[This.staffNum].voices[0] !== undefined) {
                     var found = false;
@@ -712,10 +714,10 @@ window.ABCXJS.data.Tune = function() {
                         This.lines[This.lineNum].staffs[This.staffNum].voices[0].splice(0, 0, stem);
                     }
                 }
-                This.appendElement('stem', null, null, {direction: 'down'});
+                This.appendElement('stem', null, null, null, {direction: 'down'});
             }
             if (params.scale)
-                This.appendElement('scale', null, null, {size: params.scale});
+                This.appendElement('scale', null, null, null, {size: params.scale});
         };
         var createStaff = function(params) {
             if (params.transpose)
@@ -737,7 +739,7 @@ window.ABCXJS.data.Tune = function() {
             // Some stuff just happens for the first voice
             createVoice(params);
             if (params.part)
-                This.appendElement('part', params.startChar, params.endChar, {title: params.part});
+                This.appendElement('part', null, params.startChar, params.endChar, {title: params.part});
             if (params.meter !== undefined)
                 This.lines[This.lineNum].staffs[This.staffNum].meter = params.meter;
         };

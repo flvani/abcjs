@@ -570,12 +570,12 @@ ABCXJS.write.AbsoluteElement.prototype.draw = function(printer, staveInfo ) {
 //        this.elemset.drag(move, start, up);
 };
 
-ABCXJS.write.AbsoluteElement.prototype.setMouse = function(svg) {
+ABCXJS.write.AbsoluteElement.prototype.setMouse = function(printer) {
     var self = this;
-    this.svgElem = svg;
-    this.svgElem.onmouseover =  function() {self.highlight(this);};
-    this.svgElem.onmouseout =  function() {self.unhighlight(this);};
-    this.svgElem.onclick =  function() {self.click(this);};
+    this.svgElem = document.getElementById(self.gid);
+    this.svgElem.onmouseover =  function() {self.highlight(self);};
+    this.svgElem.onmouseout =  function() {self.unhighlight(self);};
+    this.svgElem.onclick =  function() {printer.notifyClearNSelect(self);};
  };
  
  

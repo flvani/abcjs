@@ -61,9 +61,8 @@ ABCXJS.write.Printer.prototype.printABC = function(abctunes, options) {
   }
   this.y=0;
   
-  options = options || {};
-
-  options.color='red';
+  //options = options || {};
+  //options.color='red';
   
   for (var i = 0; i < abctunes.length; i++) {
     this.printTune( abctunes[i], options /*, {color:'red', backgroundColor:'#ffd', beamColor:'blue' }*/ );
@@ -308,7 +307,7 @@ ABCXJS.write.Printer.prototype.printTune = function(abctune, options) {
                 for(var a=0; a <lines[l].staffs[s].voices[v].length;a++){
                    var abs = lines[l].staffs[s].voices[v][a].abselem;
                    if( !abs || !abs.gid ) continue;
-                   abs.setMouse(document.getElementById(abs.gid));
+                   abs.setMouse(this);
                 }
             }
         }
