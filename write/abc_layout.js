@@ -221,7 +221,7 @@ ABCXJS.write.Layout.prototype.printABCElement = function() {
   case "part":
     var abselem = new ABCXJS.write.AbsoluteElement(elem,0,0);
     //fixme: corrigir adequatamente os atributos deste titulo
-    abselem.addChild(new ABCXJS.write.RelativeElement(elem.title, 0, 0, 18, {type:"text", attributes:{"font-weight":"bold", "font-size":""+16+"px", "font-family":"serif"}}));
+    abselem.addChild(new ABCXJS.write.RelativeElement(elem.title, 0, 0, 18.5, {type:"part" })); //, attributes:{"font-weight":"bold", "font-size":""+16+"px", "font-family":"serif"}}));
     elemset[0] = abselem;
     break;
   default: 
@@ -375,7 +375,7 @@ ABCXJS.write.Layout.prototype.printNote = function(elem, nostem, dontDraw) { //s
         for (p = 0; p < elem.pitches.length; p++) {
 
             if (/*!nostem flavio*/ 1 ) { // vou retirar apenas flags
-                if (/*flavio*/nostem || (dir === "down" && p !== 0) || (dir === "up" && p !== pp - 1)) { // not the stemmed elem of the chord
+                if (/*flavio*/ nostem || (dir === "down" && p !== 0) || (dir === "up" && p !== pp - 1)) { // not the stemmed elem of the chord
                     flag = null;
                 } else {
                     flag = ABCXJS.write.chartable[(dir === "down") ? "dflags" : "uflags"][-durlog];
@@ -513,9 +513,9 @@ ABCXJS.write.Layout.prototype.printNote = function(elem, nostem, dontDraw) { //s
 
     if (elem.barNumber && elem.barNumberVisible && !dontDraw ) {
         if(this.lastAbs) {
-          this.lastAbs.addChild(new ABCXJS.write.RelativeElement(elem.barNumber, (elem.barNumber > 10?-8:-4), 0, 13, {type: "text"}));
+          this.lastAbs.addChild(new ABCXJS.write.RelativeElement(elem.barNumber, 0, 0, 12, {type: "barnumber"}));
         } else {
-          abselem.addChild(new ABCXJS.write.RelativeElement(elem.barNumber, (elem.barNumber > 10?8:4), 0, 13, {type: "text"}));
+          abselem.addChild(new ABCXJS.write.RelativeElement(elem.barNumber, 0, 0, 12, {type: "barnumber"}));
         }
     }
 

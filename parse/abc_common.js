@@ -28,7 +28,7 @@ window.ABCXJS.misc.isOpera = function() {
 };
 
 window.ABCXJS.misc.isChrome= function() {
-    return (( !!window.chrome && !isOpera() ) > 0 ); // Chrome 1+
+    return (( !!window.chrome && !ABCXJS.misc.isOpera() ) > 0 ); // Chrome 1+
 };
 
 window.ABCXJS.misc.isFirefox = function() {

@@ -65,7 +65,7 @@ ABCXJS.write.Printer.prototype.printABC = function(abctunes, options) {
   //options.color='red';
   
   for (var i = 0; i < abctunes.length; i++) {
-    this.printTune( abctunes[i], options /*, {color:'red', backgroundColor:'#ffd', beamColor:'blue' }*/ );
+    this.printTune( abctunes[i], options /*, {color:'red', backgroundColor:'#ffd'}*/ );
   }
 
 };
@@ -74,7 +74,6 @@ ABCXJS.write.Printer.prototype.printTune = function(abctune, options) {
     
     options = options || {};
     options.color = options.color ||'black';
-    options.beamColor = options.beamColor ||'black';
     options.backgroundColor = options.backgroundColor ||'none';
     
     
@@ -149,15 +148,17 @@ ABCXJS.write.Printer.prototype.printTune = function(abctune, options) {
     \n\
     .abc_tabtext3 {\n\
         font-size: 10px;\n\
-    }\n\
-    \n\
-    .debug {\n\
-        stroke: red;\n\
-    }\n\
-    svg { fill:'+options.color+'; } \n\
-    .beam { fill:'+options.beamColor+'; stroke:'+options.beamColor+'; stroke-width:0.6; }\n\
-    .ledger { fill:none; stroke:'+options.beamColor+'; stroke-width:0.6; stroke-dasharray: 1 1; }';
+    }   ';
     
+    ABCXJS.write.unhighLightColor = options.color;
+    
+//     svg { --fill-color:'+options.color+'; } \n\
+//    .bar { fill: var(--fill-color, black); stroke:'+'none'+'; stroke-width:0.6; }\n\
+//    .stem { fill:'+'black'+'; stroke:'+'none'+'; stroke-width:0.6; }\n\
+//    .beam { fill:'+options.color+'; stroke:'none; }\n\
+//    .ledger { fill:white; stroke:'+options.color+'; stroke-width:0.6; stroke-dasharray: 1 1; }\n\
+//    .stave { fill:'+'none'+'; stroke:'+options.color+'; stroke-width:0.6; }\n  
+
     var svg_title = 'Partitura ' + abctune.metaText.title + ' criada por ABCXJS.';
     
     if( abctune.midi) {
@@ -188,10 +189,10 @@ ABCXJS.write.Printer.prototype.printTune = function(abctune, options) {
 
     if (abctune.lines[0].staffs[0].subtitle) {
         this.printSubtitleLine(abctune.lines[0].staffs[0].subtitle);
-        //this.y += 20;
     }
     
-    var composerLine = "", meta = false;
+    var composerLine = "";
+    
     if (abctune.metaText.composer)
         composerLine += abctune.metaText.composer;
     if (abctune.metaText.origin)
@@ -200,21 +201,19 @@ ABCXJS.write.Printer.prototype.printTune = function(abctune, options) {
         composerLine += (composerLine.length> 0?'\n':'') + abctune.metaText.author;
 
     if (composerLine.length > 0) {
-        this.paper.text(this.width, 30, composerLine, 'abc_author', 'end' );
-        meta = true;
+        var n = composerLine.split('\n').length;
+        var dy = (n>1?(n>2?0:15):30);
+        this.paper.text(this.width, dy, composerLine, 'abc_author', 'end' );
     } 
     
     var xtempo ;
     if (abctune.metaText.tempo && !abctune.metaText.tempo.suppress) {
         xtempo = this.printTempo(this.paddingleft*2, abctune.metaText.tempo );
-        meta = true;
     }
     if (abctune.metaText.rhythm) {
         this.paper.text( xtempo || this.paddingleft*3+5, this.y, abctune.metaText.rhythm, 'abc_rhythm', 'start');
-        meta = true;
     }
     
-    //(meta) && (this.y += 10);
     this.y += 20;
 
     // impressão dos grupos de pautas
@@ -269,7 +268,7 @@ ABCXJS.write.Printer.prototype.printTune = function(abctune, options) {
     }    
     
     if(h1> 0) {
-        height = ABCXJS.write.spacing.STEP*3 + h1*1.5*17; // 1.5??? ver translate...
+        height = ABCXJS.write.spacing.STEP*3 + h1*1.5*17; 
         if( ( this.pageNumber - ((this.y+height)/this.estimatedPageLength) ) < 0 ) {
            this.skipPage();
         } else {
@@ -397,13 +396,13 @@ ABCXJS.write.Printer.prototype.printTieArc = function(x1, x2, pitch1, pitch2, ab
 
 ABCXJS.write.Printer.prototype.printStave = function (startx, endx, staff ) {
     if(staff.numLines === 4) {
-      this.paper.printStaveLine(startx,endx,this.calcY(19.5), 'ledger' ); 
+      this.printLedger(startx,endx, 19.5); 
       
       // imprimo duas linhas para efeito
       this.paper.printStaveLine(startx,endx,this.calcY(15)-0.5 ); 
       this.paper.printStaveLine(startx,endx,this.calcY(15) ); 
       
-      this.paper.printStaveLine(startx,endx,this.calcY(7.5), 'ledger' ); 
+      this.printLedger(startx,endx, 7.5 ); 
       
       this.paper.printStaveLine(startx,endx,this.calcY(0)); 
     } else {
@@ -414,21 +413,25 @@ ABCXJS.write.Printer.prototype.printStave = function (startx, endx, staff ) {
 };
 
 ABCXJS.write.Printer.prototype.printDebugLine = function (x1,x2, y, fill ) {
-   this.paper.printStaveLine(x1,x2, y, 'stave', fill ) ; 
+   this.paper.printStaveLine(x1,x2, y, fill ) ; 
 };
 
 ABCXJS.write.Printer.prototype.printLedger = function (x1, x2, pitch) {
-    if( pitch < 2 || pitch > 10 ) {
-      this.paper.printStaveLine(x1, x2, this.calcY(pitch), 'ledger' );
-    } else {
-      return null;
-    }  
+      this.paper.printLedger(x1, this.calcY(pitch), x2, this.calcY(pitch) );
+      
+//    if( pitch < 2 || pitch > 10 ) {
+//      this.paper.printLedger(x1, this.calcY(pitch), Math.abs(x1-x2), 0.6 );
+//    } else {
+//      return null;
+//    }  
 };
 
-ABCXJS.write.Printer.prototype.printText = function (x, offset, text, anchor) {
+ABCXJS.write.Printer.prototype.printText = function (x, offset, text, kls, anchor ) {
     anchor = anchor || "start";
-    this.paper.text(x, this.calcY(offset), text, 'abc_text', anchor);
+    kls = kls || "abc_text";
+    this.paper.text(x, this.calcY(offset), text, kls, anchor);
 };
+
 ABCXJS.write.Printer.prototype.printTabText = function (x, offset, text, klass) {
     klass = klass || 'abc_tabtext';
     this.paper.tabText(x, this.calcY(offset)+5, text, klass, 'middle');
@@ -453,8 +456,11 @@ ABCXJS.write.Printer.prototype.printDebugMsg = function(x, y, msg ) {
   return this.paper.text(x, y, msg, 'abc_ending', 'start');
 };
 
-ABCXJS.write.Printer.prototype.printLyrics = function(x, ypos, msg) {
-    var y = this.calcY(ypos);
+ABCXJS.write.Printer.prototype.printLyrics = function(x, staveInfo, msg) {
+    //var y = staveInfo.lowest-ABCXJS.write.spacing.STEP*staveInfo.lyricsRows;
+    //y += (staveInfo.lyricsRows-0.5);
+    y = this.calcY(staveInfo.lowest-(staveInfo.lyricsRows>1?0:3.5));
+    
     // para manter alinhado, quando uma das linhas for vazia, imprimo 3 pontos
     var i = msg.indexOf( "\n " );
     if( i >= 0) msg = msg.substr(0, i) + "\n...";
@@ -534,7 +540,7 @@ ABCXJS.write.Printer.prototype.calcY = function(ofs) {
 };
 
 ABCXJS.write.Printer.prototype.calcPageLength = function() {
-    this.estimatedPageLength = (this.maxwidth+this.paddingright)*this.pageratio - this.paddingbottom;
+    this.estimatedPageLength = ((this.maxwidth+this.paddingright)*this.pageratio - this.paddingbottom)/this.scale;
 };
 
 ABCXJS.write.Printer.prototype.printPageNumber = function() {

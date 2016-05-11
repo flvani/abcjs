@@ -564,7 +564,7 @@ window.ABCXJS.data.Tune = function() {
         pushNote(hashParams);
     };
 
-    this.appendStartingElement = function(type, startChar, endChar, hashParams2)
+    this.appendStartingElement = function(type, currTexLineNum, startChar, endChar, hashParams2)
     {
         // If we're in the middle of beaming, then end the beam.
         this.closeLine();

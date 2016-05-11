@@ -233,7 +233,8 @@ ABCXJS.midi.Parse.prototype.handleButtons = function(pitches, buttons ) {
             }
         }
         if(this.lastBar && ((note.isBass && hasBass) || (!note.isBass && hasTreble /* flavio && this.lastBar */))) {
-            self.addWarning( 'Compasso '+this.lastBar+': Botao '+item.button.button.tabButton+' ('+item.button.button.closeLabel+'/'+item.button.button.openLabel+') não corresponde a nenhuma nota em execução.');
+            var b = item.button.button;
+            self.addWarning( 'Compasso '+this.lastBar+': Botao '+b.tabButton+' ('+b.closeNote.key+'/'+b.openNote.key+') não corresponde a nenhuma nota em execução.');
         }    
     });
 };

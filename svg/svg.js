@@ -81,7 +81,7 @@ SVG.Printer = function ( d ) {
         var d = size? '' : 'display: none; ';
         kls = kls? 'class="'+kls+'"' : '' ;
         
-        return '<svg id="'+id+'" '+kls+' xmlns="http://www.w3.org/2000/svg" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" style="'+d+'width:'+w+'; height: '+h+';" >\n';
+        return '<svg id="'+id+'" xmlns="http://www.w3.org/2000/svg" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" style="'+d+'width:'+w+'; height: '+h+';" >\n';
     };
 };
 
@@ -90,6 +90,7 @@ SVG.Printer.prototype.initDoc = function( docId, title, add_styles, options ) {
     this.docId = docId || 'dcto';
     this.title = title || '';
     this.backgroundColor = options.backgroundColor || 'none';
+    this.color = options.color || 'black';
     this.scale = 1.0;
     this.defines = '';
     this.defined_glyph = [];
@@ -99,17 +100,19 @@ SVG.Printer.prototype.initDoc = function( docId, title, add_styles, options ) {
     this.gid=0;
     this.styles = 
 '<style type="text/css">\n\
-    //<![CDATA[\n\
     @media print {\n\
         div.nobrk {page-break-inside: avoid}\n\
         div.newpage {page-break-before: always}\n\
-    }\n'+(add_styles||'')+'\n//]]>\n</style>\n';
+    }\n'+(add_styles||'')+'\n</style>\n';
+    
+//<![CDATA[\n\
+//]]>\n
     
 };
 
 SVG.Printer.prototype.endDoc = function( owner ) {
 
-    var output = '<div style="display:block; margin:0; padding: 0; width: fit-content;  background-color:'+this.backgroundColor+'; ">\n' + this.svgHead( this.docId );
+    var output = '<div style="display:block; margin:0; padding: 0; width: fit-content; --fill-color:'+this.color+';  background-color:'+this.backgroundColor+'; ">\n' + this.svgHead( this.docId );
     
     output += '<title>'+this.title+'</title>\n';
     output += this.styles;
@@ -154,7 +157,7 @@ SVG.Printer.prototype.endPage = function( size ) {
 };
 
 SVG.Printer.prototype.beginGroup = function (el_type) {
-    var kls = el_type==='bar'?' class="beam"':'';
+    var kls = "" ; //var kls = el_type==='bar'?' class="bar"':'';
     var id = 'p'+this.printerId+'g'+(++this.gid); 
     this.svg_pages[this.currentPage] += '<g id="'+id+'"'+kls+'>\n';  
     return id;
@@ -176,21 +179,26 @@ SVG.Printer.prototype.setDefine = function (s) {
     return true;
 };
 
-SVG.Printer.prototype.printLine = function (x,y,dx,dy,klass) {
-    klass = klass || 'beam';
-    var pathString = ABCXJS.write.sprintf('<path class="%s" d="M %.2f %.2f L %.2f %.2f"/>\n', klass, x, y, dx, dy);
+SVG.Printer.prototype.printLine = function (x,y,dx,dy) {
+    var pathString = ABCXJS.write.sprintf('<path style="stroke: var(--fill-color, black); stroke-width: 0.6;" d="M %.2f %.2f L %.2f %.2f"/>\n', x, y, dx, dy);
     this.svg_pages[this.currentPage] += pathString;
 };
 
-SVG.Printer.prototype.printStaveLine = function (x1, x2, y, klass, debug) {
-    
-    klass = klass || 'beam';
-    
-    if( debug ){ // debug
-        klass='debug';
-    }
-    
-    var pathString = ABCXJS.write.sprintf('<path class="%s" d="M%.2f %.2f H%.2f"/>\n', klass, x1, y, x2);
+SVG.Printer.prototype.printLedger = function (x,y,dx,dy) {
+    var pathString = ABCXJS.write.sprintf('<path style="fill:white; stroke: var(--fill-color, black); ; stroke-width:0.6; stroke-dasharray: 1 1; " d="M %.2f %.2f L %.2f %.2f"/>\n', x, y, dx, dy);
+    this.svg_pages[this.currentPage] += pathString;
+};
+
+SVG.Printer.prototype.printBeam = function (x1,y1,x2,y2,x3,y3,x4,y4) {
+    var pathString = ABCXJS.write.sprintf('<path style="fill: var(--fill-color, black); stroke: none;" d="M %.2f %.2f L %.2f %.2f L %.2f %.2f L %.2f %.2f z"/>\n',  x1, y1, x2, y2, x3, y3, x4, y4);
+    this.svg_pages[this.currentPage] += pathString;
+};
+
+SVG.Printer.prototype.printStaveLine = function (x1, x2, y, debug) {
+    var color = debug? debug : 'var(--fill-color, black)';
+    var dy =0.6;   
+    var pathString = ABCXJS.write.sprintf('<rect style="fill: %s;" x="%.2f" y="%.2f" width="%.2f" height="%.2f"/>\n', 
+                                                color, x1, y, Math.abs(x2-x1), dy );
     this.svg_pages[this.currentPage] += pathString;
 };
 
@@ -205,7 +213,7 @@ SVG.Printer.prototype.printBar = function (x, dx, y1, y2) {
     var dy = Math.abs(y2-y1);
     dx = Math.abs(dx); 
     
-    var pathString = ABCXJS.write.sprintf('<rect x="%.2f" y="%.2f" width="%.2f" height="%.2f"/>\n', Math.min(x,x2), Math.min(y1,y2), dx, dy );
+    var pathString = ABCXJS.write.sprintf('<rect style="fill: var(--fill-color, black);" x="%.2f" y="%.2f" width="%.2f" height="%.2f"/>\n', Math.min(x,x2), Math.min(y1,y2), dx, dy );
 
     this.svg_pages[this.currentPage] += pathString;
 };
@@ -221,15 +229,11 @@ SVG.Printer.prototype.printStem = function (x, dx, y1, y2) {
     var dy = Math.abs(y2-y1);
     dx = Math.abs(dx); 
     
-    var pathString = ABCXJS.write.sprintf('<rect x="%.2f" y="%.2f" width="%.2f" height="%.2f"/>\n', Math.min(x,x2), Math.min(y1,y2), dx, dy );
+    var pathString = ABCXJS.write.sprintf('<rect style="fill: var(--fill-color, black);" x="%.2f" y="%.2f" width="%.2f" height="%.2f"/>\n', Math.min(x,x2), Math.min(y1,y2), dx, dy );
 
     this.svg_pages[this.currentPage] += pathString;
 };
 
-SVG.Printer.prototype.printBeam = function (x1,y1,x2,y2,x3,y3,x4,y4) {
-    var pathString = ABCXJS.write.sprintf('<path d="M %.2f %.2f L %.2f %.2f L %.2f %.2f L %.2f %.2f z"/>\n',  x1, y1, x2, y2, x3, y3, x4, y4);
-    this.svg_pages[this.currentPage] += pathString;
-};
 
 SVG.Printer.prototype.printTieArc = function (x1,y1,x2,y2,up) {
     
@@ -249,7 +253,7 @@ SVG.Printer.prototype.printTieArc = function (x1,y1,x2,y2,up) {
     var controly2 = y2-flatten*uy+curve*ux;
     var thickness = 2;
     
-    var pathString = ABCXJS.write.sprintf('<path d="M %.2f %.2f C %.2f %.2f %.2f %.2f %.2f %.2f C %.2f %.2f %.2f %.2f %.2f %.2f z"/>\n', 
+    var pathString = ABCXJS.write.sprintf('<path style="fill: var(--fill-color, black);" d="M %.2f %.2f C %.2f %.2f %.2f %.2f %.2f %.2f C %.2f %.2f %.2f %.2f %.2f %.2f z"/>\n', 
                             x1, y1,
                             controlx1, controly1, controlx2, controly2, x2, y2, 
                             controlx2-thickness*uy, controly2+thickness*ux, controlx1-thickness*uy, controly1+thickness*ux, x1, y1 );
@@ -277,7 +281,7 @@ SVG.Printer.prototype.printBrace = function (x, y1, y2) {
     var sz = Math.abs(y1-y2); // altura esperada
     var scale = sz / 1027; // altura real do simbolo
     this.setDefine('scripts.lbrace');
-    var pathString = ABCXJS.write.sprintf('<use class="beam" x="0" y="0" xlink:href="#scripts.lbrace" transform="translate(%.2f %.2f) scale(0.13 %.5f)" />\n', x, y2, scale );
+    var pathString = ABCXJS.write.sprintf('<use x="0" y="0" xlink:href="#scripts.lbrace" transform="translate(%.2f %.2f) scale(0.13 %.5f)" />\n', x, y2, scale );
     this.svg_pages[this.currentPage] += pathString;
 };
 
@@ -298,7 +302,7 @@ SVG.Printer.prototype.tabText = function( x, y, str, clss, anch ) {
    x = x.toFixed(2);
    y = y.toFixed(2);
    
-   this.svg_pages[this.currentPage] += '<text class="'+clss+'" x="'+x+'" y="'+y+'" >'+str+'</text>\n';
+   this.svg_pages[this.currentPage] += '<text class="'+clss+'" style="fill: var(--fill-color, black);" x="'+x+'" y="'+y+'" >'+str+'</text>\n';
 };
 
 SVG.Printer.prototype.text = function( x, y, str, clss, anch ) {
@@ -313,9 +317,9 @@ SVG.Printer.prototype.text = function( x, y, str, clss, anch ) {
    y = y.toFixed(2);
    
    if(t.length < 2) {
-       this.svg_pages[this.currentPage] += '<text class="'+clss+'" x="'+x+'" y="'+y+'" text-anchor="'+anch+'">'+t[0]+'</text>\n';
+       this.svg_pages[this.currentPage] += '<text class="'+clss+'" style="fill: var(--fill-color, black);" x="'+x+'" y="'+y+'" text-anchor="'+anch+'">'+t[0]+'</text>\n';
    } else {
-       this.svg_pages[this.currentPage] += '<g class="'+clss+'" transform="translate('+x+' '+y+')">\n';
+       this.svg_pages[this.currentPage] += '<g class="'+clss+'" style="fill: var(--fill-color, black);" transform="translate('+x+' '+y+')">\n';
        this.svg_pages[this.currentPage] += '<text text-anchor="'+anch+'" x="0" y="0">\n';
        for(var i = 0; i < t.length; i++ )
            this.svg_pages[this.currentPage] += '<tspan x="0" dy="1.2em" >'+t[i]+'</tspan>\n';

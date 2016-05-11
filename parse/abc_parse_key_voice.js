@@ -733,6 +733,7 @@ window.ABCXJS.parse.parseKeyVoice = {};
 					case 'merge':
 						staffInfo.startStaff = false;
 						break;
+					case 'stem':
 					case 'stems':
 						attr = tokenizer.getVoiceToken(line, start, end);
 						if (attr.warn !== undefined)
@@ -766,6 +767,9 @@ window.ABCXJS.parse.parseKeyVoice = {};
 					case 'transpose':
 						addNextTokenToVoiceInfo(id, 'transpose', 'number');
 						break;
+                                        default:
+                                                warn("Error parsing voice. Unknown token: " + token.token, line, start);
+
 				}
 			}
 			start += tokenizer.eatWhiteSpace(line, start);

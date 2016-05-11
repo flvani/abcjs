@@ -23,6 +23,7 @@ if (!window.ABCXJS.write)
     window.ABCXJS.write = {};
 
 ABCXJS.write.highLightColor = "#5151ff";
+ABCXJS.write.unhighLightColor = 'black';
 
 ABCXJS.write.StaffGroupElement = function() {
     this.voices = [];
@@ -160,7 +161,7 @@ ABCXJS.write.StaffGroupElement.prototype.calcHeight = function(voz) {
     // calculo da altura da pauta + uma pequena folga
     var h = (2+voz.stave.highest-voz.stave.lowest) * ABCXJS.write.spacing.STEP;
     // inclui espaço para as linhas de texto
-    h += ABCXJS.write.spacing.STEP * 6 * voz.stave.lyricsRows;
+    h += 14 * voz.stave.lyricsRows;
     return h;
 };
 
@@ -419,7 +420,7 @@ ABCXJS.write.VoiceElement.prototype.draw = function(printer) {
         //var headerY = printer.calcY(textpitch)
         var headerY = (ve.stave.clef.type!=='accordionTab'? printer.calcY(6) : ve.stave.y ) +3;
         var headerX = printer.paddingleft;
-        printer.paper.text(headerX, headerY,  this.header, 'abc_voice_header', 'start' );
+        printer.printText(headerX, headerY,  this.header, 'abc_voice_header', 'start' );
     }
     
     // beams must be drawn first for proper printing of triplets, slurs and ties.
@@ -518,7 +519,7 @@ ABCXJS.write.AbsoluteElement.prototype.draw = function(printer, staveInfo ) {
     // imprimir primeiro ledger e mante-los fora do grupo de selecionaveis
     for (var i = 0; i < this.children.length; i++) {
         //this.elemset.push(this.children[i].draw(printer, this.x, staveInfo ));
-        if ( this.children[i].type === 'ledger' ) {
+        if ( this.children[i].type === 'ledger' || this.children[i].type === 'part' ) {
             this.children[i].draw(printer, this.x, staveInfo );
         } else {
             l++; // count notes, bars, etc
@@ -531,7 +532,7 @@ ABCXJS.write.AbsoluteElement.prototype.draw = function(printer, staveInfo ) {
     
     for (var i = 0; i < this.children.length; i++) {
         //this.elemset.push(this.children[i].draw(printer, this.x, staveInfo ));
-        ( this.children[i].type !== 'ledger' ) && this.children[i].draw(printer, this.x, staveInfo );
+        ( this.children[i].type !== 'ledger' && this.children[i].type !== 'part' ) && this.children[i].draw(printer, this.x, staveInfo );
     }
     
     //this.elemset.push(printer.endGroup());
@@ -579,13 +580,26 @@ ABCXJS.write.AbsoluteElement.prototype.setMouse = function(printer) {
  };
  
  
-ABCXJS.write.AbsoluteElement.prototype.click = function() {
-   printer.notifyClearNSelect(self); 
-};
+//ABCXJS.write.AbsoluteElement.prototype.click = function() {
+//   printer.notifyClearNSelect(self); 
+//};
 
 
-//ABCXJS.write.AbsoluteElement.prototype.setClass = function(addClass, removeClass, color) {
-//    this.elemset.attr({fill: color});
+ABCXJS.write.AbsoluteElement.prototype.setClass = function(addClass, removeClass, color) {
+    //this.elemset.attr({fill: color});
+    var kls = this.svgElem.getAttribute("class");
+    if (!kls)
+        kls = "";
+    kls = kls.replace(removeClass, "");
+    kls = kls.replace(addClass, "");
+    if (addClass.length > 0) {
+        if (kls.length > 0 && kls.charAt(kls.length - 1) !== ' ')
+            kls += " ";
+        kls += addClass;
+    }
+    this.svgElem.setAttribute("class", kls.trim() );
+    
+    
 //    if (!ABCXJS.misc.isIE()) {
 //        for (var i = 0; i < this.elemset.length; i++) {
 //            if (this.elemset[i][0].setAttribute) {
@@ -603,16 +617,20 @@ ABCXJS.write.AbsoluteElement.prototype.click = function() {
 //            }
 //        }
 //    }
-//};
+};
 
 ABCXJS.write.AbsoluteElement.prototype.highlight = function() {
-    this.svgElem.style.fill= ABCXJS.write.highLightColor;
-    //this.setClass("note_selected", "", ABCXJS.write.highLightColor );
+    //this.svgElem.style.fill= ABCXJS.write.highLightColor;
+    //this.setClass("selected", "", ABCXJS.write.highLightColor );
+    this.svgElem.style.setProperty( '--fill-color', ABCXJS.write.highLightColor );
+
 };
 
 ABCXJS.write.AbsoluteElement.prototype.unhighlight = function() {
-    this.svgElem.style.fill= 'black';
-    //this.setClass("", "note_selected", "black");
+    //this.svgElem.style.fill= 'black';
+    //this.setClass("", "selected", "black");
+    this.svgElem.style.setProperty( '--fill-color', ABCXJS.write.unhighLightColor );
+    //this.svgElem.style.setProperty( '--fill-color', 'black' );
 };
 
 ABCXJS.write.RelativeElement = function(c, dx, w, pitch, opt) {
@@ -643,12 +661,16 @@ ABCXJS.write.RelativeElement.prototype.draw = function(printer, x, staveInfo ) {
             this.graphelem = printer.printDebugMsg(this.x, staveInfo.highest+2, this.c);
             break;
         case "lyrics":
-            var y = staveInfo.lowest-ABCXJS.write.spacing.STEP*staveInfo.lyricsRows;
-            y += (staveInfo.lyricsRows-0.5);
-            this.graphelem = printer.printLyrics(this.x, y, this.c);
+            this.graphelem = printer.printLyrics(this.x, staveInfo, this.c);
+            break;
+        case "barnumber":
+            this.graphelem = printer.printText(this.x, this.pitch, this.c, 'abc_ending', 'middle');
+            break
+        case "part":
+            this.graphelem = printer.printText(this.x, this.pitch, this.c, 'abc_subtitle');
             break;
         case "text":
-            this.graphelem = printer.printText(this.x, this.pitch, this.c);
+            this.graphelem = printer.printText(this.x, this.pitch, this.c, 'abc_text');
             break;
         case "tabText":
             this.graphelem = printer.printTabText(this.x, this.pitch, this.c);
@@ -689,7 +711,7 @@ ABCXJS.write.RelativeElement.prototype.drawStem = function( printer ) {
         var dx = (beam.asc) ? -0.6 : 0.6;
         printer.printStem(x, dx, y, bary);        
     } else {
-        this.graphelem = printer.printStem(this.x, this.linewidth, printer.calcY(this.pitch), printer.calcY(this.pitch2));
+        this.graphelem = printer.printStem(this.x, 0.6*this.linewidth/*fixme: mudar linew para 0.6*/, printer.calcY(this.pitch), printer.calcY(this.pitch2));
     }
 };
 
@@ -835,7 +857,7 @@ ABCXJS.write.TripletElem.prototype.draw = function(printer, linestartx, lineendx
         }
 
 
-        printer.printText(xsum / 2, ypos + ydelta, this.number, "middle");
+        printer.printText(xsum / 2, ypos + ydelta, this.number, 'abc_ending', "middle");
 
     }
 };
@@ -876,6 +898,16 @@ ABCXJS.write.BeamElem.prototype.average = function() {
     } catch (e) {
         return 0;
     }
+};
+
+ABCXJS.write.BeamElem.prototype.calcDir = function() {
+    var average = this.average();
+    this.asc = (this.forceup || this.isgrace || average < 6) && (!this.forcedown); // hardcoded 6 is B
+    return this.asc;
+};
+
+ABCXJS.write.BeamElem.prototype.getBarYAt = function(x) {
+    return this.starty + (this.endy - this.starty) / (this.endx - this.startx) * (x - this.startx);
 };
 
 ABCXJS.write.BeamElem.prototype.draw = function(printer) {
@@ -920,63 +952,45 @@ ABCXJS.write.BeamElem.prototype.draw = function(printer) {
         this.endy = printer.calcY(6);
     }
     printer.paper.printBeam(this.startx, this.starty, this.endx, this.endy, this.endx, (this.endy + this.dy), this.startx, this.starty + this.dy);
+    
+    this.drawAuxBeams(printer);
 };
 
-ABCXJS.write.BeamElem.prototype.calcDir = function() {
-    var average = this.average();
-    this.asc = (this.forceup || this.isgrace || average < 6) && (!this.forcedown); // hardcoded 6 is B
-    return this.asc;
+ABCXJS.write.BeamElem.prototype.drawAuxBeams = function(printer) {
+    var auxbeams = [];  // auxbeam will be {x, y, durlog, single} auxbeam[0] should match with durlog=-4 (16th) (j=-4-durlog)
+    for (var i = 0, ii = this.elems.length; i < ii; i++) {
+        if (this.elems[i].abcelem.rest) continue;
+        var furthesthead = this.elems[i].heads[(this.asc) ? 0 : this.elems[i].heads.length - 1];
+        var x = this.elems[i].x + ((this.asc) ? furthesthead.w : 0);
+        var bary = this.getBarYAt(x);
+
+        var sy = (this.asc) ? 1.5 * ABCXJS.write.spacing.STEP : -1.5 * ABCXJS.write.spacing.STEP;
+        if (this.isgrace)
+            sy = sy * 2 / 3;
+        for (var durlog = ABCXJS.write.getDurlog(this.elems[i].abcelem.duration); durlog < -3; durlog++) { // get the duration via abcelem because of triplets
+            if (auxbeams[-4 - durlog]) {
+                auxbeams[-4 - durlog].single = false;
+            } else {
+                auxbeams[-4 - durlog] = {x: x + ((this.asc) ? -0.6 : 0), y: bary + sy * (-4 - durlog + 1),
+                    durlog: durlog, single: true};
+            }
+        }
+
+        for (var j = auxbeams.length - 1; j >= 0; j--) {
+            if (i === ii - 1 || ABCXJS.write.getDurlog(this.elems[i + 1].abcelem.duration) > (-j - 4)) {
+
+                var auxbeamendx = x;
+                var auxbeamendy = bary + sy * (j + 1);
+
+
+                if (auxbeams[j].single) {
+                    auxbeamendx = (i === 0) ? x + 5 : x - 5;
+                    auxbeamendy = this.getBarYAt(auxbeamendx) + sy * (j + 1);
+                }
+                // TODO I think they are drawn from front to back, hence the small x difference with the main beam
+                printer.paper.printBeam(auxbeams[j].x,auxbeams[j].y, auxbeamendx,auxbeamendy,auxbeamendx,(auxbeamendy + this.dy), auxbeams[j].x,(auxbeams[j].y + this.dy));
+                auxbeams = auxbeams.slice(0, j);
+            }
+        }
+    }
 };
-
-ABCXJS.write.BeamElem.prototype.getBarYAt = function(x) {
-    return this.starty + (this.endy - this.starty) / (this.endx - this.startx) * (x - this.startx);
-};
-
-
-//Old code: the stems are now printed among the note heads
-//ABCXJS.write.BeamElem.prototype.drawStems = function(printer) {
-//    var auxbeams = [];  // auxbeam will be {x, y, durlog, single} auxbeam[0] should match with durlog=-4 (16th) (j=-4-durlog)
-//    //printer.beginGroup();
-//    for (var i = 0, ii = this.elems.length; i < ii; i++) {
-//        if (this.elems[i].abcelem.rest)
-//            continue;
-//        var furthesthead = this.elems[i].heads[(this.asc) ? 0 : this.elems[i].heads.length - 1];
-//        var ovaldelta = (this.isgrace) ? 1 / 3 : 1 / 5;
-//        var pitch = furthesthead.pitch + ((this.asc) ? ovaldelta : -ovaldelta);
-//        var y = printer.calcY(pitch);
-//        var x = furthesthead.x + ((this.asc) ? furthesthead.w : 0);
-//        var bary = this.getBarYAt(x);
-//        var dx = (this.asc) ? -0.6 : 0.6;
-//        printer.printStem(x, dx, y, bary);
-//
-//        var sy = (this.asc) ? 1.5 * ABCXJS.write.spacing.STEP : -1.5 * ABCXJS.write.spacing.STEP;
-//        if (this.isgrace)
-//            sy = sy * 2 / 3;
-//        for (var durlog = ABCXJS.write.getDurlog(this.elems[i].abcelem.duration); durlog < -3; durlog++) { // get the duration via abcelem because of triplets
-//            if (auxbeams[-4 - durlog]) {
-//                auxbeams[-4 - durlog].single = false;
-//            } else {
-//                auxbeams[-4 - durlog] = {x: x + ((this.asc) ? -0.6 : 0), y: bary + sy * (-4 - durlog + 1),
-//                    durlog: durlog, single: true};
-//            }
-//        }
-//
-//        for (var j = auxbeams.length - 1; j >= 0; j--) {
-//            if (i === ii - 1 || ABCXJS.write.getDurlog(this.elems[i + 1].abcelem.duration) > (-j - 4)) {
-//
-//                var auxbeamendx = x;
-//                var auxbeamendy = bary + sy * (j + 1);
-//
-//
-//                if (auxbeams[j].single) {
-//                    auxbeamendx = (i === 0) ? x + 5 : x - 5;
-//                    auxbeamendy = this.getBarYAt(auxbeamendx) + sy * (j + 1);
-//                }
-//                // TODO I think they are drawn from front to back, hence the small x difference with the main beam
-//                printer.paper.printBeam(auxbeams[j].x,auxbeams[j].y, auxbeamendx,auxbeamendy,auxbeamendx,(auxbeamendy + this.dy), auxbeams[j].x,(auxbeams[j].y + this.dy));
-//                auxbeams = auxbeams.slice(0, j);
-//            }
-//        }
-//    }
-//    //printer.endGroup();
-//};
