@@ -317,11 +317,11 @@ ABCXJS.midi.Player.prototype.executa = function(pl) {
                 
                 delay = self.calcTempo( elem.delay );
                 if( self.callbackOnScroll ) {
-                    self.currAbsElem = elem.abcelem.abselem;
+                    self.currAbsElem = elem.abcelem.parent;
                     self.currChannel = elem.channel;
                     self.callbackOnScroll(self);
                 }
-                self.highlight(elem.abcelem.abselem, true, delay);
+                self.highlight(elem.abcelem.parent, true, delay);
             });
         } else {
             pl.item.pitches.forEach( function( elem ) {
@@ -332,7 +332,7 @@ ABCXJS.midi.Player.prototype.executa = function(pl) {
            });
             pl.item.abcelems.forEach( function( elem ) {
                 delay = self.calcTempo( elem.delay );
-                self.highlight(elem.abcelem.abselem, false, delay);
+                self.highlight(elem.abcelem.parent, false, delay);
             });
         }
     } catch( err ) {

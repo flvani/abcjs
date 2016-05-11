@@ -538,6 +538,9 @@ ABCXJS.write.AbsoluteElement.prototype.draw = function(printer, staveInfo ) {
     //this.elemset.push(printer.endGroup());
     (l>0) && printer.endGroup();
     
+    this.abcelem.parent = this; 
+    this.abcelem.parent.screenY = printer.totalY + printer.y; // posição na tela, independe das quebras de página
+    
 //    if (this.klass)
 //        this.setClass("mark", "", "#00ff00");
     
@@ -545,8 +548,6 @@ ABCXJS.write.AbsoluteElement.prototype.draw = function(printer, staveInfo ) {
 //        printer.notifyClearNSelect(self);
 //    });
 
-    this.abcelem.abselem = this; /*fixme: o que é isso??? onde é usado*/
-    this.abcelem.abselem.y = printer.y;
 
 //    var spacing = ABCXJS.write.spacing.STEP ;
 

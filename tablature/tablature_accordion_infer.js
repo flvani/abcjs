@@ -129,7 +129,7 @@ ABCXJS.tablature.Infer.prototype.inferTabVoice = function(line) {
                 var i = 0;
                 while ( i < voices.length) {
                     if(voices[i].wi.el_type && voices[i].wi.el_type === "bar" )     {
-                        this.addTABChild(ABCXJS.parse.clone(voices[i].wi));
+                        this.addTABChild(ABCXJS.parse.clone(voices[i].wi),line);
                         i = voices.length;
                     } else {
                         i++;
@@ -145,7 +145,7 @@ ABCXJS.tablature.Infer.prototype.inferTabVoice = function(line) {
 
                 break;
             case 2:
-                this.addTABChild(this.extraiIntervalo(voices));
+                this.addTABChild(this.extraiIntervalo(voices), line);
                 break;
         }
     } 
@@ -210,7 +210,7 @@ ABCXJS.tablature.Infer.prototype.extraiIntervalo = function(voices) {
         }
     }
     ;
-    var wf = { el_type: 'note', duration: Number((minDur/this.multiplier).toFixed(5)), startChar: 0, endChar: 0, pitches:[], bassNote: [] }; // wf - final working item
+    var wf = { el_type: 'note', duration: Number((minDur/this.multiplier).toFixed(5)), startChar: 0, endChar: 0, line:0, pitches:[], bassNote: [] }; // wf - final working item
     
     for( var i = 0; i < voices.length; i ++ ) {
         if(voices[i].st !== 'processing' ) continue;
@@ -311,7 +311,7 @@ ABCXJS.tablature.Infer.prototype.checkTies = function(voice) {
     }    
 };
 
-ABCXJS.tablature.Infer.prototype.addTABChild = function(token) {
+ABCXJS.tablature.Infer.prototype.addTABChild = function(token, line ) {
 
     if (token.el_type !== "note") {
         var xf = 0;
@@ -322,7 +322,7 @@ ABCXJS.tablature.Infer.prototype.addTABChild = function(token) {
             throw new Error( 'ABCXJS.tablature.Infer.prototype.addTABChild(token_type): ' + token.type );
         }
         var xi = this.getXi();
-        this.add(token, xi, xf - 1 );
+        this.add(token, xi, xf - 1, line );
         return;
     }
     
@@ -330,6 +330,7 @@ ABCXJS.tablature.Infer.prototype.addTABChild = function(token) {
          el_type: token.el_type 
         ,startChar: 0
         ,endChar: 0
+        ,line: 0
         ,pitches: []
         ,duration: token.duration
         ,bellows: ""
@@ -510,7 +511,7 @@ ABCXJS.tablature.Infer.prototype.addTABChild = function(token) {
         this.registerLine( ') ' );
     }
     
-    this.add(child, xi, xf-1);
+    this.add(child, xi, xf-1, line);
 };
 
 ABCXJS.tablature.Infer.prototype.registerMissingButton = function(item) {
@@ -532,9 +533,10 @@ ABCXJS.tablature.Infer.prototype.registerLine = function(appendStr) {
   return this.producedLine.length;
 };
 
-ABCXJS.tablature.Infer.prototype.add = function(child, xi, xf) {
+ABCXJS.tablature.Infer.prototype.add = function(child, xi, xf, line) {
   child.startChar = this.vars.iChar+xi;
   child.endChar = this.vars.iChar+xf;
+  child.line = line;
   this.voice.push(child);
 };
 

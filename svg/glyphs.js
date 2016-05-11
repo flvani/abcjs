@@ -37,7 +37,7 @@ SVG.Glyphs = function () {
       ,"noteheads.quarter": '<path style="fill: var(--fill-color, black);" id="noteheads.quarter" \nd="@@"/>'
       ,"noteheads.half": '<path style="fill: var(--fill-color, black);" id="noteheads.half" \nd="@@"/>'
       ,"noteheads.whole": '<path style="fill: var(--fill-color, black);" id="noteheads.whole" \nd="@@"/>'
-      ,"notehesad.dbl": '<g id="notehesad.dbl">\n<use xlink:href="#noteheads.whole"/>\n<path d="m-6 -4v8m12 0v-8" />\n</g>'
+      ,"notehesad.dbl": '<path style="fill: var(--fill-color, black);" id="noteheads.dbl" \nd="@@"/>'
       ,"rests.quarter": '<path style="fill: var(--fill-color, black);" id="rests.quarter" \nd="@@"/>'
       ,"rests.half": '<path style="fill: var(--fill-color, black);" id="rests.half" \nd="@@"/>'
       ,"rests.whole": '<path style="fill: var(--fill-color, black);" id="rests.whole" \nd="@@"/>'

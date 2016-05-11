@@ -60,6 +60,7 @@ ABCXJS.write.Printer.prototype.printABC = function(abctunes, options) {
     abctunes = [abctunes];
   }
   this.y=0;
+  this.totalY = 0;
   
   //options = options || {};
   //options.color='red';
@@ -173,6 +174,7 @@ ABCXJS.write.Printer.prototype.printTune = function(abctune, options) {
     this.maxwidth = this.width;
     
     this.y = this.paddingtop;
+    this.totalY = 0;
     
     this.layouter = new ABCXJS.write.Layout( this, abctune.formatting.bagpipes );
     
@@ -298,13 +300,13 @@ ABCXJS.write.Printer.prototype.printTune = function(abctune, options) {
     
     this.formatPage(abctune);
     
+    //binds SVG elements
     var lines = abctune.lines;
-    
     for(var l=0; l<lines.length;l++){
         for(var s=0; lines[l].staffs && s <lines[l].staffs.length;s++){
             for(var v=0; v <lines[l].staffs[s].voices.length;v++){
                 for(var a=0; a <lines[l].staffs[s].voices[v].length;a++){
-                   var abs = lines[l].staffs[s].voices[v][a].abselem;
+                   var abs = lines[l].staffs[s].voices[v][a].parent;
                    if( !abs || !abs.gid ) continue;
                    abs.setMouse(this);
                 }
@@ -459,7 +461,7 @@ ABCXJS.write.Printer.prototype.printDebugMsg = function(x, y, msg ) {
 ABCXJS.write.Printer.prototype.printLyrics = function(x, staveInfo, msg) {
     //var y = staveInfo.lowest-ABCXJS.write.spacing.STEP*staveInfo.lyricsRows;
     //y += (staveInfo.lyricsRows-0.5);
-    y = this.calcY(staveInfo.lowest-(staveInfo.lyricsRows>1?0:3.5));
+    y = this.calcY(staveInfo.lowest-(staveInfo.lyricsRows>1?0:3.7));
     
     // para manter alinhado, quando uma das linhas for vazia, imprimo 3 pontos
     var i = msg.indexOf( "\n " );
@@ -560,6 +562,8 @@ ABCXJS.write.Printer.prototype.skipPage = function(lastPage) {
     if( ! lastPage || this.pageNumber > 1) {
         this.printPageNumber();
     }
+    this.totalY += this.y;
+    
     this.paper.endPage({w: (this.maxwidth + this.paddingright) , h: this.y });
     if( ! lastPage ) {
         this.y = this.paddingtop;

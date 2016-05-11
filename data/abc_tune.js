@@ -126,23 +126,7 @@ window.ABCXJS.data.Tune = function() {
         if (!this.formatting.staffwidth)    this.formatting.staffwidth = this.formatting.usablewidth;
         
     };
-    
-    this.afterPrint = function() {
-        return;
-        var lines = this.lines;
-        for(var l=0; l<lines.length;l++){
-            for(var s=0; lines[l].staffs && s <lines[l].staffs.length;s++){
-                for(var v=0; v <lines[l].staffs[s].voices.length;v++){
-                    for(var a=0; a <lines[l].staffs[s].voices[v].length;a++){
-                       var abs = lines[l].staffs[s].voices[v][a].abselem;
-                       if( !abs || !abs.gid ) continue;
-                       abs.setMouse(document.getElementById(abs.gid));
-                    }
-                }
-            }
-        }
-    };
-    
+
     this.handleBarsPerStaff = function() {
         function splitBar(left, right) {
             

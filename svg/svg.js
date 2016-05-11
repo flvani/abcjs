@@ -110,7 +110,7 @@ SVG.Printer.prototype.initDoc = function( docId, title, add_styles, options ) {
     
 };
 
-SVG.Printer.prototype.endDoc = function( owner ) {
+SVG.Printer.prototype.endDoc = function( ) {
 
     var output = '<div style="display:block; margin:0; padding: 0; width: fit-content; --fill-color:'+this.color+';  background-color:'+this.backgroundColor+'; ">\n' + this.svgHead( this.docId );
     
@@ -130,12 +130,7 @@ SVG.Printer.prototype.endDoc = function( owner ) {
     output +='</div>';
     
     this.topDiv.innerHTML = output;
-    
-    if( owner && owner.afterPrint ) {
-//    setTimeout(function(){
-        owner.afterPrint();
-//    }, 300);
-    }
+
 };
 
 SVG.Printer.prototype.initPage = function( scl ) {
