@@ -149,7 +149,8 @@ ABCXJS.write.Printer.prototype.printTune = function(abctune, options) {
     \n\
     .abc_tabtext3 {\n\
         font-size: 10px;\n\
-    }   ';
+    }\n\
+    .selected { fill:red; }\n';
     
     ABCXJS.write.unhighLightColor = options.color;
     
@@ -204,7 +205,7 @@ ABCXJS.write.Printer.prototype.printTune = function(abctune, options) {
 
     if (composerLine.length > 0) {
         var n = composerLine.split('\n').length;
-        var dy = (n>1?(n>2?0:15):30);
+        var dy = (n>1?(n>2?0:5):30);
         this.paper.text(this.width, dy, composerLine, 'abc_author', 'end' );
     } 
     
@@ -313,16 +314,20 @@ ABCXJS.write.Printer.prototype.printTune = function(abctune, options) {
             }
         }
     }
-
     
+    if ( !ABCXJS.misc.isChrome() ) {
+        this.paper.topDiv.parentNode.style.width = "" +  (this.maxwidth + this.paddingright) + "px";
+    };
+    
+
 //    // Correct for IE problem in calculating height
 //    if (ABCXJS.misc.isIE()) {
-//        this.paper.canvas.parentNode.style.width = "" +  sizetoset.w + "px";
-//        this.paper.canvas.parentNode.style.height = "" + sizetoset.h + "px";
+//        this.paper.topDiv.parentNode.style.width = "" +  sizetoset.w + "px";
+//        this.paper.topDiv.parentNode.style.height = "" + sizetoset.h + "px";
 //    } else {
-//        this.paper.canvas.parentNode.setAttribute("style", "width:" + sizetoset.w + "px"); 
-//       // this.paper.canvas.parentNode.setAttribute("style", "height:" + sizetoset.h + "px");
-//       // this.paper.canvas.setAttribute("style", "background-color: #ffe"); 
+//        this.paper.topDiv.parentNode.setAttribute("style", "width:" + sizetoset.w + "px"); 
+//       // this.paper.topDiv.parentNode.setAttribute("style", "height:" + sizetoset.h + "px");
+//       // this.paper.topDiv.setAttribute("style", "background-color: #ffe"); 
 //    }
 
 };

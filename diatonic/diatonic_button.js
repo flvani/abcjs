@@ -48,40 +48,46 @@ DIATONIC.map.Button.prototype.draw = function( id, printer, limits, options ) {
 };
 
 DIATONIC.map.Button.prototype.clear = function(delay) {
-    if(!this.SVG) return;
+    if(!this.SVG.button) return;
     var that = this;
     if(delay) {
         window.setTimeout(function(){ that.clear(); }, delay*1000);
         return;
     }    
-    this.SVG.button.style.setProperty( '--close-color', 'none' );
-    this.SVG.button.style.setProperty( '--open-color', 'none' );
+    this.SVG.closeArc.style.setProperty( 'fill', 'none' );
+    this.SVG.openArc.style.setProperty( 'fill', 'none' );
+    //this.SVG.button.style.setProperty( '--close-color', 'none' );
+    //this.SVG.button.style.setProperty( '--open-color', 'none' );
 };
 
 DIATONIC.map.Button.prototype.setOpen = function(delay) {
-    if(!this.SVG) return;
+    if(!this.SVG.button) return;
     var that = this;
     if(  delay ) {
         window.setTimeout(function(){that.setOpen();}, delay*1000 );
         return;
     } 
-    this.SVG.button.style.setProperty( '--open-color', this.openColor );
+    //this.SVG.button.style.setProperty( '--open-color', this.openColor );
+    this.SVG.openArc.style.setProperty( 'fill', this.openColor );
 };
 
 DIATONIC.map.Button.prototype.setClose = function(delay) {
-    if(!this.SVG) return;
+    if(!this.SVG.button) return;
     var that = this;
     if(  delay ) {
         window.setTimeout(function(){that.setClose();}, delay*1000);
         return;
     } 
-    this.SVG.button.style.setProperty( '--close-color', this.closeColor );
+    //this.SVG.button.style.setProperty( '--close-color', this.closeColor );
+    this.SVG.closeArc.style.setProperty( 'fill', this.closeColor );
 };
 
 DIATONIC.map.Button.prototype.setSVG = function(showLabel, open, close ) {
     var b = this.SVG;
     this.SVG.button = document.getElementById(b.gid);
+    this.SVG.openArc = document.getElementById(b.gid+'_ao');
     this.SVG.openText = document.getElementById(b.gid+'_to');
+    this.SVG.closeArc = document.getElementById(b.gid+'_ac');
     this.SVG.closeText = document.getElementById(b.gid+'_tc');
     this.setText(showLabel, open, close ); 
 };

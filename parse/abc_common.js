@@ -24,11 +24,28 @@ if (!window.ABCXJS.parse)
 
 window.ABCXJS.misc.isOpera = function() {
     return ( !!window.opera || navigator.userAgent.indexOf(' OPR/') >= 0 );
-    
 };
 
 window.ABCXJS.misc.isChrome= function() {
-    return (( !!window.chrome && !ABCXJS.misc.isOpera() ) > 0 ); // Chrome 1+
+    var test1 =  (( !!window.chrome && !ABCXJS.misc.isOpera() ) > 0 ); // Chrome 1+
+   
+    if(!test1) return false;
+    
+    for (var i=0; i<navigator.plugins.length; i++)
+        if (navigator.plugins[i].name == 'Chrome PDF Viewer') return true;
+    
+    return false;
+};
+
+window.ABCXJS.misc.isChromium= function() {
+    var test1 =  (( !!window.chrome && !ABCXJS.misc.isOpera() ) > 0 ); // Chrome 1+
+   
+    if(!test1) return false;
+    
+    for (var i=0; i<navigator.plugins.length; i++)
+        if (navigator.plugins[i].name == 'Chrome PDF Viewer') return false;
+    
+    return true;
 };
 
 window.ABCXJS.misc.isFirefox = function() {

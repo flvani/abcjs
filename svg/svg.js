@@ -175,12 +175,21 @@ SVG.Printer.prototype.setDefine = function (s) {
 };
 
 SVG.Printer.prototype.printLine = function (x,y,dx,dy) {
-    var pathString = ABCXJS.write.sprintf('<path style="stroke: var(--fill-color, black); stroke-width: 0.6;" d="M %.2f %.2f L %.2f %.2f"/>\n', x, y, dx, dy);
+    if( x === dx ) {
+        dx = ABCXJS.misc.isIE() ? 1: 0.6;
+        dy -=  y;
+    }
+    if( y === dy ) {
+        dy = ABCXJS.misc.isIE() ? 1: 0.6;
+        dx -=  x;
+    }
+    var pathString = ABCXJS.write.sprintf('<rect style="fill: var(--fill-color, black);" x="%.2f" y="%.2f" width="%.2f" height="%.2f"/>\n', x, y, dx, dy);
+    //var pathString = ABCXJS.write.sprintf('<path style="stroke: var(--fill-color, black); stroke-width: 0.6px;" d="M %.2f %.2f L %.2f %.2f"/>\n', x, y, dx, dy);
     this.svg_pages[this.currentPage] += pathString;
 };
 
 SVG.Printer.prototype.printLedger = function (x,y,dx,dy) {
-    var pathString = ABCXJS.write.sprintf('<path style="fill:white; stroke: var(--fill-color, black); ; stroke-width:0.6; stroke-dasharray: 1 1; " d="M %.2f %.2f L %.2f %.2f"/>\n', x, y, dx, dy);
+    var pathString = ABCXJS.write.sprintf('<path style="stroke: var(--fill-color, black); fill: white; stroke-width:1; stroke-dasharray: 1 1; " d="M %.2f %.2f h%.2f"/>\n', x, y, dx-x);
     this.svg_pages[this.currentPage] += pathString;
 };
 
@@ -258,16 +267,47 @@ SVG.Printer.prototype.printTieArc = function (x1,y1,x2,y2,up) {
     
 SVG.Printer.prototype.printButton = function (id, x, y, radius, button_class) {
     
-    var scale = radius/26; // 26 é o raio inicial do botão
+    var scale = radius/28; // 26 é o raio inicial do botão
     var gid = 'p'+this.printerId+id;
-    
-    this.setDefine('button');
-    
-    var pathString = ABCXJS.write.sprintf( '<g class="%s" transform="translate(%.2f %.2f) scale(%.5f)">\n\
-    <use id="%s" x="0" y="0" width="52" height="52" xlink:href="#button" />\n\
-    <text id="%s_tc" x="26" y="20" >...</text>\n\
-    <text id="%s_to" x="26" y="42" >...</text>\n</g>\n', button_class, x, y, scale, gid, gid, gid );
-    
+    var bclose = 'nofill';
+    var bopen = 'nofill';
+    var bpedal='normal';
+ 
+    switch( button_class) {
+        case 'blegenda':
+            bclose = 'bclose';
+            bopen = 'bopen';
+            bpedal='pedal';
+            break;
+        case 'bpedal':
+            bpedal='pedal';
+            break;
+        default:
+    }
+
+    var pathString = ABCXJS.write.sprintf( '<g id="%s" transform="translate(%.2f %.2f) scale(%.5f)">\n\
+        <circle cx="28" cy="28" r="26" style="fill: white;" ></circle>\n\
+        <path id="%s_ac" class="%s" d="M 2 34 a26 26 0 0 1 52 -12"></path>\n\
+        <path id="%s_ao" class="%s" d="M 54 22 a26 26 0 0 1 -52 12"></path>\n\
+        <circle class="%s" cx="28" cy="28" r="26"></circle>\n\
+        <path class="%s" d="m 2 34 l 52 -12" ></path>\n\
+        <text id="%s_tc" class="%s" x="27" y="22" >...</text>\n\
+        <text id="%s_to" class="%s" x="27" y="44" >...</text>\n</g>\n',
+        gid, x, y, scale, gid, bclose,  gid, bopen, bpedal, bpedal, gid, button_class, gid, button_class );
+        
+    this.svg_pages[this.currentPage] += pathString;
+    return gid;
+
+    if(ABCXJS.misc.isIE() || ABCXJS.misc.isChromium() ) {
+    } else {
+   
+        this.setDefine('button');
+
+        var pathString = ABCXJS.write.sprintf( '<g class="%s" transform="translate(%.2f %.2f) scale(%.5f)">\n\
+        <use id="%s" x="0" y="0" width="52" height="52" xlink:href="#button" />\n\
+        <text id="%s_tc" x="26" y="20" >...</text>\n\
+        <text id="%s_to" x="26" y="42" >...</text>\n</g>\n', button_class, x, y, scale, gid, gid, gid );
+    }    
     this.svg_pages[this.currentPage] += pathString;
     return gid;
 };

@@ -138,25 +138,34 @@ DIATONIC.map.Keyboard.prototype.print = function (div, options ) {
     options.label = options.label|| false;
     
     var estilo = 
-'   .blegenda,\n\
-    .bpedal,\n\
+'   .bpedal,\n\
+   .blegenda,\n\
     .button {\n\
-        --fill-color: '+options.fillColor+';\n\
-        --border-color: black;\n\
-        fill: black;\n\
         font-family: serif;\n\
         text-anchor: middle;\n\
         font-size: 16px;\n\
         font-weight: bold;\n\
     }\n\
-    .bpedal {\n\
-        --border-color: red;\n\
-        --border-width: 2px;\n\
+    .normal {\n\
+        fill: none;\n\
+        stroke: black;\n\
+        stroke-width: 1px;\n\
+    }\n\
+    .pedal {\n\
+        fill: none;\n\
+        stroke: red;\n\
+        stroke-width: 2px;\n\
+    }\n\
+    .bopen {\n\
+        fill: '+options.openColor+';\n\
+    }\n\
+    .bclose {\n\
+        fill: '+options.closeColor+';\n\
+    }\n\
+    .nofill {\n\
+        fill: none;\n\
     }\n\
     .blegenda {\n\
-        --open-color: '+options.openColor+';\n\
-        --close-color: '+options.closeColor+';\n\
-        --border-width: 2px;\n\
         font-weight: normal;\n\
         font-size: 13px;\n\
     }';

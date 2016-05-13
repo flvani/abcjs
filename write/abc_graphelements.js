@@ -579,15 +579,8 @@ ABCXJS.write.AbsoluteElement.prototype.setMouse = function(printer) {
     this.svgElem.onmouseout =  function() {self.unhighlight(self);};
     this.svgElem.onclick =  function() {printer.notifyClearNSelect(self);};
  };
- 
- 
-//ABCXJS.write.AbsoluteElement.prototype.click = function() {
-//   printer.notifyClearNSelect(self); 
-//};
 
-
-ABCXJS.write.AbsoluteElement.prototype.setClass = function(addClass, removeClass, color) {
-    //this.elemset.attr({fill: color});
+ABCXJS.write.AbsoluteElement.prototype.setClass = function(addClass, removeClass) {
     var kls = this.svgElem.getAttribute("class");
     if (!kls)
         kls = "";
@@ -599,39 +592,21 @@ ABCXJS.write.AbsoluteElement.prototype.setClass = function(addClass, removeClass
         kls += addClass;
     }
     this.svgElem.setAttribute("class", kls.trim() );
-    
-    
-//    if (!ABCXJS.misc.isIE()) {
-//        for (var i = 0; i < this.elemset.length; i++) {
-//            if (this.elemset[i][0].setAttribute) {
-//                var kls = this.elemset[i][0].getAttribute("class");
-//                if (!kls)
-//                    kls = "";
-//                kls = kls.replace(removeClass, "");
-//                kls = kls.replace(addClass, "");
-//                if (addClass.length > 0) {
-//                    if (kls.length > 0 && kls.charAt(kls.length - 1) !== ' ')
-//                        kls += " ";
-//                    kls += addClass;
-//                }
-//                this.elemset[i][0].setAttribute("class", kls);
-//            }
-//        }
-//    }
 };
 
 ABCXJS.write.AbsoluteElement.prototype.highlight = function() {
-    //this.svgElem.style.fill= ABCXJS.write.highLightColor;
-    //this.setClass("selected", "", ABCXJS.write.highLightColor );
-    this.svgElem.style.setProperty( '--fill-color', ABCXJS.write.highLightColor );
+    if(ABCXJS.misc.isIE() || ABCXJS.misc.isChromium() ) 
+        this.setClass("selected", "" );
+    else
+        this.svgElem.style.setProperty( '--fill-color', ABCXJS.write.highLightColor );
 
 };
 
 ABCXJS.write.AbsoluteElement.prototype.unhighlight = function() {
-    //this.svgElem.style.fill= 'black';
-    //this.setClass("", "selected", "black");
-    this.svgElem.style.setProperty( '--fill-color', ABCXJS.write.unhighLightColor );
-    //this.svgElem.style.setProperty( '--fill-color', 'black' );
+    if(ABCXJS.misc.isIE() || ABCXJS.misc.isChromium() ) 
+        this.setClass("", "selected");
+    else
+        this.svgElem.style.setProperty( '--fill-color', ABCXJS.write.unhighLightColor );
 };
 
 ABCXJS.write.RelativeElement = function(c, dx, w, pitch, opt) {

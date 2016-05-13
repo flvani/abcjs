@@ -278,7 +278,7 @@ ABCXJS.midi.Player.prototype.executa = function(pl) {
     var loudness = 256;
     var delay = 0;
 
-    try {
+    //try {
         if( pl.start ) {
             
             pl.item.pitches.forEach( function( elem ) {
@@ -298,7 +298,7 @@ ABCXJS.midi.Player.prototype.executa = function(pl) {
                     }
                 }
                 
-                if(elem.button && elem.button.button) {
+                if(elem.button && elem.button.button && elem.button.button.SVG && elem.button.button.SVG.button !==null) {
                     if(elem.button.closing) {
                         elem.button.button.setClose(delay);
                     }else{
@@ -335,11 +335,11 @@ ABCXJS.midi.Player.prototype.executa = function(pl) {
                 self.highlight(elem.abcelem.parent, false, delay);
             });
         }
-    } catch( err ) {
-        this.onError = { erro: err.message, idx: this.i, item: pl };
-        console.log ('PlayList['+this.onError.idx+'] - Erro: ' + this.onError.erro + '.');
-        this.addWarning( 'PlayList['+this.onError.idx+'] - Erro: ' + this.onError.erro + '.' );
-    }
+    //} catch( err ) {
+    //    this.onError = { erro: err.message, idx: this.i, item: pl };
+    //    console.log ('PlayList['+this.onError.idx+'] - Erro: ' + this.onError.erro + '.');
+    //    this.addWarning( 'PlayList['+this.onError.idx+'] - Erro: ' + this.onError.erro + '.' );
+    //}
 };
 
 ABCXJS.midi.Player.prototype.calcTempo = function( val ) {
