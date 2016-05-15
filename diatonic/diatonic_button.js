@@ -25,35 +25,56 @@ DIATONIC.map.Button = function( x, y, options ) {
     this.openColor = opt.openColor || '#00ff00';
     this.closeColor = opt.closeColor || '#00b2ee';
     this.radius = opt.radius || 26;
+    this.size = this.radius *2 + 4;
     this.kls = opt.kls || 'button';
 
 };
 
-DIATONIC.map.Button.prototype.draw = function( id, printer, limits, options ) {
+DIATONIC.map.Button.prototype.draw = function( id, printer, limits, options, isPedal ) {
     
     var currX, currY;
 
     if( options.transpose ) {
         //horizontal
         currX = this.y;
-        currY = options.mirror ? this.x : limits.maxX - this.radius*2 - (this.x - limits.minX);
+        currY = options.mirror ? this.x : limits.maxX - this.radius - (this.x - limits.minX);
     } else {
         //vertical
-        currX = options.mirror ? limits.maxX - this.radius*2 - (this.x - limits.minX): this.x;
+        currX = options.mirror ? limits.maxX - this.radius - (this.x - limits.minX): this.x;
         currY = this.y;
     }
    
-    this.SVG.gid = printer.printButton( id, currX, currY, this.radius, this.kls );
+    this.SVG.gid = printer.printButton( id, currX, currY, this.radius, options, isPedal );
 
 };
+DIATONIC.map.Button.prototype.setClass = function( svgElem, addClass, removeClass) {
+    svgElem.setAttribute("class", addClass.trim() );
+};
+
+DIATONIC.map.Button.prototype.setClassOld = function( svgElem, addClass, removeClass) {
+    var kls = svgElem.getAttribute("class");
+    if (!kls)
+        kls = "";
+    kls = kls.replace(removeClass, "");
+    kls = kls.replace(addClass, "");
+    if (addClass.length > 0) {
+        if (kls.length > 0 && kls.charAt(kls.length - 1) !== ' ')
+            kls += " ";
+        kls += addClass;
+    }
+    svgElem.setAttribute("class", kls.trim() );
+};
+
 
 DIATONIC.map.Button.prototype.clear = function(delay) {
-    if(!this.SVG.button) return;
+    if(!this.SVG.button ) return;
     var that = this;
     if(delay) {
         window.setTimeout(function(){ that.clear(); }, delay*1000);
         return;
     }    
+   // this.setClass(this.SVG.closeArc, 'nofill', 'bclose');
+   // this.setClass(this.SVG.openArc, 'nofill', 'bopen');
     this.SVG.closeArc.style.setProperty( 'fill', 'none' );
     this.SVG.openArc.style.setProperty( 'fill', 'none' );
     //this.SVG.button.style.setProperty( '--close-color', 'none' );
@@ -61,23 +82,25 @@ DIATONIC.map.Button.prototype.clear = function(delay) {
 };
 
 DIATONIC.map.Button.prototype.setOpen = function(delay) {
-    if(!this.SVG.button) return;
+    if(!this.SVG.button ) return;
     var that = this;
     if(  delay ) {
         window.setTimeout(function(){that.setOpen();}, delay*1000 );
         return;
     } 
+    //this.setClass(this.SVG.openArc, 'bopen', 'nofill');
     //this.SVG.button.style.setProperty( '--open-color', this.openColor );
     this.SVG.openArc.style.setProperty( 'fill', this.openColor );
 };
 
 DIATONIC.map.Button.prototype.setClose = function(delay) {
-    if(!this.SVG.button) return;
+    if(!this.SVG.button ) return;
     var that = this;
     if(  delay ) {
         window.setTimeout(function(){that.setClose();}, delay*1000);
         return;
     } 
+    //this.setClass(this.SVG.closeArc, 'bclose', 'nofill' );
     //this.SVG.button.style.setProperty( '--close-color', this.closeColor );
     this.SVG.closeArc.style.setProperty( 'fill', this.closeColor );
 };

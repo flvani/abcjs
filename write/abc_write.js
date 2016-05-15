@@ -149,10 +149,10 @@ ABCXJS.write.Printer.prototype.printTune = function(abctune, options) {
     \n\
     .abc_tabtext3 {\n\
         font-size: 10px;\n\
-    }\n\
-    .selected { fill:red; }\n';
+    }';
     
     ABCXJS.write.unhighLightColor = options.color;
+
     
 //     svg { --fill-color:'+options.color+'; } \n\
 //    .bar { fill: var(--fill-color, black); stroke:'+'none'+'; stroke-width:0.6; }\n\
@@ -337,6 +337,8 @@ ABCXJS.write.Printer.prototype.printTempo = function (x, tempo) {
     this.y -= 5;
 
     var tempopitch = 5;
+    
+    this.paper.beginGroup();
 
     if (tempo.preString) {
         this.paper.text(x, this.calcY(tempopitch-0.8), tempo.preString, 'abc_tempo', 'start');
@@ -374,6 +376,7 @@ ABCXJS.write.Printer.prototype.printTempo = function (x, tempo) {
     if (tempo.postString) {
         this.paper.text( x, this.calcY(tempopitch-0.8), tempo.postString, 'abc_tempo', 'start');
     }
+    this.paper.endGroup();
 
     this.y += 5;
     return abselem.x + abselem.w +4;
@@ -452,8 +455,8 @@ ABCXJS.write.Printer.prototype.printTabText3 = function (x, offset, text) {
     return this.printTabText(x, offset, text, 'abc_tabtext3');
 };
 
-ABCXJS.write.Printer.prototype.printBar = function (x, dx, y1, y2) {
-    this.paper.printBar(x, dx, y1, y2);
+ABCXJS.write.Printer.prototype.printBar = function (x, dx, y1, y2, real) {
+    this.paper.printBar(x, dx, y1, y2, real);
 };
 
 ABCXJS.write.Printer.prototype.printStem = function (x, dx, y1, y2) {

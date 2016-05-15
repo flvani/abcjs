@@ -200,6 +200,13 @@ V:3 accordionTab
             
             function initApp() {
                 
+                console.log( 
+                        'chromium: ' + ABCXJS.misc.isChromium() 
+                    + '\nchrome: ' + ABCXJS.misc.isChrome() 
+                    + '\nfirefox: ' + ABCXJS.misc.isFirefox()  
+                    + '\nIE: ' + ABCXJS.misc.isIE() + '\n '
+                );
+                
                 ypos = 0;
                 lastYpos = 0;
                 debug = false;
@@ -343,7 +350,7 @@ V:3 accordionTab
                 debug = document.getElementById("chkDebug").checked;
                 var doc = document.documentElement;
                 window.lastYpos = (window.pageYOffset || doc.scrollTop)  - (doc.clientTop || 0);                
-                myEditor.fireChanged(0, "force");
+                //myEditor.fireChanged(0, "force");
             };
 
         </script>        

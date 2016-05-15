@@ -91,6 +91,7 @@ SVG.Printer.prototype.initDoc = function( docId, title, add_styles, options ) {
     this.title = title || '';
     this.backgroundColor = options.backgroundColor || 'none';
     this.color = options.color || 'black';
+    this.baseColor = options.baseColor || 'black';
     this.scale = 1.0;
     this.defines = '';
     this.defined_glyph = [];
@@ -112,7 +113,7 @@ SVG.Printer.prototype.initDoc = function( docId, title, add_styles, options ) {
 
 SVG.Printer.prototype.endDoc = function( ) {
 
-    var output = '<div style="display:block; margin:0; padding: 0; width: fit-content; --fill-color:'+this.color+';  background-color:'+this.backgroundColor+'; ">\n' + this.svgHead( this.docId );
+    var output = '<div class="normal" style="display:block; margin:0; padding: 0; width: fit-content; background-color:'+this.backgroundColor+'; ">\n' + this.svgHead( this.docId );
     
     output += '<title>'+this.title+'</title>\n';
     output += this.styles;
@@ -152,7 +153,7 @@ SVG.Printer.prototype.endPage = function( size ) {
 };
 
 SVG.Printer.prototype.beginGroup = function (el_type) {
-    var kls = "" ; //var kls = el_type==='bar'?' class="bar"':'';
+    var kls = ' style="fill:'+this.color+'; stroke:none;" ' ; //var kls = el_type==='bar'?' class="bar"':'';
     var id = 'p'+this.printerId+'g'+(++this.gid); 
     this.svg_pages[this.currentPage] += '<g id="'+id+'"'+kls+'>\n';  
     return id;
@@ -183,32 +184,33 @@ SVG.Printer.prototype.printLine = function (x,y,dx,dy) {
         dy = ABCXJS.misc.isIE() ? 1: 0.6;
         dx -=  x;
     }
-    var pathString = ABCXJS.write.sprintf('<rect style="fill: var(--fill-color, black);" x="%.2f" y="%.2f" width="%.2f" height="%.2f"/>\n', x, y, dx, dy);
+    var pathString = ABCXJS.write.sprintf('<rect style="stroke:'+this.color+';"  x="%.2f" y="%.2f" width="%.2f" height="%.2f"/>\n', x, y, dx, dy);
     //var pathString = ABCXJS.write.sprintf('<path style="stroke: var(--fill-color, black); stroke-width: 0.6px;" d="M %.2f %.2f L %.2f %.2f"/>\n', x, y, dx, dy);
     this.svg_pages[this.currentPage] += pathString;
 };
 
 SVG.Printer.prototype.printLedger = function (x,y,dx,dy) {
-    var pathString = ABCXJS.write.sprintf('<path style="stroke: var(--fill-color, black); fill: white; stroke-width:1; stroke-dasharray: 1 1; " d="M %.2f %.2f h%.2f"/>\n', x, y, dx-x);
+    var pathString = ABCXJS.write.sprintf('<path style="stroke:'+this.baseColor+'; fill: white; stroke-width:0.6; stroke-dasharray: 1 1; " d="M %.2f %.2f h%.2f"/>\n', x, y, dx-x);
     this.svg_pages[this.currentPage] += pathString;
 };
 
 SVG.Printer.prototype.printBeam = function (x1,y1,x2,y2,x3,y3,x4,y4) {
-    var pathString = ABCXJS.write.sprintf('<path style="fill: var(--fill-color, black); stroke: none;" d="M %.2f %.2f L %.2f %.2f L %.2f %.2f L %.2f %.2f z"/>\n',  x1, y1, x2, y2, x3, y3, x4, y4);
+    var pathString = ABCXJS.write.sprintf('<path style="fill:'+this.color+'; stroke:none" d="M %.2f %.2f L %.2f %.2f L %.2f %.2f L %.2f %.2f z"/>\n',  x1, y1, x2, y2, x3, y3, x4, y4);
     this.svg_pages[this.currentPage] += pathString;
 };
 
 SVG.Printer.prototype.printStaveLine = function (x1, x2, y, debug) {
-    var color = debug? debug : 'var(--fill-color, black)';
+    var color = debug? debug : this.baseColor;
     var dy =0.6;   
-    var pathString = ABCXJS.write.sprintf('<rect style="fill: %s;" x="%.2f" y="%.2f" width="%.2f" height="%.2f"/>\n', 
+    var pathString = ABCXJS.write.sprintf('<rect style="stroke:none; fill: %s;" x="%.2f" y="%.2f" width="%.2f" height="%.2f"/>\n', 
                                                 color, x1, y, Math.abs(x2-x1), dy );
     this.svg_pages[this.currentPage] += pathString;
 };
 
-SVG.Printer.prototype.printBar = function (x, dx, y1, y2) {
+SVG.Printer.prototype.printBar = function (x, dx, y1, y2, real) {
     
     var x2 = x+dx;
+    var kls = real?'':'style="stroke:none; fill:'+this.baseColor+'"'
     
     if (ABCXJS.misc.isIE() && dx<1) {
       dx = 1;
@@ -217,7 +219,7 @@ SVG.Printer.prototype.printBar = function (x, dx, y1, y2) {
     var dy = Math.abs(y2-y1);
     dx = Math.abs(dx); 
     
-    var pathString = ABCXJS.write.sprintf('<rect style="fill: var(--fill-color, black);" x="%.2f" y="%.2f" width="%.2f" height="%.2f"/>\n', Math.min(x,x2), Math.min(y1,y2), dx, dy );
+    var pathString = ABCXJS.write.sprintf('<rect '+kls+' x="%.2f" y="%.2f" width="%.2f" height="%.2f"/>\n', Math.min(x,x2), Math.min(y1,y2), dx, dy );
 
     this.svg_pages[this.currentPage] += pathString;
 };
@@ -233,7 +235,7 @@ SVG.Printer.prototype.printStem = function (x, dx, y1, y2) {
     var dy = Math.abs(y2-y1);
     dx = Math.abs(dx); 
     
-    var pathString = ABCXJS.write.sprintf('<rect style="fill: var(--fill-color, black);" x="%.2f" y="%.2f" width="%.2f" height="%.2f"/>\n', Math.min(x,x2), Math.min(y1,y2), dx, dy );
+    var pathString = ABCXJS.write.sprintf('<rect x="%.2f" y="%.2f" width="%.2f" height="%.2f"/>\n', Math.min(x,x2), Math.min(y1,y2), dx, dy );
 
     this.svg_pages[this.currentPage] += pathString;
 };
@@ -257,7 +259,7 @@ SVG.Printer.prototype.printTieArc = function (x1,y1,x2,y2,up) {
     var controly2 = y2-flatten*uy+curve*ux;
     var thickness = 2;
     
-    var pathString = ABCXJS.write.sprintf('<path style="fill: var(--fill-color, black);" d="M %.2f %.2f C %.2f %.2f %.2f %.2f %.2f %.2f C %.2f %.2f %.2f %.2f %.2f %.2f z"/>\n', 
+    var pathString = ABCXJS.write.sprintf('<path style="fill:'+this.color+'; stroke-width:0.6px; stroke:none;" d="M %.2f %.2f C %.2f %.2f %.2f %.2f %.2f %.2f C %.2f %.2f %.2f %.2f %.2f %.2f z"/>\n', 
                             x1, y1,
                             controlx1, controly1, controlx2, controly2, x2, y2, 
                             controlx2-thickness*uy, controly2+thickness*ux, controlx1-thickness*uy, controly1+thickness*ux, x1, y1 );
@@ -265,35 +267,36 @@ SVG.Printer.prototype.printTieArc = function (x1,y1,x2,y2,up) {
     this.svg_pages[this.currentPage] += pathString;
 };
     
-SVG.Printer.prototype.printButton = function (id, x, y, radius, button_class) {
+SVG.Printer.prototype.printButton = function (id, x, y, radius, options, isPedal) {
     
-    var scale = radius/28; // 26 é o raio inicial do botão
+    var scale = radius/26; // 26 é o raio inicial do botão
     var gid = 'p'+this.printerId+id;
-    var bclose = 'nofill';
-    var bopen = 'nofill';
-    var bpedal='normal';
- 
-    switch( button_class) {
-        case 'blegenda':
-            bclose = 'bclose';
-            bopen = 'bopen';
-            bpedal='pedal';
-            break;
-        case 'bpedal':
-            bpedal='pedal';
-            break;
-        default:
-    }
+    var estilo = isPedal? 'stroke:red; stroke-width:2px; fill: none;':'stroke:black; stroke-width:1px; fill: none;';
+//    var bclose = 'nofill';
+//    var bopen = 'nofill';
+//    var bpedal='normal';
+// 
+//    switch( button_class) {
+//        case 'blegenda':
+//            bclose = 'bclose';
+//            bopen = 'bopen';
+//            bpedal='pedal';
+//            break;
+//        case 'bpedal':
+//            bpedal='pedal';
+//            break;
+//        default:
+//    }
 
     var pathString = ABCXJS.write.sprintf( '<g id="%s" transform="translate(%.2f %.2f) scale(%.5f)">\n\
-        <circle cx="28" cy="28" r="26" style="fill: white;" ></circle>\n\
-        <path id="%s_ac" class="%s" d="M 2 34 a26 26 0 0 1 52 -12"></path>\n\
-        <path id="%s_ao" class="%s" d="M 54 22 a26 26 0 0 1 -52 12"></path>\n\
-        <circle class="%s" cx="28" cy="28" r="26"></circle>\n\
-        <path class="%s" d="m 2 34 l 52 -12" ></path>\n\
-        <text id="%s_tc" class="%s" x="27" y="22" >...</text>\n\
-        <text id="%s_to" class="%s" x="27" y="44" >...</text>\n</g>\n',
-        gid, x, y, scale, gid, bclose,  gid, bopen, bpedal, bpedal, gid, button_class, gid, button_class );
+        <circle cx="28" cy="28" r="26" style="stroke:none; fill: %s;" ></circle>\n\
+        <path id="%s_ac" style="stroke: none; fill: %s;" d="M 2 34 a26 26 0 0 1 52 -12"></path>\n\
+        <path id="%s_ao" style="stroke: none; fill: %s;" d="M 54 22 a26 26 0 0 1 -52 12"></path>\n\
+        <circle style="'+estilo+'" cx="28" cy="28" r="26"></circle>\n\
+        <path style="'+estilo+'" d="m 2 34 l 52 -12" ></path>\n\
+        <text id="%s_tc" class="%s" style="stroke:none; fill: black;" x="27" y="22" >...</text>\n\
+        <text id="%s_to" class="%s" style="stroke:none; fill: black;" x="27" y="44" >...</text>\n</g>\n',
+        gid, x, y, scale, options.fillColor, gid, options.closeColor, gid, options.openColor, gid, options.kls, gid, options.kls );
         
     this.svg_pages[this.currentPage] += pathString;
     return gid;
@@ -316,7 +319,7 @@ SVG.Printer.prototype.printBrace = function (x, y1, y2) {
     var sz = Math.abs(y1-y2); // altura esperada
     var scale = sz / 1027; // altura real do simbolo
     this.setDefine('scripts.lbrace');
-    var pathString = ABCXJS.write.sprintf('<use x="0" y="0" xlink:href="#scripts.lbrace" transform="translate(%.2f %.2f) scale(0.13 %.5f)" />\n', x, y2, scale );
+    var pathString = ABCXJS.write.sprintf('<use style="fill:'+this.baseColor+'" x="0" y="0" xlink:href="#scripts.lbrace" transform="translate(%.2f %.2f) scale(0.13 %.5f)" />\n', x, y2, scale );
     this.svg_pages[this.currentPage] += pathString;
 };
 
@@ -337,7 +340,7 @@ SVG.Printer.prototype.tabText = function( x, y, str, clss, anch ) {
    x = x.toFixed(2);
    y = y.toFixed(2);
    
-   this.svg_pages[this.currentPage] += '<text class="'+clss+'" style="fill: var(--fill-color, black);" x="'+x+'" y="'+y+'" >'+str+'</text>\n';
+   this.svg_pages[this.currentPage] += '<text class="'+clss+'" x="'+x+'" y="'+y+'" >'+str+'</text>\n';
 };
 
 SVG.Printer.prototype.text = function( x, y, str, clss, anch ) {
@@ -352,9 +355,9 @@ SVG.Printer.prototype.text = function( x, y, str, clss, anch ) {
    y = y.toFixed(2);
    
    if(t.length < 2) {
-       this.svg_pages[this.currentPage] += '<text class="'+clss+'" style="fill: var(--fill-color, black);" x="'+x+'" y="'+y+'" text-anchor="'+anch+'">'+t[0]+'</text>\n';
+       this.svg_pages[this.currentPage] += '<text class="'+clss+'" style="stroke:none; fill: '+this.color+';" x="'+x+'" y="'+y+'" text-anchor="'+anch+'">'+t[0]+'</text>\n';
    } else {
-       this.svg_pages[this.currentPage] += '<g class="'+clss+'" style="fill: var(--fill-color, black);" transform="translate('+x+' '+y+')">\n';
+       this.svg_pages[this.currentPage] += '<g class="'+clss+'" style="stroke:none; fill:  '+this.color+';" transform="translate('+x+' '+y+')">\n';
        this.svg_pages[this.currentPage] += '<text text-anchor="'+anch+'" x="0" y="0">\n';
        for(var i = 0; i < t.length; i++ )
            this.svg_pages[this.currentPage] += '<tspan x="0" dy="1.2em" >'+t[i]+'</tspan>\n';

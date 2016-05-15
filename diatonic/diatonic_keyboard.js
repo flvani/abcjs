@@ -23,7 +23,7 @@ DIATONIC.map.Keyboard = function ( keyMap, pedalInfo ) {
     this.limits = {minX:10000, minY:10000, maxX:0, maxY:0};
     
     this.radius = 26;
-    this.size = this.radius * 2;
+    this.size = this.radius * 2 + 4;
     
     this.setup(keyMap);
 };
@@ -51,8 +51,8 @@ DIATONIC.map.Keyboard.prototype.setup = function (keyMap) {
         this.keyMap[i] = new Array(keyMap.basses.open[i - nIlheiras].length);
     }
 
-    this.width = (nIlheiras + nIlheirasBaixo + 1) * (this.size);
-    this.height = (maiorIlheira) * (this.size);
+    this.width = (nIlheiras + nIlheirasBaixo + 1) * (this.size) +2;
+    this.height = (maiorIlheira) * (this.size) +2;
     
     var bassY = (maiorIlheira - (maiorIlheiraBaixo/2) ) / 2 * this.size;
     var openRow, closeRow, bass, noteVal;
@@ -176,7 +176,10 @@ DIATONIC.map.Keyboard.prototype.print = function (div, options ) {
     
     this.paper.initPage( options.scale );
     
-    this.legenda.draw('l00', this.paper, this.limits, options );
+    var legenda_opt = ABCXJS.parse.clone( options );
+    legenda_opt.kls = 'blegenda';
+    
+    this.legenda.draw('l00', this.paper, this.limits, legenda_opt, true );
     
     if(options.transpose) {
         sz = {w:this.height, h:this.width};
@@ -191,10 +194,14 @@ DIATONIC.map.Keyboard.prototype.print = function (div, options ) {
             this.drawLine(x, this.baseLine.yi, x, this.baseLine.yf);
         }
     }
-    
+ 
+    var btn_opt = ABCXJS.parse.clone( options );
+    btn_opt.kls = 'button';
+    btn_opt.openColor = btn_opt.closeColor = 'none';
+     
     for (var j = 0; j < this.keyMap.length; j++) {
         for (var i = 0; i < this.keyMap[j].length; i++) {
-            this.keyMap[j][i].draw('b'+j+i, this.paper, this.limits, options );
+            this.keyMap[j][i].draw('b'+j+i, this.paper, this.limits, btn_opt, this.isPedal(i,j) );
         }
     }
     

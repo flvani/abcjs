@@ -283,8 +283,8 @@ ABCXJS.write.StaffGroupElement.prototype.draw = function(printer, groupNumber) {
         var top = this.voices[0].stave.y;
         var clef = this.voices[this.voices.length - 1].stave.clef.type;
         var bottom = printer.calcY(clef==="accordionTab"?0:2);
-        printer.printBar(this.startx, 0.6, top, bottom);
-        printer.printBar(this.w-1, 0.6, top, bottom);
+        printer.printBar(this.startx, 0.6, top, bottom, false);
+        printer.printBar(this.w-1, 0.6, top, bottom, false);
         if (this.voices.length > 1)  {
             printer.paper.printBrace(this.startx-10, top-10, bottom+10);  
         }
@@ -581,6 +581,10 @@ ABCXJS.write.AbsoluteElement.prototype.setMouse = function(printer) {
  };
 
 ABCXJS.write.AbsoluteElement.prototype.setClass = function(addClass, removeClass) {
+    this.svgElem.setAttribute("class", addClass.trim() );
+};
+
+ABCXJS.write.AbsoluteElement.prototype.setClassOld = function(addClass, removeClass) {
     var kls = this.svgElem.getAttribute("class");
     if (!kls)
         kls = "";
@@ -595,6 +599,10 @@ ABCXJS.write.AbsoluteElement.prototype.setClass = function(addClass, removeClass
 };
 
 ABCXJS.write.AbsoluteElement.prototype.highlight = function() {
+    this.svgElem.style.setProperty( 'fill', ABCXJS.write.highLightColor );
+    return;
+    
+    this.setClass("selected" );
     if(ABCXJS.misc.isIE() || ABCXJS.misc.isChromium() ) 
         this.setClass("selected", "" );
     else
@@ -603,6 +611,10 @@ ABCXJS.write.AbsoluteElement.prototype.highlight = function() {
 };
 
 ABCXJS.write.AbsoluteElement.prototype.unhighlight = function() {
+    this.svgElem.style.setProperty( 'fill', ABCXJS.write.unhighLightColor );
+    return;
+    
+    this.setClass("normal" );
     if(ABCXJS.misc.isIE() || ABCXJS.misc.isChromium() ) 
         this.setClass("", "selected");
     else
@@ -658,7 +670,7 @@ ABCXJS.write.RelativeElement.prototype.draw = function(printer, x, staveInfo ) {
             this.graphelem = printer.printTabText3(this.x, this.pitch, this.c);
             break;
         case "bar":
-            this.graphelem = printer.printBar(this.x, this.linewidth, printer.calcY(this.pitch), printer.calcY(this.pitch2));
+            this.graphelem = printer.printBar(this.x, this.linewidth, printer.calcY(this.pitch), printer.calcY(this.pitch2), true);
             break;
         case "stem":
             this.drawStem(printer);

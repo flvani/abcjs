@@ -50,7 +50,8 @@ ABCXJS.edit.AccordionSelector.prototype.updateAccordionList = function() {
 ABCXJS.edit.AccordionSelector.prototype.addChangeListener = function(editor) {
   this.selector.onchange = function() {
     editor.accordion.load(parseInt(this.value));
-    editor.fireChanged( 0, "force" );
+    editor.accordion.printKeyboard('keyboardDiv' );
+        editor.fireChanged( 0, "force" );
   };
 };
     
@@ -448,7 +449,7 @@ ABCXJS.Editor.prototype.modelChanged2 = function(loader) {
     this.printer = new ABCXJS.write.Printer(paper, this.printerparams );
     this.printTimeStart = new Date();
     //this.printer.printABC(this.tunes);
-    this.printer.printABC(this.tunes, {color:'green'} );
+    this.printer.printABC(this.tunes, {color:'blue', baseColor:'red'} );
     this.printTimeEnd = new Date();
     this.warnings.push('Tempo da impressão: ' + ( (this.printTimeEnd.getTime() -this.printTimeStart.getTime()) /1000).toFixed(2)  + 's');
     

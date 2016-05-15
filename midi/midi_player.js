@@ -281,7 +281,9 @@ ABCXJS.midi.Player.prototype.executa = function(pl) {
     //try {
         if( pl.start ) {
             
-            pl.item.pitches.forEach( function( elem ) {
+            //pl.item.pitches.forEach( function( elem ) {
+            for( var e=0; e < pl.item.pitches.length; e++) {
+                var elem = pl.item.pitches[e];
                 
                 delay = self.calcTempo( elem.delay );
                 
@@ -298,7 +300,7 @@ ABCXJS.midi.Player.prototype.executa = function(pl) {
                     }
                 }
                 
-                if(elem.button && elem.button.button && elem.button.button.SVG && elem.button.button.SVG.button !==null) {
+                if( !debug && elem.button && elem.button.button && elem.button.button.SVG && elem.button.button.SVG.button !==null) {
                     if(elem.button.closing) {
                         elem.button.button.setClose(delay);
                     }else{
@@ -312,7 +314,8 @@ ABCXJS.midi.Player.prototype.executa = function(pl) {
                     }    
                 }
                 
-            });
+            //});
+            }
             pl.item.abcelems.forEach( function( elem ) {
                 
                 delay = self.calcTempo( elem.delay );
@@ -346,6 +349,7 @@ ABCXJS.midi.Player.prototype.calcTempo = function( val ) {
   return  val * this.tempo / 1000;   
 }
 ABCXJS.midi.Player.prototype.highlight = function( abselem, select, delay ) {
+    if(debug) return;
     var that = this;
     if(delay) {
         window.setTimeout(function(){ that.highlight(abselem, select); }, delay*1000);
