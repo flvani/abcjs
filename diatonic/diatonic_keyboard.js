@@ -23,7 +23,7 @@ DIATONIC.map.Keyboard = function ( keyMap, pedalInfo ) {
     this.limits = {minX:10000, minY:10000, maxX:0, maxY:0};
     
     this.radius = 26;
-    this.size = this.radius * 2 + 4;
+    this.size = this.radius * 2 + 2;
     
     this.setup(keyMap);
 };
@@ -138,37 +138,37 @@ DIATONIC.map.Keyboard.prototype.print = function (div, options ) {
     options.label = options.label|| false;
     
     var estilo = 
-'   .bpedal,\n\
-   .blegenda,\n\
+'   .blegenda,\n\
     .button {\n\
         font-family: serif;\n\
         text-anchor: middle;\n\
         font-size: 16px;\n\
         font-weight: bold;\n\
     }\n\
-    .normal {\n\
-        fill: none;\n\
-        stroke: black;\n\
-        stroke-width: 1px;\n\
-    }\n\
-    .pedal {\n\
-        fill: none;\n\
-        stroke: red;\n\
-        stroke-width: 2px;\n\
-    }\n\
-    .bopen {\n\
-        fill: '+options.openColor+';\n\
-    }\n\
-    .bclose {\n\
-        fill: '+options.closeColor+';\n\
-    }\n\
-    .nofill {\n\
-        fill: none;\n\
-    }\n\
     .blegenda {\n\
         font-weight: normal;\n\
         font-size: 13px;\n\
     }';
+
+//    .normal {\n\
+//        fill: none;\n\
+//        stroke: black;\n\
+//        stroke-width: 1px;\n\
+//    }\n\
+//    .pedal {\n\
+//        fill: none;\n\
+//        stroke: red;\n\
+//        stroke-width: 2px;\n\
+//    }\n\
+//    .bopen {\n\
+//        fill: '+options.openColor+';\n\
+//    }\n\
+//    .bclose {\n\
+//        fill: '+options.closeColor+';\n\
+//    }\n\
+//    .nofill {\n\
+//        fill: none;\n\
+//    }\n\
 
     this.paper = new SVG.Printer( div ); 
     

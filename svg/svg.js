@@ -184,7 +184,7 @@ SVG.Printer.prototype.printLine = function (x,y,dx,dy) {
         dy = ABCXJS.misc.isIE() ? 1: 0.6;
         dx -=  x;
     }
-    var pathString = ABCXJS.write.sprintf('<rect style="stroke:'+this.color+';"  x="%.2f" y="%.2f" width="%.2f" height="%.2f"/>\n', x, y, dx, dy);
+    var pathString = ABCXJS.write.sprintf('<rect style="fill:'+this.color+';"  x="%.2f" y="%.2f" width="%.2f" height="%.2f"/>\n', x, y, dx, dy);
     //var pathString = ABCXJS.write.sprintf('<path style="stroke: var(--fill-color, black); stroke-width: 0.6px;" d="M %.2f %.2f L %.2f %.2f"/>\n', x, y, dx, dy);
     this.svg_pages[this.currentPage] += pathString;
 };
