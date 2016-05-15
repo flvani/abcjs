@@ -23,7 +23,7 @@ DIATONIC.map.Keyboard = function ( keyMap, pedalInfo ) {
     this.limits = {minX:10000, minY:10000, maxX:0, maxY:0};
     
     this.radius = 26;
-    this.size = this.radius * 2 + 2;
+    this.size = this.radius * 2 + 4;
     
     this.setup(keyMap);
 };

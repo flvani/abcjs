@@ -37,10 +37,10 @@ DIATONIC.map.Button.prototype.draw = function( id, printer, limits, options, isP
     if( options.transpose ) {
         //horizontal
         currX = this.y;
-        currY = options.mirror ? this.x : limits.maxX - this.radius - (this.x - limits.minX);
+        currY = options.mirror ? this.x : limits.maxX - this.radius*2 - (this.x - limits.minX);
     } else {
         //vertical
-        currX = options.mirror ? limits.maxX - this.radius - (this.x - limits.minX): this.x;
+        currX = options.mirror ? limits.maxX - this.radius*2 - (this.x - limits.minX): this.x;
         currY = this.y;
     }
    

@@ -315,9 +315,9 @@ ABCXJS.write.Printer.prototype.printTune = function(abctune, options) {
         }
     }
     
-    if ( !ABCXJS.misc.isChrome() ) {
-        this.paper.topDiv.parentNode.style.width = "" +  (this.maxwidth + this.paddingright) + "px";
-    };
+    //if ( !ABCXJS.misc.isChrome() ) {
+        this.paper.topDiv.style.width = "" +  (this.maxwidth + this.paddingright) + "px";
+    //};
     
 
 //    // Correct for IE problem in calculating height
