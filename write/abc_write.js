@@ -469,7 +469,7 @@ ABCXJS.write.Printer.prototype.printDebugMsg = function(x, y, msg ) {
 ABCXJS.write.Printer.prototype.printLyrics = function(x, staveInfo, msg) {
     //var y = staveInfo.lowest-ABCXJS.write.spacing.STEP*staveInfo.lyricsRows;
     //y += (staveInfo.lyricsRows-0.5);
-    y = this.calcY(staveInfo.lowest-(staveInfo.lyricsRows>1?0:3.7));
+    var y = this.calcY(staveInfo.lowest-(staveInfo.lyricsRows>1?0:3.7));
     
     // para manter alinhado, quando uma das linhas for vazia, imprimo 3 pontos
     var i = msg.indexOf( "\n " );
