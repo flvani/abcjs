@@ -373,7 +373,7 @@ ABCXJS.midi.Parse.prototype.selectButtons = function(elem) {
                 continue;
             
             if (elem.pitches[i].bass) {
-                if (elem.pitches[i].c === '-->') {
+                if (elem.pitches[i].c === 'scripts.rarrow') {
                     button = this.lastTabElem[i];
                     tie = true;
                 } else {
@@ -381,7 +381,7 @@ ABCXJS.midi.Parse.prototype.selectButtons = function(elem) {
                     this.lastTabElem[i] = button;
                 }
             } else {
-                if ( elem.pitches[i].c === '-->') {
+                if ( elem.pitches[i].c === 'scripts.rarrow') {
                     button = this.lastTabElem[10+i-bassCounter];
                     tie = true;
                 } else {
@@ -661,7 +661,7 @@ ABCXJS.midi.Parse.prototype.extractOctave = function(pitch) {
 };
 
 ABCXJS.midi.Parse.prototype.getBassButton = function( bellows, b ) {
-    if( b === '-->' || !this.midiTune.keyboard ) return null;
+    if( b === 'scripts.rarrow' || !this.midiTune.keyboard ) return null;
     var kb = this.midiTune.keyboard;
     var nota = kb.parseNote(b, true );
     for( var j = kb.keyMap.length; j > kb.keyMap.length - 2; j-- ) {

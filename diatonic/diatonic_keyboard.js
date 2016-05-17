@@ -82,7 +82,7 @@ DIATONIC.map.Keyboard.prototype.setup = function (keyMap) {
             this.limits.maxX = Math.max(this.limits.maxX, x );
             this.limits.maxY = Math.max(this.limits.maxY, y );
 
-            var btn  = new DIATONIC.map.Button( x-this.radius, y-this.radius, {kls: this.isPedal(i, j)? 'bpedal' : 'button' } );
+            var btn = new DIATONIC.map.Button( x-this.radius, y-this.radius, { radius: this.radius, isPedal: this.isPedal(i,j) } );
             
             btn.tabButton = (i + 1) + Array(j + 1).join("'");
             btn.openNote = this.parseNote(openRow[i], bass);
@@ -106,21 +106,8 @@ DIATONIC.map.Keyboard.prototype.setup = function (keyMap) {
     this.baseLine = {x: x, yi:y, yf:y + 5 * this.size};
     
     // adiciona o botão de legenda
-    var raio=36;
-    this.legenda = new DIATONIC.map.Button( this.limits.maxX-(raio+this.radius), this.limits.minY+(raio), {radius: 36, kls: 'blegenda' } );
-};
-
-DIATONIC.map.Keyboard.prototype.getButtons = function (note) {
-    var noteVal = this.getNoteVal(note);
-    return {
-        open: this.noteToButtonsOpen[noteVal]
-        , close: this.noteToButtonsClose[noteVal]
-    };
-};
-
-DIATONIC.map.Keyboard.prototype.getNoteVal = function ( note ) {
-    //noteVal will be a numeric product of the key + octave (to avoid #/b problem)
-    return DIATONIC.map.key2number[note.key.toUpperCase()] + (note.isBass?(note.isChord?-12:0):note.octave*12);
+    var raio=40;
+    this.legenda = new DIATONIC.map.Button( this.limits.maxX-(raio+this.radius), this.limits.minY+raio, { radius: raio, borderWidth: 2 } );
 };
 
 DIATONIC.map.Keyboard.prototype.print = function (div, options ) {
@@ -150,26 +137,6 @@ DIATONIC.map.Keyboard.prototype.print = function (div, options ) {
         font-size: 13px;\n\
     }';
 
-//    .normal {\n\
-//        fill: none;\n\
-//        stroke: black;\n\
-//        stroke-width: 1px;\n\
-//    }\n\
-//    .pedal {\n\
-//        fill: none;\n\
-//        stroke: red;\n\
-//        stroke-width: 2px;\n\
-//    }\n\
-//    .bopen {\n\
-//        fill: '+options.openColor+';\n\
-//    }\n\
-//    .bclose {\n\
-//        fill: '+options.closeColor+';\n\
-//    }\n\
-//    .nofill {\n\
-//        fill: none;\n\
-//    }\n\
-
     this.paper = new SVG.Printer( div ); 
     
     this.paper.initDoc( 'keyb', 'Diatonic Map Keyboard', estilo, options );
@@ -179,7 +146,7 @@ DIATONIC.map.Keyboard.prototype.print = function (div, options ) {
     var legenda_opt = ABCXJS.parse.clone( options );
     legenda_opt.kls = 'blegenda';
     
-    this.legenda.draw('l00', this.paper, this.limits, legenda_opt, true );
+    this.legenda.draw('l00', this.paper, this.limits, legenda_opt );
     
     if(options.transpose) {
         sz = {w:this.height, h:this.width};
@@ -201,7 +168,7 @@ DIATONIC.map.Keyboard.prototype.print = function (div, options ) {
      
     for (var j = 0; j < this.keyMap.length; j++) {
         for (var i = 0; i < this.keyMap[j].length; i++) {
-            this.keyMap[j][i].draw('b'+j+i, this.paper, this.limits, btn_opt, this.isPedal(i,j) );
+            this.keyMap[j][i].draw('b'+j+i, this.paper, this.limits, btn_opt );
         }
     }
     
@@ -219,6 +186,20 @@ DIATONIC.map.Keyboard.prototype.print = function (div, options ) {
 
 DIATONIC.map.Keyboard.prototype.drawLine = function(xi,yi,xf,yf) {
     this.paper.printLine(xi, yi, xf, yf );
+};
+
+
+DIATONIC.map.Keyboard.prototype.getButtons = function (note) {
+    var noteVal = this.getNoteVal(note);
+    return {
+        open: this.noteToButtonsOpen[noteVal]
+        , close: this.noteToButtonsClose[noteVal]
+    };
+};
+
+DIATONIC.map.Keyboard.prototype.getNoteVal = function ( note ) {
+    //noteVal will be a numeric product of the key + octave (to avoid #/b problem)
+    return DIATONIC.map.key2number[note.key.toUpperCase()] + (note.isBass?(note.isChord?-12:0):note.octave*12);
 };
 
 DIATONIC.map.Keyboard.prototype.getLayout = function (r) {
@@ -255,8 +236,7 @@ DIATONIC.map.Keyboard.prototype.parseNote = function(txtNota, isBass) {
 DIATONIC.map.Keyboard.prototype.redraw = function(opts) {
     for (var j = 0; j < this.keyMap.length; j++) {
         for (var i = 0; i < this.keyMap[j].length; i++) {
-            var key = this.keyMap[j][i];
-            key.setText( opts.label );
+            this.keyMap[j][i].setText( opts.label );
         }
     }
 };

@@ -639,7 +639,9 @@ ABCXJS.write.RelativeElement = function(c, dx, w, pitch, opt) {
 ABCXJS.write.RelativeElement.prototype.draw = function(printer, x, staveInfo ) {
 
     this.x = x + this.dx;
+
     switch (this.type) {
+      
         case "symbol":
             if (this.c === null)
                 return null;

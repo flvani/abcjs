@@ -268,9 +268,9 @@ ABCXJS.tablature.Infer.prototype.extraiIntervalo = function(voices) {
     }    
         
     //trata intervalo vazio (quando há pausa em todas as vozes e não são visíveis)
-    if(wf.pitches.length === 0 && wf.bassNote.length === 0 )
-        wf.pitches[0] = {type:'rest'}; 
-    
+    if(wf.pitches.length === 0 && wf.bassNote.length === 0 ) {
+        wf.pitches[0] = {type:'rest', c:'scripts.tabrest'}; 
+    }
     return wf;
     
 };
@@ -375,7 +375,7 @@ ABCXJS.tablature.Infer.prototype.addTABChild = function(token, line ) {
             case 'rest':
             case 'invisible':
             case 'spacer':
-                child.pitches[b] = {bass: true, type: token.bassNote[b].type, c: '', pitch: 0.7 + pitchBase - (b * 3)};
+                child.pitches[b] = {bass: true, type: token.bassNote[b].type, c: 'scripts.tabrest', pitch: 0.7 + pitchBase - (b * 3)};
                 this.registerLine('z');
                 break;
             default:
@@ -383,9 +383,9 @@ ABCXJS.tablature.Infer.prototype.addTABChild = function(token, line ) {
                 var note = this.accordion.getNoteName(token.bassNote[b], this.accBassKey, this.bassBarAcc, true);
                 item.buttons = this.accordion.getKeyboard().getButtons(note);
                 item.note = note.key;
-                item.c = item.inTie ? '-->' :  note.key;
+                item.c = item.inTie ? 'scripts.rarrow' :  note.key;
                 child.pitches[b] = item;
-                this.registerLine(child.pitches[b].c === '-->' ? '>' : child.pitches[b].c);
+                this.registerLine(child.pitches[b].c === 'scripts.rarrow' ? '>' : child.pitches[b].c);
                 
                 baixoOpen  = baixoOpen  ? typeof (child.pitches[b].buttons.open) !== "undefined" : false;
                 baixoClose = baixoClose ? typeof (child.pitches[b].buttons.close) !== "undefined" : false;
@@ -400,7 +400,7 @@ ABCXJS.tablature.Infer.prototype.addTABChild = function(token, line ) {
             case 'invisible':
             case 'spacer':
             case 'rest':
-                item.c = '';
+                item.c = 'scripts.tabrest';
                 item.pitch = 13.2;
                 break
             default:
@@ -417,7 +417,7 @@ ABCXJS.tablature.Infer.prototype.addTABChild = function(token, line ) {
                 
                 item.buttons = this.accordion.getKeyboard().getButtons(note);
                 item.note = note.key + note.octave;
-                item.c = item.inTie ? '-->' :  item.note;
+                item.c = item.inTie ? 'scripts.rarrow' :  item.note;
                 item.pitch = (qtd === 1 ? 11.7 : 13.4 -( c * 2.8));
                 item.type = "tabText" + (qtd > 1 ? 2 : "");
 

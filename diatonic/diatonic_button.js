@@ -17,20 +17,23 @@ DIATONIC.map.Button = function( x, y, options ) {
     
     this.x = x;
     this.y = y;
+    
     this.openNote = null;
     this.closeNote = null;
     this.tabButton = null;
+    
     this.SVG  = {gid: 0}; // futuro identificador
     
+    this.radius = opt.radius;
+    this.isPedal  = opt.isPedal || false;
     this.openColor = opt.openColor || '#00ff00';
     this.closeColor = opt.closeColor || '#00b2ee';
-    this.radius = opt.radius || 26;
-    this.size = this.radius *2 + 4;
-    this.kls = opt.kls || 'button';
+    this.borderWidth = opt.borderWidth || (this.isPedal?2:1);
+    this.borderColor = opt.borderColor || (this.isPedal?'red':'black');
 
 };
 
-DIATONIC.map.Button.prototype.draw = function( id, printer, limits, options, isPedal ) {
+DIATONIC.map.Button.prototype.draw = function( id, printer, limits, options ) {
     
     var currX, currY;
 
@@ -43,28 +46,15 @@ DIATONIC.map.Button.prototype.draw = function( id, printer, limits, options, isP
         currX = options.mirror ? limits.maxX - this.radius*2 - (this.x - limits.minX): this.x;
         currY = this.y;
     }
+    
+    options = options || {};
+    options.borderColor = this.borderColor;
+    options.borderWidth = this.borderWidth;
+    options.radius = this.radius;
    
-    this.SVG.gid = printer.printButton( id, currX, currY, this.radius, options, isPedal );
+    this.SVG.gid = printer.printButton( id, currX, currY, options );
 
 };
-DIATONIC.map.Button.prototype.setClass = function( svgElem, addClass, removeClass) {
-    svgElem.setAttribute("class", addClass.trim() );
-};
-
-DIATONIC.map.Button.prototype.setClassOld = function( svgElem, addClass, removeClass) {
-    var kls = svgElem.getAttribute("class");
-    if (!kls)
-        kls = "";
-    kls = kls.replace(removeClass, "");
-    kls = kls.replace(addClass, "");
-    if (addClass.length > 0) {
-        if (kls.length > 0 && kls.charAt(kls.length - 1) !== ' ')
-            kls += " ";
-        kls += addClass;
-    }
-    svgElem.setAttribute("class", kls.trim() );
-};
-
 
 DIATONIC.map.Button.prototype.clear = function(delay) {
     if(!this.SVG.button ) return;
@@ -73,12 +63,8 @@ DIATONIC.map.Button.prototype.clear = function(delay) {
         window.setTimeout(function(){ that.clear(); }, delay*1000);
         return;
     }    
-   // this.setClass(this.SVG.closeArc, 'nofill', 'bclose');
-   // this.setClass(this.SVG.openArc, 'nofill', 'bopen');
     this.SVG.closeArc.style.setProperty( 'fill', 'none' );
     this.SVG.openArc.style.setProperty( 'fill', 'none' );
-    //this.SVG.button.style.setProperty( '--close-color', 'none' );
-    //this.SVG.button.style.setProperty( '--open-color', 'none' );
 };
 
 DIATONIC.map.Button.prototype.setOpen = function(delay) {
@@ -88,8 +74,6 @@ DIATONIC.map.Button.prototype.setOpen = function(delay) {
         window.setTimeout(function(){that.setOpen();}, delay*1000 );
         return;
     } 
-    //this.setClass(this.SVG.openArc, 'bopen', 'nofill');
-    //this.SVG.button.style.setProperty( '--open-color', this.openColor );
     this.SVG.openArc.style.setProperty( 'fill', this.openColor );
 };
 
@@ -100,8 +84,6 @@ DIATONIC.map.Button.prototype.setClose = function(delay) {
         window.setTimeout(function(){that.setClose();}, delay*1000);
         return;
     } 
-    //this.setClass(this.SVG.closeArc, 'bclose', 'nofill' );
-    //this.SVG.button.style.setProperty( '--close-color', this.closeColor );
     this.SVG.closeArc.style.setProperty( 'fill', this.closeColor );
 };
 

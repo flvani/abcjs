@@ -104,7 +104,7 @@ ABCXJS.tablature.Layout.prototype.printTabNote = function(elem) {
         if (curr.type === "rest" ) {
             rel.type = "symbol";
             if(this.restsInTab || (allRests && p === (elem.pitches.length-1))) {
-                rel.c = ABCXJS.write.chartable.rest[-durlog];
+                rel.c = 'scripts.tabrest';
             } else {
                 rel.c = '';
             }

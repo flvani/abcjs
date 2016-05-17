@@ -130,7 +130,7 @@ ABCXJS.tablature.Parse.prototype.formatChild = function(token) {
   }
   for( var b = 0; b < token.bassNote.length; ++ b ) {
     if(token.bassNote[b] === "z")
-      child.pitches[b] = { bass:true, type: "rest", c: '', pitch: 0.7 + pitchBase - (b*3)};
+      child.pitches[b] = { bass:true, type: "rest", c: 'scripts.tabrest', pitch: 0.7 + pitchBase - (b*3)};
     else
       child.pitches[b] = { bass:true, type: tt, c: this.getTabSymbol(token.bassNote[b]), pitch: pitchBase -(b*3) - 0.5};
   }
@@ -140,7 +140,7 @@ ABCXJS.tablature.Parse.prototype.formatChild = function(token) {
   for(var i = 0; i < token.buttons.length; i ++ ) {
     var n = child.pitches.length;
     if(token.buttons[i] === "z")
-      child.pitches[n] = { c: "", type: "rest", pitch: token.bellows === "+"? 13.2 : 13.2-this.offset };
+      child.pitches[n] = { type: "rest", c: "scripts.tabrest", pitch: token.bellows === "+"? 13.2 : 13.2-this.offset };
     else {
       var offset = (qtd>=3?-(this.offset-(2.8*(qtd-2))):-this.offset);
       var p = (qtd === 1 ? 11.7 : 13.4 - ( i * 2.8)) + (token.bellows === "+"? 0 : offset);
@@ -162,7 +162,7 @@ ABCXJS.tablature.Parse.prototype.formatChild = function(token) {
 
 ABCXJS.tablature.Parse.prototype.getTabSymbol = function(text) {
     switch(text) {
-        case '>': return '-->';
+        case '>': return 'scripts.rarrow';
         default: return text;
     }
 };

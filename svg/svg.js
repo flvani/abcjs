@@ -267,26 +267,11 @@ SVG.Printer.prototype.printTieArc = function (x1,y1,x2,y2,up) {
     this.svg_pages[this.currentPage] += pathString;
 };
     
-SVG.Printer.prototype.printButton = function (id, x, y, radius, options, isPedal) {
+SVG.Printer.prototype.printButton = function (id, x, y, options) {
     
-    var scale = radius/26; // 26 é o raio inicial do botão
+    var scale = options.radius/26; // 26 é o raio inicial do botão
     var gid = 'p'+this.printerId+id;
-    var estilo = isPedal? 'stroke:red; stroke-width:2px; fill: none;':'stroke:black; stroke-width:1px; fill: none;';
-//    var bclose = 'nofill';
-//    var bopen = 'nofill';
-//    var bpedal='normal';
-// 
-//    switch( button_class) {
-//        case 'blegenda':
-//            bclose = 'bclose';
-//            bopen = 'bopen';
-//            bpedal='pedal';
-//            break;
-//        case 'bpedal':
-//            bpedal='pedal';
-//            break;
-//        default:
-//    }
+    var estilo = 'stroke:'+options.borderColor+'; stroke-width:'+options.borderWidth+'px; fill: none;';
 
     var pathString = ABCXJS.write.sprintf( '<g id="%s" transform="translate(%.2f %.2f) scale(%.5f)">\n\
         <circle cx="28" cy="28" r="26" style="stroke:none; fill: %s;" ></circle>\n\
@@ -333,6 +318,11 @@ SVG.Printer.prototype.printSymbol = function (x, y, symbol) {
 };
 
 SVG.Printer.prototype.tabText = function( x, y, str, clss, anch ) {
+    
+   if( str === 'scripts.rarrow') {
+       this.printSymbol(x, y, str );
+       return;
+   }
    str = ""+str;
    if( str.length===0) return;
    
