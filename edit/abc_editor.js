@@ -448,8 +448,8 @@ ABCXJS.Editor.prototype.modelChanged2 = function(loader) {
     var paper = new SVG.Printer( this.div );
     this.printer = new ABCXJS.write.Printer(paper, this.printerparams );
     this.printTimeStart = new Date();
-    this.printer.printABC(this.tunes, {color:'red', baseColor:'green'} );
-    //this.printer.printABC(this.tunes);
+    //this.printer.printABC(this.tunes, {color:'red', baseColor:'green'} );
+    this.printer.printABC(this.tunes);
     this.printTimeEnd = new Date();
     this.warnings.push('Tempo da impressão: ' + ( (this.printTimeEnd.getTime() -this.printTimeStart.getTime()) /1000).toFixed(2)  + 's');
     
