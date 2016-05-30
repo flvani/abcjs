@@ -55,7 +55,7 @@ if (! window.SVG.misc )
     window.SVG.misc = { printerId: 0 };
 
 if (! window.SVG.Printer )
-    window.SVG.Printer = { printerId: 0 };
+    window.SVG.Printer = {};
 
 SVG.Printer = function ( d ) {
     this.topDiv = d;
@@ -76,12 +76,16 @@ SVG.Printer = function ( d ) {
     this.initDoc();
     
     this.svgHead = function( id, kls, size ) {
+        
         var w = size? size.w*this.scale + 'px' : '0';
         var h = size? size.h*this.scale + 'px' : '0';
         var d = size? '' : 'display: none; ';
-        kls = kls? 'class="'+kls+'"' : '' ;
         
-        return '<svg id="'+id+'" xmlns="http://www.w3.org/2000/svg" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" style="'+d+'width:'+w+'; height: '+h+';" >\n';
+//        // not in use
+//        id = id? 'id="'+id+'"' : '' ;
+//        kls = kls? 'class="'+kls+'"' : '' ;
+        
+        return '<svg xmlns="http://www.w3.org/2000/svg" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" style="'+d+'width:'+w+'; height: '+h+';" >\n';
     };
 };
 
@@ -153,8 +157,8 @@ SVG.Printer.prototype.endPage = function( size ) {
 };
 
 SVG.Printer.prototype.beginGroup = function (el_type) {
-    var kls = ' style="fill:'+this.color+'; stroke:none;" ' ; //var kls = el_type==='bar'?' class="bar"':'';
     var id = 'p'+this.printerId+'g'+(++this.gid); 
+    var kls = ' style="fill:'+this.color+'; stroke:none;" ' ;
     this.svg_pages[this.currentPage] += '<g id="'+id+'"'+kls+'>\n';  
     return id;
 };
@@ -185,12 +189,11 @@ SVG.Printer.prototype.printLine = function (x,y,dx,dy) {
         dx -=  x;
     }
     var pathString = ABCXJS.write.sprintf('<rect style="fill:'+this.color+';"  x="%.2f" y="%.2f" width="%.2f" height="%.2f"/>\n', x, y, dx, dy);
-    //var pathString = ABCXJS.write.sprintf('<path style="stroke: var(--fill-color, black); stroke-width: 0.6px;" d="M %.2f %.2f L %.2f %.2f"/>\n', x, y, dx, dy);
     this.svg_pages[this.currentPage] += pathString;
 };
 
 SVG.Printer.prototype.printLedger = function (x,y,dx,dy) {
-    var pathString = ABCXJS.write.sprintf('<path style="stroke:'+this.baseColor+'; fill: white; stroke-width:0.6; stroke-dasharray: 1 1; " d="M %.2f %.2f h%.2f"/>\n', x, y, dx-x);
+    var pathString = ABCXJS.write.sprintf('<path style="stroke:'+this.baseColor+'; fill: white; stroke-width:0.6; stroke-dasharray: 1 1;" d="M %.2f %.2f h%.2f"/>\n', x, y, dx-x);
     this.svg_pages[this.currentPage] += pathString;
 };
 
@@ -210,7 +213,7 @@ SVG.Printer.prototype.printStaveLine = function (x1, x2, y, debug) {
 SVG.Printer.prototype.printBar = function (x, dx, y1, y2, real) {
     
     var x2 = x+dx;
-    var kls = real?'':'style="stroke:none; fill:'+this.baseColor+'"'
+    var kls = real?'':'style="stroke:none; fill:'+this.baseColor+'"';
     
     if (ABCXJS.misc.isIE() && dx<1) {
       dx = 1;
@@ -267,39 +270,6 @@ SVG.Printer.prototype.printTieArc = function (x1,y1,x2,y2,up) {
     this.svg_pages[this.currentPage] += pathString;
 };
     
-SVG.Printer.prototype.printButton = function (id, x, y, options) {
-    
-    var scale = options.radius/26; // 26 é o raio inicial do botão
-    var gid = 'p'+this.printerId+id;
-    var estilo = 'stroke:'+options.borderColor+'; stroke-width:'+options.borderWidth+'px; fill: none;';
-
-    var pathString = ABCXJS.write.sprintf( '<g id="%s" transform="translate(%.2f %.2f) scale(%.5f)">\n\
-        <circle cx="28" cy="28" r="26" style="stroke:none; fill: %s;" ></circle>\n\
-        <path id="%s_ac" style="stroke: none; fill: %s;" d="M 2 34 a26 26 0 0 1 52 -12"></path>\n\
-        <path id="%s_ao" style="stroke: none; fill: %s;" d="M 54 22 a26 26 0 0 1 -52 12"></path>\n\
-        <circle style="'+estilo+'" cx="28" cy="28" r="26"></circle>\n\
-        <path style="'+estilo+'" d="m 2 34 l 52 -12" ></path>\n\
-        <text id="%s_tc" class="%s" style="stroke:none; fill: black;" x="27" y="22" >...</text>\n\
-        <text id="%s_to" class="%s" style="stroke:none; fill: black;" x="27" y="44" >...</text>\n</g>\n',
-        gid, x, y, scale, options.fillColor, gid, options.closeColor, gid, options.openColor, gid, options.kls, gid, options.kls );
-        
-    this.svg_pages[this.currentPage] += pathString;
-    return gid;
-
-    if(ABCXJS.misc.isIE() || ABCXJS.misc.isChromium() ) {
-    } else {
-   
-        this.setDefine('button');
-
-        var pathString = ABCXJS.write.sprintf( '<g class="%s" transform="translate(%.2f %.2f) scale(%.5f)">\n\
-        <use id="%s" x="0" y="0" width="52" height="52" xlink:href="#button" />\n\
-        <text id="%s_tc" x="26" y="20" >...</text>\n\
-        <text id="%s_to" x="26" y="42" >...</text>\n</g>\n', button_class, x, y, scale, gid, gid, gid );
-    }    
-    this.svg_pages[this.currentPage] += pathString;
-    return gid;
-};
-
 SVG.Printer.prototype.printBrace = function (x, y1, y2) {
     var sz = Math.abs(y1-y2); // altura esperada
     var scale = sz / 1027; // altura real do simbolo
@@ -320,9 +290,11 @@ SVG.Printer.prototype.printSymbol = function (x, y, symbol) {
 SVG.Printer.prototype.tabText = function( x, y, str, clss, anch ) {
     
    if( str === 'scripts.rarrow') {
+       //fixme: deveria mudar o tipe de tabtext para symbol, adequadamente
        this.printSymbol(x, y, str );
        return;
    }
+   
    str = ""+str;
    if( str.length===0) return;
    
@@ -358,23 +330,24 @@ SVG.Printer.prototype.text = function( x, y, str, clss, anch ) {
     this.svg_pages[this.currentPage] += '</g>\n';
 };
 
-//SVG.Printer.prototype.circularArc = function(centerX, centerY, radius, startAngle, endAngle) {
-//  var angle = 0;
-//  var startX = centerX+radius*Math.cos(startAngle*Math.PI/180); 
-//  var startY = centerY+radius*Math.sin(startAngle*Math.PI/180);
-//  var endX = centerX+radius*Math.cos(endAngle*Math.PI/180); 
-//  var endY = centerY+radius*Math.sin(endAngle*Math.PI/180);
-//  var arcSVG = [radius, radius, angle, 0, 1, endX-startX, endY-startY].join(' ');
-//  return this.arc(startX, startY, arcSVG);
-//};
-//
-//SVG.Printer.prototype.arc = function(startX, startY, arcSVG) {
-//    var pathString = ABCXJS.write.sprintf('<path d="M %.2f %.2f a%s"/>\n', startX, startY, arcSVG);
-//    this.svg_pages[this.currentPage] += pathString;
-//};
-//
-//SVG.Printer.prototype.circle = function(startX, startY, radius) {
-//    var pathString = ABCXJS.write.sprintf('<circle cx="%.2f" cy="%.2f" r="%.2f" stroke="black" stroke-width="2" fill="white" />\n', startX, startY, radius );
-//    this.svg_pages[this.currentPage] += pathString;
-//};
-//
+SVG.Printer.prototype.printButton = function (id, x, y, options) {
+    
+    var scale = options.radius/26; // 26 é o raio inicial do botão
+    var gid = 'p'+this.printerId+id;
+    var estilo = 'stroke:'+options.borderColor+'; stroke-width:'+options.borderWidth+'px; fill: none;';
+
+    var pathString = ABCXJS.write.sprintf( '<g id="%s" transform="translate(%.2f %.2f) scale(%.5f)">\n\
+        <circle cx="28" cy="28" r="26" style="stroke:none; fill: %s;" ></circle>\n\
+        <path id="%s_ac" style="stroke: none; fill: %s;" d="M 2 34 a26 26 0 0 1 52 -12"></path>\n\
+        <path id="%s_ao" style="stroke: none; fill: %s;" d="M 54 22 a26 26 0 0 1 -52 12"></path>\n\
+        <circle style="'+estilo+'" cx="28" cy="28" r="26"></circle>\n\
+        <path style="'+estilo+'" d="m 2 34 l 52 -12" ></path>\n\
+        <text id="%s_tc" class="%s" style="stroke:none; fill: black;" x="27" y="22" >...</text>\n\
+        <text id="%s_to" class="%s" style="stroke:none; fill: black;" x="27" y="44" >...</text>\n</g>\n',
+        gid, x, y, scale, options.fillColor, gid, options.closeColor, gid, options.openColor, gid, options.kls, gid, options.kls );
+        
+    this.svg_pages[this.currentPage] += pathString;
+    return gid;
+
+};
+

@@ -55,8 +55,6 @@ ABCXJS.write.StaffGroupElement.prototype.layout = function(spacing, printer, deb
         }
     }
     x += voiceheaderw + (voiceheaderw? printer.paddingleft:0); // 10% of 0 is 0
-    //x += voiceheaderw + printer.paddingleft; // fixme: deve ser mesmo sempre mais padding
-    // x += voiceheaderw;
     this.startx = x;
 
     var currentduration = 0;
@@ -64,7 +62,6 @@ ABCXJS.write.StaffGroupElement.prototype.layout = function(spacing, printer, deb
         console.log("init layout");
     for (i = 0; i < this.voices.length; i++) {
         this.voices[i].beginLayout(x);
-        // flavio - tentativa de encontrar lowest
         for (b = 0; b < this.voices[i].beams.length; b++) {
             for (be = 0; be < this.voices[i].beams[b].elems.length; be++) {
                 var elem = this.voices[i].beams[b].elems[be];
@@ -289,7 +286,6 @@ ABCXJS.write.StaffGroupElement.prototype.draw = function(printer, groupNumber) {
             printer.paper.printBrace(this.startx-10, top-10, bottom+10);  
         }
     }
-
     
     printer.y = yi + delta + height; // nova posição da impressora
     
@@ -371,7 +367,6 @@ ABCXJS.write.VoiceElement.prototype.beginLayout = function(startx) {
 // spacing - base spacing
 // can't call this function more than once per iteration
 ABCXJS.write.VoiceElement.prototype.layoutOneItem = function(x, spacing) {
-    // flavio - can use this.staff
     var child = this.children[this.i];
     if (!child)
         return 0;
@@ -416,8 +411,6 @@ ABCXJS.write.VoiceElement.prototype.draw = function(printer) {
     printer.y = ve.stave.y;
     
     if (this.header) { // print voice name
-        //var textpitch = 12 - (this.voicenumber + 1) * (12 / (this.voicetotal + 1));
-        //var headerY = printer.calcY(textpitch)
         var headerY = (ve.stave.clef.type!=='accordionTab'? printer.calcY(6) : ve.stave.y ) +3;
         var headerX = printer.paddingleft;
         printer.printText(headerX, headerY,  this.header, 'abc_voice_header', 'start' );
@@ -437,7 +430,6 @@ ABCXJS.write.VoiceElement.prototype.draw = function(printer) {
     for (var i = 0; i < this.otherchildren.length; i++) {
         this.otherchildren[i].draw(printer, ve.startx + 10, width, ve.stave, ve.staffnumber, ve.voicenumber );
     };
-    
 
 };
 
@@ -511,7 +503,6 @@ ABCXJS.write.AbsoluteElement.prototype.draw = function(printer, staveInfo ) {
     
     if (this.invisible) return;
 
-    var self = this;
     var l = 0;
     
     this.elemset = {};// printer.paper.set();
@@ -526,50 +517,23 @@ ABCXJS.write.AbsoluteElement.prototype.draw = function(printer, staveInfo ) {
         }
     }
     
-    if(l>0){
+    if( l > 0 ){
         printer.beginGroup(this);
     }
     
     for (var i = 0; i < this.children.length; i++) {
-        //this.elemset.push(this.children[i].draw(printer, this.x, staveInfo ));
-        ( this.children[i].type !== 'ledger' && this.children[i].type !== 'part' ) && this.children[i].draw(printer, this.x, staveInfo );
+        if ( this.children[i].type !== 'ledger' && this.children[i].type !== 'part' ) {
+            this.children[i].draw(printer, this.x, staveInfo );
+        }
     }
     
-    //this.elemset.push(printer.endGroup());
-    (l>0) && printer.endGroup();
+    if( l > 0 ){
+        printer.endGroup();
+    }
     
     this.abcelem.parent = this; 
     this.abcelem.parent.screenY = printer.totalY + printer.y; // posição na tela, independe das quebras de página
     
-//    if (this.klass)
-//        this.setClass("mark", "", "#00ff00");
-    
-//    this.elemset.mouseup(function(e) {
-//        printer.notifyClearNSelect(self);
-//    });
-
-
-//    var spacing = ABCXJS.write.spacing.STEP ;
-
-//    var start = function() {
-//        // storing original relative coordinates
-//        this.dy = 0;
-//    },
-//    move = function(dx, dy) {
-//        // move will be called with dx and dy
-//        dy = Math.round(dy / spacing) * spacing;
-//        this.translate(0, -this.dy);
-//        this.dy = dy;
-//        this.translate(0, this.dy);
-//    },
-//    up = function() {
-//        var delta = -Math.round(this.dy / spacing);
-//        self.abcelem.pitches[0].pitch += delta;
-//        self.abcelem.pitches[0].verticalPos += delta;
-//        printer.notifyChange();
-//    };
-//    if (this.abcelem.el_type === "note" && printer.editable)
-//        this.elemset.drag(move, start, up);
 };
 
 ABCXJS.write.AbsoluteElement.prototype.setMouse = function(printer) {
@@ -580,45 +544,12 @@ ABCXJS.write.AbsoluteElement.prototype.setMouse = function(printer) {
     this.svgElem.onclick =  function() {printer.notifyClearNSelect(self);};
  };
 
-ABCXJS.write.AbsoluteElement.prototype.setClass = function(addClass, removeClass) {
-    this.svgElem.setAttribute("class", addClass.trim() );
-};
-
-ABCXJS.write.AbsoluteElement.prototype.setClassOld = function(addClass, removeClass) {
-    var kls = this.svgElem.getAttribute("class");
-    if (!kls)
-        kls = "";
-    kls = kls.replace(removeClass, "");
-    kls = kls.replace(addClass, "");
-    if (addClass.length > 0) {
-        if (kls.length > 0 && kls.charAt(kls.length - 1) !== ' ')
-            kls += " ";
-        kls += addClass;
-    }
-    this.svgElem.setAttribute("class", kls.trim() );
-};
-
 ABCXJS.write.AbsoluteElement.prototype.highlight = function() {
     this.svgElem.style.setProperty( 'fill', ABCXJS.write.highLightColor );
-    return;
-    
-    this.setClass("selected" );
-    if(ABCXJS.misc.isIE() || ABCXJS.misc.isChromium() ) 
-        this.setClass("selected", "" );
-    else
-        this.svgElem.style.setProperty( '--fill-color', ABCXJS.write.highLightColor );
-
 };
 
 ABCXJS.write.AbsoluteElement.prototype.unhighlight = function() {
     this.svgElem.style.setProperty( 'fill', ABCXJS.write.unhighLightColor );
-    return;
-    
-    this.setClass("normal" );
-    if(ABCXJS.misc.isIE() || ABCXJS.misc.isChromium() ) 
-        this.setClass("", "selected");
-    else
-        this.svgElem.style.setProperty( '--fill-color', ABCXJS.write.unhighLightColor );
 };
 
 ABCXJS.write.RelativeElement = function(c, dx, w, pitch, opt) {
@@ -748,7 +679,6 @@ ABCXJS.write.TieElem.prototype.draw = function(printer, linestartx, lineendx, st
         }
     }
 
-
     printer.printTieArc(linestartx, lineendx, startpitch, endpitch, this.above);
 
 };
@@ -786,8 +716,6 @@ ABCXJS.write.EndingElem.prototype.draw = function(printer, linestartx, lineendx,
     
     printer.paper.printLine(linestartx, y, lineendx-5, y);  
 };
-
-
 
 ABCXJS.write.CrescendoElem = function(anchor1, anchor2, dir) {
     this.anchor1 = anchor1; // must have a .x and a .parent property or be null (means starts at the "beginning" of the line - after keysig)
@@ -845,7 +773,6 @@ ABCXJS.write.TripletElem.prototype.draw = function(printer, linestartx, lineendx
         } else {
             xsum += this.anchor2.w;
         }
-
 
         printer.printText(xsum / 2, ypos + ydelta, this.number, 'abc_ending', "middle");
 

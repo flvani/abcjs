@@ -55,30 +55,28 @@ ABCXJS.write.Printer = function (paper, params) {
 
 };
 
-ABCXJS.write.Printer.prototype.printABC = function(abctunes, options) {
-  if (abctunes[0]===undefined) {
-    abctunes = [abctunes];
-  }
-  this.y=0;
-  this.totalY = 0;
-  
-  //options = options || {};
-  //options.color='red';
-  
-  for (var i = 0; i < abctunes.length; i++) {
-    this.printTune( abctunes[i], options /*, {color:'red', backgroundColor:'#ffd'}*/ );
-  }
+ABCXJS.write.Printer.prototype.printABC = function (abctunes, options) {
+    if (abctunes[0] === undefined) {
+        abctunes = [abctunes];
+    }
+    this.y = 0;
+    this.totalY = 0; // screen position of an element
+
+    for (var i = 0; i < abctunes.length; i++) {
+        this.printTune(abctunes[i], options);
+    }
 
 };
 
 ABCXJS.write.Printer.prototype.printTune = function(abctune, options) {
     
+    if( abctune.lines.length === 0 ) return;
+    
     options = options || {};
     options.color = options.color ||'black';
     options.backgroundColor = options.backgroundColor ||'none';
     
-    
-    if( abctune.lines.length === 0 ) return;
+    ABCXJS.write.unhighLightColor = options.color;
     
     var estilo = 
 '\n\
@@ -151,16 +149,6 @@ ABCXJS.write.Printer.prototype.printTune = function(abctune, options) {
         font-size: 10px;\n\
     }';
     
-    ABCXJS.write.unhighLightColor = options.color;
-
-    
-//     svg { --fill-color:'+options.color+'; } \n\
-//    .bar { fill: var(--fill-color, black); stroke:'+'none'+'; stroke-width:0.6; }\n\
-//    .stem { fill:'+'black'+'; stroke:'+'none'+'; stroke-width:0.6; }\n\
-//    .beam { fill:'+options.color+'; stroke:'none; }\n\
-//    .ledger { fill:white; stroke:'+options.color+'; stroke-width:0.6; stroke-dasharray: 1 1; }\n\
-//    .stave { fill:'+'none'+'; stroke:'+options.color+'; stroke-width:0.6; }\n  
-
     var svg_title = 'Partitura ' + abctune.metaText.title + ' criada por ABCXJS.';
     
     if( abctune.midi) {
@@ -179,14 +167,13 @@ ABCXJS.write.Printer.prototype.printTune = function(abctune, options) {
     
     this.layouter = new ABCXJS.write.Layout( this, abctune.formatting.bagpipes );
     
-    
     this.calcPageLength();
     
     this.paper.initDoc( 'tune', svg_title, estilo, options );
     this.paper.initPage( this.scale );
 
     if (abctune.metaText.title) {
-        this.paper.text(this.width/2, this.y, abctune.metaText.title, "abc_title", "middle" );
+        this.paper.text(this.width/2, this.y+5, abctune.metaText.title, "abc_title", "middle" );
         this.y += 20;
     }    
 
@@ -315,20 +302,7 @@ ABCXJS.write.Printer.prototype.printTune = function(abctune, options) {
         }
     }
     
-    //if ( !ABCXJS.misc.isChrome() ) {
-        this.paper.topDiv.style.width = "" +  (this.maxwidth + this.paddingright) + "px";
-    //};
-    
-
-//    // Correct for IE problem in calculating height
-//    if (ABCXJS.misc.isIE()) {
-//        this.paper.topDiv.parentNode.style.width = "" +  sizetoset.w + "px";
-//        this.paper.topDiv.parentNode.style.height = "" + sizetoset.h + "px";
-//    } else {
-//        this.paper.topDiv.parentNode.setAttribute("style", "width:" + sizetoset.w + "px"); 
-//       // this.paper.topDiv.parentNode.setAttribute("style", "height:" + sizetoset.h + "px");
-//       // this.paper.topDiv.setAttribute("style", "background-color: #ffe"); 
-//    }
+    this.paper.topDiv.style.width = "" +  (this.maxwidth + this.paddingright) + "px";
 
 };
 
@@ -342,8 +316,8 @@ ABCXJS.write.Printer.prototype.printTempo = function (x, tempo) {
 
     if (tempo.preString) {
         this.paper.text(x, this.calcY(tempopitch-0.8), tempo.preString, 'abc_tempo', 'start');
-        //x += (text.getBBox().width + 20*printer.scale);
         //fixme: obter a largura do texto
+        //x += (text.getBBox().width + 20*printer.scale);
         x += tempo.preString.length*5 + 5;
     }
 
@@ -427,13 +401,7 @@ ABCXJS.write.Printer.prototype.printDebugLine = function (x1,x2, y, fill ) {
 };
 
 ABCXJS.write.Printer.prototype.printLedger = function (x1, x2, pitch) {
-      this.paper.printLedger(x1, this.calcY(pitch), x2, this.calcY(pitch) );
-      
-//    if( pitch < 2 || pitch > 10 ) {
-//      this.paper.printLedger(x1, this.calcY(pitch), Math.abs(x1-x2), 0.6 );
-//    } else {
-//      return null;
-//    }  
+    this.paper.printLedger(x1, this.calcY(pitch), x2, this.calcY(pitch) );
 };
 
 ABCXJS.write.Printer.prototype.printText = function (x, offset, text, kls, anchor ) {
@@ -467,8 +435,6 @@ ABCXJS.write.Printer.prototype.printDebugMsg = function(x, y, msg ) {
 };
 
 ABCXJS.write.Printer.prototype.printLyrics = function(x, staveInfo, msg) {
-    //var y = staveInfo.lowest-ABCXJS.write.spacing.STEP*staveInfo.lyricsRows;
-    //y += (staveInfo.lyricsRows-0.5);
     var y = this.calcY(staveInfo.lowest-(staveInfo.lyricsRows>1?0:3.7));
     
     // para manter alinhado, quando uma das linhas for vazia, imprimo 3 pontos
@@ -477,6 +443,10 @@ ABCXJS.write.Printer.prototype.printLyrics = function(x, staveInfo, msg) {
     
     this.paper.text(x, y, msg, 'abc_lyrics', 'start');
     
+};
+
+ABCXJS.write.Printer.prototype.addSelectListener = function (listener) {
+  this.listeners[this.listeners.length] = listener;
 };
 
 // notify all listeners that a graphical element has been selected
@@ -507,10 +477,6 @@ ABCXJS.write.Printer.prototype.clearSelection = function () {
   this.selected = [];
 };
 
-ABCXJS.write.Printer.prototype.addSelectListener = function (listener) {
-  this.listeners[this.listeners.length] = listener;
-};
-
 ABCXJS.write.Printer.prototype.rangeHighlight = function(start,end)
 {
     this.clearSelection();
@@ -524,7 +490,6 @@ ABCXJS.write.Printer.prototype.rangeHighlight = function(start,end)
 		var elStart = elems[elem].abcelem.startChar;
 		var elEnd = elems[elem].abcelem.endChar;
 		if ((end>elStart && start<elEnd) || ((end===start) && end===elEnd)) {
-		    //		if (elems[elem].abcelem.startChar>=start && elems[elem].abcelem.endChar<=end) {
 		    this.selected[this.selected.length]=elems[elem];
 		    elems[elem].highlight();
 		}
@@ -554,13 +519,11 @@ ABCXJS.write.Printer.prototype.calcPageLength = function() {
 };
 
 ABCXJS.write.Printer.prototype.printPageNumber = function() {
-    //return; // vamos usar page format
     
     this.y = this.estimatedPageLength;
     
     if (this.pagenumbering) {
          this.paper.text(this.maxwidth+this.paddingright, this.y, "- " + this.pageNumber + " -", 'abc_tempo', 'end');
-             // .attr({"text-anchor": "end", "font-size": 13 , "font-family": "serif", 'font-weight': 'bold'});
     }
 };
 
@@ -573,6 +536,7 @@ ABCXJS.write.Printer.prototype.skipPage = function(lastPage) {
     this.totalY += this.y;
     
     this.paper.endPage({w: (this.maxwidth + this.paddingright) , h: this.y });
+    
     if( ! lastPage ) {
         this.y = this.paddingtop;
         this.pageNumber++;
@@ -585,18 +549,6 @@ ABCXJS.write.Printer.prototype.formatPage = function(tune) {
     var orientation = tune.formatting.landscape?'landscape':'portrait';
     var style = document.getElementById('page_format');
     
-//    var pgnumber = '';
-//
-//    if ( tune.formatting.pagenumbering ) {
-//        pgnumber = 
-//'   @page: right {\n\
-//        @bottom-right {\n\
-//            content: "Pág. " counter(page) "/" counter(pages)".";\n\
-//            }\n\
-//    }\n';
-//        
-//    }
-
     var formato = 
 '   @page {\n\
         margin: '+tune.formatting.defaultMargin+'; size: '+tune.formatting.papersize+' ' + orientation + ';\n\
@@ -614,14 +566,11 @@ ABCXJS.write.Printer.prototype.formatPage = function(tune) {
 
 ABCXJS.write.Printer.prototype.printExtraText = function(text, x) {
     var t = this.paper.text(x, this.y , text, 'abc_title', 'start');
-            //.attr({"text-anchor": "start", "font-family": "serif", "font-size": 17 });
     var height ;//= t.getBBox().height;
-    if (!height)  height = 25 ; // TODO-PER: Hack! Raphael sometimes and returns NaN. Perhaps only when printing to PDF? Possibly if the SVG is hidden?
-    //t.translate(0, height / 2);
+    if (!height)  height = 25 ; //fixme: obter a altura do texto
     return height;
 };
 
 ABCXJS.write.Printer.prototype.printSubtitleLine = function(subtitle) {
     this.paper.text(this.width/2, this.y, subtitle, 'abc_subtitle', 'middle');
 };
-

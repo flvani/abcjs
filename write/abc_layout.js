@@ -38,13 +38,12 @@ ABCXJS.write.getDuration = function(elem) {
 };
 
 ABCXJS.write.getDurlog = function(duration) {
-	// TODO-PER: This is a hack to prevent a Chrome lockup. Duration should have been defined already,
-	// but there's definitely a case where it isn't. [Probably something to do with triplets.]
-	if (duration === undefined) {
-		return 0;
-	}
-//	console.log("getDurlog: " + duration);
-  return Math.floor(Math.log(duration)/Math.log(2));
+    // TODO-PER: This is a hack to prevent a Chrome lockup. Duration should have been defined already,
+    // but there's definitely a case where it isn't. [Probably something to do with triplets.]
+    if (duration === undefined) {
+        return 0;
+    }
+    return Math.floor(Math.log(duration)/Math.log(2));
 };
 
 ABCXJS.write.Layout = function(printer, bagpipes ) {
@@ -220,8 +219,7 @@ ABCXJS.write.Layout.prototype.printABCElement = function() {
     break;
   case "part":
     var abselem = new ABCXJS.write.AbsoluteElement(elem,0,0);
-    //fixme: corrigir adequatamente os atributos deste titulo
-    abselem.addChild(new ABCXJS.write.RelativeElement(elem.title, 0, 0, 18.5, {type:"part" })); //, attributes:{"font-weight":"bold", "font-size":""+16+"px", "font-family":"serif"}}));
+    abselem.addChild(new ABCXJS.write.RelativeElement(elem.title, 0, 0, 18.5, {type:"part" })); 
     elemset[0] = abselem;
     break;
   default: 
@@ -1047,21 +1045,19 @@ ABCXJS.write.Layout.prototype.printClef = function(elem) {
   return abselem;
 };
 
-
 ABCXJS.write.Layout.prototype.printKeySignature = function(elem) {
-  if(!elem.key) throw "Missing key element!";
-  var abselem = new ABCXJS.write.AbsoluteElement(elem.key,0,10);
-  var dx = 0;
-  if ( elem.key.accidentals) {
-	  window.ABCXJS.parse.each(elem.key.accidentals, function(acc) {
-		var symbol = (acc.acc === "sharp") ? "accidentals.sharp" : (acc.acc === "natural") ? "accidentals.nat" : "accidentals.flat";
-    		//var notes = { 'A': 5, 'B': 6, 'C': 0, 'D': 1, 'E': 2, 'F': 3, 'G':4, 'a': 12, 'b': 13, 'c': 7, 'd': 8, 'e': 9, 'f': 10, 'g':11 };
-		abselem.addRight(new ABCXJS.write.RelativeElement(symbol, dx, this.glyphs.getSymbolWidth(symbol), acc.verticalPos));
-		dx += this.glyphs.getSymbolWidth(symbol)+2;
-	  }, this);
-  }
-  this.startlimitelem = abselem; // limit ties here
-  return abselem;
+    if(!elem.key) throw "Missing key element!";
+    var abselem = new ABCXJS.write.AbsoluteElement(elem.key,0,10);
+    var dx = 0;
+    if ( elem.key.accidentals) {
+        ABCXJS.parse.each(elem.key.accidentals, function(acc) {
+            var symbol = (acc.acc === "sharp") ? "accidentals.sharp" : (acc.acc === "natural") ? "accidentals.nat" : "accidentals.flat";
+            abselem.addRight(new ABCXJS.write.RelativeElement(symbol, dx, this.glyphs.getSymbolWidth(symbol), acc.verticalPos));
+            dx += this.glyphs.getSymbolWidth(symbol)+2;
+        }, this);
+    }
+    this.startlimitelem = abselem; // limit ties here
+    return abselem;
 };
 
 ABCXJS.write.Layout.prototype.printTimeSignature= function(elem) {
