@@ -690,7 +690,9 @@ ABCXJS.write.DynamicDecoration = function(anchor, dec) {
 
 ABCXJS.write.DynamicDecoration.prototype.draw = function(printer, linestartx, lineendx, staveInfo) {
     var ypos = staveInfo.lowest-1;
-    printer.printSymbol(this.anchor.x, ypos, this.dec);
+    for( var r=0; r < this.dec.length; r ++ ) {
+        printer.printSymbol(this.anchor.x+r*10, ypos, this.dec[r]);
+    }    
 };
 
 ABCXJS.write.EndingElem = function(text, anchor1, anchor2) {

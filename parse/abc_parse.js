@@ -336,7 +336,9 @@ Elas foram incluídas em this.staves - ver:  abc_parse_key_voice e abc_parse_dir
     var legalAccents = ["trill", "lowermordent", "uppermordent", "mordent", "pralltriller", "accent",
         "fermata", "invertedfermata", "tenuto", "0", "1", "2", "3", "4", "5", "+", "wedge",
         "open", "thumb", "snap", "turn", "roll", "breath", "shortphrase", "mediumphrase", "longphrase",
-        "segno", "coda", "D.S.", "D.C.", "fine", "crescendo(", "crescendo)", "diminuendo(", "diminuendo)",
+        "segno", "coda",
+        "dacoda", "dacapo", "dasegno", "dcalfine", "dcalcoda", "dsalfine", "dsalcoda"
+        , "D.S.", "D.C.", "fine", "crescendo(", "crescendo)", "diminuendo(", "diminuendo)",
         "p", "pp", "f", "ff", "mf", "mp", "ppp", "pppp", "fff", "ffff", "sfz", "repeatbar", "repeatbar2", "slide",
         "upbow", "downbow", "/", "//", "///", "////", "trem1", "trem2", "trem3", "trem4",
         "turnx", "invertedturn", "invertedturnx", "trill(", "trill)", "arpeggio", "xstem", "mark", "umarcato",

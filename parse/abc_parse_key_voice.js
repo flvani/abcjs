@@ -618,7 +618,9 @@ window.ABCXJS.parse.parseKeyVoice = {};
 			isNew = true;
 			if (multilineVars.score_is_present && id.toLowerCase().substr(0,3) !== "tab")
 				warn("Can't have an unknown V: id when the %score directive is present", line, start);
-		}
+		} else {
+                    multilineVars.clef = multilineVars.staves[ multilineVars.voices[id].staffNum].clef;
+                }
 		start += id.length;
 		start += tokenizer.eatWhiteSpace(line, start);
 

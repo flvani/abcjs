@@ -124,7 +124,7 @@ ABCXJS.write.Layout.prototype.layoutABCLine = function( abctune, line, width ) {
 
             if (abcstaff.clef.type !== "accordionTab") {
                 this.voice.addChild(this.printClef(abcstaff.clef));
-                this.voice.addChild(this.printKeySignature(abcstaff));
+                (abcstaff.key) && this.voice.addChild(this.printKeySignature(abcstaff.key));
                 (abcstaff.meter) && this.voice.addChild(this.printTimeSignature(abcstaff.meter));
                 this.printABCVoice();
             } else {
@@ -1046,11 +1046,10 @@ ABCXJS.write.Layout.prototype.printClef = function(elem) {
 };
 
 ABCXJS.write.Layout.prototype.printKeySignature = function(elem) {
-    if(!elem.key) throw "Missing key element!";
-    var abselem = new ABCXJS.write.AbsoluteElement(elem.key,0,10);
+    var abselem = new ABCXJS.write.AbsoluteElement(elem,0,10);
     var dx = 0;
-    if ( elem.key.accidentals) {
-        ABCXJS.parse.each(elem.key.accidentals, function(acc) {
+    if ( elem.accidentals) {
+        ABCXJS.parse.each(elem.accidentals, function(acc) {
             var symbol = (acc.acc === "sharp") ? "accidentals.sharp" : (acc.acc === "natural") ? "accidentals.nat" : "accidentals.flat";
             abselem.addRight(new ABCXJS.write.RelativeElement(symbol, dx, this.glyphs.getSymbolWidth(symbol), acc.verticalPos));
             dx += this.glyphs.getSymbolWidth(symbol)+2;
