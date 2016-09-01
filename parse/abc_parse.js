@@ -1076,7 +1076,7 @@ Elas foram incluídas em this.staves - ver:  abc_parse_key_voice e abc_parse_dir
             if ( multilineVars.measureNotEmpty ) multilineVars.currBarNumber++;
             multilineVars.barNumOnNextNote = multilineVars.currBarNumber;
             
-            if (multilineVars.barNumbers === 1 || ( multilineVars.barNumbers === 0 && multilineVars.currBarNumber > 1 ))
+            if (multilineVars.barNumbers === 1 || ( multilineVars.barNumbers === 0 && multilineVars.barsperstaff === undefined && multilineVars.currBarNumber > 1 ))
                 multilineVars.barNumOnNextNoteVisible = true;
         }
     }
@@ -1374,7 +1374,12 @@ Elas foram incluídas em this.staves - ver:  abc_parse_key_voice e abc_parse_dir
                                 && ( mc === undefined || ( mc.staffNum === 0 && mc.index === 0) ) ) {
                             multilineVars.currBarNumber++;
                             multilineVars.barNumOnNextNote = multilineVars.currBarNumber;
-                            if (multilineVars.barNumbers && multilineVars.currBarNumber % multilineVars.barNumbers === 0)
+                            if 
+                            (
+                                (multilineVars.barNumbers && (multilineVars.currBarNumber % multilineVars.barNumbers === 0))
+                            || 
+                                (multilineVars.barsperstaff !== undefined && multilineVars.currBarNumber && ((multilineVars.currBarNumber-1) % multilineVars.barsperstaff) === 0) 
+                            ) 
                                 multilineVars.barNumOnNextNoteVisible = true;
                         }
                         this.addTuneElement('bar', startOfLine, i, i + ret[0], bar);
@@ -1764,16 +1769,6 @@ Elas foram incluídas em this.staves - ver:  abc_parse_key_voice e abc_parse_dir
                 multilineVars.iChar += line.length + 1;
             }
             
-            tune.setFormat(multilineVars);
-            
-            tune.handleBarsPerStaff();
-
-            tune.cleanUp();
-            
-            if( this.transposer && this.transposer.offSet !== 0 ) {
-                strTune = this.transposer.updateEditor( lines );
-            }
-            
             if (tune.hasTablature) {
                 // necessário inferir a tablatura
                 if (tune.lines[0].staffs[tune.tabStaffPos].voices[0].length === 0) {
@@ -1815,6 +1810,16 @@ Elas foram incluídas em this.staves - ver:  abc_parse_key_voice e abc_parse_dir
                         addWarning("+Warn: Cannot infer tablature line: no accordion defined!");
                     }
                 }
+            }
+            
+            tune.setFormat(multilineVars);
+            
+            tune.handleBarsPerStaff();
+
+            tune.cleanUp();
+            
+            if( this.transposer && this.transposer.offSet !== 0 ) {
+                strTune = this.transposer.updateEditor( lines );
             }
     
             
