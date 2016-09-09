@@ -145,9 +145,9 @@ window.ABCXJS.parse.Transposer.prototype.transposeRegularMusicLine = function(li
             state = 0;
             
             if (found) {
-                this.transposeNote(xi, xf - xi);
+              this.transposeNote(xi, xf - xi);
             } else {
-              index++;
+              index = this.checkForInlineFields( index );
             }   
             
         }
@@ -162,6 +162,26 @@ window.ABCXJS.parse.Transposer.prototype.transposeRegularMusicLine = function(li
       
     }
     return this.changedLines[ this.workingLineIdx ].text;
+};
+
+window.ABCXJS.parse.Transposer.prototype.checkForInlineFields = function ( index ) {
+    var c = this.workingLine.substring(index);
+    var rex = c.match(/^\[([IKLMmNPQRrUV]\:.*?)\]/g);
+    var newidx = index;
+    if(rex) {
+        var key = rex[0].substr(1,rex[0].length-2).split(":");
+        switch(key[0]) {
+            case 'K':
+               this.transposeChord(index+3,key[1].length);
+               newidx+=rex[0].length;
+               break;
+            default:
+               newidx+=rex[0].length;
+        }
+    } else {
+        newidx+=1;
+    }
+    return newidx;
 };
 
 window.ABCXJS.parse.Transposer.prototype.transposeChord = function ( xi, size ) {

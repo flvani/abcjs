@@ -329,7 +329,7 @@ window.ABCXJS.parse.parseKeyVoice = {};
 		}
 	};
 
-	window.ABCXJS.parse.parseKeyVoice.parseKey = function( str, transposer, line, lineNumber )	
+	window.ABCXJS.parse.parseKeyVoice.parseKey = function( str, transposer, line, lineNumber )
 	{
 		// returns:
 		//		{ foundClef: true, foundKey: true }

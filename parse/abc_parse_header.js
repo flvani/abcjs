@@ -323,7 +323,8 @@ window.ABCXJS.parse.ParseHeader = function(tokenizer, warn, multilineVars, tune,
 						multilineVars.meter = meter;
 					return [ e-i+1+ws ];
 				case "[K:":
-					var result = window.ABCXJS.parse.parseKeyVoice.parseKey(line.substring(i+3, e), transposer );
+                                        // parseKey não precisa conhecer o transposer porque a string da linha já foi transposta integralmente antes deste ponto.
+					var result = window.ABCXJS.parse.parseKeyVoice.parseKey(line.substring(i+3, e) ); // flavio
 					if (result.foundClef && tune.hasBeginMusic())
 						tune.appendStartingElement('clef', multilineVars.currTexLineNum, -1, -1, multilineVars.clef);
 					if (result.foundKey && tune.hasBeginMusic())
