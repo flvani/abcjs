@@ -27,7 +27,7 @@ if (!window.ABCXJS.midi)
 ABCXJS.midi.Player = function( options ) {
     
     this.reset(options);
-    
+   
     this.playableClefs = "TB"; // indica que baixo (B) e melodia (T) serao executadas.
     this.ticksPerInterval = 1;
     
@@ -137,6 +137,12 @@ ABCXJS.midi.Player.prototype.startPlay = function(what) {
 
     if(this.playing || !what ) return false;
     
+    if(this.currentTime === 0 ) {
+        //flavio - pq no IOS tenho que tocar uma nota antes de qualquer pausa
+        MIDI.noteOn(0, 21, 0, 0);
+        MIDI.noteOff(0, 21, 0.01);
+    }
+   
     this.playlist = what.playlist;
     this.tempo    = what.tempo;
     this.printer  = what.printer;
@@ -146,6 +152,7 @@ ABCXJS.midi.Player.prototype.startPlay = function(what) {
     this.onError = null;
   
     var self = this;
+    
     this.doPlay();
     this.playInterval = window.setInterval(function() { self.doPlay(); }, this.tempo);
     
@@ -162,6 +169,12 @@ ABCXJS.midi.Player.prototype.clearDidacticPlay = function() {
 ABCXJS.midi.Player.prototype.startDidacticPlay = function(what, type, value, valueF ) {
 
     if(this.playing) return false;
+
+    if(this.currentTime === 0 ) {
+        //flavio - pq no IOS tenho que tocar uma nota antes de qualquer pausa
+        MIDI.noteOn(0, 21, 0, 0);
+        MIDI.noteOff(0, 21, 0.01);
+    }
     
     this.playlist = what.playlist;
     this.tempo    = what.tempo;
@@ -227,7 +240,7 @@ ABCXJS.midi.Player.prototype.handleBar = function() {
     if(this.playlist[this.i] && this.playlist[this.i].barNumber) {
         this.currentMeasure = this.playlist[this.i].barNumber;
         if( this.callbackOnChangeBar ) {
-            this.callbackOnPlay(this);
+            this.callbackOnChangeBar(this);
         }
     }    
 };
@@ -277,13 +290,14 @@ ABCXJS.midi.Player.prototype.executa = function(pl) {
     var self = this;
     var loudness = 256;
     var delay = 0;
+    var aqui;
 
-    //try {
+    try {
         if( pl.start ) {
             
-            //pl.item.pitches.forEach( function( elem ) {
-            for( var e=0; e < pl.item.pitches.length; e++) {
-                var elem = pl.item.pitches[e];
+            pl.item.pitches.forEach( function( elem ) {
+//            for( var e=0; e < pl.item.pitches.length; e++) {
+//                var elem = pl.item.pitches[e];
                 
                 delay = self.calcTempo( elem.delay );
                 
@@ -301,48 +315,66 @@ ABCXJS.midi.Player.prototype.executa = function(pl) {
                 }
                 
                 if( !debug && elem.button && elem.button.button && elem.button.button.SVG && elem.button.button.SVG.button !==null) {
+                    aqui=1;
+
                     if(elem.button.closing) {
                         elem.button.button.setClose(delay);
                     }else{
                         elem.button.button.setOpen(delay);
                     }
+                    aqui=2;
                     if( self.type !== 'note' ) {
                         //o andamento é considerado somente para o modo didatico
                         var andamento = self.type?(1/self.currentAndamento):1;
                         //limpa o botão uma fração de tempo antes do fim da nota - para dar ideia visual de botão pressionado/liberado antes da proxima nota
                         elem.button.button.clear( self.calcTempo( (elem.midipitch.mididuration-0.5)*andamento ) + delay );
                     }    
-                }
+                    aqui=3;
+               }
                 
-            //});
-            }
+            });
+            //}
             pl.item.abcelems.forEach( function( elem ) {
-                
+            //for( var e=0; e < pl.item.abcelems.length; e++) {
+            //    var elem = pl.item.abcelems[e];
                 delay = self.calcTempo( elem.delay );
+                aqui=4;
                 if( self.callbackOnScroll ) {
                     self.currAbsElem = elem.abcelem.parent;
                     self.currChannel = elem.channel;
                     self.callbackOnScroll(self);
                 }
+                aqui=5;
                 self.highlight(elem.abcelem.parent, true, delay);
+                //console.log(ABCXJS.parse.stringify(elem.abcelem.parent) );
+            //}
             });
         } else {
             pl.item.pitches.forEach( function( elem ) {
+            //for( var e=0; e < pl.item.pitches.length; e++) {
+            //    var elem = pl.item.pitches[e];
                 //if(  self.playClef( elem.midipitch.clef.charAt(0) ) ) {
                 delay = self.calcTempo( elem.delay );
                 MIDI.noteOff(elem.midipitch.channel, elem.midipitch.midipitch, delay);
                 //}
-           });
+            //}
+            });
             pl.item.abcelems.forEach( function( elem ) {
+            //for( var e=0; e < pl.item.abcelems.length; e++) {
+            //    var elem = pl.item.abcelems[e];
                 delay = self.calcTempo( elem.delay );
+                aqui=6;
+                
                 self.highlight(elem.abcelem.parent, false, delay);
+                //console.log(ABCXJS.parse.stringify(elem.abcelem.parent) );
+            //}
             });
         }
-    //} catch( err ) {
-    //    this.onError = { erro: err.message, idx: this.i, item: pl };
-    //    console.log ('PlayList['+this.onError.idx+'] - Erro: ' + this.onError.erro + '.');
-    //    this.addWarning( 'PlayList['+this.onError.idx+'] - Erro: ' + this.onError.erro + '.' );
-    //}
+    } catch( err ) {
+        this.onError = { erro: err.message, idx: this.i, item: pl };
+        //console.log ('PlayList['+this.onError.idx+'] - Erro: ' + this.onError.erro + '.')
+        this.addWarning( 'PlayList['+this.onError.idx+'] - Erro: ' + this.onError.erro + '. DebugPoint: ' + aqui );
+    }
 };
 
 ABCXJS.midi.Player.prototype.calcTempo = function( val ) {

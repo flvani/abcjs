@@ -126,11 +126,17 @@ window.ABCXJS.data.Tune = function() {
         if (!this.formatting.staffwidth)    this.formatting.staffwidth = this.formatting.usablewidth;
         
     };
-
+    
     this.handleBarsPerStaff = function() {
         function splitBar(left, right) {
             
+            if(  left.jumpInfo &&  (".fine.dacapo.dacoda.dasegno.").indexOf('.'+left.jumpInfo.type+'.') < 0  ) {
+                delete left.jumpInfo;
+            }
+            
             delete left.startEnding;
+            delete left.barNumber;
+            delete left.barNumberVisible;
             switch( left.type ) {
                 case 'bar_dbl_repeat': 
                 case 'bar_right_repeat': 
@@ -139,6 +145,10 @@ window.ABCXJS.data.Tune = function() {
                 case 'bar_thin': 
                 case 'bar_left_repeat':
                   left.type = 'bar_thin'; 
+            }
+            
+            if(  right.jumpInfo &&  (".fine.dacapo.dacoda.dasegno.").indexOf('.'+right.jumpInfo.type+'.') >= 0  ) {
+                delete right.jumpInfo;
             }
             
             delete right.endEnding;
@@ -235,6 +245,96 @@ window.ABCXJS.data.Tune = function() {
             }
         }
     };
+    
+    this.checkJumpInfo = function (addWarning) {
+        // esta rotina:
+        //   cria uma estrutura de auxilio para midi parser
+        //   ajuda no layout dos jump markers que devem impressos na última pauta de cada staff
+        //   verifica a conformidade das barras de compasso da primeira voz com as demais;
+        //
+        // Note: deveria ser chamada somente depois de handleBarsPerStaff que pode alterar os arrays gerados no parse.
+        
+        // identifica as vozes varrendo a primeira linha com staffs
+        var vozes = [];
+        for (var i = 0; i < this.lines.length; i++) {
+            if (this.lines[i].staffs !== undefined) {
+                for (var s = 0; s < this.lines[i].staffs.length; s++) {
+                    for (var v = 0; v < this.lines[i].staffs[s].voices.length; v++) {
+                        vozes.push( {el:0, sf: s, vc: v });
+                    }
+                }
+                break;
+            }
+        }
+        
+        // voz referencial        
+        var v0 = vozes[0]; // primeira
+        var vn = vozes[vozes.length-1]; // última
+        
+        for (var i = 0; i < this.lines.length; i++) {
+            if (this.lines[i].staffs !== undefined) {
+
+                for( var r = 0; r < vozes.length; r++){
+                    vozes[r].el = 0; // sempre recomeçar a varredura dos elementos em cada nova linha
+                }
+
+                this.lines[i].staffs[v0.sf].voices[v0.vc].firstVoice = true;
+                this.lines[i].staffs[vn.sf].voices[vn.vc].lastVoice = true;
+                
+                if( vozes.length < 2 ) continue; // apenas marca a única voz como primeira e última, em cada linha
+                
+                var a0 = this.lines[i].staffs[v0.sf].voices[v0.vc];
+                
+                while( v0.el < a0.length ) {
+                    
+                    while( v0.el < a0.length && a0[v0.el].el_type !== 'bar' ) {
+                        v0.el++;
+                    }
+
+                    if( ! a0[v0.el] || a0[v0.el].el_type !== 'bar' ) break;
+
+                    var bar = a0[v0.el];
+                    v0.el++; 
+
+                    for( var v = 1; v < vozes.length; v++ ) {
+                        var vi = vozes[v];
+                        var ai = this.lines[i].staffs[vi.sf].voices[vi.vc];
+                        
+                        while( vi.el < ai.length && ai[vi.el].el_type !== 'bar' ) {
+                            vi.el++;
+                        }
+                        if( ! ai[vi.el] || ai[vi.el].el_type !== 'bar' ) {
+                            addWarning('Line: '+(i+1)+', Staff: '+(vi.sf+1)+' - Numero de barras diferente da primeira voz');
+                        } else {
+
+                            var bari = ai[vi.el];
+                            vi.el++;
+
+                            if( bar.type !== bari.type )  {
+                                addWarning('Line: '+(i+1)+', Staff: '+(vi.sf+1)+' - Ajustando tipo de barra de compasso '+bar.barNumber+'.');
+                                bari.type = bar.type;
+                            }
+                            
+                            if( bar.startEnding && bar.startEnding !== bari.startEnding )  {
+                                addWarning('Line: '+(i+1)+', Staff: '+(vi.sf+1)+' - Ajustando ending do compasso '+bar.barNumber+'.');
+                                bari.startEnding = bar.startEnding;
+                            }
+                            
+                            if( bar.endEnding && bar.endEnding !== bari.endEnding )  {
+                                addWarning('Line: '+(i+1)+', Staff: '+(vi.sf+1)+' - Ajustando ending do compasso '+bar.barNumber+'.');
+                                bari.endEnding = bar.endEnding;
+                            }
+                            
+                            // todas as vozes terão a mesma informação de jump
+                            bari.jumpInfo = bar.jumpInfo;
+                        }
+                    }
+                }
+            }
+        }
+
+    };
+
 
     this.cleanUp = function() {
         

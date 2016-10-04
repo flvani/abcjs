@@ -614,7 +614,7 @@ window.ABCXJS.parse.parseKeyVoice = {};
 		}
 		var isNew = false;
 		if (multilineVars.voices[id] === undefined) {
-			multilineVars.voices[id] = {};
+			multilineVars.voices[id] = {currBarNumber:1};
 			isNew = true;
 			if (multilineVars.score_is_present && id.toLowerCase().substr(0,3) !== "tab")
 				warn("Can't have an unknown V: id when the %score directive is present", line, start);

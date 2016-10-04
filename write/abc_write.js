@@ -401,7 +401,7 @@ ABCXJS.write.Printer.prototype.printDebugLine = function (x1,x2, y, fill ) {
 };
 
 ABCXJS.write.Printer.prototype.printLedger = function (x1, x2, pitch) {
-    this.paper.printLedger(x1, this.calcY(pitch), x2, this.calcY(pitch) );
+    this.paper.printLedger(x1-1, this.calcY(pitch), x2+1, this.calcY(pitch) );
 };
 
 ABCXJS.write.Printer.prototype.printText = function (x, offset, text, kls, anchor ) {

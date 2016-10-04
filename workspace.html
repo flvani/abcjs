@@ -1,6 +1,10 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" lang="en">
     <head>
+	<title>Draw The Dots: Tune Editor</title>
+        <meta name="viewport" content="width=device-width, initial-scale=0.8, minimum-scale=0.8, maximum-scale=2.0" />
+        <meta http-equiv="content-type" content="text/html; charset=UTF-8"></meta>
+        <link rel="icon" type="image/icon" href="images/favicon.ico" />
         <link href="css/workspace.css" rel="stylesheet"></link>
     
             <!-- 
@@ -35,9 +39,13 @@
              Verificar o transporte de keys com modos min e maj
              Verificar os limites máximo e mínimos para transporte de keys
              Ignorar Accents na transposição
+             Verificar o espaçamento para os jump markers
+             barsperstaff: ao dividir a linha decidir onde fica jumpinfo e barnumbers
+             Verificar durante o parse e incluir o barnumber na barra correta
              Tablatura: gerar mesmo sem o baixo
              Layout:    Revisar a impressão dos elementos ending, accents e lyrics
              Layout:    Revisar a de linhas de texto, quando há mais de uma linha
+             Layout:    Imprimir ao final da staff alguns jump markers
              Tablatura: imprimir os de pausas adequadamente no baixo
              Tablatura: parse
                 tratar numeros hexa
@@ -49,6 +57,7 @@
                 imprimir baseado na linha existente
                 melhorar a relação open/close do fole na melodia
                 revisar a impressão de múltiplas notas na mesma coluna
+                Verificar durante o parse e incluir o barnumber na barra correta
         
            TODO:
              Tablatura: 
@@ -56,15 +65,14 @@
                 promover a inversão do fole se a posição do botao for melhor
         
         -->
-	<title>Draw The Dots: Tune Editor</title>
-        <meta http-equiv="content-type" content="text/html; charset=UTF-8"></meta>
     </head>
     <body class="mapa">
 
 	<script type="text/javascript" src="proto_noconflict.js" ></script>
 
         <!-- suporte a MIDI -->
-        <script type="text/javascript" src="MIDI.js/MIDI_2.06-min.js"></script>
+        <script type="text/javascript" src="MIDI.js/MIDI_3.00-min.js"></script>
+
         
         <script type="text/javascript" src="jquery/jquery-1.11.1.min.js" ></script>
 	        
@@ -116,6 +124,34 @@
 <textarea id="svg_source" cols="120" rows="10" style="display: none;" >
 </textarea>
     
+<textarea id="abcb" cols="120" rows="10"  style="display: none;">
+X:2020
+%%barnumbers 1
+%%papersize A4
+%%pagenumbering
+%%staffsep 20
+%barsperstaff 4
+T:Baile de Candieiro (club)
+R:rancheira
+Z:Flávio Vani
+L:1/8
+M:3/4
+Q:130
+K:F
+V:1 clef=treble
+| C4 | !segno! D4 | E4 !dacoda!| e4 | F4 | f4 | G4 | A4 !dsalcoda!|
+%teste10 | C4 | !segno! D4 | E4 !dacoda!| e4 | F4 | f4 !coda!| G4 | A4 !dsalcoda!|
+%teste09 | C4 |:!segno! D4 | E4 :|: F4 !fine!| G4 :| A4 !dsalfine!|
+%teste08 | C4 |:!segno! D4 | E4 :|: F4 | G4 :| A4 !dasegno!|
+%teste07 | C4 |: D4 | E4 :|: F4 | G4 :| A4 !dacapo!|
+%teste06 |: D4 | ^D4 |1 E4 :|2 F4 | G4 |1 ^G4 :|2 A4 | B4 |
+%teste05 |: D4 | ^D4 | E4 :| F4 | G4 | ^G4 :| A4 | B4 |
+%teste04 | C4 |: D4 |1 E4 :|2 F4 | G4 :| A4 |
+%teste03 | C4 |: D4 | E4 :| F4 | G4 :| A4 |
+%teste02 | C4 |: D4 | E4 :|: F4 | G4 :| A4 |
+%teste01 | C4 |: D4 | E4 :| F4 |
+</textarea>
+    
 <textarea id="abc" cols="120" rows="10"  style="display: inline;">
 X:1025
 %%barnumbers 0
@@ -133,16 +169,70 @@ L:1/16
 Q:70
 K:G
 V:1 treble
-| z4  zBef +segno+|: gBef gBfg | aBfg a^dfg | a^dfg afga | bega bega |
+| z4  zBef |: !segno! gBef gBfg | aBfg a^dfg | a^dfg afga | bega bega |
 | be^ga beab | c'^gab c'ba=g | fbab gbfb | ege^d eBef | gBef gBef |
 | aBfg | a^dfg | a^dfg afga | bega bega | be^ga beab | c'^gab c'ba=g |
-| fbab gbfb "to coda"| ege^d e2B2 | BG2E c2B2 | A2F2 zB2A | G3E E3^D |
+| fbab gbfb !dacoda! | ege^d e2B2 | BG2E c2B2 | A2F2 zB2A | G3E E3^D |
 | F4 z2 B2 | BG2E c2B2 | A2F2 z B2A | G3E E3^D | F4 z2 B,2 |
-| EE2^G B2e2 | c2A2 zA2F | G3E F3^D |1 E4 zBfg :|2 E4 z2 e2 | [K:E] |
-|: ee2e e2d2 | f2d2 z2 d2 | dd2d d2c2 | e4 z c2c | c3d c3B |
+| EE2^G B2e2 | c2A2 zA2F | G3E F3^D |1 E4 zBfg :|2 E4 z2 e2 |
+|: [K:C#m] ee2e e2d2 | f2d2 z2 d2 | dd2d d2c2 | e4 z c2c | c3d c3B |
 | B2A2 z2 A2 | AA2A A2G2 |1 B4 z2 E2 :|2 B6 B2 | cc2d c2B2 |
-| B2A2 [cA]2[cA]2 | [GB]2[G2B2] [FA]2[FA]2 | [EG]4 z Bef "D.S. al coda" | [K:G] !coda! egf^d e4 |
+| B2A2 [cA]2[cA]2 | [GB]2[G2B2] [FA]2[FA]2 | !dsalcoda! [EG]4 z Bef | [K:G] !coda! egf^d e4 |
 V:2 accordionTab
+</textarea>
+    
+<textarea id="abcc" cols="120" rows="10"  style="display: none;">
+X:2020
+%%barnumbers 0
+%%papersize A4
+%%pagenumbering
+%%staffsep 20
+%barsperstaff 8
+T:Baile de Candieiro (club)
+R:rancheira
+Z:Flávio Vani
+L:1/8
+M:3/4
+Q:130
+K:F
+V:1 clef=treble
+|z CC[Ac]  CC |: !segno! [Bd]C C[Ac] CC | [GBc]C C[GBc] CC | [Ac]C C[GBc] CC | [FAc]C C[Ac] CC |
+| [Bd]C C[Ac] [GBc]F | [GBc]C C[GBc] CC | [CAc]3 B/2A/2 Gc |1 F[cg] C[Ac] CC :|2 F2 z [Ac][Ac][Bd] |
+|: [Bd][Ac] [Ac][GB] [GB][FBc] | [EBc][EBc] [EBc][EBce] [EBce][EBce] | [EBce][Bd] [Bd][Ac] [Ac][GBc] | F[FAf] [FAf][Ac] [Ac][Bd] | [Bd][Ac] [Ac][GB] [GB][FBc] |
+| E[EBce] [EBce][EBce] [EBce]d/2c/2 | [Bd]A Ac GB |1 F[FA] z [Ac] [Ac][Bd] :|2 A[Adf] C[Ac] CC |: [Bd]C C[Ac] CC |
+| [GBc]C C[GBc] CC | [Ac]C C[GBc] CC | [FAc]C C[Ac] CC | [Bd]C C[Ac] [GBc]F | [GBc]C C[GBc] CC |
+| [CAc]3 B/2A/2 Gc |1 F[cg] C[Ac] CC :|2 F[Af] [Af]c AG | FE _ED CB, | [Af]6 | [G^d]6 |
+| [Fd]6- | [Fd]6 | z [Ece] [Ece]2-[Ece]2 | z [Ece] [Ece]2 z2 | z [CAc] [CAc]2 z2 | z [CAc] z2 [CAc]A, | [ca]A [ca]A [ca]A |
+| [^dg]G [dg]G [dg]G | [df]F [df]F [df]F | [df]F [df]F [df]F | [ce]E [ce]E [ce]E | Bd Bd Bd |
+| F2 z [DBd] z2 |: [CAc] z2 [CAc] z2 | [CGBc] z2 [CAc] z2 | [CGBc] z2  [CAc] z [CGBc] | [FA]2 z [DBd] z2 :|
+| [CAc] z2 [CAc] z2 | z [Ece] z [Ece] z [Ece] | z [Bd] z [Ac] z [GBc] |!dsalfine! [FA]C C[Ac] CC !dasegno!|: [Bd]C C[Ac] CC |
+| [GBc]C C[GBc] CC | [Ac]C C[GBc] CC | [FAc]C C[Ac] CC |1 [Bd]C C[Ac] [GBc]F | [GBc]C C[GBc] CC |
+| [CAc]3 B/2A/2 Gc | F[cg] C[Ac] CC :|2 [Bd]C C[Ac] z2 | z[Ece] z[Ece] z[Ece] | z[Bd] z[Ac] z[GBc] !fine!| F2 [FAcf]2 z2  |
+V:2 clef=bass
+| z6 |: F,,2 [F,A,C]2 A,,2 | G,,2 [C,E,G,]2 G,,2 | C,,2 [C,E,G,]2 [C,E,G,]2 | F,,2 [F,A,C]2 [F,A,C]2 |
+| B,,3 A,, G,,F,, | E,,2 [E,G,B,]2 [E,G,B,]2 | B,,2 [B,,D,F,]2 [B,,D,F,]2 |1 F,,2 [F,A,C]2 [F,A,C]2 :|2 F,,2 [F,A,C]2 [F,A,C]2 | 
+|: F,,2 [F,A,C]2 A,,2 | G,,2 [C,E,G,]2 [C,E,G,]2 | C,,2 D,,2 E,,2 | F,,2 [F,A,C]2 C,,2 | F,,2 E,,2 D,,2 |
+| C,,2 [C,E,G,]2 [C,E,G,]2 | C,,2 [C,E,G,]2 [C,E,G,]2 |1 F,,2 [F,A,C]2 C,,2 :|2 z6 |: F,,2 [F,A,C]2 A,,2 |
+| G,,2 [C,E,G,]2 G,,2 | C,,2 [C,E,G,]2 [C,E,G,]2 | F,,2 [F,A,C]2 [F,A,C]2 | B,,3 A,, G,,F,, | E,,2 [E,G,B,]2 [E,G,B,]2 |
+| B,,2 [B,,D,F,]2 [B,,D,F,]2 |1 F,,2 [F,A,C]2 [F,A,C]2 :|2 F,,2 zC, A,,G,, | F,,2 z2 z2 | A,,2 [F,A,C]2 [F,A,C]2 | F,,2 [F,A,C]2 [F,A,C]2 |
+| B,,2 [B,,D,F,]2 F,,2 | B,,A,, B,,2 B,,2 | C,, z C,,C,, z2 | C,, z C,,C,, z2 | F,, z F,,F,, z2 | F,, z F,,F,, z2 | F,,2 [F,A,C]2 [F,A,C]2 |
+| C,,2 [F,A,C]2 [F,A,C]2 | B,,2 [B,,D,F,]2 F,,2 | C,,2 [F,A,C]2 C,,2 | C,,2 [C,E,G,]2 [C,E,G,]2 | C,,2 D,,2 E,,2 |
+| F,,2 z2 C,,B,, |: z C,,F,, z C,,B,, | z C,,E,, z G,, B,, | z C,,E,, z G,, B,, | F,,2 [F,A,C]2 C,,B,, :|
+| z C,,A,, z3/2  A,,/2B,,/2=B,,/2 | C,, z C,, z z2 | B,,2 A,,2 G,,2 | F,,2 [F,A,C]2 [F,A,C]2 |: F,,2 [F,A,C]2 A,,2 |
+| G,,2 C,2 G,,2 | C,,2 C,2 C,2 | F,,2 [F,A,C]2 [F,A,C]2 |1 B,,3 A,,G,,F,, | E,,2 C,2 C,2 |
+| B,,2 B,,2 B,,2 | F,,2 F,2 F,2 :|2  A,,3 z3/2 A,,/2B,,/2=B,,/2 |C,, z C,, z z2 | B,,2 A,,2 G,,2 | F,,2 [F,A,C]2 z2 |
+V:3 accordionTab
+</textarea>
+    
+<textarea id="abce" cols="120" rows="10"  style="display: none;">
+X:1025
+%%barnumbers 1
+T:Teste
+K:C
+V:1
+| E,4 |: C4 | E4 | "Ré" E4 !fine! |1 E4 :|2  F4 | G4 | c3  c |c4| e4 |!dcalfine! e4 |
+V:2 bass
+| C,,4 |: C,,4 | E,,4 | E,,4 | C,,4 |  C,,4 | E,,4 | E,,4 |C,,4| C,,4 |G,,4 |
 </textarea>
    </div>
     <br/>
@@ -164,46 +254,67 @@ V:2 accordionTab
         <label id="currentPlayTime" style="font-weight: bold; color: yellow; padding-left: 5px; padding-right: 3px;">00:00.00</label>
     </div>
     </div> <!-- editorDiv -->
+    <div id="title" style="display:none; background: rgba(255,255,0,0.5); position: relative;color: #000; z-index: -1;padding: 5px 11px 5px;">Loading API...</div>
+    
     <div id="warningsDiv"><hr></div>
     <div id="canvasDiv" class="printPreviewClass"> </div>
         
         <script type="text/javascript">
             
-            window.addEventListener('load', loadMIDI, false);
+            window.addEventListener('load', loadAccordions, false);
 
-            function loadMIDI() {
-                MIDI.loader = new widgets.Loader();
+            function loadAccordions() {
                 
-                MIDI.loadPlugin({
-                    soundfontUrl: "./soundfont/"
-                   ,instruments: "accordion"
-                   ,callback: postLoadMIDI
-                });
-            }
-            
-            function postLoadMIDI() {
-                MIDI.loader.stop();
-                MIDI.programChange(0, 21); // canais para accordeon
-                MIDI.programChange(1, 21); // 
-                MIDI.programChange(2, 21); // 
-                MIDI.programChange(3, 21); // 
-                MIDI.programChange(4, 21); // 
-                MIDI.programChange(5, 21); // 
-                
+                MIDI.widget = new sketch.ui.Timer({size:180, cor1:'#ffffff', cor2:'#ffff88' });
+                MIDI.widget.setFormat( 'Carregando...');
+                MIDI.widget.setValue(1);
+
                 DIATONIC.map.loadAccordionMaps(
                     [
                        'accordions/hohner.gc.accordion'
                       ,'accordions/hohner.cf.club.br.accordion'
                       ,'accordions/leticce.cf.ne.accordion'
                     ]
-                    ,initApp // call back after loading
+                    , function () { // call back after loading
+                        FILEMANAGER.waitResources( { 
+                            onProgress: function(event) {
+                                if(event.success){
+                                    MIDI.widget.setValue(0+Math.round(event.perc*.1));
+                                    console.log('\nPercentual: '+ event.perc + '\nTimeouts: ' + event.timeouts + '\n' + event.success );
+                                } else {
+                                    MIDI.widget.setValue(0+Math.round(event.perc*.1));
+                                    console.log('\nPercentual: '+ event.perc);
+                                }
+                            }
+                            ,onLoad: loadMIDI 
+                        });
+                    } 
                 );
             }
+            
+            function loadMIDI() {
+                
+                MIDI.widget.setValue(10);
+                
+                MIDI.loadPlugin({
+                     soundfontUrl: "./soundfont/"
+                    ,instruments: "accordion" // default
+                    ,onprogress: function(event) {
+                        MIDI.widget.setValue(10+Math.round(MIDI.getPercent(event)*.4));
+                    }         
+                    ,onprogress2: function( percent ) {
+                        MIDI.widget.setValue(50+Math.round(percent*.5));
+                    }        
+                    ,callback: initApp
+                });
+            }
+            
+            
             
             function initApp() {
                 
                 console.log( 
-                        'chromium: ' + ABCXJS.misc.isChromium() 
+                      '\nchromium: ' + ABCXJS.misc.isChromium() 
                     + '\nchrome: ' + ABCXJS.misc.isChrome() 
                     + '\nfirefox: ' + ABCXJS.misc.isFirefox()  
                     + '\nIE: ' + ABCXJS.misc.isIE() + '\n '
@@ -239,7 +350,7 @@ V:2 accordionTab
                 
                 
                 playerCallBackOnPlay = function ( player ) {
-                    cpt.innerHTML = player.getTime().cTime;;
+                    cpt.innerHTML = player.getTime().cTime;
                 };
                 
                 playerCallBackOnScroll = function ( player ) {
@@ -289,7 +400,7 @@ V:2 accordionTab
                                  id: 'GAITA_HOHNER_CLUB_IIIM_BR'
                                 ,keyboardDiv_id:"keyboardDiv"
                                 ,accordionMaps: DIATONIC.map.accordionMaps
-                                ,render_keyboard_opts:{transpose:false, mirror: true, scale:1.1, draggable:false, show:true, label:false}}
+                                ,render_keyboard_opts:{transpose:false, mirror: true, scale:1.1, draggable:false, show:false, label:false}}
                         ,midi_options: {program: 21, qpm: 150, type: "qt"}
                         ,render_options: {}
                         ,onchange: editorCallbackOnChange
@@ -299,8 +410,9 @@ V:2 accordionTab
                 //myEditor.accordion.printKeyboard('keyboardDiv' /*, {fillColor:'yellow', openColor:'navy', closeColor:'purple', backgroundColor:'gray' }*/ );
                 myEditor.accordion.printKeyboard('keyboardDiv' );
                     
-                printButton.addEventListener("click", function() {
-                    
+                printButton.addEventListener("click", function(e) {
+                    e.preventDefault();
+
                     var kd = document.getElementById("keyboardDiv").style.display;
 
                     document.getElementById("keyboardDiv").style.display = 'none';
@@ -316,19 +428,23 @@ V:2 accordionTab
                     document.getElementById("keyboardDiv").style.display = kd;
                 }, false);
                 
-                playButton.addEventListener("click", function() {
+                playButton.addEventListener("click", function(e) {
+                    e.preventDefault();
                     player.startPlay( myEditor.tunes[0].midi );
-                    player.startDidacticPlay(myEditor.tunes[0].midi, 'note');
+                    //player.startDidacticPlay(myEditor.tunes[0].midi, 'note');
                     //player.startDidacticPlay(myEditor.tunes[0].midi, 'measure');
                 }, false);
-                pauseButton.addEventListener("click", function() {
+                pauseButton.addEventListener("click", function(e) {
+                    e.preventDefault();
                     player.pausePlay();
                 }, false);
-                stopButton.addEventListener("click", function() {
+                stopButton.addEventListener("click", function(e) {
+                    e.preventDefault();
                     player.stopPlay();
                 }, false);
                 
-                showMapButton.addEventListener("click", function() {
+                showMapButton.addEventListener("click", function(e) {
+                    e.preventDefault();
                     myEditor.accordion.render_keyboard_opts.show = !myEditor.accordion.render_keyboard_opts.show;
                     this.value = myEditor.accordion.render_keyboard_opts.show? 'Hide Map':'Show Map';
                     myEditor.accordion.printKeyboard('keyboardDiv');

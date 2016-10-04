@@ -330,10 +330,10 @@ window.ABCXJS.parse.parseDirective = {};
 					if (brace !== undefined) staff.brace = brace;
 					if (continueBar) staff.connectBarLines = 'end';
 					if (multilineVars.voices[id] === undefined) {
-                                                                                                            staff.inEnding[staff.numVoices] = false;
-                                                                                                            staff.inTie[staff.numVoices] = false;
-                                                                                                            staff.inTieChord[staff.numVoices] ={};
-						multilineVars.voices[id] = {staffNum: staff.index, index: staff.numVoices};
+                                                staff.inEnding[staff.numVoices] = false;
+                                                staff.inTie[staff.numVoices] = false;
+                                                staff.inTieChord[staff.numVoices] ={};
+						multilineVars.voices[id] = {staffNum: staff.index, index: staff.numVoices, currBarNumber:1};
 						staff.numVoices++;
 					}
 				};

@@ -48,16 +48,16 @@ ABCXJS.midi.Parse.prototype.reset = function() {
     this.channel = -1;
     this.timecount = 0;
     this.playlistpos = 0;
-    this.pass = 1;
+//    this.pass = 1;
     this.maxPass = 2;
     this.countBar = 0;
-    this.currEnding = null;
-    this.afterRepeatBlock = false;
+//    this.currEnding = null;
+//    this.afterRepeatBlock = false;
     this.next = null;
-    this.restarting = false;
+//    this.restarting = false;
     this.restart = {line: 0, staff: 0, voice: 0, pos: 0};
-    this.startSegno = null;
-    this.segnoUsed = false;
+//    this.startSegno = null;
+//    this.segnoUsed = false;
     
     this.multiplier = 1;
     this.alertedMin = false;
@@ -66,6 +66,8 @@ ABCXJS.midi.Parse.prototype.reset = function() {
     this.lastTabElem = [];
     this.baraccidentals = [];
     this.parsedElements = [];
+    
+    this.pass = [];
     
     this.midiTune = { 
         tempo: this.oneMinute/640 // duração de cada intervalo em mili
@@ -78,7 +80,7 @@ ABCXJS.midi.Parse.prototype.parse = function(tune, keyboard) {
     
     var self = this;
     var currBar = 0; // marcador do compasso corrente - não conta os compassos repetidos por ritornellos
-    
+
     this.reset();
 
     this.abctune = tune;
@@ -102,15 +104,19 @@ ABCXJS.midi.Parse.prototype.parse = function(tune, keyboard) {
         this.voicecount = 1;
         for (this.voice = 0; this.voice < this.voicecount; this.voice++) {
             this.startTrack();
-            for (this.line = 0; this.line < this.abctune.lines.length; this.line++) {
+            for (this.line = 0; !this.endTrack && this.line < this.abctune.lines.length; this.line++) {
                 if ( this.getStaff() ) {
                     this.pos = 0;
+                    if(!this.capo){
+                        this.capo = this.restart = this.getMark();
+                    }    
                     this.next = null;
                     this.staffcount = this.getLine().staffs.length;
                     this.voicecount = this.getStaff().voices.length;
                     this.setKeySignature(this.getStaff().key);
-                    while (this.pos < this.getVoice().length) {
+                    while (!this.endTrack && this.pos < this.getVoice().length ) {
                         var elem = this.getElem();
+
                         switch (elem.el_type) {
                             case "note":
                                 if( this.skipping ) break;
@@ -125,7 +131,9 @@ ABCXJS.midi.Parse.prototype.parse = function(tune, keyboard) {
                                 this.setKeySignature(elem);
                                 break;
                             case "bar":
-                                this.handleBar(elem);
+                                if(!this.handleBar(elem)) {
+                                    return null;
+                                }
                                 break;
                             case "meter":
                             case "clef":
@@ -145,6 +153,10 @@ ABCXJS.midi.Parse.prototype.parse = function(tune, keyboard) {
                 }
             }
         }
+    }
+    
+    if(this.lookingForCoda ){
+        this.addWarning('Simbolo não encontrado: "Coda"!');
     }
     
     //cria a playlist a partir dos elementos obtidos acima  
@@ -410,71 +422,201 @@ ABCXJS.midi.Parse.prototype.selectButtons = function(elem) {
 // Esta função é fundamental pois controla todo o fluxo de execução das notas do MIDI
 ABCXJS.midi.Parse.prototype.handleBar = function (elem) {
     
-    this.countBar++; // contagem das barras de compasso de uma linha, para auxiliar na execução de saltos como "segno".
-
-   // bar_dbl_repeat só pode ser considerada repetição se não for encontrada após salto de repetição, caso em que será apenas, o ponto de restart.
-    var repeat = (elem.type === "bar_right_repeat" || (elem.type === "bar_dbl_repeat" && !this.restarting));
+    this.countBar++; // para impedir loop infinito em caso de erro
+    if(this.countBar > 10000) {
+      this.addWarning('Impossível gerar o MIDI para esta partitura após 10.000 ciclos.') ;
+      return false;
+    }
     
-    // todas estas barras indicam ponto de restart em caso de repetição
-    var setrestart = (elem.type === "bar_left_repeat" || elem.type === "bar_dbl_repeat" ||
-                      elem.type === "bar_thick_thin" || elem.type === "bar_thin_thick" ||
-                      elem.type === "bar_thin_thin" || elem.type === "bar_right_repeat");
-              
-    // salva o ponto prévio de restart (que pode ser modificado durante a interpreatação da barra corrente
-    var restart_next = this.restart;
-
-    //reset de váriaveis para o processamento das notas dentro do compasso
     this.baraccidentals = [];
-    this.restarting = false;
+    
+    if( this.lookingForCoda ) {
+        if( !elem.jumpInfo || elem.jumpInfo.type!=='coda' ) {
+            
+            return true;
+        } else {
+            this.codaPoint = this.getMark(); 
+            this.lookingForCoda = false;
+        }
+    }
+    
+    // implementa jump ao final do compasso
+    if(this.nextBarJump ) {
+        this.next = this.nextBarJump;
+        delete this.nextBarJump;
+    }
 
-   // este bloco trata os "endings" ou chaves de 1ª e  2ª vez  (ou chaves de finalização).
-   // são importantes para determinar a quantidade de vezes que o bloco será repetido e quais compassos
-   // devem ser ignorados em cada passada
-   
+    var pass = this.getPass();
+    
+    if(elem.type === "bar_left_repeat") {
+        this.restart = this.getMark();   
+    } 
+    
+    if (elem.type === "bar_right_repeat" || elem.type === "bar_dbl_repeat" ) {
+        if( pass < this.maxPass ) {
+            delete this.currEnding; // apaga qualquer ending em ação
+            this.clearTies(); // limpa ties
+            this.next = this.restart;// vai repetir
+            return true;
+        } else {
+            if( elem.type === "bar_dbl_repeat" ) {
+                // não vai repetir e, além de tudo, é um novo restart
+                this.restart = this.getMark();   
+            }
+        }
+    }
+    
    // encerra uma chave de finalização
     if (elem.endEnding) {
-        this.currEnding = null;
+        delete this.currEnding;
     }
 
    // inicia uma chave de finalização e faz o parse da quantidade repetições necessarias
    // a chave de finalização imediatamente  após um bloco de repetição ter sido terminado será ignorada
    // e enquanto o bloco estiver sendo repetido, também
-    if (elem.startEnding &&  !this.afterRepeatBlock &&  !repeat ) {
+    if (elem.startEnding ) {
         var a = elem.startEnding.split('-');
         this.currEnding = {};
         this.currEnding.min = parseInt(a[0]);
         this.currEnding.max = a.length > 1 ? parseInt(a[1]) : this.currEnding.min;
         this.maxPass = Math.max(this.currEnding.max, 2);
-    }
-
-    //ignora notas em função da quantidade de vezes que o bloco foi repetido e o tipo de "ending"
-    this.skipping = (this.currEnding !== null && (this.currEnding.min > this.pass || this.pass > this.currEnding.max));
-
-    // marca um ponto de recomeço
-    if (setrestart) {
-        this.afterRepeatBlock = false;
-        this.restart = this.getMark();
-    }
-
-    // verifica se deve encerrar a repetição do bloco
-    if (repeat) {
-        if (this.pass < this.maxPass) {
-            this.pass++;
-            this.next = restart_next;
-            this.restarting = true;
-            this.clearTies();
-            return;
-        } else {
-            this.pass = 1;
-            this.maxPass = 2;
-            this.afterRepeatBlock = true;
-        }
+        if(this.currEnding.min > 1 ) delete this.currEnding; // casa "2" não precisa de semantica 
     }
     
+    this.skipping = (this.currEnding && ( pass < this.currEnding.min || pass > this.currEnding.max) ) || false;
+
+    if(elem.jumpInfo ) {
+        switch (elem.jumpInfo.type) {
+            case "coda":     
+                this.codaPoint = this.getMark(); 
+                break;
+            case "segno":    
+                this.segnoPoint = this.getMark(); 
+                break;
+            case "fine":     
+                if(this.fineFlagged) this.endTrack = true; 
+                break;
+            case "dacapo":   
+                if(!this.daCapoFlagged) {
+                    this.next = this.capo;
+                    this.daCapoFlagged = true;
+                    this.pass = [];
+                } 
+                break;
+            case "dasegno":
+                if( this.segnoPoint ){
+                    if(!this.daSegnoFlagged){
+                        this.next = this.segnoPoint;
+                        this.daSegnoFlagged = true;
+                        this.pass = [];
+                    }
+                } else {
+                    this.addWarning( 'Ignorando Da segno!');
+                }
+                break;
+            case "dcalfine": 
+                if(!this.daCapoFlagged) {
+                    this.nextBarJump = this.capo;
+                    this.daCapoFlagged = true;
+                    this.fineFlagged = true;
+                    this.pass = [];
+                } 
+                break;
+            case "dsalfine": 
+                if( this.segnoPoint ){
+                    if(!this.daSegnoFlagged){
+                        this.nextBarJump = this.segnoPoint;
+                        this.fineFlagged = true;
+                        this.daSegnoFlagged = true;
+                        this.pass = [];
+                    }
+                } else {
+                    this.addWarning( 'Ignorando Da segno al fine!');
+                }
+                break;
+            case "dacoda":
+                if( this.codaPoint ){
+                    if(this.daCodaFlagged){
+                        this.next = this.codaPoint;
+                        this.daCodaFlagged = false;
+                        this.pass = [];
+                    }
+                } else if(this.daCodaFlagged) {
+                    //this.addWarning( 'Ignorando Da Coda!');
+                    this.lookingForCoda = true;
+                    this.skipping = true;
+                }
+                break;
+            case "dsalcoda": 
+                if( this.segnoPoint ){
+                    if(!this.daSegnoFlagged){
+                        this.nextBarJump = this.segnoPoint;
+                        this.daSegnoFlagged = true;
+                        this.daCodaFlagged = true;
+                        this.pass = [];
+                    }
+                } else {
+                    this.addWarning( 'Ignorando "D.S. al coda"!');
+                }
+                break;
+            case "dcalcoda": 
+                if(!this.daCapoFlagged) {
+                    this.nextBarJump = this.capo;
+                    this.daCapoFlagged = true;
+                    this.daCodaFlagged = true;
+                    this.pass = [];
+                } 
+                break;
+        }
+        
+    }
+    return true;
+    
+    
 /*
-    Tratamento das decorações, especialmente o "segno", mas anda incompleto.
+    OLD - Tratamento das decorações, especialmente o "segno", mas anda incompleto.
     Característica: apenas as decorações da primeira staff são consideradas e aplicadas a todas as outras
-*/
+    // flavio - todas estas barras indicam ponto de restart em caso de repetição
+//    var setrestart = (elem.type === "bar_left_repeat" || elem.type === "bar_dbl_repeat"  ) ; // ||
+                     // elem.type === "bar_thick_thin" || elem.type === "bar_thin_thick" ||
+                    //  elem.type === "bar_thin_thin" || elem.type === "bar_right_repeat");
+              
+    // salva o ponto prévio de restart (que pode ser modificado durante a interpreatação da barra corrente
+    //var restart_next = this.restart;
+
+    //reset de váriaveis para o processamento das notas dentro do compasso
+    //this.restarting = false;
+
+   // este bloco trata os "endings" ou chaves de 1ª e  2ª vez  (ou chaves de finalização).
+   // são importantes para determinar a quantidade de vezes que o bloco será repetido e quais compassos
+   // devem ser ignorados em cada passada
+   
+
+    //ignora notas em função da quantidade de vezes que o bloco foi repetido e o tipo de "ending"
+    //this.skipping = (this.currEnding !== null && (this.currEnding.min > this.pass || this.pass > this.currEnding.max));
+    
+    
+    // marca um ponto de recomeço
+//    if (setrestart) {
+//        this.afterRepeatBlock = false;
+//        this.restart = this.getMark();
+//    }
+
+    // verifica se deve encerrar a repetição do bloco
+//    if (repeat) {
+//        if (this.pass < this.maxPass) {
+//            this.pass++;
+//            this.next = restart_next;
+//            this.restarting = true;
+//            this.clearTies();
+//            return true;
+//        } else {
+//            this.pass = 1;
+//            this.maxPass = 2;
+//            this.afterRepeatBlock = true;
+//        }
+//    }
+    
     
     if ( this.staff === 0 )   {
         if (elem.decoration)  {
@@ -502,6 +644,8 @@ ABCXJS.midi.Parse.prototype.handleBar = function (elem) {
                 }
         }
     }
+*/
+
 };
 
 ABCXJS.midi.Parse.prototype.clearTies = function() {
@@ -567,6 +711,23 @@ ABCXJS.midi.Parse.prototype.getMarkString = function(mark) {
            "voice" + mark.voice + "pos" + mark.pos;
 };
 
+ABCXJS.midi.Parse.prototype.getMarkValue = function(mark) {
+    mark = mark || this;
+    return (mark.line+1) *1e6 + mark.staff *1e4 + mark.voice *1e2 + mark.pos;
+};
+
+ABCXJS.midi.Parse.prototype.getPass = function(mark) {
+    var compasso = this.getMarkValue(mark);
+    //registra e retorna o número de vezes que já passou por compasso.
+    //a cada (salto D.C., D.S., dacoda) deve-se zerar a contagem
+    if( this.pass[compasso]){
+        this.pass[compasso] = this.pass[compasso]+1;
+    } else {
+        this.pass[compasso] = 1;
+    }
+    return this.pass[compasso];
+};
+
 ABCXJS.midi.Parse.prototype.hasTablature = function() {
     return this.abctune.hasTablature;
 };
@@ -593,16 +754,31 @@ ABCXJS.midi.Parse.prototype.startTrack = function() {
     this.channel ++;
     this.timecount = 0;
     this.playlistpos = 0;
-    this.pass = 1;
     this.maxPass = 2;
     this.countBar = 0;
-    this.currEnding = null;
-    this.afterRepeatBlock = false;
+    
     this.next = null;
-    this.restarting = false;
-    this.restart = {line: 0, staff: 0, voice: 0, pos: 0};
-    this.startSegno = null;
-    this.segnoUsed = false;
+    
+    //this.pass = 1;
+    //this.afterRepeatBlock = false;
+    //this.restarting = false;
+    //this.startSegno = null;
+    //this.segnoUsed = false;
+    //delete this.currEnding = null;
+    
+    this.endTrack = false;    
+    delete this.nextBarJump;
+    delete this.codaFlagged;
+    delete this.fineFlagged;
+    delete this.daSegnoFlagged;
+    delete this.daCapoFlagged;
+    delete this.capo;
+
+    delete this.daCodaFlagged;
+    delete this.lookingForCoda;
+    
+    delete this.segnoPoint;
+    delete this.codaPoint;
 };
 
 ABCXJS.midi.Parse.prototype.getAccOffset = function(txtAcc) {

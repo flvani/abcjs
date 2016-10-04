@@ -424,7 +424,7 @@ ABCXJS.Editor.prototype.modelChanged = function() {
     var self = this;
     var loader = this.startLoader( "ModelChanged" );
     this.warningsdiv.innerHTML = '<hr>Aguarde...' ;
-    loader.start(  function() { self.modelChanged2(loader); }, '<br>&nbsp;&nbsp;&nbsp;Atualizando abc...<br><br>' );
+    loader.start(  function() { self.modelChanged2(loader); }, '<br>&nbsp;&nbsp;&nbsp;Gerando partitura...<br><br>' );
 };
 
 ABCXJS.Editor.prototype.modelChanged2 = function(loader) {
@@ -465,7 +465,7 @@ ABCXJS.Editor.prototype.modelChanged2 = function(loader) {
     if (this.onchangeCallback)
         this.onchangeCallback(this);
     
-   loader.update( false, '<br>&nbsp;&nbsp;&nbsp;Finalizando...<br><br>' );
+   loader.update( false, '<br>&nbsp;&nbsp;&nbsp;Gerando tablatura...<br><br>' );
    loader.stop();
     
     window.setTimeout(function() {
@@ -649,7 +649,11 @@ ABCXJS.Editor.prototype.isDirty = function() {
 };
 
 ABCXJS.Editor.prototype.highlight = function(abcelem) {
-  this.editarea.setSelection(abcelem.startChar, abcelem.endChar, abcelem.line);
+  try {
+      this.editarea.setSelection(abcelem.startChar, abcelem.endChar, abcelem.line);
+  } catch( e ) {
+      // Firefox: aborta se a area não estiver visivel
+  } 
 };
 
 ABCXJS.Editor.prototype.pause = function(shouldPause) {

@@ -84,23 +84,27 @@ ABCXJS.tablature.Parse = function( str, vars ) {
 
 };
 
-ABCXJS.tablature.Parse.prototype.parseTabVoice = function( ) {
-    var voice  = [];
+ABCXJS.tablature.Parse.prototype.parseTabVoice = function ( ) {
+    var voice = [];
     this.i = 0;
-    var token = { el_type: "unrecognized" };
-    
+    var token = {el_type: "unrecognized"};
+
     while (this.i < this.line.length && !this.finished) {
         token = this.getToken();
         switch (token.el_type) {
             case "bar":
                 token.startChar = this.xi;
                 token.endChar = this.i;
-                if( ! this.invalid )
-                  voice[voice.length] = token;
+                if (!this.invalid)
+                    voice[voice.length] = token;
+                this.vars.lastBarElem = token;
+                //this.
                 break;
             case "note":
-                if( ! this.invalid )
-                  voice[voice.length] = this.formatChild(token);
+                if (!this.invalid)
+                    voice[voice.length] = this.formatChild(token);
+                if(this.vars.lastBarElem.barNumber === undefined)
+                    this.vars.lastBarElem.barNumber = this.vars.currentVoice.currBarNumber ++;
                 break;
             case "comment":
             case "unrecognized":
@@ -239,7 +243,7 @@ ABCXJS.tablature.Parse.prototype.getBarLine = function() {
                 this.vars.inEnding = false;
             }    
     }
-    if(endings.indexOf(this.line.charAt(this.i))>=0) {
+    if( (! this.finished ) && endings.indexOf(this.line.charAt(this.i))>=0) {
         token.startEnding = this.line.charAt(this.i);
         if (this.vars.inEnding) {
             token.endDrawEnding = true;
