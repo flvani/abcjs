@@ -6,6 +6,7 @@
 
 /*
  * TODO:
+ *   - BUG: não há mais informação sobre o início de cada compasso.
  *   - implementar: segno, coda, capo e fine
  *     Nota: aparentemente o ABC não implementa simbolos como D.S al fine
  *   - Ok - imprimir endings somente no compasso onde ocorrem
@@ -428,6 +429,10 @@ ABCXJS.midi.Parse.prototype.handleBar = function (elem) {
       return false;
     }
     
+    if( elem.barNumber ) {
+        this.addBarNumber = elem.barNumber; 
+    }
+    
     this.baraccidentals = [];
     
     if( this.lookingForCoda ) {
@@ -440,13 +445,14 @@ ABCXJS.midi.Parse.prototype.handleBar = function (elem) {
         }
     }
     
+    var pass = this.getPass();
+    
     // implementa jump ao final do compasso
     if(this.nextBarJump ) {
         this.next = this.nextBarJump;
         delete this.nextBarJump;
     }
 
-    var pass = this.getPass();
     
     if(elem.type === "bar_left_repeat") {
         this.restart = this.getMark();   
@@ -501,6 +507,7 @@ ABCXJS.midi.Parse.prototype.handleBar = function (elem) {
                     this.next = this.capo;
                     this.daCapoFlagged = true;
                     this.pass = [];
+                    this.currEnding && this.getPass(); //caso em ending, preserva a contagem de passagem do compasso corrente
                 } 
                 break;
             case "dasegno":
@@ -509,6 +516,7 @@ ABCXJS.midi.Parse.prototype.handleBar = function (elem) {
                         this.next = this.segnoPoint;
                         this.daSegnoFlagged = true;
                         this.pass = [];
+                        this.currEnding && this.getPass(); //caso em ending, preserva a contagem de passagem do compasso corrente
                     }
                 } else {
                     this.addWarning( 'Ignorando Da segno!');
@@ -520,6 +528,7 @@ ABCXJS.midi.Parse.prototype.handleBar = function (elem) {
                     this.daCapoFlagged = true;
                     this.fineFlagged = true;
                     this.pass = [];
+                    this.currEnding && this.getPass(); //caso em ending, preserva a contagem de passagem do compasso corrente
                 } 
                 break;
             case "dsalfine": 
@@ -529,6 +538,7 @@ ABCXJS.midi.Parse.prototype.handleBar = function (elem) {
                         this.fineFlagged = true;
                         this.daSegnoFlagged = true;
                         this.pass = [];
+                        this.currEnding && this.getPass(); //caso em ending, preserva a contagem de passagem do compasso corrente
                     }
                 } else {
                     this.addWarning( 'Ignorando Da segno al fine!');
@@ -540,9 +550,9 @@ ABCXJS.midi.Parse.prototype.handleBar = function (elem) {
                         this.next = this.codaPoint;
                         this.daCodaFlagged = false;
                         this.pass = [];
+                        this.currEnding && this.getPass(); //caso em ending, preserva a contagem de passagem do compasso corrente
                     }
                 } else if(this.daCodaFlagged) {
-                    //this.addWarning( 'Ignorando Da Coda!');
                     this.lookingForCoda = true;
                     this.skipping = true;
                 }
@@ -554,6 +564,8 @@ ABCXJS.midi.Parse.prototype.handleBar = function (elem) {
                         this.daSegnoFlagged = true;
                         this.daCodaFlagged = true;
                         this.pass = [];
+                        this.currEnding && this.getPass(); //caso em ending, preserva a contagem de passagem do compasso corrente
+
                     }
                 } else {
                     this.addWarning( 'Ignorando "D.S. al coda"!');
@@ -565,6 +577,7 @@ ABCXJS.midi.Parse.prototype.handleBar = function (elem) {
                     this.daCapoFlagged = true;
                     this.daCodaFlagged = true;
                     this.pass = [];
+                    this.currEnding && this.getPass(); //caso em ending, preserva a contagem de passagem do compasso corrente
                 } 
                 break;
         }
@@ -678,14 +691,17 @@ ABCXJS.midi.Parse.prototype.addStart = function( time, midipitch, abcelem, butto
     time -= delay;
     
     var pE = this.getParsedElement(time);
+    
     if( abcelem ) {
         pE.start.abcelems.push({abcelem:abcelem,channel:this.channel, delay:delay});
-        if(this.staff === 0 && this.voice === 0 && abcelem.barNumber ) 
-            pE.start.barNumber = pE.start.barNumber || abcelem.barNumber;
+        
+        if( this.abctune.lines[this.line].staffs[this.staff].voices[this.voice].firstVoice && this.addBarNumber ) {
+            pE.start.barNumber = this.addBarNumber;
+            delete this.addBarNumber;
+        }
     }    
     if( midipitch ) {
         midipitch.clef = this.getStaff().clef.type;
-        //midipitch.startDelay = delay;
         pE.start.pitches.push( {midipitch: midipitch, delay:delay} );
     }
     if( button) pE.start.buttons.push({button:button,abcelem:abcelem, delay:delay});
@@ -697,7 +713,6 @@ ABCXJS.midi.Parse.prototype.addEnd = function( time, midipitch, abcelem/*, butto
     var pE = this.getParsedElement(time);
     if( abcelem   ) pE.end.abcelems.push({abcelem:abcelem, delay:delay});
     if( midipitch ) pE.end.pitches.push({midipitch: midipitch, delay:delay});
-    //if( button    ) pE.end.buttons.push({button:button,abcelem:abcelem, delay:delay});
 };
 
 ABCXJS.midi.Parse.prototype.getMark = function() {
