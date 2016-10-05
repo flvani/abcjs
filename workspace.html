@@ -60,11 +60,11 @@
                 Verificar durante o parse e incluir o barnumber na barra correta
              MIDI PARSER
                 Bug: falta informação de barra de compasso para didatic play measure e goto-measure
+                Bug: manter a informação de passadas quando existe um salto originado em compasso que tem esta debaixo da casa 1 (ending)
         
            TODO:
-                Bug: manter a informação de passadas quando existe um salto originado em compasso que tem esta debaixo da casa 1 (ending)
              EDITOR: 
-                Bug na transposição de acordes de baixo
+                Bug: transposição de acordes de baixo
                 Melhorar a transposição dos baixos, mantendo na oitava correta
              Tablatura: 
                 tratar adequadamente os acordes (de baixo)      
@@ -130,7 +130,7 @@
 <textarea id="svg_source" cols="120" rows="10" style="display: none;" >
 </textarea>
     
-<textarea id="abcb" cols="120" rows="10"  style="display: none;">
+<textarea id="abc" cols="120" rows="10"  style="display: inline;">
 X:2020
 %%barnumbers 1
 %%papersize A4
@@ -145,7 +145,10 @@ M:3/4
 Q:130
 K:F
 V:1 clef=treble
-| C4 | !segno! D4 | E4 !dacoda!| e4 | F4 | f4 | G4 | A4 !dsalcoda!|
+%teste13 - workaround  || C4 | !segno! D4 | E4 |!dacoda! e4 | F4 | !dsalcoda! f4 |!coda! G4 | A4 !fine!|
+| C4 | !segno! D4 | E4 | e4 |1 F4 | !dsalfine! f4 |2 G4 | A4 !fine!|
+%teste12 | C4 | !segno! D4 | E4 | e4 | F4 |1 !dsalfine! f4 |2 G4 | A4 !fine!|
+%teste11 | C4 | !segno! D4 | E4 !dacoda!| e4 | F4 | f4 | G4 | A4 !dsalcoda!|
 %teste10 | C4 | !segno! D4 | E4 !dacoda!| e4 | F4 | f4 !coda!| G4 | A4 !dsalcoda!|
 %teste09 | C4 |:!segno! D4 | E4 :|: F4 !fine!| G4 :| A4 !dsalfine!|
 %teste08 | C4 |:!segno! D4 | E4 :|: F4 | G4 :| A4 !dasegno!|
@@ -158,7 +161,7 @@ V:1 clef=treble
 %teste01 | C4 |: D4 | E4 :| F4 |
 </textarea>
     
-<textarea id="abc" cols="120" rows="10"  style="display: inline;">
+<textarea id="abcx" cols="120" rows="10"  style="display: none;">
 X:1025
 %%barnumbers 0
 %%papersize A4

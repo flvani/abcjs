@@ -49,16 +49,10 @@ ABCXJS.midi.Parse.prototype.reset = function() {
     this.channel = -1;
     this.timecount = 0;
     this.playlistpos = 0;
-//    this.pass = 1;
     this.maxPass = 2;
     this.countBar = 0;
-//    this.currEnding = null;
-//    this.afterRepeatBlock = false;
     this.next = null;
-//    this.restarting = false;
     this.restart = {line: 0, staff: 0, voice: 0, pos: 0};
-//    this.startSegno = null;
-//    this.segnoUsed = false;
     
     this.multiplier = 1;
     this.alertedMin = false;
@@ -258,7 +252,6 @@ ABCXJS.midi.Parse.prototype.writeNote = function(elem) {
         this.multiplier = (elem.startTriplet === 2) ? 3 / 2 : (elem.startTriplet - 1) / elem.startTriplet;
     }
 
-    //var mididuration = this.checkMinNote(parseFloat(Number(elem.duration * this.wholeNote * this.multiplier).toFixed(7)));
     var mididuration = this.checkMinNote(elem.duration * this.wholeNote * this.multiplier);
 
     var intervalo = { totalDur:0, elem:null, midipitch:null };
@@ -437,7 +430,6 @@ ABCXJS.midi.Parse.prototype.handleBar = function (elem) {
     
     if( this.lookingForCoda ) {
         if( !elem.jumpInfo || elem.jumpInfo.type!=='coda' ) {
-            
             return true;
         } else {
             this.codaPoint = this.getMark(); 
@@ -445,14 +437,13 @@ ABCXJS.midi.Parse.prototype.handleBar = function (elem) {
         }
     }
     
-    var pass = this.getPass();
-    
     // implementa jump ao final do compasso
     if(this.nextBarJump ) {
         this.next = this.nextBarJump;
         delete this.nextBarJump;
     }
 
+    var pass = this.setPass();
     
     if(elem.type === "bar_left_repeat") {
         this.restart = this.getMark();   
@@ -485,8 +476,19 @@ ABCXJS.midi.Parse.prototype.handleBar = function (elem) {
         this.currEnding = {};
         this.currEnding.min = parseInt(a[0]);
         this.currEnding.max = a.length > 1 ? parseInt(a[1]) : this.currEnding.min;
+        this.currEnding.measures = [];
         this.maxPass = Math.max(this.currEnding.max, 2);
-        if(this.currEnding.min > 1 ) delete this.currEnding; // casa "2" não precisa de semantica 
+        
+        // casa "2" não precisa de semantica
+        // rever isso: não precisa de semântica se a casa dois vier depois de um 
+        // simbolo de repetição, seja um ritornello ou qualquer outro.
+        // pergunta: casa 2 sem sinal de repetição faz sentido?
+        if(this.currEnding.min > 1 ) delete this.currEnding;  
+    }
+    
+    if(this.currEnding) {
+        // registra os compassos debaixo deste ending
+        this.currEnding.measures.push( this.getMark() ); 
     }
     
     this.skipping = (this.currEnding && ( pass < this.currEnding.min || pass > this.currEnding.max) ) || false;
@@ -506,8 +508,7 @@ ABCXJS.midi.Parse.prototype.handleBar = function (elem) {
                 if(!this.daCapoFlagged) {
                     this.next = this.capo;
                     this.daCapoFlagged = true;
-                    this.pass = [];
-                    this.currEnding && this.getPass(); //caso em ending, preserva a contagem de passagem do compasso corrente
+                    this.resetPass();
                 } 
                 break;
             case "dasegno":
@@ -515,8 +516,7 @@ ABCXJS.midi.Parse.prototype.handleBar = function (elem) {
                     if(!this.daSegnoFlagged){
                         this.next = this.segnoPoint;
                         this.daSegnoFlagged = true;
-                        this.pass = [];
-                        this.currEnding && this.getPass(); //caso em ending, preserva a contagem de passagem do compasso corrente
+                        this.resetPass();
                     }
                 } else {
                     this.addWarning( 'Ignorando Da segno!');
@@ -527,8 +527,7 @@ ABCXJS.midi.Parse.prototype.handleBar = function (elem) {
                     this.nextBarJump = this.capo;
                     this.daCapoFlagged = true;
                     this.fineFlagged = true;
-                    this.pass = [];
-                    this.currEnding && this.getPass(); //caso em ending, preserva a contagem de passagem do compasso corrente
+                    this.resetPass();
                 } 
                 break;
             case "dsalfine": 
@@ -537,8 +536,7 @@ ABCXJS.midi.Parse.prototype.handleBar = function (elem) {
                         this.nextBarJump = this.segnoPoint;
                         this.fineFlagged = true;
                         this.daSegnoFlagged = true;
-                        this.pass = [];
-                        this.currEnding && this.getPass(); //caso em ending, preserva a contagem de passagem do compasso corrente
+                        this.resetPass();
                     }
                 } else {
                     this.addWarning( 'Ignorando Da segno al fine!');
@@ -549,8 +547,7 @@ ABCXJS.midi.Parse.prototype.handleBar = function (elem) {
                     if(this.daCodaFlagged){
                         this.next = this.codaPoint;
                         this.daCodaFlagged = false;
-                        this.pass = [];
-                        this.currEnding && this.getPass(); //caso em ending, preserva a contagem de passagem do compasso corrente
+                        this.resetPass();
                     }
                 } else if(this.daCodaFlagged) {
                     this.lookingForCoda = true;
@@ -563,8 +560,7 @@ ABCXJS.midi.Parse.prototype.handleBar = function (elem) {
                         this.nextBarJump = this.segnoPoint;
                         this.daSegnoFlagged = true;
                         this.daCodaFlagged = true;
-                        this.pass = [];
-                        this.currEnding && this.getPass(); //caso em ending, preserva a contagem de passagem do compasso corrente
+                        this.resetPass();
 
                     }
                 } else {
@@ -576,89 +572,12 @@ ABCXJS.midi.Parse.prototype.handleBar = function (elem) {
                     this.nextBarJump = this.capo;
                     this.daCapoFlagged = true;
                     this.daCodaFlagged = true;
-                    this.pass = [];
-                    this.currEnding && this.getPass(); //caso em ending, preserva a contagem de passagem do compasso corrente
+                    this.resetPass();
                 } 
                 break;
         }
-        
     }
     return true;
-    
-    
-/*
-    OLD - Tratamento das decorações, especialmente o "segno", mas anda incompleto.
-    Característica: apenas as decorações da primeira staff são consideradas e aplicadas a todas as outras
-    // flavio - todas estas barras indicam ponto de restart em caso de repetição
-//    var setrestart = (elem.type === "bar_left_repeat" || elem.type === "bar_dbl_repeat"  ) ; // ||
-                     // elem.type === "bar_thick_thin" || elem.type === "bar_thin_thick" ||
-                    //  elem.type === "bar_thin_thin" || elem.type === "bar_right_repeat");
-              
-    // salva o ponto prévio de restart (que pode ser modificado durante a interpreatação da barra corrente
-    //var restart_next = this.restart;
-
-    //reset de váriaveis para o processamento das notas dentro do compasso
-    //this.restarting = false;
-
-   // este bloco trata os "endings" ou chaves de 1ª e  2ª vez  (ou chaves de finalização).
-   // são importantes para determinar a quantidade de vezes que o bloco será repetido e quais compassos
-   // devem ser ignorados em cada passada
-   
-
-    //ignora notas em função da quantidade de vezes que o bloco foi repetido e o tipo de "ending"
-    //this.skipping = (this.currEnding !== null && (this.currEnding.min > this.pass || this.pass > this.currEnding.max));
-    
-    
-    // marca um ponto de recomeço
-//    if (setrestart) {
-//        this.afterRepeatBlock = false;
-//        this.restart = this.getMark();
-//    }
-
-    // verifica se deve encerrar a repetição do bloco
-//    if (repeat) {
-//        if (this.pass < this.maxPass) {
-//            this.pass++;
-//            this.next = restart_next;
-//            this.restarting = true;
-//            this.clearTies();
-//            return true;
-//        } else {
-//            this.pass = 1;
-//            this.maxPass = 2;
-//            this.afterRepeatBlock = true;
-//        }
-//    }
-    
-    
-    if ( this.staff === 0 )   {
-        if (elem.decoration)  {
-            for (var d = 0; d < elem.decoration.length; d++) {
-                if (elem.decoration[d] === 'segno') {
-                    if (this.startSegno !== null && !this.segnoUsed && this.getMarkString(this.startSegno) !== this.getMarkString()) {
-                        this.globalJumps[this.countBar] = this.getMark();
-                        this.next = this.startSegno;
-                        this.segnoUsed = true;
-                        //return;
-                    } else if (this.startSegno === null ) {
-                        this.startSegno = this.getMark();
-                        this.globalJumps[this.countBar] = this.startSegno;
-                    }
-                }
-            }
-        }
-    } else {
-        if( this.globalJumps[this.countBar]) {
-                if (this.startSegno !== null && !this.segnoUsed && this.getMarkString(this.startSegno) !== this.getMarkString()) {
-                    this.next = this.startSegno;
-                    this.segnoUsed = true;
-                } else if (this.startSegno === null ) {
-                    this.startSegno = this.getMark();
-                }
-        }
-    }
-*/
-
 };
 
 ABCXJS.midi.Parse.prototype.clearTies = function() {
@@ -731,7 +650,7 @@ ABCXJS.midi.Parse.prototype.getMarkValue = function(mark) {
     return (mark.line+1) *1e6 + mark.staff *1e4 + mark.voice *1e2 + mark.pos;
 };
 
-ABCXJS.midi.Parse.prototype.getPass = function(mark) {
+ABCXJS.midi.Parse.prototype.setPass = function(mark) {
     var compasso = this.getMarkValue(mark);
     //registra e retorna o número de vezes que já passou por compasso.
     //a cada (salto D.C., D.S., dacoda) deve-se zerar a contagem
@@ -741,6 +660,18 @@ ABCXJS.midi.Parse.prototype.getPass = function(mark) {
         this.pass[compasso] = 1;
     }
     return this.pass[compasso];
+};
+
+ABCXJS.midi.Parse.prototype.resetPass = function() {
+    //limpa contadores de passagem, mas caso em ending, preserva a contagem de passagem dos compassos debaixo do ending corrente  
+    this.pass = [];
+    var self = this;
+    if( this.currEnding ) {
+        this.currEnding.measures.forEach( function( item, index ) {
+            self.setPass(item);
+        });
+    }
+    //this.currEnding && this.setPass(); 
 };
 
 ABCXJS.midi.Parse.prototype.hasTablature = function() {
@@ -774,24 +705,18 @@ ABCXJS.midi.Parse.prototype.startTrack = function() {
     
     this.next = null;
     
-    //this.pass = 1;
-    //this.afterRepeatBlock = false;
-    //this.restarting = false;
-    //this.startSegno = null;
-    //this.segnoUsed = false;
-    //delete this.currEnding = null;
+    this.pass = [];
     
     this.endTrack = false;    
+    
     delete this.nextBarJump;
     delete this.codaFlagged;
     delete this.fineFlagged;
     delete this.daSegnoFlagged;
     delete this.daCapoFlagged;
     delete this.capo;
-
     delete this.daCodaFlagged;
     delete this.lookingForCoda;
-    
     delete this.segnoPoint;
     delete this.codaPoint;
 };
