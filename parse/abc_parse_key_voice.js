@@ -619,7 +619,8 @@ window.ABCXJS.parse.parseKeyVoice = {};
 			if (multilineVars.score_is_present && id.toLowerCase().substr(0,3) !== "tab")
 				warn("Can't have an unknown V: id when the %score directive is present", line, start);
 		} else {
-                    multilineVars.clef = multilineVars.staves[ multilineVars.voices[id].staffNum].clef;
+                    //multilineVars.clef = multilineVars.staves[ multilineVars.voices[id].staffNum].clef;
+                    multilineVars.clef = multilineVars.voices[id].clef;
                 }
 		start += id.length;
 		start += tokenizer.eatWhiteSpace(line, start);
@@ -709,6 +710,7 @@ window.ABCXJS.parse.parseKeyVoice = {};
 						staffInfo.clef = token.token.replace(/[',]/g, ""); //'//comment for emacs formatting of regexp
 						staffInfo.verticalPos = calcMiddle(staffInfo.clef, oct2);
                                                 multilineVars.clef = {type: staffInfo.clef, verticalPos: staffInfo.verticalPos};
+                                                multilineVars.voices[id].clef = multilineVars.clef; 
 						break;
 					case 'staves':
 					case 'stave':

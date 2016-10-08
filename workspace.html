@@ -131,6 +131,40 @@
 </textarea>
     
 <textarea id="abc" cols="120" rows="10"  style="display: inline;">
+X:1001
+%%barnumbers 0
+%%papersize a4
+%%pagenumbering
+%%staffsep 10
+T:Asa Branca
+C:Luiz Gonzaga & Humberto Teixeira
+Z:Flávio Vani
+N:Mapa para Acordeons Diatônicos powered by ABCXJS.
+F:https://www.youtube-nocookie.com/embed/nth-lbmb7ys
+M:C
+L:1/4
+Q:180
+K:C
+V:1 treble
+V:2 bass
+[V:1]| z2 C D | E2 G2                     | G2 E2                     | F2 F2                   | 
+[V:2]| z4     | C,,3/2 [C,E,G,]/2 C,, [C,E,G,] | C,,3/2 [C,E,G,]/2 C,, [C,E,G,] | F,,3/2 [F,A,C]/2 F,, [F,A,C] |
+[V:1]| z2 C D                  | E2 G2                     | G2 F2                     | E4                      | 
+[V:2]| F,,3/2 [F,A,C]/2 F,, [F,A,C] | C,,3/2 [C,E,G,]/2 C,, [C,E,G,] | G,,3/2 [G,B,D]/2 G,, [G,B,D] | C,,3/2 [C,E,G,]/2 C,, [C,E,G,] |
+</textarea>
+    
+    <noscript>               menor
+        C,,   C,  E,  G,     C,  ^D,  G,
+        D,,   D, ^F,  A,     D,   F,  A,
+        E,,   E, ^G,  B,     E,   G,  B,
+        F,,   F,  A,  C      F,  ^G,  C
+        G,,   G,  B,  D      G,  ^A,  D
+        A,,   A, ^C   E      A,   C   E
+        B,,   B, ^D  ^F      B,   D  ^F
+        Bb,,  Bb, D   F      Bb, ^C   F
+    </noscript>    
+    
+<textarea id="abcb" cols="120" rows="10"  style="display: none;">
 X:2020
 %%barnumbers 1
 %%papersize A4
@@ -405,8 +439,8 @@ V:2 bass
                         ,generate_tablature: 'accordion'
                         ,accordion_options: {
                                  //id: 'GAITA_LETICCE_CF_NE'
-                               //  id: 'GAITA_HOHNER_GC'
-                                 id: 'GAITA_HOHNER_CLUB_IIIM_BR'
+                                 id: 'GAITA_HOHNER_GC'
+                               //  id: 'GAITA_HOHNER_CLUB_IIIM_BR'
                                 ,keyboardDiv_id:"keyboardDiv"
                                 ,accordionMaps: DIATONIC.map.accordionMaps
                                 ,render_keyboard_opts:{transpose:false, mirror: true, scale:1.1, draggable:false, show:false, label:false}}

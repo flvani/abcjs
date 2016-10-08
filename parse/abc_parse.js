@@ -1727,7 +1727,7 @@ window.ABCXJS.parse.Parse = function(transposer_, accordion_) {
                 }
             } else {
                 if (this.transposer && this.transposer.offSet !== 0) {
-                    ret.str = this.transposer.transposeRegularMusicLine(line, lineNumber);
+                    ret.str = this.transposer.transposeRegularMusicLine(line, lineNumber, multilineVars);
                 }
                 this.parseRegularMusicLine(ret.str);
             }
