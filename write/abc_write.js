@@ -380,6 +380,7 @@ ABCXJS.write.Printer.prototype.printTieArc = function(x1, x2, pitch1, pitch2, ab
 
 ABCXJS.write.Printer.prototype.printStave = function (startx, endx, staff ) {
     if(staff.numLines === 4) {
+      // startx+1 e endx-1 pq a rotina faz um deslocamento contrario para desenhar o ledger
       this.printLedger(startx+1,endx-1, 19.5); 
       
       // imprimo duas linhas para efeito
