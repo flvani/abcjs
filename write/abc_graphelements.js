@@ -286,8 +286,10 @@ ABCXJS.write.StaffGroupElement.prototype.draw = function(printer, groupNumber) {
             printer.paper.printBrace(this.startx-10, top-10, bottom+10);  
         }
     }
+    this.top = yi+delta +printer.totalY;
+    this.height = height;
     
-    printer.y = yi + delta + height; // nova posição da impressora
+    printer.y = yi+ delta + height; // nova posição da impressora
     
 };
 
@@ -533,6 +535,7 @@ ABCXJS.write.AbsoluteElement.prototype.draw = function(printer, staveInfo ) {
     
     this.abcelem.parent = this; 
     this.abcelem.parent.screenY = printer.totalY + printer.y; // posição na tela, independe das quebras de página
+    this.abcelem.parent.staffGroup = printer.staffgroups.length;
     
 };
 

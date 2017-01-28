@@ -380,13 +380,13 @@ ABCXJS.write.Printer.prototype.printTieArc = function(x1, x2, pitch1, pitch2, ab
 
 ABCXJS.write.Printer.prototype.printStave = function (startx, endx, staff ) {
     if(staff.numLines === 4) {
-      this.printLedger(startx,endx, 19.5); 
+      this.printLedger(startx+1,endx-1, 19.5); 
       
       // imprimo duas linhas para efeito
       this.paper.printStaveLine(startx,endx,this.calcY(15)-0.5 ); 
       this.paper.printStaveLine(startx,endx,this.calcY(15) ); 
       
-      this.printLedger(startx,endx, 7.5 ); 
+      this.printLedger(startx+1,endx-1, 7.5 ); 
       
       this.paper.printStaveLine(startx,endx,this.calcY(0)); 
     } else {

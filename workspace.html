@@ -130,7 +130,7 @@
 <textarea id="svg_source" cols="120" rows="10" style="display: none;" >
 </textarea>
     
-<textarea id="abc" cols="120" rows="10"  style="display: inline;">
+<textarea id="abcc" cols="120" rows="10"  style="display: none;">
 X:1011
 %%barnumbers 1
 %score 0 (1 2) 3
@@ -222,7 +222,7 @@ V:1 treble
 V:2 accordionTab
 </textarea>
     
-<textarea id="abcc" cols="120" rows="10"  style="display: none;">
+<textarea id="abc" cols="120" rows="10"  style="display: inline;">
 X:2020
 %%barnumbers 0
 %%papersize A4
@@ -396,9 +396,20 @@ V:2 bass
                 
                 playerCallBackOnScroll = function ( player ) {
                     if( player.currChannel > 0 ) return;
-                    if( player.currAbsElem.screenY !== window.ypos ) {
-                        window.ypos = player.currAbsElem.screenY;
-                        window.scrollTo( 0, window.ypos - 40);    
+                    var fixedTop = document.getElementById('editorDiv').clientHeight;
+                    var wtop = document.getElementById('canvasDiv').offsetTop -
+                               fixedTop;
+
+                    var wh = window.innerHeight || document.documentElement.clientHeight || document.body.clientHeight;                   
+
+                    var vp = wh - fixedTop;
+                        
+                    var top = player.printer.staffgroups[player.currAbsElem.staffGroup].top;
+                    var bottom = top + player.printer.staffgroups[player.currAbsElem.staffGroup].height;
+                    
+                    if( wtop+bottom > vp+window.ypos || window.ypos-wtop > top ) {
+                        window.ypos = wtop + top;
+                        window.scrollTo( 0, window.ypos );    
                     }
                 };
                 
