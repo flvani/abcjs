@@ -103,7 +103,7 @@ ABCXJS.tablature.Parse.prototype.parseTabVoice = function ( ) {
             case "note":
                 if (!this.invalid)
                     voice[voice.length] = this.formatChild(token);
-                if(this.vars.lastBarElem.barNumber === undefined)
+                if(this.vars.lastBarElem && this.vars.lastBarElem.barNumber === undefined)
                     this.vars.lastBarElem.barNumber = this.vars.currentVoice.currBarNumber ++;
                 break;
             case "comment":
