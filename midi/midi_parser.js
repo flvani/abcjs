@@ -157,7 +157,7 @@ ABCXJS.midi.Parse.prototype.parse = function(tune, keyboard) {
     //cria a playlist a partir dos elementos obtidos acima  
     this.parsedElements.forEach( function( item, time ) {
         
-        if( item.end.pitches.length + item.end.abcelems.length + item.end.buttons.length > 0 ) {
+        if( item.end.pitches.length + item.end.abcelems.length /* fka + item.end.buttons.length > 0*/ ) {
             self.midiTune.playlist.push( {item: item.end, time: time, start: false } );
         }
         
@@ -173,6 +173,7 @@ ABCXJS.midi.Parse.prototype.parse = function(tune, keyboard) {
             } 
             delete item.start.barNumber;
             self.handleButtons(item.start.pitches, item.start.buttons );
+            delete item.start.buttons; /*fka*/
             pl.item = item.start;
             self.midiTune.playlist.push( pl );
         }
@@ -599,7 +600,7 @@ ABCXJS.midi.Parse.prototype.getParsedElement = function(time) {
     if( ! this.parsedElements[time] ) {
         this.parsedElements[time] = {
             start:{pitches:[], abcelems:[], buttons:[], barNumber: null}
-            ,end:{pitches:[], abcelems:[], buttons:[]}
+            ,end:{pitches:[], abcelems:[]/* fka , buttons:[]*/}
         };
     }
     return this.parsedElements[time];
@@ -623,7 +624,7 @@ ABCXJS.midi.Parse.prototype.addStart = function( time, midipitch, abcelem, butto
         midipitch.clef = this.getStaff().clef.type;
         pE.start.pitches.push( {midipitch: midipitch, delay:delay} );
     }
-    if( button) pE.start.buttons.push({button:button,abcelem:abcelem, delay:delay});
+    if( button ) pE.start.buttons.push({button:button,abcelem:abcelem, delay:delay});
 };
 
 ABCXJS.midi.Parse.prototype.addEnd = function( time, midipitch, abcelem/*, button*/ ) {

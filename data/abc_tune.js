@@ -172,6 +172,11 @@ window.ABCXJS.data.Tune = function() {
             if(right.startEnding){
                 left.startEnding = right.startEnding;
             }
+            
+            if(right.barNumber){
+                left.barNumber = right.barNumber;
+                left.barNumberVisible = right.barNumberVisible;
+            }
 
             if( left.type === 'bar_right_repeat' ) {
                 left.type  = right.type === 'bar_left_repeat'?'bar_dbl_repeat':'bar_right_repeat';
