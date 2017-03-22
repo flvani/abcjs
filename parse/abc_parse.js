@@ -222,7 +222,13 @@ window.ABCXJS.parse.Parse = function(transposer_, accordion_) {
                     if(elem.pitches) { 
                         elem.pitches.forEach( function( pitch ) { 
                             if(self.equalsPitch( pitch, startPitch )  ) {
-                                startPitch.tie = { id_start: tieCnt };
+                                
+                                if(! startPitch.tie) {
+                                    startPitch.tie = {};
+                                }
+                                // para ligaduras encadeadas ja existira obj tie
+                                startPitch.tie.id_start = tieCnt;
+                                
                                 pitch.tie =  { id_end: tieCnt };
                                 tieCnt ++;
                             }
@@ -1638,7 +1644,7 @@ window.ABCXJS.parse.Parse = function(transposer_, accordion_) {
                         // Single pitch
                         var el2 = {};
                         var core = getCoreNote(line, i, el2, true);
-                        if (el2.endTie !== undefined)
+                        if (el2.endTie !== undefined) 
                             multilineVars.staves[multilineVars.currentVoice.staffNum].inTie[multilineVars.currentVoice.index] = true;
                         if (core !== null) {
                             if (core.pitch !== undefined) {
