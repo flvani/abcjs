@@ -195,15 +195,22 @@ V:1 clef=treble
     
     
 <textarea id="abc" cols="120" rows="10"  style="display: inline;">
-M:3/4
-L:1/4
-Q:160
-K:C
-V:1 treble
-| D2(FD F [DF]2)[CE]2 |
-%| G3 |
-%| G3- | G3- | G z C | D2(FD [DF]2)[CE]2 |
-V:3 accordionTab
+X:1019
+%%barnumbers 1
+%%papersize a4
+%%pagenumbering
+%%staffsep 10
+T:Vanera Grossa
+C:Neneco & João A. dos Santos
+Z:Flávio Vani
+N:Mapa para Acordeons Diatônicos powered by ABCXJS.
+F:https://www.youtube-nocookie.com/embed/Br6gOSlt-_w
+M:2/4
+L:1/16
+Q:80
+K:G
+V:1 treble stem=down
+[V:1]|: zG,B,D G2FE               | "D7"D2(FD [DF]2)[CE]2-      :|[CE]2 D2 D2 D2  |
 </textarea>
    </div>
     <br/>
@@ -382,7 +389,7 @@ V:3 accordionTab
                                //  id: 'GAITA_HOHNER_CLUB_IIIM_BR'
                                 ,keyboardDiv_id:"keyboardDiv"
                                 ,accordionMaps: DIATONIC.map.accordionMaps
-                                ,render_keyboard_opts:{transpose:false, mirror: true, scale:1.1, draggable:false, show:false, label:false}}
+                                ,render_keyboard_opts:{transpose:false, mirror: true, scale:1.1, draggable:false, show:true, label:false}}
                         ,midi_options: {program: 21, qpm: 150, type: "qt"}
                         ,render_options: {}
                         ,onchange: editorCallbackOnChange
