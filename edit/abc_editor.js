@@ -650,11 +650,40 @@ ABCXJS.Editor.prototype.isDirty = function() {
 
 ABCXJS.Editor.prototype.highlight = function(abcelem) {
   try {
-      this.editarea.setSelection(abcelem.startChar, abcelem.endChar, abcelem.line);
+        this.editarea.setSelection(abcelem.startChar, abcelem.endChar, abcelem.line);
+        if(this.accordion.render_keyboard_opts.show && !player.playing) {
+            this.accordion.clearKeyboard(true);
+            if(abcelem.bellows)
+                this.selectButton(abcelem);
+        }    
   } catch( e ) {
       // Firefox: aborta se a area não estiver visivel
   } 
 };
+
+ABCXJS.Editor.prototype.selectButton = function(elem) {
+    for( var p=0; p < elem.pitches.length; p ++ ) {
+        
+        if(elem.pitches[p].type === 'rest' ) continue;
+        
+        var button;
+        var tabButton = elem.pitches[p].c === 'scripts.rarrow'? elem.pitches[p].lastButton : elem.pitches[p].c;
+        
+        if(elem.pitches[p].bass)
+            button = this.midiParser.getBassButton(elem.bellows, tabButton);
+        else
+            button = this.midiParser.getButton(tabButton);
+        
+        if(button) {
+            if(elem.bellows === '-') {
+                button.setOpen();
+            } else {
+                button.setClose();
+            }
+        }
+    }
+};
+
 
 ABCXJS.Editor.prototype.pause = function(shouldPause) {
 	this.bIsPaused = shouldPause;
