@@ -664,14 +664,21 @@ ABCXJS.Editor.prototype.highlight = function(abcelem) {
 ABCXJS.Editor.prototype.selectButton = function(elem) {
     for( var p=0; p < elem.pitches.length; p ++ ) {
         
-        if(elem.pitches[p].type === 'rest' ) continue;
+        var pitch = elem.pitches[p];
+        
+        if( pitch.type === 'rest' ) continue;
         
         var button;
-        var tabButton = elem.pitches[p].c === 'scripts.rarrow'? elem.pitches[p].lastButton : elem.pitches[p].c;
+        var tabButton = pitch.c === 'scripts.rarrow'? pitch.lastButton : pitch.c;
         
-        if(elem.pitches[p].bass)
+        
+        //quando o baixo não está "in Tie", label do botão é uma letra (G, g, etc)
+        //de outra forma o label é número do botão (1, 1', 1'', etc)
+        if(pitch.bass && pitch.c !== 'scripts.rarrow')
+            // quando label é uma letra
             button = this.midiParser.getBassButton(elem.bellows, tabButton);
         else
+            // quando label é número do botão
             button = this.midiParser.getButton(tabButton);
         
         if(button) {
