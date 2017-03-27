@@ -175,12 +175,30 @@ ABCXJS.tablature.Accordion.prototype.getNoteName = function( item, keyAcc, barAc
     return { key: key, octave:oitava, isBass:bass, isChord: item.chord, value:value };
 };
 
-//TODO: resolver isso para que não tenha que instanciar uma vez para cada linha de texto
-ABCXJS.tablature.Accordion.prototype.inferTabVoice = function( line, tune, vars ) {
-    if( ! this.inferer ) {
-        this.inferer = new ABCXJS.tablature.Infer( this, tune, vars );
-    }    
-    return this.inferer.inferTabVoice( line );
+ABCXJS.tablature.Accordion.prototype.inferTablature = function(tune, vars, addWarning ) {
+
+    var inferer = new ABCXJS.tablature.Infer( this, tune, vars );
+    
+    vars.missingButtons = {};
+    
+    for (var t = 0; t < tune.lines.length; t++) {
+       if (tune.lines[t].staffs ) {
+          var voice = inferer.inferTabVoice( t );
+          if (voice.length > 0) {
+              tune.lines[t].staffs[tune.tabStaffPos].voices[0] = voice;
+          }
+       }  
+    }
+    
+    if(vars.missingButtons){
+        for( var m in vars.missingButtons ) {
+            addWarning('Nota ' + m + ' não disponível nos compassos: ' + vars.missingButtons[m].join(", ") + '.' ) ;
+        }
+    }
+    
+    delete vars.missingButtons;
+   
+    
 };
 
 ABCXJS.tablature.Accordion.prototype.parseTabVoice = function(str, vars ) {

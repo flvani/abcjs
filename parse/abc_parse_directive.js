@@ -163,15 +163,17 @@ window.ABCXJS.parse.parseDirective = {};
 			//					vocalabove: { type: "boolean", optional: true },
 			//					vocalfont: fontType,
 			//					wordsfont: fontType,
+                        
 			case "bagpipes":tune.formatting.bagpipes = true;break;
-			case "landscape":multilineVars.landscape = true;break;
-			case "papersize":multilineVars.papersize = restOfString;break;
-                        case "restsintab": multilineVars.restsintab = true; break;
+                        case "restsintab": tune.formatting.restsInTab = true; break;
 			case "slurgraces":tune.formatting.slurgraces = true;break;
 			case "stretchlast":tune.formatting.stretchlast = true;break;
-			case "titlecaps":multilineVars.titlecaps = true;break;
 			case "titleleft":tune.formatting.titleleft = true;break;
 			case "measurebox":tune.formatting.measurebox = true;break;
+
+                        case "landscape":multilineVars.landscape = true;break;
+			case "papersize":multilineVars.papersize = restOfString;break;
+			case "titlecaps":multilineVars.titlecaps = true;break;
 
 			case "botmargin":
 			case "botspace":
@@ -202,6 +204,16 @@ window.ABCXJS.parse.parseDirective = {};
 					return vskip.error;
 				tune.addSpacing(vskip);
 				return null;
+			case "tabinferenceopts":
+				scratch = "";
+				window.ABCXJS.parse.each(tokens, function(tok) {
+					scratch += tok.token;
+				});
+				num = parseFloat(scratch);
+				if (isNaN(num) || num === 0)
+					return "Directive \"" + cmd + "\" requires positive or negativenumber a number as a parameter.";
+				tune.formatting.tabInferenceOpts = num;
+				break;
 			case "scale":
 				scratch = "";
 				window.ABCXJS.parse.each(tokens, function(tok) {

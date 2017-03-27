@@ -98,7 +98,6 @@ ABCXJS.tablature.Parse.prototype.parseTabVoice = function ( ) {
                 if (!this.invalid)
                     voice[voice.length] = token;
                 this.vars.lastBarElem = token;
-                //this.
                 break;
             case "note":
                 if (!this.invalid)
@@ -115,53 +114,65 @@ ABCXJS.tablature.Parse.prototype.parseTabVoice = function ( ) {
     return voice;
 };
 
-ABCXJS.tablature.Parse.prototype.formatChild = function(token) {
-  var child = {
-        el_type: token.el_type 
-        ,startChar:this.xi 
-        ,endChar:this.i
-        ,pitches: []
-        ,duration: token.duration * this.vars.default_length
-        ,bellows: token.bellows
-  };
-  
-  var pitchBase = 18;
-  var tt = "tabText";
-  
-  if(token.bassNote.length>1) {
-     pitchBase = 21.3;
-     tt = "tabText2";
-  }
-  for( var b = 0; b < token.bassNote.length; ++ b ) {
-    if(token.bassNote[b] === "z")
-      child.pitches[b] = { bass:true, type: "rest", c: 'scripts.tabrest', pitch: 0.7 + pitchBase - (b*3)};
-    else
-      child.pitches[b] = { bass:true, type: tt, c: this.getTabSymbol(token.bassNote[b]), pitch: pitchBase -(b*3) - 0.5};
-  }
+ABCXJS.tablature.Parse.prototype.formatChild = function (token) {
+    var child = {
+        el_type: token.el_type
+        , startChar: this.xi
+        , endChar: this.i
+        , pitches: []
+        , duration: token.duration * this.vars.default_length
+        , bellows: token.bellows
+    };
 
-  var qtd = token.buttons.length;
-  
-  for(var i = 0; i < token.buttons.length; i ++ ) {
-    var n = child.pitches.length;
-    if(token.buttons[i] === "z")
-      child.pitches[n] = { type: "rest", c: "scripts.tabrest", pitch: token.bellows === "+"? 13.2 : 13.2-this.offset };
-    else {
-      var offset = (qtd>=3?-(this.offset-(2.8*(qtd-2))):-this.offset);
-      var p = (qtd === 1 ? 11.7 : 13.4 - ( i * 2.8)) + (token.bellows === "+"? 0 : offset);
-      child.pitches[n] = { c: this.getTabSymbol(token.buttons[i]), type: "tabText"+(qtd>1?"2":""), pitch: p };
-    } 
-    
-  }
-  
-  if( token.startTriplet) {
-      child.startTriplet = token.startTriplet;
-  }
-  
-  if( token.endTriplet) {
-      child.endTriplet = token.endTriplet;
-  }
-  
-  return child;
+    var pitchBase = 18;
+    var tt = "tabText";
+
+    if (token.bassNote.length > 1) {
+        pitchBase = 21.3;
+        tt = "tabText2";
+    }
+    for (var b = 0; b < token.bassNote.length; ++b) {
+
+        if (token.buttons[i] === "x") {
+            this.warn("Baixo indisponível no compasso " + this.line.charAt(this.i));
+        }
+
+        if (token.bassNote[b] === "z") {
+            child.pitches[b] = {bass: true, type: "rest", c: 'scripts.tabrest', pitch: 0.7 + pitchBase - (b * 3)};
+        } else {
+            child.pitches[b] = {bass: true, type: tt, c: this.getTabSymbol(token.bassNote[b]), pitch: pitchBase - (b * 3) - 0.5};
+        }
+    }
+
+    var qtd = token.buttons.length;
+
+    for (var i = 0; i < token.buttons.length; i++) {
+        var n = child.pitches.length;
+
+        if (token.buttons[i] === "x") {
+            this.warn("Nota indisponível no compasso " + this.line.charAt(this.i));
+        }
+
+        if (token.buttons[i] === "z")
+            child.pitches[n] = {type: "rest", c: "scripts.tabrest", pitch: token.bellows === "+" ? 13.2 : 13.2 - this.offset};
+        else {
+            var offset = (qtd >= 3 ? -(this.offset - (2.8 * (qtd - 2))) : -this.offset);
+            var p = (qtd === 1 ? 11.7 : 13.4 - (i * 2.8)) + (token.bellows === "+" ? 0 : offset);
+            child.pitches[n] = {c: this.getTabSymbol(token.buttons[i]), type: "tabText" + (qtd > 1 ? "2" : ""), pitch: p};
+        }
+
+    }
+
+    if (token.startTriplet) {
+        child.startTriplet = token.startTriplet;
+    }
+
+    if (token.endTriplet) {
+        child.endTriplet = token.endTriplet;
+    }
+
+
+    return child;
 };
 
 ABCXJS.tablature.Parse.prototype.getTabSymbol = function(text) {

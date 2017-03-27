@@ -129,7 +129,6 @@ window.ABCXJS.parse.Parse = function(transposer_, accordion_) {
             this.textBlock = "";
             this.score_is_present = false;	// Can't have original V: lines when there is the score directive
             this.currentVoice = undefined ; // { index:0, staffNum:0, currBarNumber: 1}; 
-            this.closing = true; // HARDCODED: sempre tenta iniciar a tablatura fechando o fole
 
         }
     };
@@ -1092,9 +1091,6 @@ window.ABCXJS.parse.Parse = function(transposer_, accordion_) {
         
         params.key = window.ABCXJS.parse.parseKeyVoice.deepCopyKey(multilineVars.key);
         
-        if(params.clef && params.clef.type === 'accordionTab' ) {
-            params.restsInTab = multilineVars.restsintab;
-        }
         window.ABCXJS.parse.parseKeyVoice.addPosToKey(params.clef, params.key);
         if (multilineVars.meter !== null) {
             if (multilineVars.currentVoice) {
@@ -1789,7 +1785,6 @@ window.ABCXJS.parse.Parse = function(transposer_, accordion_) {
                         var voice = this.accordion.parseTabVoice(ret.str, this.getMultilineVars(), this.getTune());
                         if (voice.length > 0) {
                             startNewLine();
-                            tune.restsInTab = multilineVars.restsintab || false;
                             for (var i = 0; i < voice.length; i++) {
                                 tune.appendElement(voice[i].el_type, multilineVars.currTexLineNum, startOfLine + voice[i].startChar, startOfLine + voice[i].endChar, voice[i]);
                             }
@@ -1911,25 +1906,9 @@ window.ABCXJS.parse.Parse = function(transposer_, accordion_) {
                         }
                     }
                     if (this.accordion) {
-                        multilineVars.missingButtons = {};
-                        //TODO: criar metodo para reiniciar acordion a cada nova inferencia de tablatura
-                        this.accordion.inferer = null;
-                        for (var t = 0; t < tune.lines.length; t++) {
-                           if (tune.lines[t].staffs ) {
-                              var voice = this.accordion.inferTabVoice(t, tune, multilineVars);
-                              if (voice.length > 0) {
-                                  tune.lines[t].staffs[tune.tabStaffPos].voices[0] = voice;
-                                  tune.restsInTab = multilineVars.restsintab || false;
-                              }
-                           }  
-                        }
-                        if(multilineVars.missingButtons){
-                            for( var m in multilineVars.missingButtons ) {
-                                addWarning('Nota ' + m + ' não disponível nos compassos: ' + multilineVars.missingButtons[m].join(", ") + '.' ) ;
-                            }
-                        }
-                        delete multilineVars.closing;
-                        delete multilineVars.missingButtons;
+                        
+                        //inferir a nova tablatura
+                        this.accordion.inferTablature(tune, multilineVars, addWarning );
                         
                         // obtem possiveis linhas inferidas para tablatura
                         strTune = this.appendString( this.accordion.updateEditor() );
