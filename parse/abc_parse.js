@@ -66,16 +66,16 @@ window.ABCXJS.parse.Parse = function(transposer_, accordion_) {
 //   dsalcoda - barra anterior - em baixo - ao final do compasso volta ao ponto de retorno (se existir) - flag dacoda
 
     var jumpMarkers  = {
-         segno: {nextBar:false, upper:true }
-        ,coda: {nextBar:false, upper:true }
-        ,fine: {nextBar:true, upper:true }
-        ,dacoda: {nextBar:true, upper:true }
-        ,dacapo: {nextBar:true, upper:true }
-        ,dasegno: {nextBar:true, upper:true }
-        ,dcalfine: {nextBar:false, upper:false }
-        ,dcalcoda: {nextBar:false, upper:false }
-        ,dsalfine: {nextBar:false, upper:false }
-        ,dsalcoda: {nextBar:false, upper:false }
+         segno:    {decorationNextBar:false, jumpNextBar: false, upper:true  } // desenhado na barra prévia,  efetivo na barra prévia
+        ,coda:     {decorationNextBar:true,  jumpNextBar: true,  upper:true  } // desenhado na próxima barra, efetivo na próxima barra
+        ,fine:     {decorationNextBar:true,  jumpNextBar: true,  upper:true  } // desenhado na próxima barra, efetivo na próxima barra
+        ,dacoda:   {decorationNextBar:true,  jumpNextBar: true,  upper:true  } // desenhado na próxima barra, efetivo na próxima barra
+        ,dacapo:   {decorationNextBar:true,  jumpNextBar: true,  upper:true  } // desenhado na próxima barra, efetivo na próxima barra
+        ,dasegno:  {decorationNextBar:true,  jumpNextBar: true,  upper:true  } // desenhado na próxima barra, efetivo na próxima barra
+        ,dcalfine: {decorationNextBar:false, jumpNextBar: true,  upper:false } // desenhado após a barra, efetivo na próxima barra.
+        ,dcalcoda: {decorationNextBar:false, jumpNextBar: true,  upper:false } // desenhado após a barra, efetivo na próxima barra.
+        ,dsalfine: {decorationNextBar:false, jumpNextBar: true,  upper:false } // desenhado após a barra, efetivo na próxima barra.
+        ,dsalcoda: {decorationNextBar:false, jumpNextBar: true,  upper:false } // desenhado após a barra, efetivo na próxima barra.
     };
     
 
@@ -129,6 +129,7 @@ window.ABCXJS.parse.Parse = function(transposer_, accordion_) {
             this.textBlock = "";
             this.score_is_present = false;	// Can't have original V: lines when there is the score directive
             this.currentVoice = undefined ; // { index:0, staffNum:0, currBarNumber: 1}; 
+            this.closing = true; // HARDCODED: sempre tenta iniciar a tablatura fechando o fole
 
         }
     };
@@ -169,9 +170,17 @@ window.ABCXJS.parse.Parse = function(transposer_, accordion_) {
             case 'bar':
                 multilineVars.measureNotEmpty = false;
                 
-                if(multilineVars.addToNextBar) {
-                    elem.jumpInfo = ABCXJS.parse.clone( multilineVars.addToNextBar );
-                    delete multilineVars.addToNextBar;
+                if(multilineVars.addJumpPointNextBar) {
+                    elem.jumpPoint = ABCXJS.parse.clone( multilineVars.addJumpPointNextBar );
+                    delete multilineVars.addJumpPointNextBar;
+                }
+                if(multilineVars.addJumpInfoNextBar) {
+                    elem.jumpInfo = ABCXJS.parse.clone( multilineVars.addJumpInfoNextBar );
+                    delete multilineVars.addJumpInfoNextBar;
+                }
+                if(multilineVars.addJumpDecorationNextBar) {
+                    elem.jumpDecoration = ABCXJS.parse.clone( multilineVars.addJumpDecorationNextBar );
+                    delete multilineVars.addJumpDecorationNextBar;
                 }
                 
                 //restart bar accidentals
@@ -1259,6 +1268,58 @@ window.ABCXJS.parse.Parse = function(transposer_, accordion_) {
     // back-tick, space, tab: space
     var nonDecorations = "ABCDEFGabcdefgxyzZ[]|^_{";	// use this to prescreen so we don't have to look for a decoration at every note.
 
+    this.handleJump = function (name, jump, line, i) {
+        if( jump.decorationNextBar ) {
+            if( multilineVars.addJumpDecorationNextBar ) {
+                warn("Overriding previous jump decoration", line, i);
+            }
+            multilineVars.addJumpDecorationNextBar = { type: name, upper: jump.upper };
+        } else {
+            if( multilineVars.lastBarElem ) {
+                if( multilineVars.lastBarElem.jumpDecoration ) {
+                    warn("Overriding previous jump decoration", line, i);
+                }
+                multilineVars.lastBarElem.jumpDecoration = { type: name, upper: jump.upper };
+            } else {
+                warn("Ignoring jump decoration marker before the first bar.", line, i);
+            }
+        }
+        
+        if( ('.segno.coda.fine.').indexOf(name) > 0 ) {
+            if( jump.jumpNextBar ) {
+                if( multilineVars.addJumpPointNextBar ) {
+                    warn("Overriding previous jump point", line, i);
+                }
+                multilineVars.addJumpPointNextBar = { type: name };
+            } else {
+                if( multilineVars.lastBarElem ) {
+                    if( multilineVars.lastBarElem.jumpPoint ) {
+                        warn("Overriding previous jump point", line, i);
+                    }
+                    multilineVars.lastBarElem.jumpPoint = { type: name };
+                } else {
+                    warn("Ignoring jump point marker before the first bar.", line, i);
+                }
+            }
+        } else {
+            if( jump.jumpNextBar ) {
+                if( multilineVars.addJumpInfoNextBar ) {
+                    warn("Overriding previous jump information", line, i);
+                }
+                multilineVars.addJumpInfoNextBar = { type: name };
+            } else {
+                if( multilineVars.lastBarElem ) {
+                    if( multilineVars.lastBarElem.jumpInfo ) {
+                        warn("Overriding previous jump information", line, i);
+                    }
+                    multilineVars.lastBarElem.jumpInfo = { type: name };
+                } else {
+                    warn("Ignoring jump info marker before the first bar.", line, i);
+                }
+            }
+        }
+    };
+    
     this.parseRegularMusicLine = function(line) {
         
         if( ! multilineVars.voices[0] ) {
@@ -1395,22 +1456,7 @@ window.ABCXJS.parse.Parse = function(transposer_, accordion_) {
                             } else if (ret[1].length > 0) {
                                 var jump = jumpMarkers[ ret[1] ];
                                 if( jump ) {
-                                    if( jump.nextBar ) {
-                                        if( multilineVars.addToNextBar ) {
-                                            warn("Overriding previous jump information", line, i);
-                                        }
-                                        multilineVars.addToNextBar = { type: ret[1], upper:jump.upper, ordinal: ret[3] };
-                                    } else {
-                                        if( multilineVars.lastBarElem ) {
-                                            if( multilineVars.lastBarElem .jumpInfo ) {
-                                                warn("Overriding previous jump information", line, i);
-                                            }
-                                            multilineVars.lastBarElem.jumpInfo = { type: ret[1], upper:jump.upper, ordinal: ret[3] };
-                                        } else {
-                                            warn("Ignoring jump marker before the first bar.", line, i);
-                                        }
-                                    }
-                                    
+                                    this.handleJump(ret[1], jump, line, i ); 
                                 } else {
                                     if (el.decoration === undefined)
                                         el.decoration = [];
@@ -1865,8 +1911,9 @@ window.ABCXJS.parse.Parse = function(transposer_, accordion_) {
                         }
                     }
                     if (this.accordion) {
-                        multilineVars.closing = true;
                         multilineVars.missingButtons = {};
+                        //TODO: criar metodo para reiniciar acordion a cada nova inferencia de tablatura
+                        this.accordion.inferer = null;
                         for (var t = 0; t < tune.lines.length; t++) {
                            if (tune.lines[t].staffs ) {
                               var voice = this.accordion.inferTabVoice(t, tune, multilineVars);
@@ -1897,7 +1944,7 @@ window.ABCXJS.parse.Parse = function(transposer_, accordion_) {
             
             tune.handleBarsPerStaff();
             
-            tune.checkJumpInfo(addWarning);
+            tune.checkJumpMarkers(addWarning);
 
             tune.cleanUp();
             

@@ -177,8 +177,10 @@ ABCXJS.tablature.Accordion.prototype.getNoteName = function( item, keyAcc, barAc
 
 //TODO: resolver isso para que não tenha que instanciar uma vez para cada linha de texto
 ABCXJS.tablature.Accordion.prototype.inferTabVoice = function( line, tune, vars ) {
-    var i = new ABCXJS.tablature.Infer( this, tune, vars );
-    return i.inferTabVoice( line );
+    if( ! this.inferer ) {
+        this.inferer = new ABCXJS.tablature.Infer( this, tune, vars );
+    }    
+    return this.inferer.inferTabVoice( line );
 };
 
 ABCXJS.tablature.Accordion.prototype.parseTabVoice = function(str, vars ) {

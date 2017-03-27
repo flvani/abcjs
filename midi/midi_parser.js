@@ -396,7 +396,7 @@ ABCXJS.midi.Parse.prototype.selectButtons = function(elem) {
             if (elem.pitches[i].bass) {
                 if (elem.pitches[i].c === 'scripts.rarrow') {
                     button = this.lastTabElem[i];
-                    elem.pitches[i].lastButton = button.tabButton;
+                    elem.pitches[i].lastButton = (button? button.tabButton: null);
                     tie = true;
                 } else {
                     button = this.getBassButton(elem.bellows, elem.pitches[i].c);
@@ -405,7 +405,7 @@ ABCXJS.midi.Parse.prototype.selectButtons = function(elem) {
             } else {
                 if ( elem.pitches[i].c === 'scripts.rarrow') {
                     button = this.lastTabElem[10+i-bassCounter];
-                    elem.pitches[i].lastButton = button.tabButton;
+                    elem.pitches[i].lastButton = (button? button.tabButton: null);
                     tie = true;
                 } else {
                     button = this.getButton(elem.pitches[i].c);
@@ -450,6 +450,7 @@ ABCXJS.midi.Parse.prototype.handleBar = function (elem) {
         } else {
             this.codaPoint = this.getMark(); 
             this.lookingForCoda = false;
+            this.skipping = false;
         }
     }
     
@@ -509,8 +510,9 @@ ABCXJS.midi.Parse.prototype.handleBar = function (elem) {
     
     this.skipping = (this.currEnding && ( pass < this.currEnding.min || pass > this.currEnding.max) ) || false;
 
-    if(elem.jumpInfo ) {
-        switch (elem.jumpInfo.type) {
+    if(elem.jumpPoint ) {
+        
+        switch (elem.jumpPoint.type) {
             case "coda":     
                 this.codaPoint = this.getMark(); 
                 break;
@@ -518,8 +520,16 @@ ABCXJS.midi.Parse.prototype.handleBar = function (elem) {
                 this.segnoPoint = this.getMark(); 
                 break;
             case "fine":     
-                if(this.fineFlagged) this.endTrack = true; 
+                if(this.fineFlagged) {
+                    this.endTrack = true;
+                    return true;
+                } 
                 break;
+        }
+    }
+    
+    if(elem.jumpInfo ) {
+        switch (elem.jumpInfo.type) {
             case "dacapo":   
                 if(!this.daCapoFlagged) {
                     this.next = this.capo;
@@ -540,7 +550,7 @@ ABCXJS.midi.Parse.prototype.handleBar = function (elem) {
                 break;
             case "dcalfine": 
                 if(!this.daCapoFlagged) {
-                    this.nextBarJump = this.capo;
+                    this.next = this.capo;
                     this.daCapoFlagged = true;
                     this.fineFlagged = true;
                     this.resetPass();
@@ -549,7 +559,7 @@ ABCXJS.midi.Parse.prototype.handleBar = function (elem) {
             case "dsalfine": 
                 if( this.segnoPoint ){
                     if(!this.daSegnoFlagged){
-                        this.nextBarJump = this.segnoPoint;
+                        this.next = this.segnoPoint;
                         this.fineFlagged = true;
                         this.daSegnoFlagged = true;
                         this.resetPass();
@@ -573,7 +583,7 @@ ABCXJS.midi.Parse.prototype.handleBar = function (elem) {
             case "dsalcoda": 
                 if( this.segnoPoint ){
                     if(!this.daSegnoFlagged){
-                        this.nextBarJump = this.segnoPoint;
+                        this.next = this.segnoPoint;
                         this.daSegnoFlagged = true;
                         this.daCodaFlagged = true;
                         this.resetPass();
@@ -585,7 +595,7 @@ ABCXJS.midi.Parse.prototype.handleBar = function (elem) {
                 break;
             case "dcalcoda": 
                 if(!this.daCapoFlagged) {
-                    this.nextBarJump = this.capo;
+                    this.next = this.capo;
                     this.daCapoFlagged = true;
                     this.daCodaFlagged = true;
                     this.resetPass();

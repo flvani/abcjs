@@ -37,8 +37,8 @@ ABCXJS.tablature.Layout.prototype.isLastVoice = function() {
     return this.currVoice.lastVoice || false;
 };
 
-ABCXJS.tablature.Layout.prototype.printTABVoice = function(layoutJumpInfo) {
-    this.layoutJumpInfo = layoutJumpInfo;
+ABCXJS.tablature.Layout.prototype.printTABVoice = function(layoutJumpDecoration) {
+    this.layoutJumpDecoration = layoutJumpDecoration;
     this.currVoice = this.abcstaff.voices[this.tuneCurrVoice];
     this.voice = new ABCXJS.write.VoiceElement(this.tuneCurrVoice, this.tuneCurrStaff, this.abcstaff);
 
@@ -200,10 +200,10 @@ ABCXJS.tablature.Layout.prototype.printBarLine = function (elem) {
         // não há decorations na tablatura
         //this.printDecoration(elem.decoration, 12, (thick)?3:1, abselem, 0, "down", 2);
     }
-    if (elem.jumpInfo) {
-        if ((elem.jumpInfo.upper && this.isFirstVoice()) || (!elem.jumpInfo.upper && this.isLastVoice())) {
-            var pitch = elem.jumpInfo.upper ? 12 : -4;
-            abselem.addRight( this.layoutJumpInfo(elem, pitch) );
+    if (elem.jumpDecoration) {
+        if ((elem.jumpDecoration.upper && this.isFirstVoice()) || (!elem.jumpDecoration.upper && this.isLastVoice())) {
+            var pitch = elem.jumpDecoration.upper ? 12 : -4;
+            abselem.addRight( this.layoutJumpDecoration(elem, pitch) );
         }
     }
 

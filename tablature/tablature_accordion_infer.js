@@ -28,6 +28,11 @@ ABCXJS.tablature.Infer = function( accordion, tune, vars ) {
     this.accordion = accordion;
     this.vars = vars || {} ;
 
+    // esta variavel conta o tempo ante de propor a inversão do fole 
+    // em geral o count=1 equivale ao tempo de um compasso.
+    // não esta no reset para que entre as linhas o contador seja mantido
+    this.count = 0; 
+    
     this.tune = tune;
     this.offset = 8.9;
     this.reset();
@@ -40,13 +45,13 @@ ABCXJS.tablature.Infer = function( accordion, tune, vars ) {
     };
     
     this.barTypes = { 
-        "bar"                    : "|"
-      , "bar_thin"            : "|"
+        "bar"              :  "|"
+      , "bar_thin"         :  "|"
       , "bar_thin_thin"    : "||"
       , "bar_thick_thin"   : "[|"
       , "bar_thin_thick"   : "|]"
       , "bar_dbl_repeat"   : ":|:"
-      , "bar_left_repeat"   : "|:"
+      , "bar_left_repeat"  :  "|:"
       , "bar_right_repeat" : ":|"
     };
     
@@ -58,7 +63,6 @@ ABCXJS.tablature.Infer.prototype.reset = function() {
     this.bassBarAcc = [];
     this.trebBarAcc = [];
     this.producedLine = "";
-    this.count = 0;
     this.lastButton = -1;
     this.currInterval = 1;
     this.alertedMissSync = false;
@@ -74,6 +78,8 @@ ABCXJS.tablature.Infer.prototype.reset = function() {
     } else {
       this.limit = 1; 
     }
+    // flavio teste
+    this.limit = this.limit*2; // para mudar a cada 2 compassos
 };
 
 ABCXJS.tablature.Infer.prototype.inferTabVoice = function(line) {

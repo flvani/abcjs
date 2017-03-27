@@ -136,7 +136,7 @@ ABCXJS.write.Layout.prototype.layoutABCLine = function( abctune, line, width ) {
                 this.printABCVoice();
             } else {
                 var p = new ABCXJS.tablature.Layout(this.tuneCurrVoice, this.tuneCurrStaff, abcstaff, this.glyphs, this.tune.restsInTab );
-                this.voice = p.printTABVoice(this.layoutJumpInfo);
+                this.voice = p.printTABVoice(this.layoutJumpDecoration);
             }
             
             if (abcstaff.title && abcstaff.title[this.tuneCurrVoice])
@@ -150,8 +150,8 @@ ABCXJS.write.Layout.prototype.layoutABCLine = function( abctune, line, width ) {
     return this.staffgroup;
 };
 
-ABCXJS.write.Layout.prototype.layoutJumpInfo = function(elem, pitch) {
-    switch (elem.jumpInfo.type) {
+ABCXJS.write.Layout.prototype.layoutJumpDecoration = function(elem, pitch) {
+    switch (elem.jumpDecoration.type) {
         case "coda":     return new ABCXJS.write.RelativeElement("scripts.coda", 0, 0, pitch + 1); 
         case "segno":    return new ABCXJS.write.RelativeElement("scripts.segno", 0, 0, pitch + 1); 
         case "fine":     return new ABCXJS.write.RelativeElement("it.Fine", -32, 32, pitch);
@@ -989,15 +989,15 @@ ABCXJS.write.Layout.prototype.printBarLine = function (elem) {
         dx += 5;
     }
 
-    if (elem.jumpInfo) {
-        if(( elem.jumpInfo.upper && this.isFirstVoice() ) || ( !elem.jumpInfo.upper && this.isLastVoice() ) ) {
-            var pitch = elem.jumpInfo.upper ? 12 : -3;
-            abselem.addRight( this.layoutJumpInfo(elem, pitch) );
+    if (elem.jumpDecoration) {
+        if(( elem.jumpDecoration.upper && this.isFirstVoice() ) || ( !elem.jumpDecoration.upper && this.isLastVoice() ) ) {
+            var pitch = elem.jumpDecoration.upper ? 12 : -3;
+            abselem.addRight( this.layoutJumpDecoration(elem, pitch) );
         }
     }
     
     if (elem.barNumber && elem.barNumberVisible) {
-        if (!(elem.jumpInfo && elem.jumpInfo.upper)) {
+        if (!(elem.jumpDecoration && elem.jumpDecoration.upper)) {
             // nestes casos o barnumber pode ser escrito sem sobreposição
             abselem.addChild(new ABCXJS.write.RelativeElement(elem.barNumber, 0, 0, 12, {type: "barnumber"}));
         }

@@ -130,7 +130,13 @@ window.ABCXJS.data.Tune = function() {
     this.handleBarsPerStaff = function() {
         function splitBar(left, right) {
             
-            if(  left.jumpInfo &&  (".fine.dacapo.dacoda.dasegno.").indexOf('.'+left.jumpInfo.type+'.') < 0  ) {
+            
+            if(  left.jumpDecoration &&  (".coda.fine.dacapo.dacoda.dasegno.").indexOf('.'+left.jumpDecoration.type+'.') < 0  ) {
+                delete left.jumpDecoration;
+            }
+            // todos os jumpInfo ficam a esquerda do split
+            // exceto segno todos os jumpPoint ficam a esquerda do split
+            if(  left.jumpPoint && left.jumpPoint.type === 'segno'  ) {
                 delete left.jumpInfo;
             }
             
@@ -147,7 +153,15 @@ window.ABCXJS.data.Tune = function() {
                   left.type = 'bar_thin'; 
             }
             
-            if(  right.jumpInfo &&  (".fine.dacapo.dacoda.dasegno.").indexOf('.'+right.jumpInfo.type+'.') >= 0  ) {
+            if(  right.jumpDecoration &&  (".coda.fine.dacapo.dacoda.dasegno.").indexOf('.'+right.jumpDecoration.type+'.') >= 0  ) {
+                delete right.jumpDecoration;
+            }
+            // todos os jumpInfo ficam a esquerda do split
+            if(  right.jumpInfo ) {
+                delete right.jumpInfo;
+            }
+            // exceto segno todos os jumpPoint ficam a esquerda do split
+            if(  right.jumpPoint &&  right.jumpPoint.type !== 'segno'  ) {
                 delete right.jumpInfo;
             }
             
@@ -167,6 +181,21 @@ window.ABCXJS.data.Tune = function() {
         function joinBar(left, right) {
             if(right === undefined ) {
                 return;
+            }
+            
+            // flavio - não verificado
+            if(right.jumpPoint) {
+                left.jumpPoint = right.jumpPoint;
+            }
+            
+            // flavio - não verificado
+            if(right.jumpInfo) {
+                left.jumpInfo = right.jumpInfo;
+            }
+            
+            // flavio - não verificado
+            if(right.jumpDecoration) {
+                left.jumpDecoration = right.jumpDecoration;
             }
 
             if(right.startEnding){
@@ -251,7 +280,7 @@ window.ABCXJS.data.Tune = function() {
         }
     };
     
-    this.checkJumpInfo = function (addWarning) {
+    this.checkJumpMarkers = function (addWarning) {
         // esta rotina:
         //   cria uma estrutura de auxilio para midi parser
         //   ajuda no layout dos jump markers que devem impressos na última pauta de cada staff
@@ -331,7 +360,9 @@ window.ABCXJS.data.Tune = function() {
                             }
                             
                             // todas as vozes terão a mesma informação de jump
+                            bari.jumpPoint = bar.jumpPoint;
                             bari.jumpInfo = bar.jumpInfo;
+                            bari.jumpDecoration = bar.jumpDecoration;
                         }
                     }
                 }
