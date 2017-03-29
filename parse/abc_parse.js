@@ -1896,7 +1896,7 @@ window.ABCXJS.parse.Parse = function(transposer_, accordion_) {
                 if (tune.lines[0].staffs[tune.tabStaffPos].voices[0].length === 0) {
                     // para a tablatura de accordion, sempre se esperam 3 vozes (staffs): uma para melodia, uma para o baixo e a terceira para a tablatura
                     // opcionalmente, a linha de baixo, não precisa existir
-                    (tune.tabStaffPos === 0) && addWarning("+Warn: Accordion Tablature should not be the first staff!");
+                    (tune.tabStaffPos === 0) && addWarning("AccordionTab não deve ser a primeira voz!");
                     for (var t = 1; t < tune.lines.length; t++) {
                         //se for necessário inferir a tablatura, garante que todas as linhas tenham uma staff apropriada
                         if (tune.lines[t].staffs && !tune.lines[t].staffs[tune.tabStaffPos]) {
@@ -1914,8 +1914,19 @@ window.ABCXJS.parse.Parse = function(transposer_, accordion_) {
                         strTune = this.appendString( this.accordion.updateEditor() );
                         
                     } else {
-                        addWarning("+Warn: Cannot infer tablature line: no accordion defined!");
+                        addWarning("Impossível inferir a tablatura: acordeon não definido!");
                     }
+                } else {
+                    // como parse da tablatura foi feito, incluir possiveis warnings
+                    if(multilineVars.missingNotes) {
+                        addWarning("Notas não encontradas no(s) compasso(s): "+ multilineVars.missingNotes.substring(1,multilineVars.missingNotes.length-1) +".");
+                        delete multilineVars.missingNotes;
+                    } 
+                    if(multilineVars.InvalidBass) {
+                        addWarning("Baixo incompatível com movimento do fole no(s) compasso(s): "+ multilineVars.InvalidBass.substring(1,multilineVars.InvalidBass.length-1) +".");
+                        delete multilineVars.InvalidBass;
+                    } 
+                    
                 }
             }
             

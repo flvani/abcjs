@@ -400,13 +400,13 @@ ABCXJS.tablature.Infer.prototype.addTABChild = function(token, line ) {
                 var item = { bass:true, type: tt, c: "", pitch: pitchBase - (b * 3) - 0.5, inTie: token.bassNote[b].inTie || false };
                 var note = this.accordion.getNoteName(token.bassNote[b], this.accBassKey, this.bassBarAcc, true);
                 item.buttons = this.accordion.getKeyboard().getButtons(note);
+                baixoOpen  = baixoOpen  ? typeof (item.buttons.open) !== "undefined" : false;
+                baixoClose = baixoClose ? typeof (item.buttons.close) !== "undefined" : false;
                 item.note = note.key;
-                item.c = item.inTie ? 'scripts.rarrow' :  note.key;
+                item.c = item.inTie ? 'scripts.rarrow' :  (!(baixoClose || baixoOpen)? 'x': note.key);
                 child.pitches[b] = item;
                 this.registerLine(child.pitches[b].c === 'scripts.rarrow' ? '>' : child.pitches[b].c);
                 
-                baixoOpen  = baixoOpen  ? typeof (child.pitches[b].buttons.open) !== "undefined" : false;
-                baixoClose = baixoClose ? typeof (child.pitches[b].buttons.close) !== "undefined" : false;
         }
     }
 
@@ -449,9 +449,15 @@ ABCXJS.tablature.Infer.prototype.addTABChild = function(token, line ) {
     if( inTie ) {
         // inversão impossível
         this.count += child.duration;
-        if (((this.closing && !baixoClose)  || (!this.closing && !baixoOpen)) &&  this.alertedIncompatibleBass < this.currInterval ) {
-                this.addWarning('Baixo incompatível com movimento fole no compasso ' + this.currInterval + '.' ) ;
-                this.alertedIncompatibleBass = this.currInterval;
+        if ( ((this.closing && !baixoClose)  || (!this.closing && !baixoOpen)) &&  this.alertedIncompatibleBass < this.currInterval ) {
+                if( (baixoClose || baixoOpen) ) { 
+                    this.addWarning('Baixo incompatível com movimento fole no compasso ' + this.currInterval + '.' ) ;
+                    this.alertedIncompatibleBass = this.currInterval;
+                }    
+//                if(item.c === 'x') {
+//                    this.addWarning('Baixo não encontrado no compasso ' + this.currInterval + '.' ) ;
+//                } else {
+//                }    
         }
     } else {
         // verifica tudo: baixo e melodia
@@ -519,6 +525,10 @@ ABCXJS.tablature.Infer.prototype.addTABChild = function(token, line ) {
                             this.registerMissingButton(item);
                        }
                     }
+            }
+        } else {
+            if( item.c === 'x') {
+                this.registerMissingButton(item);
             }
         }
     }

@@ -192,7 +192,7 @@ ABCXJS.tablature.Accordion.prototype.inferTablature = function(tune, vars, addWa
     
     if(vars.missingButtons){
         for( var m in vars.missingButtons ) {
-            addWarning('Nota ' + m + ' não disponível nos compassos: ' + vars.missingButtons[m].join(", ") + '.' ) ;
+            addWarning('Nota "' + m + '" não disponível no(s) compasso(s): ' + vars.missingButtons[m].join(", ") + '.' ) ;
         }
     }
     

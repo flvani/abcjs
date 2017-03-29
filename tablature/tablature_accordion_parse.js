@@ -131,10 +131,13 @@ ABCXJS.tablature.Parse.prototype.formatChild = function (token) {
         pitchBase = 21.3;
         tt = "tabText2";
     }
+    
+    
     for (var b = 0; b < token.bassNote.length; ++b) {
 
         if (token.buttons[i] === "x") {
-            this.warn("Baixo indisponível no compasso " + this.line.charAt(this.i));
+            this.registerMissingNote( this.vars.lastBarElem.barNumber );
+            //this.addWarning("Baixo indisponível no compasso " + this.vars.lastBarElem.barNumber  + "." );
         }
 
         if (token.bassNote[b] === "z") {
@@ -150,7 +153,8 @@ ABCXJS.tablature.Parse.prototype.formatChild = function (token) {
         var n = child.pitches.length;
 
         if (token.buttons[i] === "x") {
-            this.warn("Nota indisponível no compasso " + this.line.charAt(this.i));
+            this.registerMissingNote( this.vars.lastBarElem.barNumber );
+            //this.addWarning("Nota indisponível no compasso "  + this.vars.lastBarElem.barNumber  + ".");
         }
 
         if (token.buttons[i] === "z")
@@ -412,4 +416,20 @@ ABCXJS.tablature.Parse.prototype.getButton = function() {
         row = this.line.substr(p, this.i - p);
         
     return c + row;
+};
+
+ABCXJS.tablature.Parse.prototype.registerMissingNote = function(barNumber) {
+    if( ! this.vars.missingNotes )  this.vars.missingNotes = ',';
+    
+    if( this.vars.missingNotes.indexOf( ''+barNumber ) < 0 ) {
+        this.vars.missingNotes += barNumber + ',';
+    }
+};
+
+ABCXJS.tablature.Parse.prototype.registerInvalidBass = function(barNumber) {
+    if( ! this.vars.InvalidBass )  this.vars.InvalidBass = ',';
+    
+    if( this.vars.InvalidBass.indexOf( ''+barNumber ) < 0 ) {
+        this.vars.InvalidBass += barNumber + ',';
+    }
 };

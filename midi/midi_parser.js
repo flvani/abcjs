@@ -317,6 +317,8 @@ ABCXJS.midi.Parse.prototype.handleTie = function ( elem, note, midipitch, mididu
             this.addStart( this.timecount, null, elem, null );
             this.addEnd( this.timecount+mididuration, null, elem );
             
+            if(!startInterval ) return;
+            
             // para todos os elementos intermediários, adiciona o fim sem som
             for(var i=0; i < startInterval.otrElems.length; i++ ) {
                 this.addEnd( this.timecount+mididuration, null, startInterval.otrElems[i] );
@@ -790,7 +792,7 @@ ABCXJS.midi.Parse.prototype.extractOctave = function(pitch) {
 };
 
 ABCXJS.midi.Parse.prototype.getBassButton = function( bellows, b ) {
-    if( b === 'scripts.rarrow' || !this.midiTune.keyboard ) return null;
+    if( b === 'x' ||  !this.midiTune.keyboard ) return null;
     var kb = this.midiTune.keyboard;
     var nota = kb.parseNote(b, true );
     for( var j = kb.keyMap.length; j > kb.keyMap.length - 2; j-- ) {
