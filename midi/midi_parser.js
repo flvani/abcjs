@@ -317,7 +317,10 @@ ABCXJS.midi.Parse.prototype.handleTie = function ( elem, note, midipitch, mididu
             this.addStart( this.timecount, null, elem, null );
             this.addEnd( this.timecount+mididuration, null, elem );
             
-            if(!startInterval ) return;
+            if(!startInterval ) {
+                alert( 'corrigir bug no parse que considerou ligadas notas de alturas diferentes' )
+                return;
+            }
             
             // para todos os elementos intermediários, adiciona o fim sem som
             for(var i=0; i < startInterval.otrElems.length; i++ ) {

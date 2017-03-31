@@ -202,7 +202,7 @@ ABCXJS.tablature.Accordion.prototype.inferTablature = function(tune, vars, addWa
 };
 
 ABCXJS.tablature.Accordion.prototype.parseTabVoice = function(str, vars ) {
-    var p = new ABCXJS.tablature.Parse(str, vars);
+    var p = new ABCXJS.tablature.Parse( this,  str, vars);
     return p.parseTabVoice();
 };
 

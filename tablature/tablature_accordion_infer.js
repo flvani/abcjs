@@ -403,7 +403,7 @@ ABCXJS.tablature.Infer.prototype.addTABChild = function(token, line ) {
                 baixoOpen  = baixoOpen  ? typeof (item.buttons.open) !== "undefined" : false;
                 baixoClose = baixoClose ? typeof (item.buttons.close) !== "undefined" : false;
                 item.note = note.key;
-                item.c = item.inTie ? 'scripts.rarrow' :  (!(baixoClose || baixoOpen)? 'x': note.key);
+                item.c =  (item.buttons.close || item.buttons.open) ? ( item.inTie ?  'scripts.rarrow': item.note ) :  'x';
                 child.pitches[b] = item;
                 this.registerLine(child.pitches[b].c === 'scripts.rarrow' ? '>' : child.pitches[b].c);
                 
@@ -435,7 +435,7 @@ ABCXJS.tablature.Infer.prototype.addTABChild = function(token, line ) {
                 
                 item.buttons = this.accordion.getKeyboard().getButtons(note);
                 item.note = note.key + note.octave;
-                item.c = item.inTie ? 'scripts.rarrow' :  item.note;
+                item.c =  (item.buttons.close || item.buttons.open) ? ( item.inTie ?  'scripts.rarrow': item.note ) :  'x';
                 item.pitch = (qtd === 1 ? 11.7 : 13.4 -( c * 2.8));
                 item.type = "tabText" + (qtd > 1 ? 2 : "");
 
@@ -454,10 +454,6 @@ ABCXJS.tablature.Infer.prototype.addTABChild = function(token, line ) {
                     this.addWarning('Baixo incompatível com movimento fole no compasso ' + this.currInterval + '.' ) ;
                     this.alertedIncompatibleBass = this.currInterval;
                 }    
-//                if(item.c === 'x') {
-//                    this.addWarning('Baixo não encontrado no compasso ' + this.currInterval + '.' ) ;
-//                } else {
-//                }    
         }
     } else {
         // verifica tudo: baixo e melodia
@@ -516,8 +512,9 @@ ABCXJS.tablature.Infer.prototype.addTABChild = function(token, line ) {
                     this.registerLine('z');
                     break;
                 default:
+                    // esse código pode ser melhorado. Nota não encontrada já foi definida previmente 
                     if ( item.inTie  ) {
-                        this.registerLine('>');
+                        this.registerLine((item.buttons.close || item.buttons.open)? '>': 'x' );
                     } else {
                         item.c = this.elegeBotao(this.closing ? item.buttons.close : item.buttons.open);
                         this.registerLine(this.button2Hex(item.c));

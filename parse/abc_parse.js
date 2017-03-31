@@ -1918,13 +1918,13 @@ window.ABCXJS.parse.Parse = function(transposer_, accordion_) {
                     }
                 } else {
                     // como parse da tablatura foi feito, incluir possiveis warnings
-                    if(multilineVars.missingNotes) {
-                        addWarning("Notas não encontradas no(s) compasso(s): "+ multilineVars.missingNotes.substring(1,multilineVars.missingNotes.length-1) +".");
-                        delete multilineVars.missingNotes;
-                    } 
                     if(multilineVars.InvalidBass) {
                         addWarning("Baixo incompatível com movimento do fole no(s) compasso(s): "+ multilineVars.InvalidBass.substring(1,multilineVars.InvalidBass.length-1) +".");
                         delete multilineVars.InvalidBass;
+                    } 
+                    if(multilineVars.missingNotes) {
+                        addWarning("Notas não encontradas no(s) compasso(s): "+ multilineVars.missingNotes.substring(1,multilineVars.missingNotes.length-1) +".");
+                        delete multilineVars.missingNotes;
                     } 
                     
                 }

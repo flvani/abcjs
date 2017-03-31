@@ -45,7 +45,8 @@ if (!window.ABCXJS)
 if (!window.ABCXJS.tablature)
 	window.ABCXJS.tablature = {};
 
-ABCXJS.tablature.Parse = function( str, vars ) {
+ABCXJS.tablature.Parse = function( accordion, str, vars ) {
+    this.accordion = accordion;
     this.invalid = false;
     this.finished = false;
     this.line = str;
@@ -104,6 +105,10 @@ ABCXJS.tablature.Parse.prototype.parseTabVoice = function ( ) {
                     voice[voice.length] = this.formatChild(token);
                 if(this.vars.lastBarElem && this.vars.lastBarElem.barNumber === undefined)
                     this.vars.lastBarElem.barNumber = this.vars.currentVoice.currBarNumber ++;
+                // verificar todos os baixos
+                if( token.bassNote[0] !== '>' &&  token.bassNote[0] !== 'x' && ! this.checkBassButton(token.bellows, token.bassNote[0]) ) {
+                    this.registerInvalidBass( this.vars.lastBarElem.barNumber );
+                }
                 break;
             case "comment":
             case "unrecognized":
@@ -287,6 +292,7 @@ ABCXJS.tablature.Parse.prototype.getColumn = function() {
     token.bellows = this.getBelows();
     token.buttons = this.getNote();
     token.duration = this.getDuration();
+
     
     if( this.isTripletEnd() ) {
         token.endTriplet = true;
@@ -296,6 +302,24 @@ ABCXJS.tablature.Parse.prototype.getColumn = function() {
     return token;
 
 };
+
+ABCXJS.tablature.Parse.prototype.checkBassButton = function( bellows, b ) {
+    var kb = this.accordion.getKeyboard();
+    if( b === 'x' ||  !kb ) return null;
+    var nota = kb.parseNote(b, true );
+    for( var j = kb.keyMap.length; j > kb.keyMap.length - 2; j-- ) {
+      for( var i = 0; i < kb.keyMap[j-1].length; i++ ) {
+          var tecla = kb.keyMap[j-1][i];
+          if(bellows === '+') {
+            if(tecla.closeNote.key === nota.key ) return tecla;
+          } else {  
+            if(tecla.openNote.key === nota.key ) return tecla;
+          }
+      }   
+    }
+    return null;
+};
+
 
 ABCXJS.tablature.Parse.prototype.getTripletDef = function() {
     this.i++;
