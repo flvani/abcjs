@@ -318,8 +318,8 @@ ABCXJS.midi.Parse.prototype.handleTie = function ( elem, note, midipitch, mididu
             this.addEnd( this.timecount+mididuration, null, elem );
             
             if(!startInterval ) {
-                alert( 'corrigir bug no parse que considerou ligadas notas de alturas diferentes' )
-                return;
+               this.addWarning( 'Verifique as ligaduras: possivel ligacao de notas com alturas diferentes');
+               return;
             }
             
             // para todos os elementos intermediários, adiciona o fim sem som
@@ -792,6 +792,39 @@ ABCXJS.midi.Parse.prototype.extractNote = function(pitch) {
 
 ABCXJS.midi.Parse.prototype.extractOctave = function(pitch) {
     return Math.floor(pitch / 7);
+};
+
+ABCXJS.midi.Parse.prototype.setSelection = function(tabElem) {
+    
+    if(! tabElem.bellows) return;
+    
+    for( var p=0; p < tabElem.pitches.length; p ++ ) {
+        
+        var pitch = tabElem.pitches[p];
+        
+        if( pitch.type === 'rest' ) continue;
+        
+        var button;
+        var tabButton = pitch.c === 'scripts.rarrow'? pitch.lastButton : pitch.c;
+        
+        
+        //quando o baixo não está "in Tie", label do botão é uma letra (G, g, etc)
+        //de outra forma o label é número do botão (1, 1', 1'', etc)
+        if(pitch.bass && pitch.c !== 'scripts.rarrow')
+            // quando label é uma letra
+            button = this.getBassButton(tabElem.bellows, tabButton);
+        else
+            // quando label é número do botão
+            button = this.getButton(tabButton);
+        
+        if(button) {
+            if(tabElem.bellows === '-') {
+                button.setOpen();
+            } else {
+                button.setClose();
+            }
+        }
+    }
 };
 
 ABCXJS.midi.Parse.prototype.getBassButton = function( bellows, b ) {

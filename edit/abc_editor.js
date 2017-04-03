@@ -653,47 +653,15 @@ ABCXJS.Editor.prototype.highlight = function(abcelem) {
         this.editarea.setSelection(abcelem.startChar, abcelem.endChar, abcelem.line);
         if(this.accordion.render_keyboard_opts.show && !player.playing) {
             this.accordion.clearKeyboard(true);
-            if(abcelem.bellows)
-                this.selectButton(abcelem);
+            this.midiParser.setSelection(abcelem);
         }    
   } catch( e ) {
       // Firefox: aborta se a area não estiver visivel
   } 
 };
 
-ABCXJS.Editor.prototype.selectButton = function(elem) {
-    for( var p=0; p < elem.pitches.length; p ++ ) {
-        
-        var pitch = elem.pitches[p];
-        
-        if( pitch.type === 'rest' ) continue;
-        
-        var button;
-        var tabButton = pitch.c === 'scripts.rarrow'? pitch.lastButton : pitch.c;
-        
-        
-        //quando o baixo não está "in Tie", label do botão é uma letra (G, g, etc)
-        //de outra forma o label é número do botão (1, 1', 1'', etc)
-        if(pitch.bass && pitch.c !== 'scripts.rarrow')
-            // quando label é uma letra
-            button = this.midiParser.getBassButton(elem.bellows, tabButton);
-        else
-            // quando label é número do botão
-            button = this.midiParser.getButton(tabButton);
-        
-        if(button) {
-            if(elem.bellows === '-') {
-                button.setOpen();
-            } else {
-                button.setClose();
-            }
-        }
-    }
-};
-
-
 ABCXJS.Editor.prototype.pause = function(shouldPause) {
 	this.bIsPaused = shouldPause;
 	if (!shouldPause)
-		this.updateRendering();
+            this.updateRendering();
 };

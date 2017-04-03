@@ -312,7 +312,7 @@ window.ABCXJS.parse.Parse = function(transposer_, accordion_) {
     };
     
     this.equalsPitch = function(p1, p2) {
-        var p1acc='noacc', p2acc = 'noacc';
+        var p1acc='natural', p2acc = 'natural';
         if( p1.accidental !== undefined ) {
             p1acc= p1.accidental;
         } else if ( p1.barAccidental !== undefined ) {
@@ -1940,6 +1940,13 @@ window.ABCXJS.parse.Parse = function(transposer_, accordion_) {
             
             if( this.transposer && this.transposer.offSet !== 0 ) {
                 strTune = this.transposer.updateEditor( lines );
+            }
+            
+            //remover linhas vazias ao final
+            var end = strTune.indexOf('\n\n');
+            while(end >= 0) {
+                strTune = strTune.substring(0, end);
+                end = strTune.indexOf('\n\n');
             }
     
             
