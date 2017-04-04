@@ -106,7 +106,7 @@ ABCXJS.tablature.Parse.prototype.parseTabVoice = function ( ) {
                 if(this.vars.lastBarElem && this.vars.lastBarElem.barNumber === undefined)
                     this.vars.lastBarElem.barNumber = this.vars.currentVoice.currBarNumber ++;
                 // verificar todos os baixos
-                if( token.bassNote[0] !== '>' &&  token.bassNote[0] !== 'x' && ! this.checkBassButton(token.bellows, token.bassNote[0]) ) {
+                if( ! this.checkBassButton(token.bellows, token.bassNote[0]) ) {
                     this.registerInvalidBass( this.vars.lastBarElem.barNumber );
                 }
                 break;
@@ -305,7 +305,9 @@ ABCXJS.tablature.Parse.prototype.getColumn = function() {
 
 ABCXJS.tablature.Parse.prototype.checkBassButton = function( bellows, b ) {
     var kb = this.accordion.getKeyboard();
-    if( b === 'x' ||  !kb ) return null;
+    
+    if( !kb  || b === undefined || ('.>.x.z.').indexOf(b) > 0 ) return true;
+    
     var nota = kb.parseNote(b, true );
     for( var j = kb.keyMap.length; j > kb.keyMap.length - 2; j-- ) {
       for( var i = 0; i < kb.keyMap[j-1].length; i++ ) {
@@ -317,7 +319,7 @@ ABCXJS.tablature.Parse.prototype.checkBassButton = function( bellows, b ) {
           }
       }   
     }
-    return null;
+    return false;
 };
 
 
