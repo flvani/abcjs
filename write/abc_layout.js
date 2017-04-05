@@ -992,7 +992,22 @@ ABCXJS.write.Layout.prototype.printBarLine = function (elem) {
     if (elem.jumpDecoration) {
         if(( elem.jumpDecoration.upper && this.isFirstVoice() ) || ( !elem.jumpDecoration.upper && this.isLastVoice() ) ) {
             var pitch = elem.jumpDecoration.upper ? 12 : -3;
-            abselem.addRight( this.layoutJumpDecoration(elem, pitch) );
+            switch (elem.jumpDecoration.type) {
+                case "coda":     
+                case "segno":    
+                case "fine":     
+                case "dcalfine": 
+                case "dcalcoda": 
+                case "dsalfine": 
+                case "dsalcoda": 
+                    abselem.addRight( this.layoutJumpDecoration(elem, pitch) );
+                    break;
+                case "dacapo":   
+                case "dasegno":  
+                case "dacoda":   
+                    abselem.addExtra( this.layoutJumpDecoration(elem, pitch) );
+                    break;
+            }
         }
     }
     
