@@ -132,15 +132,37 @@ window.ABCXJS.data.Tune = function() {
     this.handleBarsPerStaff = function() {
         function splitBar(left, right) {
             
-            
-            if(  left.jumpDecoration &&  (".coda.fine.dacapo.dacoda.dasegno.").indexOf('.'+left.jumpDecoration.type+'.') < 0  ) {
+            // divide as decorações de jump
+            if( left.jumpDecoration ) {
+                var jd = window.ABCXJS.parse.clone(left.jumpDecoration);
                 delete left.jumpDecoration;
-            }
+                delete right.jumpDecoration;
+                for(var j=0; j< jd.length; j ++ ) {
+                    if( (".coda.fine.dacapo.dacoda.dasegno.").indexOf('.'+jd[j].type+'.') >= 0 ) {
+                        left.jumpDecoration = left.jumpDecoration || [];
+                        left.jumpDecoration.push( jd[j] ); 
+                    } else {
+                        right.jumpDecoration = right.jumpDecoration || [];
+                        right.jumpDecoration.push( jd[j] ); 
+                        
+                    }
+                }
+            }    
+                
             // todos os jumpInfo ficam a esquerda do split
             // exceto segno todos os jumpPoint ficam a esquerda do split
             if(  left.jumpPoint && left.jumpPoint.type === 'segno'  ) {
                 delete left.jumpInfo;
             }
+            // todos os jumpInfo ficam a esquerda do split
+            if(  right.jumpInfo ) {
+                delete right.jumpInfo;
+            }
+            // exceto segno todos os jumpPoint ficam a esquerda do split
+            if(  right.jumpPoint &&  right.jumpPoint.type !== 'segno'  ) {
+                delete right.jumpInfo;
+            }
+            
             
             delete left.startEnding;
             delete left.barNumber;
@@ -153,18 +175,6 @@ window.ABCXJS.data.Tune = function() {
                 case 'bar_thin': 
                 case 'bar_left_repeat':
                   left.type = 'bar_thin'; 
-            }
-            
-            if(  right.jumpDecoration &&  (".coda.fine.dacapo.dacoda.dasegno.").indexOf('.'+right.jumpDecoration.type+'.') >= 0  ) {
-                delete right.jumpDecoration;
-            }
-            // todos os jumpInfo ficam a esquerda do split
-            if(  right.jumpInfo ) {
-                delete right.jumpInfo;
-            }
-            // exceto segno todos os jumpPoint ficam a esquerda do split
-            if(  right.jumpPoint &&  right.jumpPoint.type !== 'segno'  ) {
-                delete right.jumpInfo;
             }
             
             delete right.endEnding;
@@ -195,11 +205,11 @@ window.ABCXJS.data.Tune = function() {
                 left.jumpInfo = right.jumpInfo;
             }
             
-            // flavio - não verificado
-            if(right.jumpDecoration) {
-                left.jumpDecoration = right.jumpDecoration;
+            for(var j=0; j< right.jumpDecoration.length; j ++ ) {
+                left.jumpDecoration = left.jumpDecoration || [];
+                left.jumpDecoration.push( right.jumpDecoration[j] ); 
             }
-
+            
             if(right.startEnding){
                 left.startEnding = right.startEnding;
             }

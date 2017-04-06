@@ -136,7 +136,7 @@ ABCXJS.write.Layout.prototype.layoutABCLine = function( abctune, line, width ) {
                 this.printABCVoice();
             } else {
                 var p = new ABCXJS.tablature.Layout(this.tuneCurrVoice, this.tuneCurrStaff, abcstaff, this.glyphs, this.tune.formatting.restsInTab );
-                this.voice = p.printTABVoice(this.layoutJumpDecoration);
+                this.voice = p.printTABVoice(this.layoutJumpDecorationItem);
             }
             
             if (abcstaff.title && abcstaff.title[this.tuneCurrVoice])
@@ -150,8 +150,8 @@ ABCXJS.write.Layout.prototype.layoutABCLine = function( abctune, line, width ) {
     return this.staffgroup;
 };
 
-ABCXJS.write.Layout.prototype.layoutJumpDecoration = function(elem, pitch) {
-    switch (elem.jumpDecoration.type) {
+ABCXJS.write.Layout.prototype.layoutJumpDecorationItem = function(jumpDecorationItem, pitch) {
+    switch (jumpDecorationItem.type) {
         case "coda":     return new ABCXJS.write.RelativeElement("scripts.coda", 0, 0, pitch + 1); 
         case "segno":    return new ABCXJS.write.RelativeElement("scripts.segno", 0, 0, pitch + 1); 
         case "fine":     return new ABCXJS.write.RelativeElement("it.Fine", -32, 32, pitch);
@@ -163,6 +163,7 @@ ABCXJS.write.Layout.prototype.layoutJumpDecoration = function(elem, pitch) {
         case "dsalfine": return new ABCXJS.write.RelativeElement("it.DSalFine", 25, -25, pitch);
         case "dsalcoda": return new ABCXJS.write.RelativeElement("it.DSalCoda", 25, -25, pitch);
     }
+        
     return null;
 };
 
@@ -989,33 +990,36 @@ ABCXJS.write.Layout.prototype.printBarLine = function (elem) {
         dx += 5;
     }
 
+    var anyJumpDecoUpper = false;
     if (elem.jumpDecoration) {
-        if(( elem.jumpDecoration.upper && this.isFirstVoice() ) || ( !elem.jumpDecoration.upper && this.isLastVoice() ) ) {
-            var pitch = elem.jumpDecoration.upper ? 12 : -3;
-            switch (elem.jumpDecoration.type) {
-                case "coda":     
-                case "segno":    
-                case "fine":     
-                case "dcalfine": 
-                case "dcalcoda": 
-                case "dsalfine": 
-                case "dsalcoda": 
-                    abselem.addRight( this.layoutJumpDecoration(elem, pitch) );
-                    break;
-                case "dacapo":   
-                case "dasegno":  
-                case "dacoda":   
-                    abselem.addExtra( this.layoutJumpDecoration(elem, pitch) );
-                    break;
+        for(var j=0; j< elem.jumpDecoration.length; j++ ) {
+            if(( elem.jumpDecoration[j].upper && this.isFirstVoice() ) || ( !elem.jumpDecoration[j].upper && this.isLastVoice() ) ) {
+                var pitch = elem.jumpDecoration[j].upper ? 12 : -3;
+                anyJumpDecoUpper = (anyJumpDecoUpper||elem.jumpDecoration[j].upper);
+                switch (elem.jumpDecoration[j].type) {
+                    case "coda":     
+                    case "segno":    
+                    case "fine":     
+                    case "dcalfine": 
+                    case "dcalcoda": 
+                    case "dsalfine": 
+                    case "dsalcoda": 
+                        abselem.addRight( this.layoutJumpDecorationItem(elem.jumpDecoration[j], pitch) );
+                        break;
+                    case "dacapo":   
+                    case "dasegno":  
+                    case "dacoda":   
+                        abselem.addExtra( this.layoutJumpDecorationItem(elem.jumpDecoration[j], pitch) );
+                        break;
+                }
             }
         }
+    
     }
     
-    if (elem.barNumber && elem.barNumberVisible) {
-        if (!(elem.jumpDecoration && elem.jumpDecoration.upper)) {
-            // nestes casos o barnumber pode ser escrito sem sobreposição
-            abselem.addChild(new ABCXJS.write.RelativeElement(elem.barNumber, 0, 0, 12, {type: "barnumber"}));
-        }
+    if (elem.barNumber && elem.barNumberVisible && !anyJumpDecoUpper) {
+        // quando não há jumpDecorations na parte superiror da pauta, o barnumber pode ser escrito sem sobreposição
+        abselem.addChild(new ABCXJS.write.RelativeElement(elem.barNumber, 0, 0, 12, {type: "barnumber"}));
     }
 
     if (this.partstartelem && elem.endDrawEnding) {

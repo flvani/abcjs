@@ -1266,16 +1266,16 @@ window.ABCXJS.parse.Parse = function(transposer_, accordion_) {
 
     this.handleJump = function (name, jump, line, i) {
         if( jump.decorationNextBar ) {
-            if( multilineVars.addJumpDecorationNextBar ) {
-                warn("Overriding previous jump decoration", line, i);
+            if( ! multilineVars.addJumpDecorationNextBar ) {
+                multilineVars.addJumpDecorationNextBar = [];
             }
-            multilineVars.addJumpDecorationNextBar = { type: name, upper: jump.upper };
+            multilineVars.addJumpDecorationNextBar.push({ type: name, upper: jump.upper });
         } else {
             if( multilineVars.lastBarElem ) {
-                if( multilineVars.lastBarElem.jumpDecoration ) {
-                    warn("Overriding previous jump decoration", line, i);
+                if( ! multilineVars.lastBarElem.jumpDecoration ) {
+                    multilineVars.lastBarElem.jumpDecoration = [];
                 }
-                multilineVars.lastBarElem.jumpDecoration = { type: name, upper: jump.upper };
+                multilineVars.lastBarElem.jumpDecoration.push( { type: name, upper: jump.upper } ) ;
             } else {
                 warn("Ignoring jump decoration marker before the first bar.", line, i);
             }

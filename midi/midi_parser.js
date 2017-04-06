@@ -292,6 +292,11 @@ ABCXJS.midi.Parse.prototype.writeNote = function(elem) {
                 }
             }
         }
+    } else {
+        // rest
+        this.addStart( this.timecount, null, elem, null );
+        this.addEnd( this.timecount + mididuration, null, elem );
+        
     }
 
     this.setTimeCount( mididuration );
@@ -461,11 +466,11 @@ ABCXJS.midi.Parse.prototype.handleBar = function (elem) {
         }
     }
     
-    // implementa jump ao final do compasso
-    if(this.nextBarJump ) {
-        this.next = this.nextBarJump;
-        delete this.nextBarJump;
-    }
+    //implementa jump ao final do compasso
+    //if(this.nextBarJump ) {
+    //    this.next = this.nextBarJump;
+    //    delete this.nextBarJump;
+    //}
 
     var pass = this.setPass();
     
@@ -507,7 +512,7 @@ ABCXJS.midi.Parse.prototype.handleBar = function (elem) {
         // rever isso: não precisa de semântica se a casa dois vier depois de um 
         // simbolo de repetição, seja um ritornello ou qualquer outro.
         // pergunta: casa 2 sem sinal de repetição faz sentido?
-        if(this.currEnding.min > 1 ) delete this.currEnding;  
+        if(this.currEnding.min > 1) delete this.currEnding;  
     }
     
     if(this.currEnding) {
@@ -732,7 +737,7 @@ ABCXJS.midi.Parse.prototype.startTrack = function() {
     
     this.endTrack = false;    
     
-    delete this.nextBarJump;
+    //delete this.nextBarJump;
     delete this.codaFlagged;
     delete this.fineFlagged;
     delete this.daSegnoFlagged;

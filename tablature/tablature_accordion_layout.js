@@ -37,8 +37,8 @@ ABCXJS.tablature.Layout.prototype.isLastVoice = function() {
     return this.currVoice.lastVoice || false;
 };
 
-ABCXJS.tablature.Layout.prototype.printTABVoice = function(layoutJumpDecoration) {
-    this.layoutJumpDecoration = layoutJumpDecoration;
+ABCXJS.tablature.Layout.prototype.printTABVoice = function(layoutJumpDecorationItem) {
+    this.layoutJumpDecorationItem = layoutJumpDecorationItem;
     this.currVoice = this.abcstaff.voices[this.tuneCurrVoice];
     this.voice = new ABCXJS.write.VoiceElement(this.tuneCurrVoice, this.tuneCurrStaff, this.abcstaff);
 
@@ -200,13 +200,16 @@ ABCXJS.tablature.Layout.prototype.printBarLine = function (elem) {
         // não há decorations na tablatura
         //this.printDecoration(elem.decoration, 12, (thick)?3:1, abselem, 0, "down", 2);
     }
+    
     if (elem.jumpDecoration) {
-        if ((elem.jumpDecoration.upper && this.isFirstVoice()) || (!elem.jumpDecoration.upper && this.isLastVoice())) {
-            var pitch = elem.jumpDecoration.upper ? 12 : -4;
-            abselem.addRight( this.layoutJumpDecoration(elem, pitch) );
+        for(var j=0; j< elem.jumpDecoration.length; j++ ) {
+            if(( elem.jumpDecoration[j].upper && this.isFirstVoice() ) || ( !elem.jumpDecoration[j].upper && this.isLastVoice() ) ) {
+                var pitch = elem.jumpDecoration[j].upper ? 12 : -4;
+                abselem.addRight( this.layoutJumpDecorationItem(elem.jumpDecoration[j], pitch) );
+            }
         }
     }
-
+                
     if (thick) {
         dx += 4; //3 hardcoded;    
         anchor = new ABCXJS.write.RelativeElement(null, dx, 4, 0, {"type": "bar", "pitch2": topbar, linewidth: 4});
