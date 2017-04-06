@@ -205,9 +205,11 @@ window.ABCXJS.data.Tune = function() {
                 left.jumpInfo = right.jumpInfo;
             }
             
-            for(var j=0; j< right.jumpDecoration.length; j ++ ) {
-                left.jumpDecoration = left.jumpDecoration || [];
-                left.jumpDecoration.push( right.jumpDecoration[j] ); 
+            if( right.jumpDecoration ) {
+                for(var j=0; j< right.jumpDecoration.length; j ++ ) {
+                    left.jumpDecoration = left.jumpDecoration || [];
+                    left.jumpDecoration.push( right.jumpDecoration[j] ); 
+                }
             }
             
             if(right.startEnding){
