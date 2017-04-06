@@ -46,6 +46,7 @@ ABCXJS.midi.Parse.prototype.reset = function() {
     this.vars = { warnings: [] };
     this.globalJumps = [];
     
+    this.addingBarNumbers = -1;
     this.channel = -1;
     this.timecount = 0;
     this.playlistpos = 0;
@@ -53,6 +54,7 @@ ABCXJS.midi.Parse.prototype.reset = function() {
     this.countBar = 0;
     this.next = null;
     this.restart = {line: 0, staff: 0, voice: 0, pos: 0};
+    
     
     this.multiplier = 1;
     this.alertedMin = false;
@@ -173,7 +175,7 @@ ABCXJS.midi.Parse.prototype.parse = function(tune, keyboard) {
             } 
             delete item.start.barNumber;
             self.handleButtons(item.start.pitches, item.start.buttons );
-            delete item.start.buttons; /*fka*/
+            delete item.start.buttons; 
             pl.item = item.start;
             self.midiTune.playlist.push( pl );
         }
@@ -498,7 +500,7 @@ ABCXJS.midi.Parse.prototype.handleBar = function (elem) {
         this.currEnding = {};
         this.currEnding.min = parseInt(a[0]);
         this.currEnding.max = a.length > 1 ? parseInt(a[1]) : this.currEnding.min;
-        this.currEnding.measures = [];
+        this.currEnding.measuresInEnding = [];
         this.maxPass = Math.max(this.currEnding.max, 2);
         
         // casa "2" não precisa de semantica
@@ -510,7 +512,7 @@ ABCXJS.midi.Parse.prototype.handleBar = function (elem) {
     
     if(this.currEnding) {
         // registra os compassos debaixo deste ending
-        this.currEnding.measures.push( this.getMark() ); 
+        this.currEnding.measuresInEnding.push( this.getMark() ); 
     }
     
     this.skipping = (this.currEnding && ( pass < this.currEnding.min || pass > this.currEnding.max) ) || false;
@@ -615,7 +617,7 @@ ABCXJS.midi.Parse.prototype.getParsedElement = function(time) {
     if( ! this.parsedElements[time] ) {
         this.parsedElements[time] = {
             start:{pitches:[], abcelems:[], buttons:[], barNumber: null}
-            ,end:{pitches:[], abcelems:[]/* fka , buttons:[]*/}
+            ,end:{pitches:[], abcelems:[]}
         };
     }
     return this.parsedElements[time];
@@ -630,8 +632,11 @@ ABCXJS.midi.Parse.prototype.addStart = function( time, midipitch, abcelem, butto
     if( abcelem ) {
         pE.start.abcelems.push({abcelem:abcelem,channel:this.channel, delay:delay});
         
-        if( this.abctune.lines[this.line].staffs[this.staff].voices[this.voice].firstVoice && this.addBarNumber ) {
+        // a ideia é: a primeira voz que chegar com o barNumber 1, será a única considera para numerar os compassos
+        // assim depois que a var addingBarNumbers for inicializada, somente nrs. de compasso restantes daquela voz serão incluidos
+        if( this.addBarNumber && ( ( this.addBarNumber === 1 && this.addingBarNumbers < 0 ) || this.addingBarNumbers === ((this.staff+1)*10 + this.voice ) ) ) {
             pE.start.barNumber = this.addBarNumber;
+            this.addingBarNumbers = ((this.staff+1)*10 + this.voice );
             delete this.addBarNumber;
         }
     }    
@@ -685,7 +690,7 @@ ABCXJS.midi.Parse.prototype.resetPass = function() {
     this.pass = [];
     var self = this;
     if( this.currEnding ) {
-        this.currEnding.measures.forEach( function( item, index ) {
+        this.currEnding.measuresInEnding.forEach( function( item, index ) {
             self.setPass(item);
         });
     }
