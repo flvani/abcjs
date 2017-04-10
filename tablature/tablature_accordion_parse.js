@@ -101,14 +101,10 @@ ABCXJS.tablature.Parse.prototype.parseTabVoice = function ( ) {
                 this.vars.lastBarElem = token;
                 break;
             case "note":
-                if (!this.invalid)
-                    voice[voice.length] = this.formatChild(token);
                 if(this.vars.lastBarElem && this.vars.lastBarElem.barNumber === undefined)
                     this.vars.lastBarElem.barNumber = this.vars.currentVoice.currBarNumber ++;
-                // verificar todos os baixos
-                if( ! this.checkBassButton(token.bellows, token.bassNote[0]) ) {
-                    this.registerInvalidBass( this.vars.lastBarElem.barNumber );
-                }
+                if (!this.invalid)
+                    voice[voice.length] = this.formatChild(token);
                 break;
             case "comment":
             case "unrecognized":
@@ -140,9 +136,12 @@ ABCXJS.tablature.Parse.prototype.formatChild = function (token) {
     
     for (var b = 0; b < token.bassNote.length; ++b) {
 
-        if (token.buttons[i] === "x") {
+        if (token.bassNote[b] === "x") {
             this.registerMissingNote( this.vars.lastBarElem.barNumber );
-            //this.addWarning("Baixo indisponível no compasso " + this.vars.lastBarElem.barNumber  + "." );
+        }
+        
+        if( ! this.checkBassButton(token.bellows, token.bassNote[b]) ) {
+            this.registerInvalidBass( this.vars.lastBarElem.barNumber );
         }
 
         if (token.bassNote[b] === "z") {
@@ -159,7 +158,6 @@ ABCXJS.tablature.Parse.prototype.formatChild = function (token) {
 
         if (token.buttons[i] === "x") {
             this.registerMissingNote( this.vars.lastBarElem.barNumber );
-            //this.addWarning("Nota indisponível no compasso "  + this.vars.lastBarElem.barNumber  + ".");
         }
 
         if (token.buttons[i] === "z")

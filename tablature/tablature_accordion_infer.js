@@ -449,12 +449,6 @@ ABCXJS.tablature.Infer.prototype.addTABChild = function(token, line ) {
     if( inTie ) {
         // inversão impossível
         this.count += child.duration;
-        if ( ((this.closing && !baixoClose)  || (!this.closing && !baixoOpen)) &&  this.alertedIncompatibleBass < this.currInterval ) {
-                if( (baixoClose || baixoOpen) ) { 
-                    this.addWarning('Baixo incompatível com movimento fole no compasso ' + this.currInterval + '.' ) ;
-                    this.alertedIncompatibleBass = this.currInterval;
-                }    
-        }
     } else {
         // verifica tudo: baixo e melodia
         if ((this.closing && baixoClose && allClose) || (!this.closing && baixoOpen && allOpen)) {
@@ -492,6 +486,13 @@ ABCXJS.tablature.Infer.prototype.addTABChild = function(token, line ) {
                 }
             }
         }
+    }
+    
+    // seria a melhor hora para indicar baixo incompativel?
+    if ( ((this.closing && !baixoClose)  || (!this.closing && !baixoOpen)) &&  this.alertedIncompatibleBass < this.currInterval ) {
+            if( (baixoClose || baixoOpen) ) { 
+                this.registerInvalidBass();
+            }    
     }
 
     child.bellows = this.closing ? "+" : "-";
@@ -537,6 +538,15 @@ ABCXJS.tablature.Infer.prototype.addTABChild = function(token, line ) {
     }
     
     this.add(child, xi, xf-1, line);
+};
+
+ABCXJS.tablature.Infer.prototype.registerInvalidBass = function() {
+    var barNumber = parseInt(this.currInterval);
+    if( ! this.vars.invalidBasses )  this.vars.invalidBasses = ',';
+    
+    if( this.vars.invalidBasses.indexOf( ''+barNumber ) < 0 ) {
+        this.vars.invalidBasses += barNumber + ',';
+    }
 };
 
 ABCXJS.tablature.Infer.prototype.registerMissingButton = function(item) {

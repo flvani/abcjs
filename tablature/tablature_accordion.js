@@ -180,6 +180,7 @@ ABCXJS.tablature.Accordion.prototype.inferTablature = function(tune, vars, addWa
     var inferer = new ABCXJS.tablature.Infer( this, tune, vars );
     
     vars.missingButtons = {};
+    vars.invalidBasses = '';
     
     for (var t = 0; t < tune.lines.length; t++) {
        if (tune.lines[t].staffs ) {
@@ -190,6 +191,10 @@ ABCXJS.tablature.Accordion.prototype.inferTablature = function(tune, vars, addWa
        }  
     }
     
+    if(vars.invalidBasses.length > 0){
+        addWarning('Baixo incompatível com o movimento do fole no(s) compasso(s): ' + vars.invalidBasses.substring(1,vars.invalidBasses.length-1) + '.' ) ;
+    }
+    
     if(vars.missingButtons){
         for( var m in vars.missingButtons ) {
             addWarning('Nota "' + m + '" não disponível no(s) compasso(s): ' + vars.missingButtons[m].join(", ") + '.' ) ;
@@ -197,6 +202,7 @@ ABCXJS.tablature.Accordion.prototype.inferTablature = function(tune, vars, addWa
     }
     
     delete vars.missingButtons;
+    delete vars.invalidBasses;
    
     
 };
