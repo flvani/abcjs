@@ -1823,7 +1823,8 @@ window.ABCXJS.parse.Parse = function(transposer_, accordion_) {
         };
         strTune = strTune.replace(/\\([ \t]*)(%.*)*\n/g, continuationReplacement);	// take care of line continuations right away, but keep the same number of characters
         var lines = strTune.split('\n');
-        if (window.ABCXJS.parse.last(lines).length === 0)	// remove the blank line we added above.
+        // flavio - era só um if
+        while( window.ABCXJS.parse.last(lines).length === 0 )	// remove the blank lines at the end.
             lines.pop();
         return lines;
     };
