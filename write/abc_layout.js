@@ -154,10 +154,10 @@ ABCXJS.write.Layout.prototype.layoutJumpDecorationItem = function(jumpDecoration
     switch (jumpDecorationItem.type) {
         case "coda":     return new ABCXJS.write.RelativeElement("scripts.coda", 0, 0, pitch + 1); 
         case "segno":    return new ABCXJS.write.RelativeElement("scripts.segno", 0, 0, pitch + 1); 
-        case "fine":     return new ABCXJS.write.RelativeElement("it.Fine", -32, 32, pitch);
-        case "dacapo":   return new ABCXJS.write.RelativeElement("it.DC", -16, 16, pitch);
-        case "dasegno":  return new ABCXJS.write.RelativeElement("it.DaSegno", -22, 32, pitch);
-        case "dacoda":   return new ABCXJS.write.RelativeElement("it.DaCoda", -22, 32, pitch);
+        case "fine":     return new ABCXJS.write.RelativeElement("it.Fine", -34, 34, pitch);
+        case "dacapo":   return new ABCXJS.write.RelativeElement("it.DC", -30, 30, pitch);
+        case "dacoda":   return new ABCXJS.write.RelativeElement("it.DaCoda", -30, 30, pitch);
+        case "dasegno":  return new ABCXJS.write.RelativeElement("it.DaSegno", -32, 32, pitch);
         case "dcalfine": return new ABCXJS.write.RelativeElement("it.DCalFine", 25, -25, pitch);
         case "dcalcoda": return new ABCXJS.write.RelativeElement("it.DCalCoda", 25, -25, pitch);
         case "dsalfine": return new ABCXJS.write.RelativeElement("it.DSalFine", 25, -25, pitch);

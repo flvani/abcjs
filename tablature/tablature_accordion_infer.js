@@ -161,6 +161,7 @@ ABCXJS.tablature.Infer.prototype.inferTabVoice = function(line) {
     } 
     
     this.accordion.setTabLine(this.producedLine);
+    this.vars.iChar += this.producedLine.length; // atualiza a posição onde vai começar a nova linha da tablatura
     
     return this.voice;
 };
@@ -329,6 +330,7 @@ ABCXJS.tablature.Infer.prototype.checkTies = function(voice) {
 };
 
 ABCXJS.tablature.Infer.prototype.addTABChild = function(token, line ) {
+    var xi = this.producedLine.length; // posição atual a linha de tabladura
 
     if (token.el_type !== "note") {
         var xf = 0;
@@ -338,7 +340,6 @@ ABCXJS.tablature.Infer.prototype.addTABChild = function(token, line ) {
         } else {
             throw new Error( 'ABCXJS.tablature.Infer.prototype.addTABChild(token_type): ' + token.type );
         }
-        var xi = this.getXi();
         this.add(token, xi, xf - 1, line );
         return;
     }
@@ -409,7 +410,6 @@ ABCXJS.tablature.Infer.prototype.addTABChild = function(token, line ) {
         }
     }
 
-    var xi = this.getXi();
     for (var c = 0; c < column.length; c++) {
         var item = column[c];
         inTie = (item.inTie || inTie);
@@ -554,10 +554,6 @@ ABCXJS.tablature.Infer.prototype.registerMissingButton = function(item) {
         if ( this.vars.missingButtons[item.note][i] === bar ) return; // already listed
     }
     this.vars.missingButtons[item.note].push(bar);
-};
-
-ABCXJS.tablature.Infer.prototype.getXi = function() {
-  return this.producedLine.length;
 };
 
 ABCXJS.tablature.Infer.prototype.registerLine = function(appendStr) {

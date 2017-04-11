@@ -62,7 +62,6 @@ ABCXJS.midi.Player.prototype.reset = function(options) {
     this.warnings = [];
     
     this.printer = {};
-    this.currChannel = 0;
     this.currentTime = 0;
     this.currentMeasure = 1;
     
@@ -296,8 +295,6 @@ ABCXJS.midi.Player.prototype.executa = function(pl) {
         if( pl.start ) {
             
             pl.item.pitches.forEach( function( elem ) {
-//            for( var e=0; e < pl.item.pitches.length; e++) {
-//                var elem = pl.item.pitches[e];
                 
                 delay = self.calcTempo( elem.delay );
                 
@@ -336,46 +333,37 @@ ABCXJS.midi.Player.prototype.executa = function(pl) {
                }
                 
             });
-            //}
+            
+            var ja = '.'; // controla quais elementos absolutos foram marcados para highlight no mesmo item da playlist - evita dupla seleção do mesmo item
             pl.item.abcelems.forEach( function( elem ) {
-            //for( var e=0; e < pl.item.abcelems.length; e++) {
-            //    var elem = pl.item.abcelems[e];
                 delay = self.calcTempo( elem.delay );
                 aqui=4;
                 if( self.callbackOnScroll ) {
                     self.currAbsElem = elem.abcelem.parent;
-                    self.currChannel = elem.channel;
                     self.callbackOnScroll(self);
                 }
                 aqui=5;
-                self.highlight(elem.abcelem.parent, true, delay);
-                //console.log(ABCXJS.parse.stringify(elem.abcelem.parent) );
-            //}
+                if( ja.indexOf('.'+self.currAbsElem.gid+'.') < 0 ) {
+                    // absElem ainda não sofreu highlight
+                    ja += self.currAbsElem.gid+'.';
+                    self.highlight(self.currAbsElem , true, delay);
+                }
             });
+            
         } else {
             pl.item.pitches.forEach( function( elem ) {
-            //for( var e=0; e < pl.item.pitches.length; e++) {
-            //    var elem = pl.item.pitches[e];
-                //if(  self.playClef( elem.midipitch.clef.charAt(0) ) ) {
                 delay = self.calcTempo( elem.delay );
                 MIDI.noteOff(elem.midipitch.channel, elem.midipitch.midipitch, delay);
-                //}
-            //}
             });
             pl.item.abcelems.forEach( function( elem ) {
-            //for( var e=0; e < pl.item.abcelems.length; e++) {
-            //    var elem = pl.item.abcelems[e];
                 delay = self.calcTempo( elem.delay );
                 aqui=6;
                 
                 self.highlight(elem.abcelem.parent, false, delay);
-                //console.log(ABCXJS.parse.stringify(elem.abcelem.parent) );
-            //}
             });
         }
     } catch( err ) {
         this.onError = { erro: err.message, idx: this.i, item: pl };
-        //console.log ('PlayList['+this.onError.idx+'] - Erro: ' + this.onError.erro + '.')
         this.addWarning( 'PlayList['+this.onError.idx+'] - Erro: ' + this.onError.erro + '. DebugPoint: ' + aqui );
     }
 };

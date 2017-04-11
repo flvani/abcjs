@@ -72,11 +72,6 @@ p {
     width: 70%;
 }
 
-.editor textarea {
-    width: 98%;
-    font-family:"Monaco","Verdana",monospace;
-}
-
 .controls {
     padding-left: 1em;
     margin-left: 70%;
@@ -206,9 +201,12 @@ ul.NoBulletNoIndent {
 
 }
 
-.tunebook_textarea {
-	width: 25em;
-	height: 7em;
+.abc_textarea {
+    width: 170%;
+    //font-family:"Monaco","Verdana",monospace;
+    white-space: pre;
+    overflow: auto;
+    overflow-style: scrollbar;
 }
 
 
@@ -459,7 +457,7 @@ ul.NoBulletNoIndent {
 #keyboardDiv {
     display:none; 
     position: fixed;
-    top:100px; 
+    top:160px; 
     left:75%; 
     padding:5px;
     width: fit-content;

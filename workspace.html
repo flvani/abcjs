@@ -1,4 +1,3 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" lang="en">
     <head>
 	<title>Draw The Dots: Tune Editor</title>
@@ -122,26 +121,27 @@
         <script type="text/javascript" src="tablature/tablature_accordion_layout.js"></script>
         
  	<script type="text/javascript" src="edit/abc_editor.js" ></script>
+        
+        <!--                     menor
+            C,,   C,  E,  G,     C,  ^D,  G,
+            D,,   D, ^F,  A,     D,   F,  A,
+            E,,   E, ^G,  B,     E,   G,  B,
+            F,,   F,  A,  C      F,  ^G,  C
+            G,,   G,  B,  D      G,  ^A,  D
+            A,,   A, ^C   E      A,   C   E
+            B,,   B, ^D  ^F      B,   D  ^F
+            Bb,,  Bb, D   F      Bb, ^C   F
+        -->    
+    
 
     
 <div id="editorDiv" style="position: fixed; top:0; display:inline-block; background-color: gray; width:100%; z-index: 100;"> 
 <div id="editControl" style="display:inline-block;"> 
 
-<textarea id="svg_source" cols="120" rows="10" style="display: none;" >
+<textarea id="svg_source" class="abc_textarea" spellcheck="false" cols="120" rows="10" style="display: none;" >
 </textarea>
     
-    <noscript>               menor
-        C,,   C,  E,  G,     C,  ^D,  G,
-        D,,   D, ^F,  A,     D,   F,  A,
-        E,,   E, ^G,  B,     E,   G,  B,
-        F,,   F,  A,  C      F,  ^G,  C
-        G,,   G,  B,  D      G,  ^A,  D
-        A,,   A, ^C   E      A,   C   E
-        B,,   B, ^D  ^F      B,   D  ^F
-        Bb,,  Bb, D   F      Bb, ^C   F
-    </noscript>    
-    
-<textarea id="abc" cols="120" rows="10"  style="display: inline;">
+<textarea class="abc_textarea" spellcheck="false" id="abc" cols="120" rows="10"  style="display: inline;">
 %%barnumbers 0
 %%papersize A4
 %%score (0 1) 2 3
@@ -184,7 +184,7 @@ V:2 bass
 V:3 accordionTab
 </textarea>
     
-<textarea id="abcd" cols="120" rows="10"  style="display: none;">
+<textarea id="abcd" class="abc_textarea" spellcheck="false" cols="120" rows="10"  style="display: none;">
 X:2020
 %%barnumbers 1
 %%papersize A4
@@ -217,7 +217,7 @@ V:1 clef=treble
 </textarea>
     
     
-<textarea id="abcc" cols="120" rows="10"  style="display: none;">
+<textarea id="abcc" class="abc_textarea" spellcheck="false" cols="120" rows="10"  style="display: none;">
 X:1017
 %%barnumbers 1
 %%papersize A4
@@ -329,6 +329,7 @@ V:3 accordionTab
                 
                 ypos = 0;
                 lastYpos = 0;
+                lastStaffGroup = null;
                 debug = false;
                 myEditor = {};
 
@@ -361,7 +362,23 @@ V:3 accordionTab
                 };
                 
                 playerCallBackOnScroll = function ( player ) {
-                    if( player.currChannel > 0 ) return;
+//                { // se possivel aplicar esta mesma lógica em playerCallBackOnScroll 
+//                    var fixedTop = player.printer.staffgroups[0].top;
+//                    var vp = this.studioCanvasDiv.clientHeight - fixedTop;
+//                    var top = player.printer.staffgroups[player.currAbsElem.staffGroup].top;
+//                    var bottom = top + player.printer.staffgroups[player.currAbsElem.staffGroup].height;
+//
+//                    if( bottom > vp+this.ypos || this.ypos > top-fixedTop ) {
+//
+//                        this.ypos = top;
+//                        this.studioCanvasDiv.scrollTop = this.ypos;    
+//                   }
+//                }  
+                
+                    if( player.currAbsElem.staffGroup === lastStaffGroup )  return;
+                    
+                    lastStaffGroup = player.currAbsElem.staffGroup;
+                    
                     var fixedTop = document.getElementById('editorDiv').clientHeight;
                     var wtop = document.getElementById('canvasDiv').offsetTop -
                                fixedTop;
@@ -418,7 +435,7 @@ V:3 accordionTab
                                //  id: 'GAITA_HOHNER_CLUB_IIIM_BR'
                                 ,keyboardDiv_id:"keyboardDiv"
                                 ,accordionMaps: DIATONIC.map.accordionMaps
-                                ,render_keyboard_opts:{transpose:false, mirror: true, scale:1.1, draggable:false, show:true, label:false}}
+                                ,render_keyboard_opts:{transpose:false, mirror: true, scale:1, draggable:false, show:true, label:false}}
                         ,midi_options: {program: 21, qpm: 150, type: "qt"}
                         ,render_options: {}
                         ,onchange: editorCallbackOnChange
@@ -448,6 +465,7 @@ V:3 accordionTab
                 
                 playButton.addEventListener("click", function(e) {
                     e.preventDefault();
+                    myEditor.accordion.clearKeyboard();
                     player.startPlay( myEditor.tunes[0].midi );
                     //player.startDidacticPlay(myEditor.tunes[0].midi, 'note');
                     //player.startDidacticPlay(myEditor.tunes[0].midi, 'measure', 2 );
@@ -459,6 +477,7 @@ V:3 accordionTab
                 }, false);
                 stopButton.addEventListener("click", function(e) {
                     e.preventDefault();
+                    myEditor.accordion.clearKeyboard();
                     player.stopPlay();
                 }, false);
                 

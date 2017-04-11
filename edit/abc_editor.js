@@ -109,6 +109,7 @@ ABCXJS.edit.KeySelector.prototype.addChangeListener = function(editor) {
 ABCXJS.edit.EditArea = function(textareaid) {
   this.textarea = document.getElementById(textareaid);
   this.initialText = this.textarea.value;
+  this.textChanged = true; // vou usar para recalcular os dados de scroll da textarea
   this.isDragging = false;
   this.changeListener;
 };
@@ -123,6 +124,7 @@ ABCXJS.edit.EditArea.prototype.addSelectionListener = function(listener) {
 ABCXJS.edit.EditArea.prototype.addChangeListener = function(listener) {
   this.changelistener = listener;
   this.textarea.onkeyup = function() {
+    this.textChanged = true; // vou usar para recalcular os dados de scroll da textarea
     listener.fireChanged();
   };
   this.textarea.onmousedown = function() {
@@ -134,6 +136,7 @@ ABCXJS.edit.EditArea.prototype.addChangeListener = function(listener) {
     listener.fireChanged();
   };
   this.textarea.onchange = function() {
+    this.textChanged = true; // vou usar para recalcular os dados de scroll da textarea
     listener.fireChanged();
   };
 };
@@ -143,7 +146,7 @@ ABCXJS.edit.EditArea.prototype.getSelection = function() {
     return {start: this.textarea.selectionStart, end: this.textarea.selectionEnd};
 };
 
-ABCXJS.edit.EditArea.prototype.setSelection = function (start, end, line) {
+ABCXJS.edit.EditArea.prototype.setSelection = function (start, end) {
     if (this.textarea.setSelectionRange)
         this.textarea.setSelectionRange(start, end);
     else if (this.textarea.createTextRange) {
@@ -154,16 +157,47 @@ ABCXJS.edit.EditArea.prototype.setSelection = function (start, end, line) {
         e.moveStart('character', start);
         e.select();
     }
-    this.scrollTo(line);
+    this.scrollTo(start);
     this.textarea.focus();
 };
 
-ABCXJS.edit.EditArea.prototype.scrollTo = function(line)
+ABCXJS.edit.EditArea.prototype.scrollTo = function(start)
 {
-  line = line || 0;
-  var lineHeight = this.textarea.clientHeight / this.textarea.rows;
-  var jump = (line - 1) * lineHeight;
-  this.textarea.scrollTop = jump;
+  var found = false;  
+  var l = 0;
+  this.computeScrollData();
+  while(!found &&  l < this.totalLines ) {
+      if( start > this.lineLimits[l].i+this.lineLimits[l].f ) {
+          l ++;
+      } else {
+          found = true;
+      }
+  }
+  if(!found) return;
+  var x =  (start - this.lineLimits[l].i) / this.maxLine;
+  
+  var top = ((l  / this.totalLines) * this.textarea.scrollHeight)-this.textarea.clientHeight/2;
+  
+  var left = ( (x<0.33?0:x<0.66?0.33:0.66) ) * this.textarea.scrollWidth;
+  
+  this.textarea.scrollTop = top;
+  this.textarea.scrollLeft = left ;
+};
+
+ABCXJS.edit.EditArea.prototype.computeScrollData = function () {
+   if ( !this.textChanged ) return;
+   var lines = this.textarea.value.split('\n');    
+   this.textChanged=false;
+   this.totalLines = lines.length;
+   this.lineLimits = [];
+   this.maxLine = 0;
+
+   var size = 0;
+   for( var l=0; l< lines.length; l++ ) {
+       this.lineLimits[l] = { i: size, f: lines[l].length };
+       size += lines[l].length + 1;
+       this.maxLine = Math.max( lines[l].length, this.maxLine );
+   }
 };
 
 ABCXJS.edit.EditArea.prototype.getString = function() {
@@ -171,6 +205,7 @@ ABCXJS.edit.EditArea.prototype.getString = function() {
 };
 
 ABCXJS.edit.EditArea.prototype.setString = function(str, noRefresh ) {
+  this.textChanged = true; // vou usar para recalcular os dados de scroll da textarea
   this.textarea.value = str;
   this.textarea.selectionStart = 0;  
   this.textarea.selectionEnd = 0;  
@@ -179,15 +214,6 @@ ABCXJS.edit.EditArea.prototype.setString = function(str, noRefresh ) {
     this.changelistener.fireChanged();
   }
 };
-
-//ABCXJS.edit.EditArea.prototype.appendString = function(str, noRefresh ) {
-//  //retira \n ao final  
-//  var t = this.textarea.value;
-//  while( t.charAt(t.length-1) === '\n' ) {
-//    t = t.substr(0,t.length-1);
-//  }
-//  this.setString(t+str, noRefresh );
-//};
 
 ABCXJS.edit.EditArea.prototype.getElem = function() {
   return this.textarea;
@@ -650,7 +676,7 @@ ABCXJS.Editor.prototype.isDirty = function() {
 
 ABCXJS.Editor.prototype.highlight = function(abcelem) {
   try {
-        this.editarea.setSelection(abcelem.startChar, abcelem.endChar, abcelem.line);
+        this.editarea.setSelection(abcelem.startChar, abcelem.endChar);
         if(this.accordion.render_keyboard_opts.show && !player.playing) {
             this.accordion.clearKeyboard(true);
             this.midiParser.setSelection(abcelem);

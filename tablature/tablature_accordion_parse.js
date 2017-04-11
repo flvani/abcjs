@@ -95,7 +95,7 @@ ABCXJS.tablature.Parse.prototype.parseTabVoice = function ( ) {
         switch (token.el_type) {
             case "bar":
                 token.startChar = this.xi;
-                token.endChar = this.i;
+                token.endChar = this.i-1;
                 if (!this.invalid)
                     voice[voice.length] = token;
                 this.vars.lastBarElem = token;
@@ -119,7 +119,7 @@ ABCXJS.tablature.Parse.prototype.formatChild = function (token) {
     var child = {
         el_type: token.el_type
         , startChar: this.xi
-        , endChar: this.i
+        , endChar: this.i-1
         , pitches: []
         , duration: token.duration * this.vars.default_length
         , bellows: token.bellows
