@@ -108,6 +108,11 @@ ABCXJS.edit.KeySelector.prototype.addChangeListener = function(editor) {
 
 ABCXJS.edit.EditArea = function(textareaid) {
   this.textarea = document.getElementById(textareaid);
+  
+  //var editor = CodeMirror(document.body, {  value: "function myScript(){return 100;}\n", lineNumbers: true, mode: "javascript" } );
+  
+  var editor = CodeMirror.fromTextArea(this.textarea, {  lineNumbers: true, mode: "abcx" } );
+  
   this.initialText = this.textarea.value;
   this.textChanged = true; // vou usar para recalcular os dados de scroll da textarea
   this.isDragging = false;
@@ -205,6 +210,7 @@ ABCXJS.edit.EditArea.prototype.getString = function() {
 };
 
 ABCXJS.edit.EditArea.prototype.setString = function(str, noRefresh ) {
+  return ; // flavio codemirror
   this.textChanged = true; // vou usar para recalcular os dados de scroll da textarea
   this.textarea.value = str;
   this.textarea.selectionStart = 0;  

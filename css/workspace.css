@@ -3,7 +3,7 @@
 }
 
 .mapa {
-     padding-top: 190px;
+     padding-top: 290px;
      margin: 0px;
      display:block;
 }
@@ -19,6 +19,12 @@
     width: fit-content;
     background-color: #ffd;
     z-index: 0;
+}
+
+.genericDivClass {
+    position:relative;
+    display:block;
+    background-color: #fff;
 }
 
 h1 {

@@ -5,6 +5,7 @@
         <meta http-equiv="content-type" content="text/html; charset=UTF-8"></meta>
         <link rel="icon" type="image/icon" href="images/favicon.ico" />
         <link href="css/workspace.css" rel="stylesheet"></link>
+        <link href="codemirror/codemirror.css" rel="stylesheet">
     
             <!-- 
           MAIN DATA STRUCTURES
@@ -71,10 +72,13 @@
         
         -->
     </head>
-    <body class="mapa">
+    <body >
 
 	<script type="text/javascript" src="proto_noconflict.js" ></script>
 
+        <script  type="text/javascript" src="codemirror/codemirror.js">></script>
+        <script  type="text/javascript" src="codemirror/mode/abcx/abcx.js">></script>
+        
         <!-- suporte a MIDI -->
         <script type="text/javascript" src="MIDI.js/MIDI_3.00-min.js"></script>
 
@@ -135,53 +139,40 @@
     
 
     
-<div id="editorDiv" style="position: fixed; top:0; display:inline-block; background-color: gray; width:100%; z-index: 100;"> 
+<div id="editorDiv" style="position: relative; top:0; display:inline-block; background-color: gray; width:100%; z-index: 100;"> 
 <div id="editControl" style="display:inline-block;"> 
 
 <textarea id="svg_source" class="abc_textarea" spellcheck="false" cols="120" rows="10" style="display: none;" >
 </textarea>
     
 <textarea class="abc_textarea" spellcheck="false" id="abc" cols="120" rows="10"  style="display: inline;">
-%%barnumbers 0
+X:1006 %isto é um comentario.
+%isto também é um comentario.
+%%barnumbers 1 %isto também é um comentario.
 %%papersize A4
-%%score (0 1) 2 3
-T:Danúbio Azul
-C:J. Strauss
-C:(arr. Mario Mascarenhas)
+%%landscape
+%%pagenumbering
+T:Hino do Grêmio %isto também é um comentario.
+C:Lupicínio Rodrigues
+C:(<a class="abc_link" href=https://www.facebook.com/groups/toquegaitaponto/?fref=nf target=_blank>arr. Cezar Ferreira</a>)
 Z:Flávio Vani
 N:Mapa para Acordeons Diatônicos powered by ABCXJS.
-M:3/4
-L:1/4
-Q:160
+F:https://www.youtube-nocookie.com/embed/J7cWbUVw97c
+L:1/8
+Q:140
+M:4/4
 K:C
-V:0 treble  
-| C E G |  G3-  | G3- | G z  C | C E G |  G3  | G3- | G z B, |
-| B, D B | B3- | B3- | B z  B, | B, D B | B3- | B3- | B z C | C E G | 
-| c3- | c3- | c z C | C E G | c3- | c3- |
-| c z D | D F B | B3- | B ^F G | [ce]3- | [ce] c E |
-| E2 D | A2 G | C z/2 [EGc]/2 [EGc] !fine! || [K:G] z c B | B A A |
-| z A ^G | ^G A A | z D D | E2 D | z D D | A2 G |
-| z c B | B A A | z A B | d c c | z f a | a2 g |
-| f3/2 e/2 c/2 A/2 | e/2e/2 e d | g z z | [Bdg]3 | [ceg]3 | [Bfg] z z !dcalfine! |]
-V:1 treble stem=up 
-[K:C] | x3 | x  x g | g x e | e  x2 | x3 | x  x g | g x f | f  x2 |
-| x3 | x2 a | a x f | f x2 | x3 | x2 a | a x e |e x2 | x3 |
-| x2 c' | c' x g | g x2 | x3 | x2 c' | c' x a |
-| a x2 | x3 | x3 | x3 | x3 | x3 |
-| x3 | x3 | x3 || [K:G] x3 | x3 |
-| x3 | x3 | x3 | x3 | x3 | x3 |
-| x3 | x3 | x3 | x3 | x3 | x3 |
-| x3 | x3 | x3 | x3 | x3 | x3 |]
-V:2 bass
-[K:C] |z3 | C,, [C,E,G,] [C,E,G,] | C,, [C,E,G,] [C,E,G,] | C,, [C,E,G,] [C,E,G,] | C,, [C,E,G,] [C,E,G,] | C,, [C,E,G,] [C,E,G,] | G,, [G,B,D] [G,B,D] | G,, [G,B,D] [G,B,D] |
-| G,, [G,B,D] [G,B,D] | G,, [G,B,D] [G,B,D] | G,, [G,B,D] [G,B,D] | G,, [G,B,D] [G,B,D] |  G,, [G,B,D] [G,B,D] | C,, [C,E,G,] [C,E,G,] |  C,, [C,E,G,] [C,E,G,] |  C,, [C,E,G,] [C,E,G,] |  C,, [C,E,G,] [C,E,G,] |
-| C,, [C,E,G,] [C,E,G,] |  C,, [C,E,G,] [C,E,G,] |  C,, [C,E,G,] [C,E,G,] |  C,, [C,E,G,] [C,E,G,] | F,, [F,A,C] [F,A,C] | F,, [F,A,C] [F,A,C] |
-| F,, [F,A,C] [F,A,C] | z3 | G,, [G,B,D] [G,B,D] | G,, [G,B,D] [G,B,D] | C,, [C,E,G,] [C,E,G,] |  C,, [C,E,G,] [C,E,G,] | 
-| D,, [D,^F,A,] [D,^F,A,] | G,, [G,B,D] [G,B,D] | [C,E,G,] z [C,E,G,] || [K:G] z3 |  D,, [D,F,A,] [D,F,A,] |
-| D,, [D,F,A,] [D,F,A,] | D,, [D,F,A,] [D,F,A,] | D,, [D,F,A,] [D,F,A,] | G,, [G,B,D] [G,B,D] | G,, [G,B,D] [G,B,D] | G,, [G,B,D] [G,B,D] |
-| G,, [G,B,D] [G,B,D] | D,, [D,F,A,] [D,F,A,] | D,, [D,F,A,] [D,F,A,] | D,, [D,F,A,] [D,F,A,] | D,, [D,F,A,] [D,F,A,] | E,, [G,B,D] [G,B,D] |
-| A,, [A,CE] [A,CE] | D,, [D,F,A,] [D,F,A,] | G,, [G,B,D] [G,B,D] | G,, [G,B,D] [G,B,D] | [C,E,G,] z [C,E,G,] | G,, [G,B,D] [G,B,D] |]
-V:3 accordionTab
+V:melodia clef=treble
+|: "C"g2 e3/2d1/2 c2 d3/2e1/2 | "G"d2 G4 z2 | "C"g2 e3/2d1/2 c2 d3/2e1/2 | "G"d4 z2 e3/2f1/2 |
+w: A- té a pé nós i-re-mos Pa ra o que der e vier Mas o 
+|"C"g2 ^f3/2g1/2 "C5+"a2 g3/2a1/2 | "Dm"b2 a2 z2 e3/2f1/2 | "C"g2 a3/2g1/2 "G"d2 f3/2e1/2 | "C"c6 z2 :|
+w:cer-to é que nós es-ta-remos Com o Grêmio onde o Grêmio es-ti-ver
+V:baixo clef=bass
+|: C,2 [C,E,G,] 2 C,2 [C,E,G,] 2 | G,,2 [G,B,d,] 2 G,,2 [G,B,d,] 2 |  C,2 [C,E,G,] 2 C,2 [C,E,G,] 2 | G,,2 [G,B,d,] 2 G,,2 [G,B,d,] 2 |
+| C,2z2 A,,2z2 | F,,2 [F,A,c,] 2 F,,2 [F,A,c,] 2 | C,,2 [G,B,d,] 2 G,,2 [G,B,d,] 2 |  C,2 [C,E,G,] 2 C,2 [C,E,G,] 2:|
+V:tab clef=accordionTab
+|: C+92 c+7'1.5 >+80.5 C+6'2 c+81.5 >+7'0.5 | G-7'2 g-5'2 G->2 g-z2 | C+92 c+7'1.5 >+80.5 C+6'2 c+81.5 >+7'0.5 | G-7'2 g->2 G-z2 g-91.5 >-8'0.5 |
+| C+8'2 z-a1.5 z-9'0.5 A-b2 z-9'1.5 z-b0.5 | F-a'2 f-b2 F-z2 f-91.5 >-8'0.5 | C+8'2 g-b1.5 >-9'0.5 G-7'2 g-8'1.5 >-90.5 | C+6'2 c+>2 C+>2 c+z2 :|
 </textarea>
     
 <textarea id="abcd" class="abc_textarea" spellcheck="false" cols="120" rows="10"  style="display: none;">
@@ -261,10 +252,8 @@ V:3 accordionTab
         <label id="currentPlayTime" style="font-weight: bold; color: yellow; padding-left: 5px; padding-right: 3px;">00:00.00</label>
     </div>
     </div> <!-- editorDiv -->
-    <div id="title" style="display:none; background: rgba(255,255,0,0.5); position: relative;color: #000; z-index: -1;padding: 5px 11px 5px;">Loading API...</div>
-    
-    <div id="warningsDiv"><hr></div>
-    <div id="canvasDiv" class="printPreviewClass"> </div>
+    <div id="warningsDiv" class="genericDivClass"><hr></div>
+    <div id="canvasDiv" class="printPreviewClass" > </div>
         
         <script type="text/javascript">
             
