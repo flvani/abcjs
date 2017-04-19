@@ -626,24 +626,14 @@ window.ABCXJS.data.Tune = function() {
     };
 
     this.addPosition = function(line, startChar, endChar, hashParams, currentVoice) {
-        // flavio - mudando a forma de localizar o elemento ABCX
-        
         if( ABCXJS.math.isNumber(line) &&
             ABCXJS.math.isNumber(startChar) &&
             ABCXJS.math.isNumber(endChar) ) {
             hashParams.position = { anchor: {line: line, ch: startChar}, head: {line: line,ch: endChar} };     
-            if( currentVoice && currentVoice.staffNum === 2 ) {
-                hashParams.position.selectable=true;
-            }
         }
-
-        //        if( line )
-        //        hashParams.line =  line;
-        //        if (startChar !== null)
-        //            hashParams.startChar = startChar;
-        //        if (endChar !== null)
-        //            hashParams.endChar = endChar;
-        
+        if( currentVoice && currentVoice.staffNum === 0 && currentVoice.index === 0 ) {
+            hashParams.position.selectable=true;
+        }
     };
     
     this.appendElement = function(type, line, startChar, endChar, hashParams, currentVoice)

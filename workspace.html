@@ -1,4 +1,4 @@
-<html xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" lang="en">
+<html>
     <head>
 	<title>Draw The Dots: Tune Editor</title>
         <meta name="viewport" content="width=device-width, initial-scale=0.8, minimum-scale=0.8, maximum-scale=2.0" />
@@ -76,8 +76,11 @@
 
 	<script type="text/javascript" src="proto_noconflict.js" ></script>
 
-        <script  type="text/javascript" src="codemirror/codemirror.js">></script>
-        <script  type="text/javascript" src="codemirror/mode/abcx/abcx.js">></script>
+        <!--script  type="text/javascript" src="codemirror/codemirror.js">></script>
+        <script  type="text/javascript" src="codemirror/mode/abcx/abcx.js">></script-->
+        
+        <!--script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.2.6/ace.js" type="text/javascript" charset="utf-8"></script-->
+        <script src="ace/src/ace.js" type="text/javascript" charset="utf-8"></script>
         
         <!-- suporte a MIDI -->
         <script type="text/javascript" src="MIDI.js/MIDI_3.00-min.js"></script>
@@ -139,13 +142,76 @@
     
 
     
-<div id="editorDiv" style="position: fixed; top:0; display:inline-block; background-color: gray; width:100%; z-index: 100;"> 
-<div id="editControl" style="display:inline-block;"> 
+<div id="editorDiv" class="editor" > 
+<div id="textDivold"> 
 
 <textarea id="svg_source" class="abc_textarea" spellcheck="false" cols="120" rows="10" style="display: none;" >
 </textarea>
     
-<textarea class="abc_textarea" spellcheck="false" id="abc" cols="120" rows="10"  style="display: inline;">
+<textarea class="abc_textarea" spellcheck="false" id="abcc" cols="120" rows="10"  style="display: none;">
+X:1006 %isto é um comentario.
+%isto também é um comentario.
+%%barnumbers 1 %isto também é um comentario.
+%%papersize A4
+%%landscape
+%%pagenumbering
+T:Hino do Grêmio %isto também é um comentario.
+C:Lupicínio Rodrigues
+C:(<a class="abc_link" href=https://www.facebook.com/groups/toquegaitaponto/?fref=nf target=_blank>arr. Cezar Ferreira</a>)
+Z:Flávio Vani
+N:Mapa para Acordeons Diatônicos powered by ABCXJS.
+F:https://www.youtube-nocookie.com/embed/J7cWbUVw97c
+L:1/8
+Q:140
+M:4/4
+K:C
+V:melodia clef=treble
+|: "C"g2 e3/2d1/2 c2 d3/2e1/2 | "G"d2 G4 z2 | "C"g2 e3/2d1/2 c2 d3/2e1/2 | "G"d4 z2 e3/2f1/2 |
+w: A- té a pé nós i-re-mos Pa ra o que der e vier Mas o 
+|"C"g2 ^f3/2g1/2 "C5+"a2 g3/2a1/2 | "Dm"b2 a2 z2 e3/2f1/2 | "C"g2 a3/2g1/2 "G"d2 f3/2e1/2 | "C"c6 z2 :|
+w:cer-to é que nós es-ta-remos Com o Grêmio onde o Grêmio es-ti-ver
+V:baixo clef=bass
+|: C,2 [C,E,G,] 2 C,2 [C,E,G,] 2 | G,,2 [G,B,d,] 2 G,,2 [G,B,d,] 2 |  C,2 [C,E,G,] 2 C,2 [C,E,G,] 2 | G,,2 [G,B,d,] 2 G,,2 [G,B,d,] 2 |
+| C,2z2 A,,2z2 | F,,2 [F,A,c,] 2 F,,2 [F,A,c,] 2 | C,,2 [G,B,d,] 2 G,,2 [G,B,d,] 2 |  C,2 [C,E,G,] 2 C,2 [C,E,G,] 2:|
+V:tab clef=accordionTab
+|: C+92 c+7'1.5 >+80.5 C+6'2 c+81.5 >+7'0.5 | G-7'2 g-5'2 G->2 g-z2 | C+92 c+7'1.5 >+80.5 C+6'2 c+81.5 >+7'0.5 | G-7'2 g->2 G-z2 g-91.5 >-8'0.5 |
+| C+8'2 z-a1.5 z-9'0.5 A-b2 z-9'1.5 z-b0.5 | F-a'2 f-b2 F-z2 f-91.5 >-8'0.5 | C+8'2 g-b1.5 >-9'0.5 G-7'2 g-8'1.5 >-90.5 | C+6'2 c+>2 C+>2 c+z2 :|
+</textarea>
+    
+<textarea id="abcd" class="abc_textarea" spellcheck="false" cols="120" rows="10"  style="display: none;">
+X:2020
+%%barnumbers 1
+%%papersize A4
+%%pagenumbering
+%%staffsep 20
+%barsperstaff 4
+T:Baile de Candieiro (club)
+R:rancheira
+Z:Flávio Vani
+L:1/8
+M:3/4
+Q:130
+K:F
+V:1 clef=treble
+| C4 |!segno! D4 |: E4 | F4 !dacoda! |1 G4 !dsalcoda!:|2 C4 | !coda!G4 |
+%teste13 - workaround  || C4 | !segno! D4 | E4 |!dacoda! e4 | F4 | !dsalcoda! f4 |!coda! G4 | A4 !fine!|
+%| C4 | !segno! D4 | E4 | e4 |1 F4 | !dsalfine! f4 |2 G4 | A4 !fine!|
+%teste12 | C4 | !segno! D4 | E4 | e4 | F4 |1 !dsalfine! f4 |2 G4 | A4 !fine!|
+%teste11 | C4 | !segno! D4 | E4 !dacoda!| e4 | F4 | f4 | G4 | A4 !dsalcoda!|
+%teste10 | C4 | !segno! D4 | E4 !dacoda!| e4 | F4 | f4 !coda!| G4 | A4 !dsalcoda!|
+%teste09 | C4 |:!segno! D4 | E4 :|: F4 !fine!| G4 :| A4 !dsalfine!|
+%teste08 | C4 |:!segno! D4 | E4 :|: F4 | G4 :| A4 !dasegno!|
+%teste07 | C4 |: D4 | E4 :|: F4 | G4 :| A4 !dacapo!|
+%teste06 |: D4 | ^D4 |1 E4 :|2 F4 | G4 |1 ^G4 :|2 A4 | B4 |
+%teste05 |: D4 | ^D4 | E4 :| F4 | G4 | ^G4 :| A4 | B4 |
+%teste04 | C4 |: D4 |1 E4 :|2 F4 | G4 :| A4 |
+%teste03 | C4 |: D4 | E4 :| F4 | G4 :| A4 |
+%teste02 | C4 |: D4 | E4 :|: F4 | G4 :| A4 |
+%teste01 | C4 |: D4 | E4 :| F4 |
+</textarea>
+    
+    
+<textarea id="abc" class="abc_textarea" spellcheck="false" cols="120" rows="10"  style="display: none;">
 X:1015
 %%papersize A4
 %%barnumbers 0
@@ -213,67 +279,10 @@ V:3 accordionTab
 | D-[13']2 >-2 d-3 D-3'2 d-42 | D-> >-1 >-2 d-3 D-3'2 d-42 | G-> >-1 >-1' g+4 G+52 g+>2 | G+> >+2 >+2' g+4 G-3'2 g->2 | D-> >-1 >-1' d-2' D-3'2 d-42 | D-> >-1 >-2 d-3 D-3'2 d-42 | G+42 >+[55']  g+[>>] G+z >+4 g+3' >+5 | G+[57]2 >+[4'6'] g+[>>] G+[57]2 g+82 |
 | D-[7'3]2 >-[>4] d-[>>] D-[>3]2 d-[>4]2 | D-[>3']2 >-[>4] d-[>>] D-[>2']2 d-[>3]2 | G+[83]2 >+[>5] g+[>>] G+[>4]2 g+[>3']2 | G+[>4']2 >+[>5] g+[>>] G+[>3']2 g+[>4]2 | D-[7'3]2 >-[>4] d-[>>] D-[>3]2 d-[>4]2 | D-[>3']2 >-[>4] d-[>>] D-[>2']2 d-[>3]2 | G+42 >+[455'] g+[>>>] G+z >+4 g+3' >+5 | z+[57]2 z+[4'6']2 g+[55'7]2 z+z2 |]
 </textarea>
+</div> 
     
-<textarea id="abcd" class="abc_textarea" spellcheck="false" cols="120" rows="10"  style="display: none;">
-X:2020
-%%barnumbers 1
-%%papersize A4
-%%pagenumbering
-%%staffsep 20
-%barsperstaff 4
-T:Baile de Candieiro (club)
-R:rancheira
-Z:Flávio Vani
-L:1/8
-M:3/4
-Q:130
-K:F
-V:1 clef=treble
-| C4 |!segno! D4 |: E4 | F4 !dacoda! |1 G4 !dsalcoda!:|2 C4 | !coda!G4 |
-%teste13 - workaround  || C4 | !segno! D4 | E4 |!dacoda! e4 | F4 | !dsalcoda! f4 |!coda! G4 | A4 !fine!|
-%| C4 | !segno! D4 | E4 | e4 |1 F4 | !dsalfine! f4 |2 G4 | A4 !fine!|
-%teste12 | C4 | !segno! D4 | E4 | e4 | F4 |1 !dsalfine! f4 |2 G4 | A4 !fine!|
-%teste11 | C4 | !segno! D4 | E4 !dacoda!| e4 | F4 | f4 | G4 | A4 !dsalcoda!|
-%teste10 | C4 | !segno! D4 | E4 !dacoda!| e4 | F4 | f4 !coda!| G4 | A4 !dsalcoda!|
-%teste09 | C4 |:!segno! D4 | E4 :|: F4 !fine!| G4 :| A4 !dsalfine!|
-%teste08 | C4 |:!segno! D4 | E4 :|: F4 | G4 :| A4 !dasegno!|
-%teste07 | C4 |: D4 | E4 :|: F4 | G4 :| A4 !dacapo!|
-%teste06 |: D4 | ^D4 |1 E4 :|2 F4 | G4 |1 ^G4 :|2 A4 | B4 |
-%teste05 |: D4 | ^D4 | E4 :| F4 | G4 | ^G4 :| A4 | B4 |
-%teste04 | C4 |: D4 |1 E4 :|2 F4 | G4 :| A4 |
-%teste03 | C4 |: D4 | E4 :| F4 | G4 :| A4 |
-%teste02 | C4 |: D4 | E4 :|: F4 | G4 :| A4 |
-%teste01 | C4 |: D4 | E4 :| F4 |
-</textarea>
-    
-    
-<textarea id="abcc" class="abc_textarea" spellcheck="false" cols="120" rows="10"  style="display: none;">
-X:1017
-%%barnumbers 1
-%%papersize A4
-%%landscape
-%%pagenumbering
-%%staffsep 20
-T:Tristeza do Jeca 
-C:Angelino de Oliveira
-Z:Flávio Vani
-R:Baião
-K:G
-L:1/8
-M:2/4
-Q:60
-% verificar bug de "=G" !== "G"
-V:1 treble
-%| ^G G- | G |
-%| [^GD] [GD]- | [GD] |
-| z [^G,D]-[G,D]/2-[G,/2D/2]  [=G,D]- | [G,D]/2 B/2 [A,D] z2 !dacoda! |
-V:2 bass
-| B,,3/2[G,/2B,/2D/2] G,,[G,B,D] | D,,3/2[D,/2F,/2A,/2] D,,[D,F,A,] |
-V:3 accordionTab
-</textarea>
-   </div>
-    <br/>
-    <div id="outrosControles" style="display:inline-block; color: #FFFFFF; background-color: #000; padding: 2px;">
+    <div id="textDiv" class="editorText"></div>
+    <div id="outrosControles" class="editorControles">
         <span id="spanNomeGaita">Acordeons: </span>
         <select id="selGaitas" ></select>
         <select id="selKey" ></select>
@@ -485,7 +494,7 @@ V:3 accordionTab
                     
                     window.print();
                     
-                    document.body.style.paddingTop = '260px';
+                    document.body.style.paddingTop = '240px';
                     document.getElementById("warningsDiv").style.display = "inline";
                     document.getElementById("editorDiv").style.display = "inline";
                     document.getElementById("keyboardDiv").style.display = kd;

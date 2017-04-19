@@ -106,102 +106,89 @@ ABCXJS.edit.KeySelector.prototype.addChangeListener = function(editor) {
   };
 };
 
-ABCXJS.edit.EditArea = function(textareaid) {
-  this.textarea = document.getElementById(textareaid);
-  
-  this.cmEditor = CodeMirror.fromTextArea(this.textarea, { lineNumbers: true, mode: "abcx", readonly:true } );
-  this.cmEditor.setSize("115%", "260");
-  
-  this.initialText = this.textarea.value;
-  this.textChanged = true; // vou usar para recalcular os dados de scroll da textarea
-  this.isDragging = false;
-  this.changeListener;
+ABCXJS.edit.EditArea = function (textareaid) {
+    this.textarea = document.getElementById(textareaid);
+
+    this.aceEditor = ace.edit("textDiv");
+    this.aceEditor.setTheme("ace/theme/eclipse");
+    this.aceEditor.getSession().setMode("ace/mode/abcx");
+    this.aceEditor.setOptions( {highlightActiveLine: false, selectionStyle: "text", cursorStyle: "smooth"} );
+    this.aceEditor.renderer.setOptions( {highlightGutterLine: false, showPrintMargin: false, showFoldWidgets: false } );
+    this.aceEditor.$blockScrolling = Infinity;
+    this.aceEditor.setValue(this.textarea.value);
+    this.Range = require("ace/range").Range;
+
+    this.initialText = this.textarea.value;
+    this.textChanged = true; // vou usar para recalcular os dados de scroll da textarea
+    this.isDragging = false;
+    this.changeListener;
 };
 
 ABCXJS.edit.EditArea.prototype.addChangeListener = function (listener) {
     var that = this;
     this.changelistener = listener;
 
-    this.cmEditor.on('mousedown', function (ev) {
-        that.cmEditor.getWrapperElement().onmouseup = function () {
-            that.isDragging = false;
-            listener.updateSelection();
-        };
-        that.isDragging = true;
-    });
-
-    this.cmEditor.on('change', function (ev) {
-        that.textChanged = true; // vou usar para recalcular os dados de scroll da textarea
-        listener.fireChanged();
-    });
+//    this.aceEditor.on('mousedown', function (ev) {
+//        that.aceEditor.getWrapperElement().onmouseup = function () {
+//            that.isDragging = false;
+//            listener.updateSelection();
+//        };
+//        that.isDragging = true;
+//    });
+//
+//    this.aceEditor.on('change', function (ev) {
+//        that.textChanged = true; // vou usar para recalcular os dados de scroll da textarea
+//        listener.fireChanged();
+//    });
 
 };
 
 ABCXJS.edit.EditArea.prototype.getString = function() {
-  return this.cmEditor.getValue(); 
+  return this.aceEditor.getValue(); 
 };
 
-ABCXJS.edit.EditArea.prototype.setString = function(str, noRefresh ) {
-  this.textChanged = true; // vou usar para recalcular os dados de scroll da textarea
-  this.cmEditor.setValue( str ); 
-  this.cmEditor.setCursor( 0, 0 ); 
-  this.initialText = this.getString();
-  if (this.changelistener && typeof( noRefresh ) === 'undefined' ) {
-    this.changelistener.fireChanged();
-  }
+ABCXJS.edit.EditArea.prototype.setString = function (str, noRefresh) {
+    this.textChanged = true; // vou usar para recalcular os dados de scroll da textarea
+    this.aceEditor.setValue(str);
+    this.aceEditor.clearSelection();
+
+    this.initialText = this.getString();
+    
+    if (this.changelistener && typeof (noRefresh) === 'undefined') {
+        this.changelistener.fireChanged();
+    }
 };
 
 ABCXJS.edit.EditArea.prototype.getSelection = function() {
-    return this.cmEditor.listSelections();
+    return this.aceEditor.selection.getAllRanges();
 };
 
 ABCXJS.edit.EditArea.prototype.setSelection = function (abcelem) {
-    
-    if (abcelem && abcelem.position && abcelem.position.selectable) {
-        // determinar um jeito de fazer isso executar em tempo hábil para uma música grande
-        this.cmEditor.addSelection(abcelem.position.anchor, abcelem.position.head );
-    }
-//  this.cmEditor.setSelections( 
-//        [ 
-//             { anchor: {line:17,ch:1}, head: {line:17,ch:10} }
-//            ,{ anchor: {line:19,ch:1}, head: {line:19,ch:10} }
-//            ,{ anchor: {line:21,ch:1}, head: {line:21,ch:10} }
-//             
-//        ], 2, {scroll: true} 
-//    ); 
-//    
-//      
-////    if (this.textarea.setSelectionRange)
-////        this.textarea.setSelectionRange(start, end);
-////    else if (this.textarea.createTextRange) {
-////        // For IE8
-////        var e = this.textarea.createTextRange();
-////        e.collapse(true);
-////        e.moveEnd('character', end);
-////        e.moveStart('character', start);
-////        e.select();
-////    }
-////    this.scrollTo(start);
-////    this.textarea.focus();
+    if (abcelem && abcelem.position) {
+        
+        var range = new this.Range(abcelem.position.anchor.line, abcelem.position.anchor.ch, abcelem.position.head.line, abcelem.position.head.ch);
+
+        this.aceEditor.selection.addRange(range);
+        if(abcelem.position.selectable || !player.playing)
+            this.aceEditor.scrollToLine(range.start.row);
+    }   
 };
 
 ABCXJS.edit.EditArea.prototype.clearSelection = function (abcelem) {
     
     if (abcelem && abcelem.position) {
+    //var Range = require("ace/range").Range;
+
+        var range = new this.Range(abcelem.position.anchor.line, abcelem.position.anchor.ch, abcelem.position.head.line, abcelem.position.head.ch);
+        var aSel = this.getSelection();
         
-        var aSel = this.cmEditor.listSelections();
-        var p = abcelem.position;
+        this.aceEditor.selection.toSingleRange(); 
+        this.aceEditor.clearSelection(); 
         
-        this.cmEditor.setCursor(0,0); // desmarca tudo
-        
-        if( aSel.length > 2 ) { // ver próximo comentário
-            for( var r = 1; r < aSel.length; r ++  ) { // começo em 1 pq parece que codemirror sempre retorna uma posição 0,0 no array[0].
-                if( p.anchor.line === aSel[r].anchor.line && p.anchor.ch === aSel[r].anchor.ch &&  
-                    p.head.line === aSel[r].head.line && p.head.ch === aSel[r].head.ch  ) {
-                    continue; // aSel.splice( r, 1 ); // este é o elemento não será remarcado
-                } else {
-                    this.cmEditor.addSelection( aSel[r].anchor,  aSel[r].head );
-                }
+        for( var r = 0; r < aSel.length; r ++  ) { // começo em 1 pq parece que codemirror sempre retorna uma posição 0,0 no array[0].
+            if( ! aSel[r].isEqual(range) ) {
+                this.aceEditor.selection.addRange(aSel[r]);
+                //this.aceEditor.scrollToLine(aSel[r].start.row);
             }
         }
     }
