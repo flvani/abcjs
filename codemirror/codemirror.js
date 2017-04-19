@@ -3722,6 +3722,10 @@ function endOperation(cm) {
 // that the minimum number of relayouts are required.
 function endOperations(group) {
   var ops = group.ops
+  //if(player.playing) {
+  //      ops[0].updateInput = false;
+//        ops[0].cm.options.mode=null;
+//  }
   for (var i = 0; i < ops.length; i++) // Read DOM
     { endOperation_R1(ops[i]) }
   for (var i$1 = 0; i$1 < ops.length; i$1++) // Write DOM (maybe)
@@ -4116,6 +4120,8 @@ function maybeClipScrollbars(cm) {
 // false.
 function updateDisplayIfNeeded(cm, update) {
   var display = cm.display, doc = cm.doc
+  
+//  if(player.playing) return;
 
   if (update.editorIsHidden) {
     resetView(cm)

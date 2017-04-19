@@ -625,7 +625,28 @@ window.ABCXJS.data.Tune = function() {
         delete this.potentialEndBeam;
     };
 
-    this.appendElement = function(type, line, startChar, endChar, hashParams)
+    this.addPosition = function(line, startChar, endChar, hashParams, currentVoice) {
+        // flavio - mudando a forma de localizar o elemento ABCX
+        
+        if( ABCXJS.math.isNumber(line) &&
+            ABCXJS.math.isNumber(startChar) &&
+            ABCXJS.math.isNumber(endChar) ) {
+            hashParams.position = { anchor: {line: line, ch: startChar}, head: {line: line,ch: endChar} };     
+            if( currentVoice && currentVoice.staffNum === 2 ) {
+                hashParams.position.selectable=true;
+            }
+        }
+
+        //        if( line )
+        //        hashParams.line =  line;
+        //        if (startChar !== null)
+        //            hashParams.startChar = startChar;
+        //        if (endChar !== null)
+        //            hashParams.endChar = endChar;
+        
+    };
+    
+    this.appendElement = function(type, line, startChar, endChar, hashParams, currentVoice)
     {
         var This = this;
         var pushNote = function(hp) {
@@ -643,12 +664,11 @@ window.ABCXJS.data.Tune = function() {
             }
             This.lines[This.lineNum].staffs[This.staffNum].voices[This.voiceNum].push(hp);
         };
+        
         hashParams.el_type = type;
-        hashParams.line =  line;
-        if (startChar !== null)
-            hashParams.startChar = startChar;
-        if (endChar !== null)
-            hashParams.endChar = endChar;
+        
+        this.addPosition(line, startChar, endChar, hashParams, currentVoice);
+        
         var endBeamHere = function() {
             This.potentialStartBeam.startBeam = true;
             hashParams.endBeam = true;
@@ -698,7 +718,7 @@ window.ABCXJS.data.Tune = function() {
         pushNote(hashParams);
     };
 
-    this.appendStartingElement = function(type, currTexLineNum, startChar, endChar, hashParams2)
+    this.appendStartingElement = function(type, line, startChar, endChar, hashParams2)
     {
         // If we're in the middle of beaming, then end the beam.
         this.closeLine();
@@ -739,8 +759,7 @@ window.ABCXJS.data.Tune = function() {
         for (var i = 0; i < voice.length; i++) {
             if (voice[i].el_type === 'note' || voice[i].el_type === 'bar') {
                 hashParams.el_type = type;
-                hashParams.startChar = startChar;
-                hashParams.endChar = endChar;
+                this.addPosition(line, startChar, endChar, hashParams);
                 if (impliedNaturals)
                     hashParams.accidentals = impliedNaturals.concat(hashParams.accidentals);
                 voice.push(hashParams);
@@ -748,8 +767,7 @@ window.ABCXJS.data.Tune = function() {
             }
             if (voice[i].el_type === type) {
                 hashParams.el_type = type;
-                hashParams.startChar = startChar;
-                hashParams.endChar = endChar;
+                this.addPosition(line, startChar, endChar, hashParams);
                 if (impliedNaturals)
                     hashParams.accidentals = impliedNaturals.concat(hashParams.accidentals);
                 voice[i] = hashParams;
@@ -873,7 +891,7 @@ window.ABCXJS.data.Tune = function() {
             // Some stuff just happens for the first voice
             createVoice(params);
             if (params.part)
-                This.appendElement('part', null, params.startChar, params.endChar, {title: params.part});
+                This.appendElement('part', null, null, null, {title: params.part}); // flavio anulou
             if (params.meter !== undefined)
                 This.lines[This.lineNum].staffs[This.staffNum].meter = params.meter;
         };

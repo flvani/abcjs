@@ -16,6 +16,7 @@
 "use strict";
 
 CodeMirror.defineMode("abcx", function(conf, parserConf) {
+ 
   var ERRORCLASS = "error";
 
   function wordRegexp(words) {
@@ -25,52 +26,47 @@ CodeMirror.defineMode("abcx", function(conf, parserConf) {
     return new RegExp("^((" + words.join(")|(") + "))\\b");
   }
 
-  //var operators = /^(?:->|=>|\+[+=]?|-[\-=]?|\*[\*=]?|\/[\/=]?|[=!]=|<[><]?=?|>>?=?|%=?|&=?|\|=?|\^=?|\~|!|\?|(\%\%|or|and|\|\||&&|\?)=)/;
-  var operators = "/";
-  var delimiters = /^(?:[()\[\]{},:`=;]|\.\.?\.?)/;
-  var delimiters = /^(?:[|\!\[\]\'\,\-\^]|\.\.?\.?)/;
-  var identifiers = /^( |\n|\r|\t)([ABCDEFGHIJKLMNOPQRSTUVXYZ]\:)()/;
-  var identifiers = /^( |\n|\r|\t)([y]\:)()/;
-  var atProp = /^%%[_A-Za-z$][_A-Za-z$0-9]*/;
-  var atField = /^( |\n|\r|\t)([ABCDEFGHIJKLMNOPQRSTUVXYZ]\:)()/;
-
-  var fieldOperators = wordRegexp(["A\:","B\:","C\:","D\:","E\:","F\:","G\:","H\:","I\:","J\:","K\:","L\:","M\:","N\:","O\:","P\:","Q\:","R\:","S\:","T\:","U\:","V\:","X\:","Y\:","Z\:","W\:","w\:"]);
-                              
-  var indentKeywords = ["A","B","C","D","E","F","G","z", 'x', '>', '-'];
-  var indentKeywords = [];
-                    
-  var commonKeywords = [
-                'accordionTab', 'treble', 'bass', 'tenor', 'alto', 'none' 
-               ,'merge', 'up', 'down', 'middle', 'tab', 'tablatura', 'tablature', 'melodia', 'baixo', 'baixos', 'melody' ];
-
-  var keywords = wordRegexpBlank(indentKeywords.concat(commonKeywords));
-
-  //indentKeywords = wordRegexp(indentKeywords);
-  
-  var commonConstants = ["NaN"];
-  var constants = wordRegexp(commonConstants);
-
-
   var stringPrefixes = /^('{3}|\"{3}|['\"])/;
-  var regexPrefixes = /^(\/{3}|\/)/;
+  var delimiters = /^(?:[()\!\[\]\'\,\-\+\^\_\=\{\}]|\.\.?\.?)/;
+  var identifiers = /^( |\n|\r|\t)([y]\:)()/;
+  var directives = /^%%[_A-Za-z$][_A-Za-z$0-9]*/;
+
+  var barDelimiters = wordRegexp([ "\\:", "\\|", "\\[\\|", "\\|\\]" ]);
+    
+  var fields = wordRegexp([
+        "A:","B:","C:","D:","E:","F:","G:","H:","I:","J:","K:","L:","M:","N:","O:","P:","Q:","R:","S:","T:","U:","V:","X:","Y:","Z:"]);
+                              
+  var attributes = wordRegexpBlank([
+        "clef", "stem", 'class', 'href', 'fref', 'target', 'nm', 'name' ]);
+                    
+  var keyValues = wordRegexpBlank([
+        "accordionTab", 'treble', 'bass', 'tenor', 'alto', 'none', 'A4', 'letter', 'legal',  "http",  "https", 'nf', '_blank'  
+       ,"merge", 'up', 'down', 'middle', 'tab', 'tablatura', 'tablature', 'melodia', 'baixo', 'baixos', 'melody'
+       ,"segno", "dacapo", "dacoda",  "dasegno",  "coda",  "dsalfine",  "dcalfine",  "dsalcoda",  "dcalcoda",  "fine", "D.C",  "D.S" ]);
+
 
   // Tokenizers
   function tokenBase(stream, state) {
+      
     if (stream.eatSpace()) {
       return null;
     }
 
     var ch = stream.peek();
 
-    if (stream.match(atProp) || state.prop && stream.match(identifiers)) {
+    if (stream.match(directives) || state.prop && stream.match(identifiers)) {
       return "directive";
     }
     
-    if (stream.match(fieldOperators) || state.prop && stream.match(identifiers)) {
+    if (stream.match(fields) || state.prop && stream.match(identifiers)) {
       return "operator";
     }
     
-    if (stream.match(keywords)) {
+    if (stream.match(attributes)) {
+      return "attribute";
+    }
+    
+    if (stream.match(keyValues)) {
       return "keyword";
     }
     
@@ -80,60 +76,30 @@ CodeMirror.defineMode("abcx", function(conf, parserConf) {
       return "comment";
     }
     
-    stream.next();
-    return 'string';
-    
-    
-    
-    // Handle diretives
-    if (stream.match("%%")) {
-        
-      if(!stream.skipTo('%') ) {
-        stream.skipToEnd();
-      };
-      return "directive";
-    }
-
-    // Single line comment
-    if (ch === "%") {
+    // Handle words
+    if (stream.match("W:") || stream.match("w:") ) {
       stream.skipToEnd();
-      return "comment";
+      return "string-2";
     }
     
-    
-    // Handle fields 
-    if (stream.match(fieldOperators)) {
-      return "operator";
+    if (stream.match(barDelimiters)) {
+      return "punctuation-2";
     }
-    
-    
-    if (stream.match(keywords)) {
-      return "keyword";
-    }
-    
-    // Handle non-detected items
-    stream.next();
-    return 'string';
     
     if (stream.match(delimiters)) {
       return "punctuation";
     }
     
-    
-    
-    
-//    //Handle abcnotes
-//    if (stream.match(/^-?[A-G][0-9\.]/, false)) {
-//      return "operator";
-//    }
+    // Handle strings
+    if (stream.match(stringPrefixes)) {
+      state.tokenize = tokenFactory(stream.current(), false, "string");
+      return state.tokenize(stream, state);
+    }
 
     // Handle number literals
     if (stream.match(/^-?[0-9\.]/, false)) {
       var floatLiteral = false;
       // Floats
-      if (stream.match(/^-?\d*\.\d+(e[\+\-]?\d+)?/i)) {
-        floatLiteral = true;
-      }
       if (stream.match(/^-?\d+\.\d*/)) {
         floatLiteral = true;
       }
@@ -150,12 +116,8 @@ CodeMirror.defineMode("abcx", function(conf, parserConf) {
       }
       // Integers
       var intLiteral = false;
-      // Hex
-      if (stream.match(/^-?0x[0-9a-f]+/i)) {
-        intLiteral = true;
-      }
       // Decimal
-      if (stream.match(/^-?[1-9]\d*(e[\+\-]?\d+)?/)) {
+      if (stream.match(/^-?[1-9]\d*(\/[\+\-]?\d+)?/)) {
         intLiteral = true;
       }
       // Zero by itself with no other piece of number.
@@ -166,49 +128,10 @@ CodeMirror.defineMode("abcx", function(conf, parserConf) {
         return "number";
       }
     }
-
-    // Handle strings
-    if (stream.match(stringPrefixes)) {
-      state.tokenize = tokenFactory(stream.current(), false, "string");
-      return state.tokenize(stream, state);
-    }
-    // Handle regex literals
-    if (stream.match(regexPrefixes)) {
-      if (stream.current() !== "/" || stream.match(/^.*\//, false)) { // prevent highlight of division
-        state.tokenize = tokenFactory(stream.current(), true, "string-2");
-        return state.tokenize(stream, state);
-      } else {
-        stream.backUp(1);
-      }
-    }
-
-    // Handle operators and delimiters
-    if (stream.match(operators)) {
-      return "operator";
-    }
-    if (stream.match(delimiters)) {
-      return "punctuation";
-    }
-
-    if (stream.match(constants)) {
-      return "atom";
-    }
-
-    if (stream.match(atProp) || state.prop && stream.match(identifiers)) {
-      return "property";
-    }
-
-    if (stream.match(keywords)) {
-      return "keyword";
-    }
-
-    if (stream.match(identifiers)) {
-      return "variable";
-    }
-
-    // Handle non-detected items
+    
     stream.next();
-    return 'string';
+    return 'identifier';
+    
   }
 
   function tokenFactory(delimiter, singleline, outclass) {
@@ -238,114 +161,6 @@ CodeMirror.defineMode("abcx", function(conf, parserConf) {
     };
   }
 
-//  function longComment(stream, state) {
-//    while (!stream.eol()) {
-//      stream.eatWhile(/[^#]/);
-//      if (stream.match("###")) {
-//        state.tokenize = tokenBase;
-//        break;
-//      }
-//      stream.eatWhile("#");
-//    }
-//    return "comment";
-//  }
-
-//  function indent(stream, state, type) {
-//    type = type || "coffee";
-//    var offset = 0, align = false, alignOffset = null;
-//    for (var scope = state.scope; scope; scope = scope.prev) {
-//      if (scope.type === "coffee" || scope.type == "}") {
-//        offset = scope.offset + conf.indentUnit;
-//        break;
-//      }
-//    }
-//    if (type !== "coffee") {
-//      align = null;
-//      alignOffset = stream.column() + stream.current().length;
-//    } else if (state.scope.align) {
-//      state.scope.align = false;
-//    }
-//    state.scope = {
-//      offset: offset,
-//      type: type,
-//      prev: state.scope,
-//      align: align,
-//      alignOffset: alignOffset
-//    };
-//  }
-//
-//  function dedent(stream, state) {
-//    if (!state.scope.prev) return;
-//    if (state.scope.type === "coffee") {
-//      var _indent = stream.indentation();
-//      var matched = false;
-//      for (var scope = state.scope; scope; scope = scope.prev) {
-//        if (_indent === scope.offset) {
-//          matched = true;
-//          break;
-//        }
-//      }
-//      if (!matched) {
-//        return true;
-//      }
-//      while (state.scope.prev && state.scope.offset !== _indent) {
-//        state.scope = state.scope.prev;
-//      }
-//      return false;
-//    } else {
-//      state.scope = state.scope.prev;
-//      return false;
-//    }
-//  }
-
-  function tokenLexer(stream, state) {
-    var style = state.tokenize(stream, state);
-    var current = stream.current();
-
-//    // Handle scope changes.
-//    if (current === "return") {
-//      state.dedent = true;
-//    }
-//    if (((current === "->" || current === "=>") && stream.eol())
-//        || style === "indent") {
-//      //indent(stream, state);
-//    }
-    var delimiter_index = "[({".indexOf(current);
-    
-//    if (delimiter_index !== -1) {
-//      //indent(stream, state, "])}".slice(delimiter_index, delimiter_index+1));
-//    }
-//    if (indentKeywords.exec(current)){
-//      //indent(stream, state);
-//    }
-//    if (current == "then"){
-//      dedent(stream, state);
-//    }
-//
-//
-//    if (style === "dedent") {
-//      if (dedent(stream, state)) {
-//        return ERRORCLASS;
-//      }
-//    }
-
-    delimiter_index = "])}".indexOf(current);
-    
-//    if (delimiter_index !== -1) {
-//      while (state.scope.type === "coffee" && state.scope.prev)
-//        state.scope = state.scope.prev;
-//      if (state.scope.type === current)
-//        state.scope = state.scope.prev;
-//    }
-//    if (state.dedent && stream.eol()) {
-//      if (state.scope.type == "coffee" && state.scope.prev)
-//        state.scope = state.scope.prev;
-//      state.dedent = false;
-//    }
-
-    return style;
-  }
-
   var external = {
     startState: function(basecolumn) {
       return {
@@ -360,29 +175,15 @@ CodeMirror.defineMode("abcx", function(conf, parserConf) {
       var fillAlign = state.scope.align === null && state.scope;
       if (fillAlign && stream.sol()) fillAlign.align = false;
 
-      var style = tokenLexer(stream, state);
-      if (style && style != "comment") {
+      var style = state.tokenize(stream, state);
+      if (style && style !== "comment") {
         if (fillAlign) fillAlign.align = true;
-        state.prop = style == "punctuation" && stream.current() == "."
+        state.prop = style === "punctuation" && stream.current() === ".";
       }
 
       return style;
-    },
+    }
 
-    indent: function(state, text) {
-      if (state.tokenize != tokenBase) return 0;
-      var scope = state.scope;
-      var closer = text && "])}".indexOf(text.charAt(0)) > -1;
-      if (closer) while (scope.type == "coffee" && scope.prev) scope = scope.prev;
-      var closes = closer && scope.type === text.charAt(0);
-      if (scope.align)
-        return scope.alignOffset - (closes ? 1 : 0);
-      else
-        return (closes ? scope.prev : scope).offset;
-    },
-
-    lineComment: "#",
-    fold: "indent"
   };
   return external;
 });

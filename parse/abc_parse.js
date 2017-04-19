@@ -213,13 +213,13 @@ window.ABCXJS.parse.Parse = function(transposer_, accordion_) {
                 break;
         }
 
-        this.handleTie( elem, line, xi );
+        this.handleTie( elem );
         this.handleSlur( elem, line, xi );
-        tune.appendElement(type, multilineVars.currTexLineNum, startOfLine + xi, startOfLine + xf, elem);
+        tune.appendElement(type, multilineVars.currTexLineNum, xi, xf, elem, multilineVars.currentVoice); // flavio -startOfLine
     };
     
 
-    this.handleTie = function(elem, line, i ) {
+    this.handleTie = function(elem) {
         var self = this;
         if( ! elem.pitches ) return;
         if( this.anyTieEnd(elem) )  {
@@ -1777,7 +1777,7 @@ window.ABCXJS.parse.Parse = function(transposer_, accordion_) {
         if (ret.regular) {
             // TODO: verificar porque no parabens crioulo a voz v3 nao tem clef definida
             if (multilineVars.clef && multilineVars.clef.type === "accordionTab") {
-                var startOfLine = this.getMultilineVars().iChar;
+                //var startOfLine = this.getMultilineVars().iChar;
                 if (this.accordion) {
                     if( this.transposer && this.transposer.offSet !== 0) {
                         this.transposer.deleteTabLine(lineNumber);
@@ -1786,7 +1786,7 @@ window.ABCXJS.parse.Parse = function(transposer_, accordion_) {
                         if (voice.length > 0) {
                             startNewLine();
                             for (var i = 0; i < voice.length; i++) {
-                                tune.appendElement(voice[i].el_type, multilineVars.currTexLineNum, startOfLine + voice[i].startChar, startOfLine + voice[i].endChar, voice[i]);
+                                tune.appendElement(voice[i].el_type, multilineVars.currTexLineNum, voice[i].startChar, voice[i].endChar, voice[i], multilineVars.currentVoice); // flavio - startOfline
                             }
                         }
                     }

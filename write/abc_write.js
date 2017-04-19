@@ -459,10 +459,24 @@ ABCXJS.write.Printer.prototype.notifySelect = function (abselem) {
   }
 };
 
+ABCXJS.write.Printer.prototype.notifyClear = function (abselem) {
+  abselem.unhighlight();
+  for (var i=0; i<this.listeners.length;i++) {
+    this.listeners[i].unhighlight(abselem.abcelem);
+  }
+};
+
 // notify all listeners that a graphical element has been selected
 ABCXJS.write.Printer.prototype.notifyClearNSelect = function (abselem) {
   this.clearSelection();
   this.notifySelect(abselem);
+};
+
+ABCXJS.write.Printer.prototype.clearSelection = function () {
+  for (var i=0;i<this.selected.length;i++) {
+    this.notifyClear( this.selected[i] );
+  }
+  this.selected = [];
 };
 
 ABCXJS.write.Printer.prototype.notifyChange = function (abselem) {
@@ -471,29 +485,34 @@ ABCXJS.write.Printer.prototype.notifyChange = function (abselem) {
   }
 };
 
-ABCXJS.write.Printer.prototype.clearSelection = function () {
-  for (var i=0;i<this.selected.length;i++) {
-    this.selected[i].unhighlight();
-  }
-  this.selected = [];
-};
-
-ABCXJS.write.Printer.prototype.rangeHighlight = function(start,end)
-{
-    this.clearSelection();
+ABCXJS.write.Printer.prototype.rangeHighlight = function(sel) {
+    if( sel.length === 1 && sel[0].anchor.line === sel[0].head.line && sel[0].anchor.ch === sel[0].head.ch ) {
+        return;
+    }
+    
     for (var line=0;line<this.staffgroups.length; line++) {
 	var voices = this.staffgroups[line].voices;
 	for (var voice=0;voice<voices.length;voice++) {
 	    var elems = voices[voice].children;
 	    for (var elem=0; elem<elems.length; elem++) {
-		// Since the user can highlight more than an element, or part of an element, a hit is if any of the endpoints
-		// is inside the other range.
-		var elStart = elems[elem].abcelem.startChar;
-		var elEnd = elems[elem].abcelem.endChar;
-		if ((end>elStart && start<elEnd) || ((end===start) && end===elEnd)) {
-		    this.selected[this.selected.length]=elems[elem];
-		    elems[elem].highlight();
-		}
+		// Elementos estão confinados somente em uma linha
+                if(! elems[elem].abcelem.position ) continue;
+                var elLine = elems[elem].abcelem.position.anchor.line;
+		var elStart = elems[elem].abcelem.position.anchor.ch;
+		var elEnd = elems[elem].abcelem.position.head.ch;
+                for(var s = 0; s < sel.length; s ++) {
+                    if( elLine >= sel[s].anchor.line && elLine <= sel[s].head.line ) {
+                        
+                        if ( ( elLine === sel[s].anchor.line && elEnd >= sel[s].anchor.ch && sel[s].head.line !== sel[s].anchor.line) || 
+                             ( elLine === sel[s].head.line && elStart <= sel[s].head.ch && sel[s].head.line !== sel[s].anchor.line) ||
+                             ( elStart <= sel[s].head.ch && elEnd >= sel[s].anchor.ch  && sel[s].head.line === sel[s].anchor.line ) 
+                        ) {
+                            this.selected[this.selected.length]=elems[elem];
+                            elems[elem].highlight();
+                            break;
+                        }
+                    }
+                }
 	    }
 	}
     }

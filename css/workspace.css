@@ -208,8 +208,7 @@ ul.NoBulletNoIndent {
 }
 
 .abc_textarea {
-    width: 170%;
-    //font-family:"Monaco","Verdana",monospace;
+    width: 100%;
     white-space: pre;
     overflow: auto;
     overflow-style: scrollbar;

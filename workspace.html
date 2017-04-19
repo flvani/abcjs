@@ -72,7 +72,7 @@
         
         -->
     </head>
-    <body >
+    <body class="mapa">
 
 	<script type="text/javascript" src="proto_noconflict.js" ></script>
 
@@ -139,40 +139,79 @@
     
 
     
-<div id="editorDiv" style="position: relative; top:0; display:inline-block; background-color: gray; width:100%; z-index: 100;"> 
+<div id="editorDiv" style="position: fixed; top:0; display:inline-block; background-color: gray; width:100%; z-index: 100;"> 
 <div id="editControl" style="display:inline-block;"> 
 
 <textarea id="svg_source" class="abc_textarea" spellcheck="false" cols="120" rows="10" style="display: none;" >
 </textarea>
     
 <textarea class="abc_textarea" spellcheck="false" id="abc" cols="120" rows="10"  style="display: inline;">
-X:1006 %isto é um comentario.
-%isto também é um comentario.
-%%barnumbers 1 %isto também é um comentario.
+X:1015
 %%papersize A4
-%%landscape
+%%barnumbers 0
 %%pagenumbering
-T:Hino do Grêmio %isto também é um comentario.
-C:Lupicínio Rodrigues
-C:(<a class="abc_link" href=https://www.facebook.com/groups/toquegaitaponto/?fref=nf target=_blank>arr. Cezar Ferreira</a>)
+%%score (0 1) 2 3
+T:Rincão dos Maciel
+C:Reduzino Malaquias
 Z:Flávio Vani
 N:Mapa para Acordeons Diatônicos powered by ABCXJS.
-F:https://www.youtube-nocookie.com/embed/J7cWbUVw97c
-L:1/8
-Q:140
-M:4/4
-K:C
-V:melodia clef=treble
-|: "C"g2 e3/2d1/2 c2 d3/2e1/2 | "G"d2 G4 z2 | "C"g2 e3/2d1/2 c2 d3/2e1/2 | "G"d4 z2 e3/2f1/2 |
-w: A- té a pé nós i-re-mos Pa ra o que der e vier Mas o 
-|"C"g2 ^f3/2g1/2 "C5+"a2 g3/2a1/2 | "Dm"b2 a2 z2 e3/2f1/2 | "C"g2 a3/2g1/2 "G"d2 f3/2e1/2 | "C"c6 z2 :|
-w:cer-to é que nós es-ta-remos Com o Grêmio onde o Grêmio es-ti-ver
-V:baixo clef=bass
-|: C,2 [C,E,G,] 2 C,2 [C,E,G,] 2 | G,,2 [G,B,d,] 2 G,,2 [G,B,d,] 2 |  C,2 [C,E,G,] 2 C,2 [C,E,G,] 2 | G,,2 [G,B,d,] 2 G,,2 [G,B,d,] 2 |
-| C,2z2 A,,2z2 | F,,2 [F,A,c,] 2 F,,2 [F,A,c,] 2 | C,,2 [G,B,d,] 2 G,,2 [G,B,d,] 2 |  C,2 [C,E,G,] 2 C,2 [C,E,G,] 2:|
-V:tab clef=accordionTab
-|: C+92 c+7'1.5 >+80.5 C+6'2 c+81.5 >+7'0.5 | G-7'2 g-5'2 G->2 g-z2 | C+92 c+7'1.5 >+80.5 C+6'2 c+81.5 >+7'0.5 | G-7'2 g->2 G-z2 g-91.5 >-8'0.5 |
-| C+8'2 z-a1.5 z-9'0.5 A-b2 z-9'1.5 z-b0.5 | F-a'2 f-b2 F-z2 f-91.5 >-8'0.5 | C+8'2 g-b1.5 >-9'0.5 G-7'2 g-8'1.5 >-90.5 | C+6'2 c+>2 C+>2 c+z2 :|
+F:https://www.youtube-nocookie.com/embed/QtQzhLMd6tA
+L:1/16
+Q:78
+M:2/4
+K:G
+V:0 treble stem=up
+V:1 treble
+V:2 bass
+[V:0]|x8[|!segno!x8|x8|x8|x8|x8|x8| %1
+[V:1]|[dBG]4 zdBG [| GeGd GeGd | FcFc FfFe | FcFc FfFe | GeGd GbGg | GeGd GeGd | FdFc FfFe | 
+[V:2]| z8 [| G,,3[G,B,D] G,,2[G,B,D]2 | D,,3[D,F,A,] D,,2[D,F,A,]2 | D,,3[D,F,A,] D,,2[D,F,A,]2 | G,,3[G,B,D] G,,2[G,B,D]2 | G,,3[G,B,D] G,,2[G,B,D]2 | D,,3[D,F,A,] D,,2[D,F,A,]2 |
+[V:0]|x8|x8|x8|x8|x8|x8|x8| %2
+[V:1]|[dF]2[cF]2 B2[Ac]2 | [BG]2  gb gbgb | gbdg BdGB | FdFc FfFe | FdFc FfFe| GeGd GbGg | GeGd GeGd |
+[V:2]| D,,3[D,F,A,] D,,2[D,F,A,]2 | G,,3[G,B,D] G,,2[G,B,D]2 | G,,3[G,B,D] G,,2[G,B,D]2 | D,,3[D,F,A,] D,,2[D,F,A,]2 | D,,3[D,F,A,] D,,2[D,F,A,]2 | G,,3[G,B,D] G,,2[G,B,D]2 | G,,3[G,B,D] G,,2[G,B,D]2 |
+[V:0]|x8|x8|x8|x8|x8|x8|x8| %3
+[V:1]|FdFc FfFe | edcd b2[ac]2 | [Bg]2gb gbgb | gbdg BdGB | [DD,]2F,A, D2C2- | CD,F,A, D4- | DD,G,B, D4-| 
+[V:2]| D,,3[D,F,A,] D,,2[D,F,A,]2 | D,,3[D,F,A,] D,,2[D,F,A,]2 | G,,3[G,B,D] G,,2[G,B,D]2 | G,,3[G,B,D] G,,2[G,B,D]2 | D,,3[D,F,A,] D,,2[D,F,A,]2 | D,,3[D,F,A,] D,,2[D,F,A,]2 | G,,3[G,B,D] G,,2[G,B,D]2 |
+[V:0]|x8|x8|x8|x8!dacoda!||x8|x8|x8| %4
+[V:1]|DD,G,B, D4- | DD,G,B, D2C2- | CD,F,A, D2C2 | B,2[DG]2 z B,CD || [DB]2[Ec]2[DB]2d2- | dD,F,A, D2C2- |CD,F,A, D2C2- | 
+[V:2]| G,,3[G,B,D] G,,2[G,B,D]2 | D,,3[D,F,A,] D,,2[D,F,A,]2 | D,,3[D,F,A,] D,,2[D,F,A,]2 | G,,3[G,B,D] G,,2[G,B,D]2 || G,,3[G,B,D] G,,2[G,B,D]2 | D,,3[D,F,A,] D,,2[D,F,A,]2 | D,,3[D,F,A,] D,,2[D,F,A,]2 |
+[V:0]|x8|x8|x8|x8|x8|:x8|d8-|d8| %5
+[V:1]|CD,G,B, D4- | DD,G,B, D4- | DD,G,B, D2C2- | CD,F,A, D2C2 | B,2[DG]2 z B,CD |: [DB]2[Ec]2[DB]2d2 | A2C2A,2C2 | D2C2B,2A,2 |
+[V:2]| G,,3[G,B,D] G,,2[G,B,D]2 | G,,3[G,B,D] G,,2[G,B,D]2 | D,,3[D,F,A,] D,,2[D,F,A,]2 | D,,3[D,F,A,] D,,2[D,F,A,]2 | G,,3[G,B,D] G,,2[G,B,D]2 |: G,,3[G,B,D] G,,2[G,B,D]2 | D,,3[D,F,A,] D,,2[D,F,A,]2 |D,,3[D,F,A,] D,,2[D,F,A,]2 |
+[V:0]|d8-|d8|d8-|d8|1 x8 :|2 !dsalcoda! x8 !coda! | x8| %6
+[V:1]| G,2D2B,2C2 | E2D2C2B,2 | A,2C2A,2C2 |D2C2B,2A,2 |1 B,2[B,DG]2 z B,CD :|2 B,2[B,DG]2 z dBG | [DB]2[Ec]2[DB]2d2 |
+[V:2]| G,,3[G,B,D] G,,2[G,B,D]2 | G,,3[G,B,D] G,,2[G,B,D]2 | D,,3[D,F,A,] D,,2[D,F,A,]2 | D,,3[D,F,A,] D,,2[D,F,A,]2 |1 G,,3[G,B,D] G,,2[G,B,D]2 :|2 G,,3[G,B,D] G,,2[G,B,D]2 | G,,3[G,B,D] G,,2[G,B,D]2 | 
+[V:0]|d8-|d8|d8-|d8|d8-|d8| x8|x8| %7
+[V:1]| A,2C2 A,A,CC | D2CC  B,B,A,A, | G,2D2 B,B,DD | EED2 C2B,B, | A,2C2 A,A,CC | D2C2B,2A,2 | B,2[DG]2 z B,CD | [DB]2[Ec]2[DB]2d2 |
+[V:2]| D,,3[D,F,A,] D,,2[D,F,A,]2 | D,,3[D,F,A,] D,,2[D,F,A,]2 | G,,3[G,B,D] G,,2[G,B,D]2 | G,,3[G,B,D] G,,2[G,B,D]2 | D,,3[D,F,A,] D,,2[D,F,A,]2 | D,,3[D,F,A,] D,,2[D,F,A,]2 | G,,3[G,B,D] G,,2[G,B,D]2 | G,,3[G,B,D] G,,2[G,B,D]2 |
+[V:0]|d8-|d8|d8-|d8|d8-|d8|x8|x8| %8
+[V:1]| A,2C2A,2C2 | D2C2B,2A,2 | G,2D2B,2C2 | E2D2C2B,2 | A,2C2A,2C2 |D2C2B,2A,2 | B,2[B,DG]2 z gdB | [GBe]2[GBd]2[GBe]2[GBd]2 |
+[V:2]| D,,3[D,F,A,] D,,2[D,F,A,]2 | D,,3[D,F,A,] D,,2[D,F,A,]2 | G,,3[G,B,D] G,,2[G,B,D]2 | G,,3[G,B,D] G,,2[G,B,D]2 | D,,3[D,F,A,] D,,2[D,F,A,]2 | D,,3[D,F,A,] D,,2[D,F,A,]2 | G,,3[G,B,D] G,,2[G,B,D]2 | G,,3[G,B,D] G,,2[G,B,D]2 |
+[V:0]|x8|x8|x8|x8| x8|x8|x8|x8| %9
+[V:1]| [FAd]2[Fc]2[FAf]2[Gce]2 | [FAd]2[Fc]2[FAf]2[Gce]2 | [GBe]2[Gd]2[GBd]2[Gdg]2| [GBe]2[GBd]2[GBe]2[GBd]2|[FAd]2[Fc]2[FAf]2[Ge]2 | (3ded ^cd [db]2[=ca]2 | [Bg]2gb gbgb | gbdg BdGB |
+[V:2]| D,,3[D,F,A,] D,,2[D,F,A,]2 | D,,3[D,F,A,] D,,2[D,F,A,]2 | G,,3[G,B,D] G,,2[G,B,D]2 | G,,3[G,B,D] G,,2[G,B,D]2 | D,,3[D,F,A,] D,,2[D,F,A,]2 | D,,3[D,F,A,] D,,2[D,F,A,]2 | G,,3[G,B,D] G,,2[G,B,D]2 | G,,3[G,B,D] G,,2[G,B,D]2 |
+[V:0]|x8|x8|x8|x8|x8|x8|x8|x8| %10
+[V:1]| FdFc FfFe| FdFc FfFe| GeGd GbGg|GeGd GeGd | FdFc FfFe| [de]dcd b2[cg]2 | [Bg]2gb gbgb | gbdg BdGB |
+[V:2]| D,,3[D,F,A,] D,,2[D,F,A,]2 | D,,3[D,F,A,] D,,2[D,F,A,]2 | G,,3[G,B,D] G,,2[G,B,D]2 | G,,3[G,B,D] G,,2[G,B,D]2 | D,,3[D,F,A,] D,,2[D,F,A,]2 | D,,3[D,F,A,] D,,2[D,F,A,]2 | G,,3[G,B,D] G,,2[G,B,D]2 | G,,3[G,B,D] G,,2[G,B,D]2 |
+[V:0]|x8|x8|x8|x8|x8|x8|x8|x8| %11
+[V:1]| [DD,]2F,A, D2C2- | CD,F,A, D2C2- |CD,G,B, (D4| D)D,G,B, (D4| D)D,G,B, D2(C2 | C)D,F,A, D2C2 | B,2[DG]2 z B,CD | [DB]2[Ec]2[DB]2d2 |
+[V:2]| D,,3[D,F,A,] D,,2[D,F,A,]2 | D,,3[D,F,A,] D,,2[D,F,A,]2 | G,,3[G,B,D] G,,2[G,B,D]2 | G,,3[G,B,D] G,,2[G,B,D]2 | D,,3[D,F,A,] D,,2[D,F,A,]2 | D,,3[D,F,A,] D,,2[D,F,A,]2 | G,,3[G,B,D] G,,2[G,B,D]2 | G,,3[G,B,D] G,,2[G,B,D]2 |
+[V:0]|d8-|d8|d8-|d8|d8-|d8|x8|x8 !fine! |] %12
+[V:1]| A,2C2A,2C2 | D2C2B,2A,2 | G,2D2B,2C2 | E2D2C2B,2 | A,2C2A,2C2 | D2C2B,2A,2 | B,2[B,DG]2 z B,CD | [DB]2[Ec]2[DGB]2 z2 |]
+[V:2]| D,,3[D,F,A,] D,,2[D,F,A,]2 | D,,3[D,F,A,] D,,2[D,F,A,]2 | G,,3[G,B,D] G,,2[G,B,D]2 | G,,3[G,B,D] G,,2[G,B,D]2 | D,,3[D,F,A,] D,,2[D,F,A,]2 | D,,3[D,F,A,] D,,2[D,F,A,]2 | G,,3[G,B,D] G,,2[G,B,D]2 | z4 [G,B,D]2 z2 |]
+V:3 accordionTab
+| z+[5'78]4 z+z z+8 z+7 z+6 [| G+6 >+7' >+6 g+8 G+6 >+7' g+6 >+8 | D-6 >-8 >-6 d-8 D-6 >-a d-6 >-9 | D-6 >-8 >-6 d-8 D-6 >-a d-6 >-9 | G+6 >+7' >+6 g+8 G+6 >+a g+6 >+8' | G+6 >+7' >+6 g+8 G+6 >+7' g+6 >+8 | D-6 >-7' >-6 d-8 D-6 >-a d-6 >-9 |
+| D-[67']2 >-[68] d-[>>] D-6'2 d-[78]2 | G+[67]2 >+8' g+a G+9 >+a g+9 >+a | G+9 >+a >+8 g+8' G+7 >+8 g+6 >+7 | D-6 >-7' >-6 d-8 D-6 >-a d-6 >-9 | D-6 >-7' >-6 d-8 D-6 >-a d-6 >-9 | G+6 >+7' >+6 g+8 G+6 >+a g+6 >+8' | G+6 >+7' >+6 g+8 G+6 >+7' g+6 >+8 |
+| D-6 >-7' >-6 d-8 D-6 >-a d-6 >-9 | D-9 >-7' >-8 d-7' D-a'2 d-[8b]2 | G+[78']2 >+8' g+a G+9 >+a g+9 >+a | G+9 >+a >+8 g+8' G+7 >+8 g+6 >+7 | D-[13']2 >-2 d-3 D-3'2 d-42 | D-> >-1 >-2 d-3 D-3'2 d->2 | G-> >-1 >-1' g+4 G+52 g+>2 |
+| G+> >+2 >+2' g+4 G-3'2 g->2 | D-> >-1 >-1' d-2' D-3'2 d-42 | D-> >-1 >-2 d-3 D-3'2 d-42 | G+42 >+[56] g+[>>] G+z >+4 g+3' >+5 || G+[57]2 >+[4'6'] g+[>>] G+[57]2 g-7'2 | D-> >-1 >-2 d-3 D-3'2 d-42 | D-> >-1 >-2 d-3 D-3'2 d-42 |
+| G-> >-1 >-1' g+4 G+52 g+>2 | G+> >+2 >+2' g+4 G-3'2 g->2 | D-> >-1 >-1' d-2' D-3'2 d-42 | D-> >-1 >-2 d-3 D-3'2 d-42 | G+42 >+[56] g+[>>] G+z >+4 g+3' >+5 |: G+[57]2 >+[4'6'] g+[>>] G+[57]2 g+82 | D-[7'7]2 >-[>4] d-[>>] D-[>3]2 d-[>4]2 | D-[>3']2 >-[>4] d-[>>] D-[>2']2 d-[>3]2 |
+| G+[83]2 >+[>5] g+[>>] G+[>4]2 g+[>3']2 | G+[>4']2 >+[>5] g+[>>] G+[>3']2 g+[>4]2 | D-[7'3]2 >-[>4] d-[>>] D-[>3]2 d-[>4]2 | D-[>3']2 >-[>4] d-[>>] D-[>2']2 d-[>3]2 |1 G+42 >+[455'] g+[>>>] G+z >+4 g+3' >+5 :|2 G+42 >+[455'] g+[>>>] G+z >+8 g+7 >+6 | G+[57]2 >+[4'6'] g+[>>] G+[57]2 g+82 |
+| D-[7'3]2 >-[>4] d-[>>] D-[>3] >-[>3] d-[>4] >-[>4] | D-[>3']2 >-[>4] d-[>4] D-[>2'] >-[>2'] d-[>3] >-[>3] | G+[83]2 >+[>5] g+[>>] G+[>4] >+[>4] g+[>5] >+[>5] | G+[>4'] >+[>4'] >+[>5] g+[>>] G+[>3']2 g+[>4] >+[>4] | D-[7'3]2 >-[>4] d-[>>] D-[>3] >-[>3] d-[>4] >-[>4] | D-[>3']2 >-[>4] d-[>>] D-[>2']2 d-[>3]2 | G+42 >+[55'] g+[>>] G+z >+4 g+3' >+5 | G+[57]2 >+[4'6'] g+[>>] G+[57]2 g+82 |
+| D-[7'3]2 >-[>4] d-[>>] D-[>3]2 d-[>4]2 | D-[>3']2 >-[>4] d-[>>] D-[>2']2 d-[>3]2 | G+[83]2 >+[>5] g+[>>] G+[>4]2 g+[>3']2 | G+[>4']2 >+[>5] g+[>>] G+[>3']2 g+[>4]2 | D-[7'3]2 >-[>4] d-[>>] D-[>3]2 d-[>4]2 | D-[>3']2 >-[>4] d-[>>] D-[>2']2 d-[>3]2 | G+42 >+[455'] g+[>>>] G+z >+8' g+8 >+7 | G+[677']2 >+[678] g+[>>>] G+[677']2 g+[678]2 |
+| D-[677']2 >-[68] d-[>>] D-[67a]2 d-[5'89]2 | D-[677']2 >-[68] d-[>>] D-[67a]2 d-[5'89]2 | G+[677']2 >+[68] g+[>>] G+[678]2 g+[688']2 | G+[677']2 >+[678] g+[>>>] G+[677']2 g+[678]2 | D-[677']2 >-[68] d-[>>] D-[67a]2 d-[5'9]2 | (3 D-7' >-9 >-7' ) >-x d-7' D-[7'a']2 d-[8b]2 | G+[78']2 >+8' g+a G+9 >+a g+9 >+a | G+9 >+a >+8 g+8' G+7 >+8 g+6 >+7 |
+| D-6 >-7' >-6 d-8 D-6 >-a d-6 >-9 | D-6 >-7' >-6 d-8 D-6 >-a d-6 >-9 | G+6 >+7' >+6 g+8 G+6 >+a g+6 >+8' | G+6 >+7' >+6 g+8 G+6 >+7' g+6 >+8 | D-6 >-7' >-6 d-8 D-6 >-a d-6 >-9 | D-[7'9] >-7' >-8 d-7' D-a'2 d-[89']2 | G+[78']2 >+8' g+a G+9 >+a g+9 >+a | G+9 >+a >+8 g+8' G+7 >+8 g+6 >+7 |
+| D-[13']2 >-2 d-3 D-3'2 d-42 | D-> >-1 >-2 d-3 D-3'2 d-42 | G-> >-1 >-1' g+4 G+52 g+>2 | G+> >+2 >+2' g+4 G-3'2 g->2 | D-> >-1 >-1' d-2' D-3'2 d-42 | D-> >-1 >-2 d-3 D-3'2 d-42 | G+42 >+[55']  g+[>>] G+z >+4 g+3' >+5 | G+[57]2 >+[4'6'] g+[>>] G+[57]2 g+82 |
+| D-[7'3]2 >-[>4] d-[>>] D-[>3]2 d-[>4]2 | D-[>3']2 >-[>4] d-[>>] D-[>2']2 d-[>3]2 | G+[83]2 >+[>5] g+[>>] G+[>4]2 g+[>3']2 | G+[>4']2 >+[>5] g+[>>] G+[>3']2 g+[>4]2 | D-[7'3]2 >-[>4] d-[>>] D-[>3]2 d-[>4]2 | D-[>3']2 >-[>4] d-[>>] D-[>2']2 d-[>3]2 | G+42 >+[455'] g+[>>>] G+z >+4 g+3' >+5 | z+[57]2 z+[4'6']2 g+[55'7]2 z+z2 |]
 </textarea>
     
 <textarea id="abcd" class="abc_textarea" spellcheck="false" cols="120" rows="10"  style="display: none;">
@@ -446,7 +485,7 @@ V:3 accordionTab
                     
                     window.print();
                     
-                    document.body.style.paddingTop = '190px';
+                    document.body.style.paddingTop = '260px';
                     document.getElementById("warningsDiv").style.display = "inline";
                     document.getElementById("editorDiv").style.display = "inline";
                     document.getElementById("keyboardDiv").style.display = kd;
@@ -455,6 +494,7 @@ V:3 accordionTab
                 playButton.addEventListener("click", function(e) {
                     e.preventDefault();
                     myEditor.accordion.clearKeyboard();
+                    //myEditor.editarea.cmEditor.setOption("readOnly", true);
                     player.startPlay( myEditor.tunes[0].midi );
                     //player.startDidacticPlay(myEditor.tunes[0].midi, 'note');
                     //player.startDidacticPlay(myEditor.tunes[0].midi, 'measure', 2 );

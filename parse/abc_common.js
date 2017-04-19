@@ -20,8 +20,15 @@ if (!window.ABCXJS)
 	window.ABCXJS = {};
 
 if (!window.ABCXJS.parse)
-	window.ABCXJS.misc = {};
+	window.ABCXJS.math = {};
+    
+window.ABCXJS.math.isNumber = function (n) {
+  return !isNaN(parseFloat(n)) && isFinite(n);
+};    
 
+if (!window.ABCXJS.parse)
+	window.ABCXJS.misc = {};
+    
 window.ABCXJS.misc.isOpera = function() {
     return ( !!window.opera || navigator.userAgent.indexOf(' OPR/') >= 0 );
 };

@@ -8,14 +8,14 @@
 // EditArea:
 // - constructor(textareaid)
 //		This contains the id of a textarea control that will be used.
-// - addSelectionListener(listener)
-//		A callback class that contains the entry point fireSelectionChanged()
 // - addChangeListener(listener)
 //		A callback class that contains the entry point fireChanged()
 // - getSelection()
 //		returns the object { start: , end: } with the current selection in characters
-// - setSelection(start, end)
-//		start and end are the character positions that should be selected.
+// - clearSelection(abcelem)
+//		limpa seleção do elemento no texto abc.
+// - setSelection(abcelem)
+//		seleciona elemento no texto abc.
 // - getString()
 //		returns the ABC text that is currently displayed.
 // - setString(str)
@@ -109,9 +109,8 @@ ABCXJS.edit.KeySelector.prototype.addChangeListener = function(editor) {
 ABCXJS.edit.EditArea = function(textareaid) {
   this.textarea = document.getElementById(textareaid);
   
-  //var editor = CodeMirror(document.body, {  value: "function myScript(){return 100;}\n", lineNumbers: true, mode: "javascript" } );
-  
-  var editor = CodeMirror.fromTextArea(this.textarea, {  lineNumbers: true, mode: "abcx" } );
+  this.cmEditor = CodeMirror.fromTextArea(this.textarea, { lineNumbers: true, mode: "abcx", readonly:true } );
+  this.cmEditor.setSize("115%", "260");
   
   this.initialText = this.textarea.value;
   this.textChanged = true; // vou usar para recalcular os dados de scroll da textarea
@@ -119,53 +118,95 @@ ABCXJS.edit.EditArea = function(textareaid) {
   this.changeListener;
 };
 
-ABCXJS.edit.EditArea.prototype.addSelectionListener = function(listener) {
-  this.textarea.onmousemove = function(ev) {
-	  if (this.isDragging)
-	    listener.fireSelectionChanged();
-  };
+ABCXJS.edit.EditArea.prototype.addChangeListener = function (listener) {
+    var that = this;
+    this.changelistener = listener;
+
+    this.cmEditor.on('mousedown', function (ev) {
+        that.cmEditor.getWrapperElement().onmouseup = function () {
+            that.isDragging = false;
+            listener.updateSelection();
+        };
+        that.isDragging = true;
+    });
+
+    this.cmEditor.on('change', function (ev) {
+        that.textChanged = true; // vou usar para recalcular os dados de scroll da textarea
+        listener.fireChanged();
+    });
+
 };
 
-ABCXJS.edit.EditArea.prototype.addChangeListener = function(listener) {
-  this.changelistener = listener;
-  this.textarea.onkeyup = function() {
-    this.textChanged = true; // vou usar para recalcular os dados de scroll da textarea
-    listener.fireChanged();
-  };
-  this.textarea.onmousedown = function() {
-	this.isDragging = true;
-    listener.fireSelectionChanged();
-  };
-  this.textarea.onmouseup = function() {
-	this.isDragging = false;
-    listener.fireChanged();
-  };
-  this.textarea.onchange = function() {
-    this.textChanged = true; // vou usar para recalcular os dados de scroll da textarea
-    listener.fireChanged();
-  };
+ABCXJS.edit.EditArea.prototype.getString = function() {
+  return this.cmEditor.getValue(); 
 };
 
-//TODO won't work under IE?
+ABCXJS.edit.EditArea.prototype.setString = function(str, noRefresh ) {
+  this.textChanged = true; // vou usar para recalcular os dados de scroll da textarea
+  this.cmEditor.setValue( str ); 
+  this.cmEditor.setCursor( 0, 0 ); 
+  this.initialText = this.getString();
+  if (this.changelistener && typeof( noRefresh ) === 'undefined' ) {
+    this.changelistener.fireChanged();
+  }
+};
+
 ABCXJS.edit.EditArea.prototype.getSelection = function() {
-    return {start: this.textarea.selectionStart, end: this.textarea.selectionEnd};
+    return this.cmEditor.listSelections();
 };
 
-ABCXJS.edit.EditArea.prototype.setSelection = function (start, end) {
-    if (this.textarea.setSelectionRange)
-        this.textarea.setSelectionRange(start, end);
-    else if (this.textarea.createTextRange) {
-        // For IE8
-        var e = this.textarea.createTextRange();
-        e.collapse(true);
-        e.moveEnd('character', end);
-        e.moveStart('character', start);
-        e.select();
+ABCXJS.edit.EditArea.prototype.setSelection = function (abcelem) {
+    
+    if (abcelem && abcelem.position && abcelem.position.selectable) {
+        // determinar um jeito de fazer isso executar em tempo hábil para uma música grande
+        this.cmEditor.addSelection(abcelem.position.anchor, abcelem.position.head );
     }
-    this.scrollTo(start);
-    this.textarea.focus();
+//  this.cmEditor.setSelections( 
+//        [ 
+//             { anchor: {line:17,ch:1}, head: {line:17,ch:10} }
+//            ,{ anchor: {line:19,ch:1}, head: {line:19,ch:10} }
+//            ,{ anchor: {line:21,ch:1}, head: {line:21,ch:10} }
+//             
+//        ], 2, {scroll: true} 
+//    ); 
+//    
+//      
+////    if (this.textarea.setSelectionRange)
+////        this.textarea.setSelectionRange(start, end);
+////    else if (this.textarea.createTextRange) {
+////        // For IE8
+////        var e = this.textarea.createTextRange();
+////        e.collapse(true);
+////        e.moveEnd('character', end);
+////        e.moveStart('character', start);
+////        e.select();
+////    }
+////    this.scrollTo(start);
+////    this.textarea.focus();
 };
 
+ABCXJS.edit.EditArea.prototype.clearSelection = function (abcelem) {
+    
+    if (abcelem && abcelem.position) {
+        
+        var aSel = this.cmEditor.listSelections();
+        var p = abcelem.position;
+        
+        this.cmEditor.setCursor(0,0); // desmarca tudo
+        
+        if( aSel.length > 2 ) { // ver próximo comentário
+            for( var r = 1; r < aSel.length; r ++  ) { // começo em 1 pq parece que codemirror sempre retorna uma posição 0,0 no array[0].
+                if( p.anchor.line === aSel[r].anchor.line && p.anchor.ch === aSel[r].anchor.ch &&  
+                    p.head.line === aSel[r].head.line && p.head.ch === aSel[r].head.ch  ) {
+                    continue; // aSel.splice( r, 1 ); // este é o elemento não será remarcado
+                } else {
+                    this.cmEditor.addSelection( aSel[r].anchor,  aSel[r].head );
+                }
+            }
+        }
+    }
+};
+    
 ABCXJS.edit.EditArea.prototype.scrollTo = function(start)
 {
   var found = false;  
@@ -203,22 +244,6 @@ ABCXJS.edit.EditArea.prototype.computeScrollData = function () {
        size += lines[l].length + 1;
        this.maxLine = Math.max( lines[l].length, this.maxLine );
    }
-};
-
-ABCXJS.edit.EditArea.prototype.getString = function() {
-  return this.textarea.value;
-};
-
-ABCXJS.edit.EditArea.prototype.setString = function(str, noRefresh ) {
-  return ; // flavio codemirror
-  this.textChanged = true; // vou usar para recalcular os dados de scroll da textarea
-  this.textarea.value = str;
-  this.textarea.selectionStart = 0;  
-  this.textarea.selectionEnd = 0;  
-  this.initialText = this.getString();
-  if (this.changelistener && typeof( noRefresh ) === 'undefined' ) {
-    this.changelistener.fireChanged();
-  }
 };
 
 ABCXJS.edit.EditArea.prototype.getElem = function() {
@@ -261,8 +286,6 @@ ABCXJS.edit.EditArea.prototype.getElem = function() {
 //		returns true if there has been a change since last call.
 // - updateSelection()
 //		Called when the user has changed the selection. This calls the printer to show the selection.
-// - fireSelectionChanged()
-//		Called by the textarea object when the user has changed the selection.
 // - paramChanged(printerparams)
 //		Called to signal that the printer params have changed, so re-rendering should occur.
 // - fireChanged()
@@ -339,7 +362,7 @@ ABCXJS.Editor = function(editarea, params) {
     this.keySelector.addChangeListener(this);
   }  
 
-  this.editarea.addSelectionListener(this);
+  //this.editarea.addSelectionListener(this);
   this.editarea.addChangeListener(this);
 
   if (params.canvas_id) {
@@ -605,12 +628,8 @@ ABCXJS.Editor.prototype.parseABC = function(transpose, force ) {
 ABCXJS.Editor.prototype.updateSelection = function() {
   var selection = this.editarea.getSelection();
   try {
-    this.printer.rangeHighlight(selection.start, selection.end);
+    this.printer.rangeHighlight(selection);
   } catch (e) {} // maybe printer isn't defined yet?
-};
-
-ABCXJS.Editor.prototype.fireSelectionChanged = function() {
-  this.updateSelection();
 };
 
 ABCXJS.Editor.prototype.setDirtyStyle = function(isDirty) {
@@ -680,13 +699,27 @@ ABCXJS.Editor.prototype.isDirty = function() {
 	return this.editarea.initialText !== this.editarea.getString();
 };
 
+// seleciona os obo
 ABCXJS.Editor.prototype.highlight = function(abcelem) {
   try {
-        this.editarea.setSelection(abcelem.startChar, abcelem.endChar);
+        this.editarea.setSelection(abcelem);
         if(this.accordion.render_keyboard_opts.show && !player.playing) {
             this.accordion.clearKeyboard(true);
             this.midiParser.setSelection(abcelem);
         }    
+  } catch( e ) {
+      // Firefox: aborta se a area não estiver visivel
+  } 
+};
+
+// limpa apenas a janela de texto. Os demais elementos são controlados por tempo 
+ABCXJS.Editor.prototype.unhighlight = function(abcelem) {
+  try {
+        this.editarea.clearSelection(abcelem);
+//        if(this.accordion.render_keyboard_opts.show && !player.playing) {
+//            this.accordion.clearKeyboard(true);
+//            this.midiParser.setSelection(abcelem);
+//        }    
   } catch( e ) {
       // Firefox: aborta se a area não estiver visivel
   } 

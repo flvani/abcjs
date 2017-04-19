@@ -562,10 +562,14 @@ ABCXJS.tablature.Infer.prototype.registerLine = function(appendStr) {
 };
 
 ABCXJS.tablature.Infer.prototype.add = function(child, xi, xf, line) {
-  child.startChar = this.vars.iChar+xi;
-  child.endChar = this.vars.iChar+xf;
-  child.line = line;
-  this.voice.push(child);
+    
+    if( ABCXJS.math.isNumber(line) &&
+        ABCXJS.math.isNumber(xi) &&
+        ABCXJS.math.isNumber(xf) ) {
+        child.position = { anchor: {line: line, ch: xi}, head: {line: line, ch: xf} };     
+    }
+    
+    this.voice.push(child);
 };
 
 ABCXJS.tablature.Infer.prototype.button2Hex = function( b ) {

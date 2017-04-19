@@ -355,11 +355,14 @@ ABCXJS.midi.Player.prototype.executa = function(pl) {
                 delay = self.calcTempo( elem.delay );
                 MIDI.noteOff(elem.midipitch.channel, elem.midipitch.midipitch, delay);
             });
+            var ja = '.'; // controla quais elementos absolutos foram marcados para unhighlight no mesmo item da playlist - evita dupla seleção do mesmo item
             pl.item.abcelems.forEach( function( elem ) {
                 delay = self.calcTempo( elem.delay );
-                aqui=6;
-                
-                self.highlight(elem.abcelem.parent, false, delay);
+                if( ja.indexOf('.'+elem.abcelem.parent+'.') < 0 ) {
+                    // absElem ainda não sofreu unhighlight
+                    ja += elem.abcelem.parent.gid+'.';
+                    self.highlight(elem.abcelem.parent, false, delay);
+                }
             });
         }
     } catch( err ) {
@@ -370,18 +373,21 @@ ABCXJS.midi.Player.prototype.executa = function(pl) {
 
 ABCXJS.midi.Player.prototype.calcTempo = function( val ) {
   return  val * this.tempo / 1000;   
-}
+};
+
 ABCXJS.midi.Player.prototype.highlight = function( abselem, select, delay ) {
-    if(debug) return;
+    if(debug || !this.printer ) return;
     var that = this;
+    
     if(delay) {
         window.setTimeout(function(){ that.highlight(abselem, select); }, delay*1000);
         return;
     }   
+    
     if(select) {
-        if( that.printer ) that.printer.notifySelect(abselem);
+       that.printer.notifySelect(abselem);
     } else {
-        abselem.unhighlight();
+       that.printer.notifyClear(abselem);
     }
 };
 
