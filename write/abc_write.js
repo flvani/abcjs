@@ -486,7 +486,7 @@ ABCXJS.write.Printer.prototype.notifyChange = function (abselem) {
 };
 
 ABCXJS.write.Printer.prototype.rangeHighlight = function(sel) {
-    if( sel.length === 1 && sel[0].anchor.line === sel[0].head.line && sel[0].anchor.ch === sel[0].head.ch ) {
+    if( sel.length === 1 && sel[0].start.row === sel[0].end.row && sel[0].start.column === sel[0].end.column ) {
         return;
     }
     
@@ -501,11 +501,11 @@ ABCXJS.write.Printer.prototype.rangeHighlight = function(sel) {
 		var elStart = elems[elem].abcelem.position.anchor.ch;
 		var elEnd = elems[elem].abcelem.position.head.ch;
                 for(var s = 0; s < sel.length; s ++) {
-                    if( elLine >= sel[s].anchor.line && elLine <= sel[s].head.line ) {
+                    if( elLine >= sel[s].start.row  && elLine <= sel[s].end.row ) {
                         
-                        if ( ( elLine === sel[s].anchor.line && elEnd >= sel[s].anchor.ch && sel[s].head.line !== sel[s].anchor.line) || 
-                             ( elLine === sel[s].head.line && elStart <= sel[s].head.ch && sel[s].head.line !== sel[s].anchor.line) ||
-                             ( elStart <= sel[s].head.ch && elEnd >= sel[s].anchor.ch  && sel[s].head.line === sel[s].anchor.line ) 
+                        if ( ( elLine === sel[s].start.row  && elEnd >= sel[s].start.column && sel[s].end.row !== sel[s].start.row ) || 
+                             ( elLine === sel[s].end.row && elStart <= sel[s].end.column && sel[s].end.row !== sel[s].start.row ) ||
+                             ( elStart <= sel[s].end.column && elEnd >= sel[s].start.column  && sel[s].end.row === sel[s].start.row  ) 
                         ) {
                             this.selected[this.selected.length]=elems[elem];
                             elems[elem].highlight();

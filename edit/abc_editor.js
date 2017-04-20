@@ -128,18 +128,17 @@ ABCXJS.edit.EditArea.prototype.addChangeListener = function (listener) {
     var that = this;
     this.changelistener = listener;
 
-//    this.aceEditor.on('mousedown', function (ev) {
-//        that.aceEditor.getWrapperElement().onmouseup = function () {
-//            that.isDragging = false;
-//            listener.updateSelection();
-//        };
-//        that.isDragging = true;
-//    });
-//
-//    this.aceEditor.on('change', function (ev) {
-//        that.textChanged = true; // vou usar para recalcular os dados de scroll da textarea
-//        listener.fireChanged();
-//    });
+    this.aceEditor.on('changeSelection', function (ev) {
+        listener.updateSelection();
+        // não faz mais sentido: tem que se controlar mousedown, mouseup
+        //that.isDragging = false; 
+        //that.isDragging = true;
+    });
+
+    this.aceEditor.on('change', function (ev) {
+        that.textChanged = true; // vou usar para recalcular os dados de scroll da textarea
+        listener.fireChanged();
+    });
 
 };
 
@@ -177,7 +176,6 @@ ABCXJS.edit.EditArea.prototype.setSelection = function (abcelem) {
 ABCXJS.edit.EditArea.prototype.clearSelection = function (abcelem) {
     
     if (abcelem && abcelem.position) {
-    //var Range = require("ace/range").Range;
 
         var range = new this.Range(abcelem.position.anchor.line, abcelem.position.anchor.ch, abcelem.position.head.line, abcelem.position.head.ch);
         var aSel = this.getSelection();
