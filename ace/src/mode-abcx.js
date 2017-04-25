@@ -9,51 +9,65 @@ define("ace/mode/abcx_highlight_rules",["require","exports","module","ace/lib/oo
         this.$rules = {
             start: [
                 {
-                    token: ['information.keyword.embedded', 'information.keyword.embedded'],
+                    token: ['directive', 'directive'],
                     regex: '(%%)([^%\\\\]*)',
                     comment: 'ABCX Directive'
                 },
                 {
-                    token: 'comment.line.percentage',
+                    token: 'comment.italic',
                     regex: '%.*',
                     comment: 'ABCX Comment'
                 },
                 {
-                    token: 'barline.keyword.operator',
-                    regex: '[\\[:]*[|:][|\\]:]*(?:\\[?[0-9]+)?|\\[[0-9]+',
-                    comment: 'Bar lines'
+                    token: ['information.lyrics.strong', 'information.lyrics'],
+                    regex: '^([Ww]:)([^%\\\\]*)',
+                    comment: 'Lyrics lines'
                 },
                 {
-                    token: ['information.keyword.embedded', 'information.argument.string.unquoted'],
-                    regex: '(\\[[A-Za-z]:)([^\\]]*\\])',
-                    comment: 'Embedded Header lines'
+                    token: ['keyword', 'information.variable'],
+                    regex: '^(V:)([^\\s\\\\]*)',
+                    comment: 'Voice lines'
                 },
                 {
-                    token: ['information.keyword', 'information.argument.string.unquoted'],
-                    regex: '^([A-Za-z]:)([^%\\\\]*)',
-                    comment: 'Header lines'
-                },
-                {
-                    token: ['text', 'entity.name.function', 'string.unquoted', 'text'],
+                    token: ['barline.text', 'keyword', 'information.variable', 'barline.text'],
                     regex: '(\\[)([A-Z]:)(.*?)(\\])',
                     comment: 'Inline fields'
                 },
                 {
-                    token: ['accent.constant.language', 'pitch.constant.numeric', 'duration.constant.numeric'],
-                    regex: '([\\^=_]*)([A-Ga-gz][,\']*)([0-9]*/*[><0-9]*)',
+                    token: ['keyword', 'information.variable'],
+                    regex: '^([A-Za-z]:)([^%\\\\]*)',
+                    comment: 'Header fileds'
+                },
+                {
+                    token: 'barline.operator.strong',
+                    regex: '[\\[:]*[|:][|\\]:]*(?:\\[?[0-9]+)?|\\[[0-9]+',
+                    comment: 'Bar lines'
+                },
+                {
+                    token: 'string.strong',
+                    regex: '[\\"].*?[\\"]',
+                    comment: 'ABCX annotation'
+                },
+                {
+                    token: ['attribute','information.variable'],
+                    regex: '([\\s].*?[\\=])([^\\s\\\\]*)',
+                    comment: 'ABCX attribute'
+                },
+                {
+                    token: ['accent.constant', 'pitch.constant', 'duration.constant.numeric'],
+                    regex: '([\\^=_]*)([A-Ga-gzx>][,\']*)([0-9]*[\./]*[0-9]*)',
                     comment: 'Notes'
                 },
                 {
-                    token: 'chordname.string.quoted',
-                    regex: '[\\"!]\\^.*?[\\"!]',
-                    comment: 'ABCX chord'
+                    token: ['bass.constant', 'bellows.decoration.strong', 'buttons.constant', 'duration.constant.numeric'],
+                    regex: '([A-Ga-gzxZX>]*[♭♯]*[,\']*)([+-])([0-9abc>xz][\']*)([0-9]*[\.\/><0-9]*)',
+                    comment: 'ABCX tablature elements'
                 },
                 {
-                    token: 'string.quoted',
-                    regex: '[\\"!].*?[\\"!]',
-                    comment: 'ABCX annotation'
+                    token: 'decoration.strong',
+                    regex: '([!\\+].*?[!\\+])',
+                    comment: 'ABCX decoration'
                 }
-
             ]
         };
 
@@ -228,7 +242,7 @@ define("ace/mode/abcx",["require","exports","module","ace/lib/oop","ace/mode/tex
     oop.inherits(Mode, TextMode);
 
     (function () {
-        this.$id = "ace/mode/abcx"
+        this.$id = "ace/mode/abcx";
     }).call(Mode.prototype);
 
     exports.Mode = Mode;

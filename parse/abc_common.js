@@ -1,4 +1,4 @@
-﻿//    abc_parse.js: parses a string representing ABC Music Notation into a usable internal structure.
+//    abc_parse.js: parses a string representing ABC Music Notation into a usable internal structure.
 //    Copyright (C) 2010 Paul Rosen (paul at paulrosen dot net)
 //
 //    This program is free software: you can redistribute it and/or modify

@@ -16758,7 +16758,7 @@ config.defineOptions(VirtualRenderer.prototype, "renderer", {
     theme: {
         set: function(val) { this.setTheme(val) },
         get: function() { return this.$themeId || this.theme; },
-        initialValue: "./theme/textmate",
+        initialValue: "./theme/abcx",
         handlesSet: true
     }
 });
@@ -19026,7 +19026,7 @@ exports.edit = function(el) {
         el.innerHTML = "";
     }
 
-    var doc = exports.createEditSession(value);
+    var doc = exports.createEditSession(value, 'ace/mode/abcx');
 
     var editor = new Editor(new Renderer(el));
     editor.setSession(doc);

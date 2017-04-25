@@ -544,17 +544,21 @@ ABCXJS.write.AbsoluteElement.prototype.draw = function(printer, staveInfo ) {
 ABCXJS.write.AbsoluteElement.prototype.setMouse = function(printer) {
     var self = this;
     this.svgElem = document.getElementById(self.gid);
-    this.svgElem.onmouseover =  function() {self.highlight(self);};
-    this.svgElem.onmouseout =  function() {self.unhighlight(self);};
-    this.svgElem.onclick =  function() {printer.notifyClearNSelect(self);};
+    this.svgElem.onmouseover =  function() {self.highlight(true);};
+    this.svgElem.onmouseout =  function() {self.unhighlight(true);};
+    this.svgElem.onclick =  function() {printer.notifyClearNSelect(self, true);};
  };
 
-ABCXJS.write.AbsoluteElement.prototype.highlight = function() {
+ABCXJS.write.AbsoluteElement.prototype.highlight = function(keepState) {
+    if(!this.svgElem) return;
+    if(keepState) this.svgElem.prevFill = this.svgElem.style.fill;
     this.svgElem.style.setProperty( 'fill', ABCXJS.write.highLightColor );
 };
 
-ABCXJS.write.AbsoluteElement.prototype.unhighlight = function() {
-    this.svgElem.style.setProperty( 'fill', ABCXJS.write.unhighLightColor );
+ABCXJS.write.AbsoluteElement.prototype.unhighlight = function(keepState) {
+    if(!this.svgElem) return;
+    var fill = (keepState && this.svgElem.prevFill ) ? this.svgElem.prevFill : ABCXJS.write.unhighLightColor;
+    this.svgElem.style.setProperty( 'fill', fill );
 };
 
 ABCXJS.write.RelativeElement = function(c, dx, w, pitch, opt) {

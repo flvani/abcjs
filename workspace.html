@@ -76,12 +76,6 @@
 
 	<script type="text/javascript" src="proto_noconflict.js" ></script>
 
-        <!--script  type="text/javascript" src="codemirror/codemirror.js">></script>
-        <script  type="text/javascript" src="codemirror/mode/abcx/abcx.js">></script-->
-        
-        <!--script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.2.6/ace.js" type="text/javascript" charset="utf-8"></script-->
-        <script src="ace/src/ace.js" type="text/javascript" charset="utf-8"></script>
-        
         <!-- suporte a MIDI -->
         <script type="text/javascript" src="MIDI.js/MIDI_3.00-min.js"></script>
 
@@ -127,6 +121,9 @@
         <script type="text/javascript" src="tablature/tablature_accordion_parse.js"></script>
         <script type="text/javascript" src="tablature/tablature_accordion_layout.js"></script>
         
+        <script type="text/javascript" src="ace/src/ace.js" ></script>
+ 	<script type="text/javascript" src="edit/abc_selectors.js" ></script>
+ 	<script type="text/javascript" src="edit/abc_editarea.js" ></script>
  	<script type="text/javascript" src="edit/abc_editor.js" ></script>
         
         <!--                     menor
@@ -148,13 +145,12 @@
 <textarea id="svg_source" class="abc_textarea" spellcheck="false" cols="120" rows="10" style="display: none;" >
 </textarea>
     
-<textarea class="abc_textarea" spellcheck="false" id="abcc" cols="120" rows="10"  style="display: none;">
+<textarea class="abc_textarea" spellcheck="false" id="abc" cols="120" rows="10"  style="display: none;">
 X:1006 %isto é um comentario.
 %isto também é um comentario.
 %%barnumbers 1 %isto também é um comentario.
 %%papersize A4
 %%landscape
-%%pagenumbering
 T:Hino do Grêmio %isto também é um comentario.
 C:Lupicínio Rodrigues
 C:(<a class="abc_link" href=https://www.facebook.com/groups/toquegaitaponto/?fref=nf target=_blank>arr. Cezar Ferreira</a>)
@@ -165,14 +161,14 @@ L:1/8
 Q:140
 M:4/4
 K:C
-V:melodia clef=treble
-|: "C"g2 e3/2d1/2 c2 d3/2e1/2 | "G"d2 G4 z2 | "C"g2 e3/2d1/2 c2 d3/2e1/2 | "G"d4 z2 e3/2f1/2 |
-w: A- té a pé nós i-re-mos Pa ra o que der e vier Mas o 
-|"C"g2 ^f3/2g1/2 "C5+"a2 g3/2a1/2 | "Dm"b2 a2 z2 e3/2f1/2 | "C"g2 a3/2g1/2 "G"d2 f3/2e1/2 | "C"c6 z2 :|
+V:melodia clef=treble stem=up
+[V:melodia] |: [P:Parte 1] +segno+ "C" g2 e3/2d1/2 c2 d3/2e1/2 | "G" d2 G4 z2 | "C" g2 e3/2d1/2 c2 d3/2e1/2 | "G" d4 z2 e3/2f1/2 |
+w:A- té a pé nós i-re-mos Pa ra o que der e vier Mas o 
+[V:melodia] |"C" g2 ^f3/2g1/2 "C5+" a2 g3/2a1/2 | "Dm" b2 a2 z2 e3/2f1/2 | "C" g2 a3/2g1/2 "G" d2 f3/2e1/2 | "C" c6 z2 +fine+ :|
 w:cer-to é que nós es-ta-remos Com o Grêmio onde o Grêmio es-ti-ver
 V:baixo clef=bass
-|: C,2 [C,E,G,] 2 C,2 [C,E,G,] 2 | G,,2 [G,B,d,] 2 G,,2 [G,B,d,] 2 |  C,2 [C,E,G,] 2 C,2 [C,E,G,] 2 | G,,2 [G,B,d,] 2 G,,2 [G,B,d,] 2 |
-| C,2z2 A,,2z2 | F,,2 [F,A,c,] 2 F,,2 [F,A,c,] 2 | C,,2 [G,B,d,] 2 G,,2 [G,B,d,] 2 |  C,2 [C,E,G,] 2 C,2 [C,E,G,] 2:|
+|: C,2 [C,E,G,]2 C,2 [C,E,G,]2 | G,,2 [G,B,d,]2 G,,2 [G,B,d,]2 |  C,2 [C,E,G,]2 C,2 [C,E,G,]2 | G,,2 [G,B,d,]2 G,,2 [G,B,d,]2 |
+| C,2z2 A,,2z2 | F,,2 [F,A,c,]2 F,,2 [F,A,c,]2 | C,,2 [G,B,d,]2 G,,2 [G,B,d,]2 |  C,2 [C,E,G,]2 C,2 [C,E,G,]2 :|
 V:tab clef=accordionTab
 |: C+92 c+7'1.5 >+80.5 C+6'2 c+81.5 >+7'0.5 | G-7'2 g-5'2 G->2 g-z2 | C+92 c+7'1.5 >+80.5 C+6'2 c+81.5 >+7'0.5 | G-7'2 g->2 G-z2 g-91.5 >-8'0.5 |
 | C+8'2 z-a1.5 z-9'0.5 A-b2 z-9'1.5 z-b0.5 | F-a'2 f-b2 F-z2 f-91.5 >-8'0.5 | C+8'2 g-b1.5 >-9'0.5 G-7'2 g-8'1.5 >-90.5 | C+6'2 c+>2 C+>2 c+z2 :|
@@ -211,7 +207,7 @@ V:1 clef=treble
 </textarea>
     
     
-<textarea id="abc" class="abc_textarea" spellcheck="false" cols="120" rows="10"  style="display: none;">
+<textarea id="abcc" class="abc_textarea" spellcheck="false" cols="120" rows="10"  style="display: none;">
 X:1015
 %%papersize A4
 %%barnumbers 0
@@ -281,7 +277,8 @@ V:3 accordionTab
 </textarea>
 </div> 
     
-    <div id="textDiv" class="editorText"></div>
+    <div id="textDiv2" >
+    <div id="textDiv" class="editorText"></div></div>
     <div id="outrosControles" class="editorControles">
         <span id="spanNomeGaita">Acordeons: </span>
         <select id="selGaitas" ></select>
@@ -297,6 +294,8 @@ V:3 accordionTab
         <input type="button" id="playBtn" value="Play" />
         <input type="button" id="pauseBtn" value="Pause" />
         <input type="button" id="stopBtn" value="Stop" />
+        <input type="button" id="textBtn" value="TextArea" />
+        <input type="button" id="roBtn" value="R.O." />
         <label id="currentPlayTime" style="font-weight: bold; color: yellow; padding-left: 5px; padding-right: 3px;">00:00.00</label>
     </div>
     </div> <!-- editorDiv -->
@@ -374,6 +373,8 @@ V:3 accordionTab
                 playButton = document.getElementById("playBtn");
                 pauseButton = document.getElementById("pauseBtn");
                 stopButton = document.getElementById("stopBtn");
+                textButton = document.getElementById("textBtn");
+                roButton = document.getElementById("roBtn");
                 showMapButton = document.getElementById("showMapBtn");
                 switchSourceButton = document.getElementById("switch_source");
                 cpt = document.getElementById("currentPlayTime");
@@ -446,7 +447,7 @@ V:3 accordionTab
                 };
                 
                 editorCallbackOnChange = function ( editor ) {
-                    editor.callback();
+                    window.scrollTo( 0, window.lastYpos );
                 };
                 
                 player.defineCallbackOnEnd(playerCallBackOnEnd);
@@ -454,10 +455,9 @@ V:3 accordionTab
                 player.defineCallbackOnScroll(playerCallBackOnScroll);
  
                 myEditor = new ABCXJS.Editor(
-                    "abc", 
                     {
-                         canvas_id: "canvasDiv"
-                        ,abcText: "demo"
+                         editor_id: "textDiv"
+                        ,canvas_id: "canvasDiv"
                         ,refreshController_id: "chkAutoRefresh"
                         ,keySelector_id: "selKey"
                         ,accordionSelector_id: "selGaitas"
@@ -481,6 +481,9 @@ V:3 accordionTab
                     
                 //myEditor.accordion.printKeyboard('keyboardDiv' /*, {fillColor:'yellow', openColor:'navy', closeColor:'purple', backgroundColor:'gray' }*/ );
                 myEditor.accordion.printKeyboard('keyboardDiv' );
+                
+                myEditor.setString( document.getElementById("abc").value );
+                myEditor.fireChanged( 0, {force: true} );
                     
                 printButton.addEventListener("click", function(e) {
                     e.preventDefault();
@@ -518,6 +521,16 @@ V:3 accordionTab
                     myEditor.accordion.clearKeyboard();
                     player.stopPlay();
                 }, false);
+                var visible = true;
+                textButton.addEventListener("click", function(e) {
+                    visible = !visible;
+                    myEditor.editarea.setVisible(visible);
+                }, false);
+                var readOnly=false;
+                roButton.addEventListener("click", function(e) {
+                    readOnly = !readOnly;
+                    myEditor.editarea.setReadOnly(readOnly);
+                }, false);
                 
                 showMapButton.addEventListener("click", function(e) {
                     e.preventDefault();
@@ -531,20 +544,20 @@ V:3 accordionTab
             function doTranspose(value) {
                 var doc = document.documentElement;
                 window.lastYpos = (window.pageYOffset || doc.scrollTop)  - (doc.clientTop || 0);                
-                myEditor.fireChanged(value, "force");
+                myEditor.fireChanged( value, {force: true} );
             };
 
             function doForceRefresh() {
                 var doc = document.documentElement;
                 window.lastYpos = (window.pageYOffset || doc.scrollTop)  - (doc.clientTop || 0);                
-                myEditor.fireChanged(0, "force");
+                myEditor.fireChanged( 0, {force: true} );
             };
 
             function doCheckDebug() {
                 debug = document.getElementById("chkDebug").checked;
                 var doc = document.documentElement;
                 window.lastYpos = (window.pageYOffset || doc.scrollTop)  - (doc.clientTop || 0);                
-                //myEditor.fireChanged(0, "force");
+                myEditor.fireChanged( 0, {force: true} );
             };
 
         </script>        

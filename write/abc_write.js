@@ -450,26 +450,34 @@ ABCXJS.write.Printer.prototype.addSelectListener = function (listener) {
   this.listeners[this.listeners.length] = listener;
 };
 
-// notify all listeners that a graphical element has been selected
-ABCXJS.write.Printer.prototype.notifySelect = function (abselem) {
-  this.selected[this.selected.length]=abselem;
-  abselem.highlight();
+// notify all listeners que o modelo mudou
+ABCXJS.write.Printer.prototype.notifyChange = function () {
   for (var i=0; i<this.listeners.length;i++) {
-    this.listeners[i].highlight(abselem.abcelem);
+    this.listeners[i].modelChanged && this.listeners[i].modelChanged();
   }
 };
 
+// notify all listeners that a graphical element has been selected
+ABCXJS.write.Printer.prototype.notifySelect = function (abselem, keepState) {
+  this.selected[this.selected.length]=abselem;
+  abselem.highlight(keepState);
+  for (var i=0; i<this.listeners.length;i++) {
+    this.listeners[i].highlight && this.listeners[i].highlight(abselem.abcelem);
+  }
+};
+
+// notify all listeners that a graphical element has been deselected
 ABCXJS.write.Printer.prototype.notifyClear = function (abselem) {
   abselem.unhighlight();
   for (var i=0; i<this.listeners.length;i++) {
-    this.listeners[i].unhighlight(abselem.abcelem);
+    this.listeners[i].unhighlight && this.listeners[i].unhighlight(abselem.abcelem);
   }
 };
 
-// notify all listeners that a graphical element has been selected
-ABCXJS.write.Printer.prototype.notifyClearNSelect = function (abselem) {
+// notify all listeners that a graphical element has been selected (should clear any previous selection)
+ABCXJS.write.Printer.prototype.notifyClearNSelect = function (abselem, keepState) {
   this.clearSelection();
-  this.notifySelect(abselem);
+  this.notifySelect(abselem,keepState);
 };
 
 ABCXJS.write.Printer.prototype.clearSelection = function () {
@@ -479,13 +487,10 @@ ABCXJS.write.Printer.prototype.clearSelection = function () {
   this.selected = [];
 };
 
-ABCXJS.write.Printer.prototype.notifyChange = function (abselem) {
-  for (var i=0; i<this.listeners.length;i++) {
-    this.listeners[i].modelChanged();
-  }
-};
-
 ABCXJS.write.Printer.prototype.rangeHighlight = function(sel) {
+    
+    this.clearSelection();
+    
     if( sel.length === 1 && sel[0].start.row === sel[0].end.row && sel[0].start.column === sel[0].end.column ) {
         return;
     }
@@ -501,16 +506,20 @@ ABCXJS.write.Printer.prototype.rangeHighlight = function(sel) {
 		var elStart = elems[elem].abcelem.position.anchor.ch;
 		var elEnd = elems[elem].abcelem.position.head.ch;
                 for(var s = 0; s < sel.length; s ++) {
-                    if( elLine >= sel[s].start.row  && elLine <= sel[s].end.row ) {
-                        
-                        if ( ( elLine === sel[s].start.row  && elEnd >= sel[s].start.column && sel[s].end.row !== sel[s].start.row ) || 
-                             ( elLine === sel[s].end.row && elStart <= sel[s].end.column && sel[s].end.row !== sel[s].start.row ) ||
-                             ( elStart <= sel[s].end.column && elEnd >= sel[s].start.column  && sel[s].end.row === sel[s].start.row  ) 
-                        ) {
-                            this.selected[this.selected.length]=elems[elem];
-                            elems[elem].highlight();
-                            break;
+                    try {
+                        if( elLine >= sel[s].start.row && elLine <= sel[s].end.row ) {
+
+                            if (  ( elLine === sel[s].start.row && elEnd < sel[s].start.column ) ||
+                                  ( elLine === sel[s].end.row && elStart > sel[s].end.column   ) ) {
+                                continue; //elemento fora do range
+                            } else {
+                                this.selected.push(elems[elem]);
+                                elems[elem].highlight();
+                                break;
+                            }
                         }
+                    } catch(e) {
+                        
                     }
                 }
 	    }

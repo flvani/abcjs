@@ -22,9 +22,11 @@ cat write/abc_glyphs.js write/abc_graphelements.js \
 
 cat midi/midi_common.js  midi/midi_parser.js  midi/midi_player.js > tmp/midi.js
 
-cat svg/svg.js  svg/glyphs.js > tmp/svg.js
+cat svg/svg.js svg/glyphs.js > tmp/svg.js
 
-cat api/abc_tunebook.js data/abc_tune.js tmp/parse.js tmp/write.js tmp/svg.js > tmp/abcjs-nomidi.js
+cat api/abc_tunebook.js data/abc_tune.js tmp/parse.js tmp/write.js tmp/svg.js \
+        edit/abc_selectors.js edit/abc_editarea.js > tmp/abcjs-nomidi.js
+
 cat tmp/abcjs-nomidi.js tmp/midi.js > tmp/abcjs-all.js
 
 cat tmp/abcjs-all.js edit/abc_editor.js > tmp/abcjs-editor.js
@@ -32,6 +34,11 @@ cat tmp/abcjs-nomidi.js edit/abc_editor.js > tmp/abcjs-editor-nomidi.js
 
 cat tmp/abcjs-all.js tmp/tablature.js > tmp/abcxjs.js
 cat tmp/abcjs-nomidi.js tmp/tablature.js > tmp/abcxjs-nomidi.js
+
+cat ace/src/ace.js ace/src/mode-abcx.js ace/src/theme-abcx.js > tmp/ace4abcx.js
+
+echo "Compressing ACE4ABCX lib ..."
+java -jar yuicompressor-2.4.2.jar  --line-break 7000 -o bin/ace4abcx_$1-min.js tmp/ace4abcx.js
 
 echo "Compressing ABCX lib ..."
 java -jar yuicompressor-2.4.2.jar  --line-break 7000 -o bin/abcxjs_$1-min.js tmp/abcxjs.js
@@ -54,10 +61,12 @@ java -jar yuicompressor-2.4.2.jar  --line-break 7000 -o bin/filemanager_$1-min.j
 #java -jar yuicompressor-2.4.2.jar  --line-break 7000 -o bin/abcxjs_nomidi_$1-min.js tmp/abcxjs-nomidi.js
 
 cp tmp/abcxjs.js  ../diatonic-map/abcxjs/
+cp tmp/ace4abcx.js  ../diatonic-map/ace4abcx/
 cp tmp/diatonic.js  ../diatonic-map/diatonic/
 cp file/filemanager.js  ../diatonic-map/file/
 
 cp bin/abcxjs_$1-min.js ../diatonic-map/abcxjs/
+cp bin/ace4abcx_$1-min.js ../diatonic-map/ace4abcx/
 cp bin/diatonic_$1-min.js ../diatonic-map/diatonic/
 cp bin/filemanager_$1-min.js ../diatonic-map/file/
 
