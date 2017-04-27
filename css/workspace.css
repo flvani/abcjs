@@ -479,40 +479,6 @@ ul.NoBulletNoIndent {
 .close:hover, .cancel:hover { background: #D4482D; }
 .clear { float:none; clear: both; }
 
-#keyboardDiv {
-    display:none; 
-    position: fixed;
-    top:160px; 
-    left:75%; 
-    padding:5px;
-    width: fit-content;
-    height: fit-content;
-    z-index: 700;
-    pointer-events: none;
-    -webkit-border-radius: 4px;
-    -moz-border-radius: 4px;
-    border-radius: 4px;
-    -moz-box-shadow: 8px 8px 10px #444;
-    -webkit-box-shadow: 8px 8px 10px #444;
-    box-shadow: 8px 8px 10px #444;
-    background-color: white;
-}
-
-
-#keyboardMenu {
-    top:0; 
-    width:100%; 
-    min-height:20px; 
-    background-color: black; 
-    color: white;
-}
-
-#keyboardData {
-    width:100%; 
-    height:100%;
-}
-
-
 .close {
     background: #606061;
     color: #fff;

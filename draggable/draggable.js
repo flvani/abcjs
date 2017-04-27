@@ -49,7 +49,7 @@ DRAGGABLE.Div = function(id, topDiv, title, aButtons, callBack, translate ) {
     
     this.titleSpan = document.getElementById("dSpanTitle"+this.id);
     this.moveButton = document.getElementById("dMenu"+this.id);
-    this.closeButton = document.getElementById("dMINUSButton"+this.id);
+    this.closeButton = document.getElementById("dCLOSEButton"+this.id);
     
 
     /*
@@ -141,29 +141,32 @@ DRAGGABLE.Div.prototype.addTitle = function( id, title  ) {
 };
 
 DRAGGABLE.Div.prototype.addButtons = function( id,  aButtons, callBack ) {
-    var defaultButtons = ['minus|Fechar'];
+    var defaultButtons = ['close|Fechar'];
     var txt = "";
     var self = this;
     var txtCallback;
+    
+    var buttonMap = { CLOSE: 'window-close', MOVE: 'move', ROTATE: 'retweet-3', GLOBE: 'globe-2', ZOOM:'zoom-in-1' };
     
     if(aButtons)
         defaultButtons = defaultButtons.concat(aButtons);
     
     defaultButtons.forEach( function (label) {
         label = label.split('|');
-        label[1]  = label.length > 1 ? label[1] : "";
+        var action = label[0].toUpperCase();
+        var rotulo = label.length > 1 ? label[1] : "";
+        var icon = 'icon-' + (buttonMap[action] ? buttonMap[action] : action.toLowerCase());
         
         if( self.translate ) {
-            DR.forcedResource('d'+label[0].toUpperCase() +'ButtonA', label[1], id, 'd'+label[0].toUpperCase() +'ButtonA'+id); 
+            DR.forcedResource('d'+ action +'ButtonA', rotulo, id, 'd'+ action +'ButtonA'+id); 
         }
         if( callBack ) {
-            txtCallback = callBack+'(\''+label[0].toUpperCase()+'\');';
+            txtCallback = callBack+'(\''+action+'\');';
         }
 
-        txt += '<div id="d'+label[0].toUpperCase() +'Button'+id+
-                '" class="dButton"><a href="#" id="d'+label[0].toUpperCase() +'ButtonA'+id+'" title="'+label[1]+
-                '" onclick="'+txtCallback+'"><i class="icon-'
-                +label[0].toLowerCase()+' icon-white"></i></a></div>';
+        txt += '<div id="d'+ action +'Button'+id+
+                '" class="dButton"><a href="#" id="d'+ action +'ButtonA'+id+'" title="'+ rotulo +
+                '" onclick="'+txtCallback+'"><i class="'+ icon + '"></i></a></div>';
     });
     return txt;
 };

@@ -4,9 +4,10 @@
         <meta name="viewport" content="width=device-width, initial-scale=0.8, minimum-scale=0.8, maximum-scale=2.0" />
         <meta http-equiv="content-type" content="text/html; charset=UTF-8"></meta>
         <link rel="icon" type="image/icon" href="images/favicon.ico" />
-        <link href="css/workspace.css" rel="stylesheet"></link>
-        <link href="codemirror/codemirror.css" rel="stylesheet">
-    
+        <link href="font/abcx.css" rel="stylesheet" />
+        <link href="css/workspace.css" rel="stylesheet"/>
+        <link href="css/draggable.css" rel="stylesheet"/>
+        
             <!-- 
           MAIN DATA STRUCTURES
         
@@ -75,15 +76,15 @@
     <body class="mapa">
 
 	<script type="text/javascript" src="proto_noconflict.js" ></script>
-
+        <script type="text/javascript" src="jquery/jquery-1.11.1.min.js" ></script>
+        
         <!-- suporte a MIDI -->
         <script type="text/javascript" src="MIDI.js/MIDI_3.00-min.js"></script>
 
-        
-        <script type="text/javascript" src="jquery/jquery-1.11.1.min.js" ></script>
-	        
         <script type="text/javascript" src="svg/svg.js" ></script>
         <script type="text/javascript" src="svg/glyphs.js" ></script>
+        
+        <script type="text/javascript" src="draggable/draggable.js"></script>
         
         <script type="text/javascript" src="file/filemanager.js" ></script>
 
@@ -300,11 +301,14 @@ V:3 accordionTab
     </div>
     </div> <!-- editorDiv -->
     <div id="warningsDiv" class="genericDivClass"><hr></div>
+    <div id="keyboardDiv" class="draggableWindow" style="left:900px; top:120px; "></div> 
     <div id="canvasDiv" class="printPreviewClass" > </div>
         
         <script type="text/javascript">
             
             window.addEventListener('load', loadAccordions, false);
+            
+            var w2 = new DRAGGABLE.Div( 2, 'keyboardDiv', '', [ 'move|Mover', 'rotate|Rotacionar', 'zoom|Zoom','globe|Mudar Notação'], 'w2Callback', false );
 
             function loadAccordions() {
                 
@@ -466,13 +470,14 @@ V:3 accordionTab
                         ,warnings_id: "warningsDiv"
                         ,generate_warnings: true
                         ,generate_tablature: 'accordion'
+                        ,keyboardWindow: w2
                         ,accordion_options: {
                                  //id: 'GAITA_LETICCE_CF_NE'
                                  id: 'GAITA_HOHNER_GC'
                                //  id: 'GAITA_HOHNER_CLUB_IIIM_BR'
-                                ,keyboardDiv_id:"keyboardDiv"
+                                //,keyboardDiv_id:"keyboardDiv"
                                 ,accordionMaps: DIATONIC.map.accordionMaps
-                                ,render_keyboard_opts:{transpose:false, mirror: true, scale:1, draggable:false, show:true, label:false}}
+                                ,render_keyboard_opts:{transpose:false, mirror: true, scale:1, draggable:false, show:false, label:false}}
                         ,midi_options: {program: 21, qpm: 150, type: "qt"}
                         ,render_options: {}
                         ,onchange: editorCallbackOnChange
@@ -480,7 +485,7 @@ V:3 accordionTab
                     } );
                     
                 //myEditor.accordion.printKeyboard('keyboardDiv' /*, {fillColor:'yellow', openColor:'navy', closeColor:'purple', backgroundColor:'gray' }*/ );
-                myEditor.accordion.printKeyboard('keyboardDiv' );
+                    myEditor.accordion.printKeyboard(myEditor.keyboardWindow.dataDiv);
                 
                 myEditor.setString( document.getElementById("abc").value );
                 myEditor.fireChanged( 0, {force: true} );
@@ -488,9 +493,9 @@ V:3 accordionTab
                 printButton.addEventListener("click", function(e) {
                     e.preventDefault();
 
-                    var kd = document.getElementById("keyboardDiv").style.display;
+                    //var kd = document.getElementById("keyboardDiv").style.display;
 
-                    document.getElementById("keyboardDiv").style.display = 'none';
+                    //document.getElementById("keyboardDiv").style.display = 'none';
                     document.getElementById("editorDiv").style.display = "none";
                     document.getElementById("warningsDiv").style.display = "none";
                     document.body.style.paddingTop = '0px';
@@ -500,7 +505,7 @@ V:3 accordionTab
                     document.body.style.paddingTop = '240px';
                     document.getElementById("warningsDiv").style.display = "inline";
                     document.getElementById("editorDiv").style.display = "inline";
-                    document.getElementById("keyboardDiv").style.display = kd;
+                    //document.getElementById("keyboardDiv").style.display = kd;
                 }, false);
                 
                 playButton.addEventListener("click", function(e) {
@@ -534,13 +539,16 @@ V:3 accordionTab
                 
                 showMapButton.addEventListener("click", function(e) {
                     e.preventDefault();
-                    myEditor.accordion.render_keyboard_opts.show = !myEditor.accordion.render_keyboard_opts.show;
+                    myEditor.switchMap();
                     this.value = myEditor.accordion.render_keyboard_opts.show? 'Hide Map':'Show Map';
-                    myEditor.accordion.printKeyboard('keyboardDiv');
                 }, false);
                 
             }
 
+            function w2Callback(e) {
+                myEditor.keyboardCallback(e);
+            };
+            
             function doTranspose(value) {
                 var doc = document.documentElement;
                 window.lastYpos = (window.pageYOffset || doc.scrollTop)  - (doc.clientTop || 0);                
@@ -561,8 +569,6 @@ V:3 accordionTab
             };
 
         </script>        
-
-        <div id="keyboardDiv"></div> 
     </body>
     
 </html>

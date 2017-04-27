@@ -51,6 +51,7 @@ ABCXJS.Editor = function(params) {
   this.printTimeStart =0;
   this.printTimeEnd =0;
   this.endTime =0;
+  this.keyboardWindow = params.keyboardWindow;
     
   this.bReentry = false;
   this.accordion = null;
@@ -133,7 +134,7 @@ ABCXJS.Editor = function(params) {
       new RegExp("(^|\\s+)" + className + "(\\s+|$)"), ' '));
     return element;
   };
-}
+};
   
 ABCXJS.Editor.prototype.selectAccordionById = function( id ) {
     if( this.accordion ) {
@@ -297,6 +298,12 @@ ABCXJS.Editor.prototype.updateSelection = function (force) {
     }
 };
 
+ABCXJS.Editor.prototype.switchMap = function() {
+    this.accordion.render_keyboard_opts.show = !this.accordion.render_keyboard_opts.show;
+    this.keyboardWindow.topDiv.style.display = this.accordion.render_keyboard_opts.show? 'inline': 'none';
+    this.accordion.printKeyboard(this.keyboardWindow.dataDiv);
+}
+
 ABCXJS.Editor.prototype.highlight = function(abcelem) {
   try {
         this.editarea.setSelection(abcelem);
@@ -384,3 +391,25 @@ ABCXJS.Editor.prototype.modelChanged2 = function(loader) {
     }, 1);
     
 };
+
+ABCXJS.Editor.prototype.keyboardCallback = function (e) {
+                switch(e) {
+                    case 'MOVE':
+                        break;
+                    case 'CLOSE':
+                        this.switchMap();
+                        break;
+                    case 'ROTATE':
+                        this.accordion.rotateKeyboard(this.keyboardWindow.dataDiv);
+                        break;
+                    case 'ZOOM':
+                        this.accordion.scaleKeyboard(this.keyboardWindow.dataDiv);
+                        break;
+                    case 'GLOBE':
+                        this.accordion.changeNotation();
+                        break;
+                    default:
+                        alert(e);
+                }
+            };
+            
