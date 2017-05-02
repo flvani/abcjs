@@ -301,14 +301,13 @@ V:3 accordionTab
     </div>
     </div> <!-- editorDiv -->
     <div id="warningsDiv" class="genericDivClass"><hr></div>
-    <div id="keyboardDiv" class="draggableWindow" style="left:900px; top:120px; "></div> 
     <div id="canvasDiv" class="printPreviewClass" > </div>
         
         <script type="text/javascript">
             
             window.addEventListener('load', loadAccordions, false);
             
-            var w2 = new DRAGGABLE.Div( 2, 'keyboardDiv', '', [ 'move|Mover', 'rotate|Rotacionar', 'zoom|Zoom','globe|Mudar Notação'], 'w2Callback', false );
+            var w2 = new DRAGGABLE.Div( 2, null, '', [ 'move|Mover', 'rotate|Rotacionar', 'zoom|Zoom','globe|Mudar Notação'], 'w2Callback', false );
 
             function loadAccordions() {
                 

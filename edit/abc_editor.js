@@ -408,6 +408,9 @@ ABCXJS.Editor.prototype.keyboardCallback = function (e) {
                     case 'GLOBE':
                         this.accordion.changeNotation();
                         break;
+                    case 'RESIZE':
+                        //this.accordion.changeNotation();
+                        break;
                     default:
                         alert(e);
                 }

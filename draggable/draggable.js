@@ -8,15 +8,25 @@
 if (!window.DRAGGABLE)
     window.DRAGGABLE= {};
 
-DRAGGABLE.Div = function(id, topDiv, title, aButtons, callBack, translate ) {
+DRAGGABLE.Div = function(id, parent, title, aButtons, callBack, translate ) {
     var self = this;
-    this.translate = false;
-    this.topDiv = document.getElementById(topDiv);
+    this.id = id;
     
-    if(!this.topDiv) {
-        // criar uma div
-        return;
-    }    
+    this.translate = false;
+    
+    var div = document.createElement("DIV");
+    div.setAttribute("id", "draggableWindow" +  this.id ); 
+    div.setAttribute("class", "draggableWindow" ); 
+    this.topDiv = div;
+    this.minTop = 1;
+    this.minWidth = 160;
+    this.minHeight = 48;
+    
+    if(!parent) {
+        document.body.appendChild(this.topDiv);
+    }else{
+        document.getElementById(parent).appendChild(this.topDiv);
+    }
     
     if( translate && DR ) {
         this.translate = function() {
@@ -24,9 +34,7 @@ DRAGGABLE.Div = function(id, topDiv, title, aButtons, callBack, translate ) {
         DR.addAgent(this);
     }
     
-    this.id = id;
-    
-    self.topDiv.style.position = "fixed";
+    //self.topDiv.style.position = "fixed";
     
     if(this.topDiv.style.top === "" ) this.topDiv.style.top = "100px";
     if(this.topDiv.style.left === "" ) this.topDiv.style.left = "100px";
@@ -47,6 +55,20 @@ DRAGGABLE.Div = function(id, topDiv, title, aButtons, callBack, translate ) {
     this.topDiv.appendChild( div );
     this.dataDiv = div;
     
+    div = document.createElement("DIV");
+    div.setAttribute("id", "draggableStatus" + this.id ); 
+    div.setAttribute("class", "draggableStatus" ); 
+    this.topDiv.appendChild( div );
+    this.bottomDiv = div;
+    //this.bottomDiv.innerHTML = 'ISTO É UM TESTE!!!!';
+    
+    div = document.createElement("DIV");
+    div.setAttribute("id", "draggableStatusResize" + this.id ); 
+    div.setAttribute("class", "draggableStatusResize" ); 
+    this.topDiv.appendChild( div );
+    this.resizeCorner = div;
+    this.resizeCorner.innerHTML = '<img src="images/statusbar_resize.gif">';
+    
     this.titleSpan = document.getElementById("dSpanTitle"+this.id);
     this.moveButton = document.getElementById("dMenu"+this.id);
     this.closeButton = document.getElementById("dCLOSEButton"+this.id);
@@ -66,6 +88,10 @@ DRAGGABLE.Div = function(id, topDiv, title, aButtons, callBack, translate ) {
     
     */
     
+    //TODO: tratar todos os botões da janela com stopMouse
+    this.closeButton.addEventListener( 'mousedown', this.stopMouse, false);
+    this.closeButton.addEventListener( 'touchstart', this.stopMouse, false);
+    
     this.stopMouse = function (e) {
         e.stopPropagation();
         //e.preventDefault();
@@ -83,15 +109,16 @@ DRAGGABLE.Div = function(id, topDiv, title, aButtons, callBack, translate ) {
         }
         e.preventDefault();
         var y = ((p.y - self.y) + parseInt(self.topDiv.style.top));
-        self.topDiv.style.top = (y < 43 ? 43 : y) + "px"; //hardcoded top of window
+        self.topDiv.style.top = (self.minTop && y < self.minTop ? self.minTop: y) + "px"; //hardcoded top of window
         self.topDiv.style.left = ((p.x - self.x) + parseInt(self.topDiv.style.left)) + "px";
         self.x = p.x;
         self.y = p.y;
     };
 
-    this.mouseUp = function (e) {
+    this.mouseEndMove = function (e) {
         self.stopMouse(e);
         window.removeEventListener('touchmove', self.divMove, false);
+        window.removeEventListener('touchleave', self.divMove, false);
         window.removeEventListener('mousemove', self.divMove, false);
         window.removeEventListener('mouseout', self.divMove, false);
         self.dataDiv.style.pointerEvents = "auto";
@@ -99,10 +126,10 @@ DRAGGABLE.Div = function(id, topDiv, title, aButtons, callBack, translate ) {
             window[callBack]('MOVE');
         }
     };
-
-    this.mouseDown = function (e) {
-        window.addEventListener('mouseup', self.mouseUp, false);
-        window.addEventListener('touchend', self.mouseUp, false);
+    
+    this.mouseMove = function (e) {
+        window.addEventListener('mouseup', self.mouseEndMove, false);
+        window.addEventListener('touchend', self.mouseEndMove, false);
         self.stopMouse(e);
         self.dataDiv.style.pointerEvents = "none";
         window.addEventListener('touchmove', self.divMove, false);
@@ -112,12 +139,59 @@ DRAGGABLE.Div = function(id, topDiv, title, aButtons, callBack, translate ) {
         self.x = e.clientX;
         self.y = e.clientY;
     };
+
+    this.moveButton.addEventListener( 'mousedown', this.mouseMove, false);
+    this.moveButton.addEventListener('touchstart', this.mouseMove, false);
     
-    //TODO: tratar todos os botões da janela com stopMouse
-    this.closeButton.addEventListener( 'mousedown', this.stopMouse, false);
-    this.closeButton.addEventListener( 'touchstart', this.stopMouse, false);
-    this.moveButton.addEventListener( 'mousedown', this.mouseDown, false);
-    this.moveButton.addEventListener('touchstart', this.mouseDown, false);
+    this.divResize = function (e) {
+        self.stopMouse(e);
+        var touches = e.changedTouches;
+        var p = {x: e.clientX, y: e.clientY};
+
+        if (touches) {
+            var l = touches.length - 1;
+            p.x = touches[l].clientX;
+            p.y = touches[l].clientY;
+        }
+        e.preventDefault();
+        var w = (self.topDiv.clientWidth + p.x - self.x);
+        var h = (self.topDiv.clientHeight + p.y - self.y);
+        self.topDiv.style.width = ( w < self.minWidth ? self.minWidth : w ) + 'px';
+        self.topDiv.style.height = ( h < self.minHeight ? self.minHeight : h ) + 'px';
+        
+        self.x = p.x;
+        self.y = p.y;
+    };
+
+    this.mouseEndResize = function (e) {
+        window.removeEventListener('touchmove', self.divResize, false);
+        window.removeEventListener('touchleave', self.divResize, false);
+        window.removeEventListener('mousemove', self.divResize, false);
+        window.removeEventListener('mouseout', self.divResize, false);
+        self.dataDiv.style.pointerEvents = "auto";
+        e.stopPropagation();
+        e.preventDefault();
+        if(callBack) {
+            window[callBack]('RESIZE');
+        }
+    };
+
+    this.mouseResize = function (e) {
+        window.addEventListener('mouseup', self.mouseEndResize, false);
+        window.addEventListener('touchend', self.mouseEndResize, false);
+        self.stopMouse(e);
+        self.dataDiv.style.pointerEvents = "none";
+        window.addEventListener('touchmove', self.divResize, false);
+        window.addEventListener('touchleave', self.divResize, false);
+        window.addEventListener('mousemove', self.divResize, false);
+        window.addEventListener('mouseout', self.divResize, false);
+        self.x = e.clientX;
+        self.y = e.clientY;
+    };
+    
+    
+    this.resizeCorner.addEventListener( 'mousedown', this.mouseResize, false);
+    this.resizeCorner.addEventListener('touchstart', this.mouseResize, false);
     
     this.close = function(e) {
         self.topDiv.style.display='none';
@@ -146,7 +220,7 @@ DRAGGABLE.Div.prototype.addButtons = function( id,  aButtons, callBack ) {
     var self = this;
     var txtCallback;
     
-    var buttonMap = { CLOSE: 'window-close', MOVE: 'move', ROTATE: 'retweet-3', GLOBE: 'globe-2', ZOOM:'zoom-in-1' };
+    var buttonMap = { CLOSE: 'close', MOVE: 'move', ROTATE: 'rotate', GLOBE: 'globe-1', ZOOM:'search-plus' };
     
     if(aButtons)
         defaultButtons = defaultButtons.concat(aButtons);
@@ -166,7 +240,7 @@ DRAGGABLE.Div.prototype.addButtons = function( id,  aButtons, callBack ) {
 
         txt += '<div id="d'+ action +'Button'+id+
                 '" class="dButton"><a href="#" id="d'+ action +'ButtonA'+id+'" title="'+ rotulo +
-                '" onclick="'+txtCallback+'"><i class="'+ icon + '"></i></a></div>';
+                '" onclick="'+txtCallback+'"><i class="'+ icon + ' icon-lightblue"></i></a></div>';
     });
     return txt;
 };
