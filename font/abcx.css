@@ -47,7 +47,7 @@
   -moz-osx-font-smoothing: grayscale;
  
   /* Uncomment for 3D effect */
-   text-shadow: 2px 1px 1px rgba(180, 180, 180, 0.8); 
+   text-shadow: 1px 1px 1px rgba(180, 180, 180, 0.8); 
 }
  
 .icon-headphones:before { content: '\e800'; } /* '' */

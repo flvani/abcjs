@@ -27,14 +27,34 @@ if (!ABCXJS.edit)
 	ABCXJS.edit = {};
 
 ABCXJS.edit.EditArea = function (editor_id, listener) {
-
-    this.aceEditor = ace.edit(editor_id);
-    this.aceEditor.setOptions( {highlightActiveLine: true, selectionStyle: "text", cursorStyle: "smooth"} );
+    
+    if(editor_id) {
+        this.container = {};
+        this.container.topDiv = document.getElementById( editor_id );
+        if(this.container.topDiv) {
+            var div = document.createElement("DIV");
+            div.setAttribute("id", "editorWindow" + editor_id ); 
+            this.container.topDiv.appendChild( div );
+            this.container.dataDiv = div;
+            this.container.dataDiv.setAttribute("class", "editorText fixedSize"); 
+        } else {
+            alert( 'this.container: elemento "'+editor_id+'" não encontrado.');
+        }
+    } else {
+        this.container = new DRAGGABLE.Div( null, [ 'move|Mover' ], {translate:false, statusBar:true, width: 600, height: 300 } );
+        this.container.defineCallback( {listener : listener, method: 'editorCallback' } );
+        this.container.dataDiv.setAttribute("class", "editorText"); 
+    }
+    
+    this.aceEditor = ace.edit(this.container.dataDiv);
+    this.aceEditor.setOptions( {highlightActiveLine: true, selectionStyle: "text", cursorStyle: "smooth"/*, maxLines: Infinity*/ } );
     this.aceEditor.setOptions( {fontFamily: "monospace",  fontSize: "11pt", fontWeight: "normal" });
     this.aceEditor.renderer.setOptions( {highlightGutterLine: true, showPrintMargin: false, showFoldWidgets: false } );
     this.aceEditor.$blockScrolling = Infinity;
     this.Range = require("ace/range").Range;
     
+    this.setVisible(true);
+    this.resize();
     
     this.isDragging = false;
     this.selectionEnabled = true;
@@ -60,6 +80,8 @@ ABCXJS.edit.EditArea.prototype.setReadOnly = function (readOnly) {
 
 
 ABCXJS.edit.EditArea.prototype.resize = function () {
+    var h = this.container.topDiv.clientHeight;
+    this.container.dataDiv.style.height = ( h - 48  ) + 'px';
     this.aceEditor.resize();
 };
 

@@ -51,8 +51,7 @@ ABCXJS.Editor = function(params) {
   this.printTimeStart =0;
   this.printTimeEnd =0;
   this.endTime =0;
-  this.keyboardWindow = params.keyboardWindow;
-    
+  
   this.bReentry = false;
   this.accordion = null;
   this.accordionSelector = null;
@@ -65,12 +64,12 @@ ABCXJS.Editor = function(params) {
   if( params.onchange )
     this.onchangeCallback = params.onchange;
 
-  if (typeof params.editor_id === "string") {
-    this.editarea = new ABCXJS.edit.EditArea(params.editor_id, this);
-  } else {
-    alert( 'editor_id must be a string indicating a DIV tag');
-  }
+  this.editareaFixa = new ABCXJS.edit.EditArea(params.editor_id, this);
+  this.editareaMovel = new ABCXJS.edit.EditArea(null, this);
+  this.editareaMovel.setVisible(false);
 
+  this.editarea = this.editareaFixa;
+   
   if (params.canvas_id) {
     this.div = document.getElementById(params.canvas_id);
   } else if (params.paper_id) {
@@ -104,6 +103,13 @@ ABCXJS.Editor = function(params) {
                 this.accordionNameSpan.innerHTML = this.accordion.getName();
             }
         }
+        
+        this.keyboardWindow = params.keyboardWindow;
+        this.keyboardWindow.defineCallback( {listener : this, method: 'keyboardCallback' } );
+        
+        //this.accordion.printKeyboard(this.keyboardWindow.dataDiv , {fillColor:'yellow', openColor:'navy', closeColor:'purple', backgroundColor:'gray' } );
+        this.accordion.printKeyboard(this.keyboardWindow.dataDiv);
+
     } else {
         throw new Error( 'Tablatura para '+params.generate_tablature+' não suportada!');
     }
@@ -302,7 +308,7 @@ ABCXJS.Editor.prototype.switchMap = function() {
     this.accordion.render_keyboard_opts.show = !this.accordion.render_keyboard_opts.show;
     this.keyboardWindow.topDiv.style.display = this.accordion.render_keyboard_opts.show? 'inline': 'none';
     this.accordion.printKeyboard(this.keyboardWindow.dataDiv);
-}
+};
 
 ABCXJS.Editor.prototype.highlight = function(abcelem) {
   try {
@@ -393,26 +399,53 @@ ABCXJS.Editor.prototype.modelChanged2 = function(loader) {
 };
 
 ABCXJS.Editor.prototype.keyboardCallback = function (e) {
-                switch(e) {
-                    case 'MOVE':
-                        break;
-                    case 'CLOSE':
-                        this.switchMap();
-                        break;
-                    case 'ROTATE':
-                        this.accordion.rotateKeyboard(this.keyboardWindow.dataDiv);
-                        break;
-                    case 'ZOOM':
-                        this.accordion.scaleKeyboard(this.keyboardWindow.dataDiv);
-                        break;
-                    case 'GLOBE':
-                        this.accordion.changeNotation();
-                        break;
-                    case 'RESIZE':
-                        //this.accordion.changeNotation();
-                        break;
-                    default:
-                        alert(e);
-                }
-            };
+    switch(e) {
+        case 'MOVE':
+            break;
+        case 'CLOSE':
+            this.switchMap();
+            break;
+        case 'ROTATE':
+            this.accordion.rotateKeyboard(this.keyboardWindow.dataDiv);
+            break;
+        case 'ZOOM':
+            this.accordion.scaleKeyboard(this.keyboardWindow.dataDiv);
+            break;
+        case 'GLOBE':
+            this.accordion.changeNotation();
+            break;
+        case 'RESIZE':
+            //this.accordion.changeNotation();
+            break;
+        default:
+            alert(e);
+    }
+};
             
+ABCXJS.Editor.prototype.editorCallback = function (e) {
+    switch(e) {
+        case 'MOVE':
+            break;
+        case 'CLOSE':
+            document.body.style.paddingTop = '240px';
+            this.editarea.setVisible(false);
+            this.editarea = this.editareaFixa;
+            this.editarea.setString(this.editareaMovel.getString());
+            this.editarea.setVisible(true);
+            break;
+        case 'ROTATE':
+            //this.accordion.rotateKeyboard(this.keyboardWindow.dataDiv);
+            break;
+        case 'ZOOM':
+            //this.accordion.scaleKeyboard(this.keyboardWindow.dataDiv);
+            break;
+        case 'GLOBE':
+            //this.accordion.changeNotation();
+            break;
+        case 'RESIZE':
+            this.editarea.resize();
+            break;
+        default:
+            alert(e);
+    }
+};

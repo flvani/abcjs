@@ -140,9 +140,6 @@
     
 
     
-<div id="editorDiv" class="editor" > 
-<div id="textDivold"> 
-
 <textarea id="svg_source" class="abc_textarea" spellcheck="false" cols="120" rows="10" style="display: none;" >
 </textarea>
     
@@ -276,10 +273,9 @@ V:3 accordionTab
 | D-[13']2 >-2 d-3 D-3'2 d-42 | D-> >-1 >-2 d-3 D-3'2 d-42 | G-> >-1 >-1' g+4 G+52 g+>2 | G+> >+2 >+2' g+4 G-3'2 g->2 | D-> >-1 >-1' d-2' D-3'2 d-42 | D-> >-1 >-2 d-3 D-3'2 d-42 | G+42 >+[55']  g+[>>] G+z >+4 g+3' >+5 | G+[57]2 >+[4'6'] g+[>>] G+[57]2 g+82 |
 | D-[7'3]2 >-[>4] d-[>>] D-[>3]2 d-[>4]2 | D-[>3']2 >-[>4] d-[>>] D-[>2']2 d-[>3]2 | G+[83]2 >+[>5] g+[>>] G+[>4]2 g+[>3']2 | G+[>4']2 >+[>5] g+[>>] G+[>3']2 g+[>4]2 | D-[7'3]2 >-[>4] d-[>>] D-[>3]2 d-[>4]2 | D-[>3']2 >-[>4] d-[>>] D-[>2']2 d-[>3]2 | G+42 >+[455'] g+[>>>] G+z >+4 g+3' >+5 | z+[57]2 z+[4'6']2 g+[55'7]2 z+z2 |]
 </textarea>
-</div> 
-    
-    <div id="textDiv2" >
-    <div id="textDiv" class="editorText"></div></div>
+        
+<div id="editorDiv" class="editor" > 
+    <div id="textDiv" ></div>
     <div id="outrosControles" class="editorControles">
         <span id="spanNomeGaita">Acordeons: </span>
         <select id="selGaitas" ></select>
@@ -299,16 +295,14 @@ V:3 accordionTab
         <input type="button" id="roBtn" value="R.O." />
         <label id="currentPlayTime" style="font-weight: bold; color: yellow; padding-left: 5px; padding-right: 3px;">00:00.00</label>
     </div>
-    </div> <!-- editorDiv -->
-    <div id="warningsDiv" class="genericDivClass"><hr></div>
-    <div id="canvasDiv" class="printPreviewClass" > </div>
+</div> <!-- editorDiv -->
+<div id="warningsDiv" class="genericDivClass"><hr></div>
+<div id="canvasDiv" class="printPreviewClass" > </div>
         
         <script type="text/javascript">
             
             window.addEventListener('load', loadAccordions, false);
             
-            var w2 = new DRAGGABLE.Div( 2, null, '', [ 'move|Mover', 'rotate|Rotacionar', 'zoom|Zoom','globe|Mudar Notação'], 'w2Callback', false );
-
             function loadAccordions() {
                 
                 MIDI.widget = new sketch.ui.Timer({size:180, cor1:'#ffffff', cor2:'#ffff88' });
@@ -456,6 +450,8 @@ V:3 accordionTab
                 player.defineCallbackOnEnd(playerCallBackOnEnd);
                 player.defineCallbackOnPlay(playerCallBackOnPlay);
                 player.defineCallbackOnScroll(playerCallBackOnScroll);
+                
+                var w2 = new DRAGGABLE.Div( null, [ 'move|Mover', 'rotate|Rotacionar', 'zoom|Zoom','globe|Mudar Notação'], {title:'KB', translate:false, statusBar:false, top:100, left:900 } );
  
                 myEditor = new ABCXJS.Editor(
                     {
@@ -483,16 +479,11 @@ V:3 accordionTab
                         ,gui: false
                     } );
                     
-                //myEditor.accordion.printKeyboard('keyboardDiv' /*, {fillColor:'yellow', openColor:'navy', closeColor:'purple', backgroundColor:'gray' }*/ );
-                    myEditor.accordion.printKeyboard(myEditor.keyboardWindow.dataDiv);
-                
                 myEditor.setString( document.getElementById("abc").value );
                 myEditor.fireChanged( 0, {force: true} );
                     
                 printButton.addEventListener("click", function(e) {
                     e.preventDefault();
-
-                    //var kd = document.getElementById("keyboardDiv").style.display;
 
                     //document.getElementById("keyboardDiv").style.display = 'none';
                     document.getElementById("editorDiv").style.display = "none";
@@ -528,7 +519,20 @@ V:3 accordionTab
                 var visible = true;
                 textButton.addEventListener("click", function(e) {
                     visible = !visible;
-                    myEditor.editarea.setVisible(visible);
+                    if( visible ) {
+                        document.body.style.paddingTop = '240px';
+                        myEditor.editarea.setVisible(false);
+                        myEditor.editarea = myEditor.editareaFixa;
+                        myEditor.editarea.setString(myEditor.editareaMovel.getString());
+                        myEditor.editarea.setVisible(true);
+                    } else {
+                        document.body.style.paddingTop = '20px';
+                        myEditor.editarea.setVisible(false);
+                        myEditor.editarea = myEditor.editareaMovel;
+                        myEditor.editarea.setString(myEditor.editareaFixa.getString());
+                        myEditor.editarea.setVisible(true);
+                    }
+                    
                 }, false);
                 var readOnly=false;
                 roButton.addEventListener("click", function(e) {
@@ -544,10 +548,6 @@ V:3 accordionTab
                 
             }
 
-            function w2Callback(e) {
-                myEditor.keyboardCallback(e);
-            };
-            
             function doTranspose(value) {
                 var doc = document.documentElement;
                 window.lastYpos = (window.pageYOffset || doc.scrollTop)  - (doc.clientTop || 0);                
