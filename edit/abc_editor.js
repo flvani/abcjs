@@ -424,6 +424,12 @@ ABCXJS.Editor.prototype.keyboardCallback = function (e) {
             
 ABCXJS.Editor.prototype.editorCallback = function (e) {
     switch(e) {
+        case 'GUTTER': // liga/desliga a numeracao de linhas
+            this.editarea.setGutter();
+            break;
+        case 'LIGHT': // liga/desliga realce de sintaxe
+            this.editarea.setSyntaxHighLight();
+            break;
         case 'MOVE':
             break;
         case 'CLOSE':

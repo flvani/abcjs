@@ -41,8 +41,13 @@ ABCXJS.edit.EditArea = function (editor_id, listener) {
             alert( 'this.container: elemento "'+editor_id+'" não encontrado.');
         }
     } else {
-        this.container = new DRAGGABLE.Div( null, [ 'move|Mover' ], {translate:false, statusBar:true, width: 600, height: 300 } );
-        this.container.defineCallback( {listener : listener, method: 'editorCallback' } );
+        this.container = new DRAGGABLE.Div( 
+            null
+            , [ 'move|Mover', 'dock|Fixar Janela' ]
+            , {translate:false, statusBar:true, width: 600, height: 300 }
+            , {listener : listener, method: 'editorCallback' }
+            , [ 'gutter|Numeração das Linhas', 'fontsize|Tamanho da fonte', 'down|Tom', 'arrowdn|Oitava|Oitava', 'arrowup|Oitava|Oitava', 'search|Procurar', 'undo|Dezfazer', 'redo|Refazer', 'light|Realçar texto' ] 
+        );
         this.container.dataDiv.setAttribute("class", "editorText"); 
     }
     
@@ -56,11 +61,31 @@ ABCXJS.edit.EditArea = function (editor_id, listener) {
     this.setVisible(true);
     this.resize();
     
+    this.gutterVisible = true;
+    this.syntaxHighLightVisible = true;
     this.isDragging = false;
     this.selectionEnabled = true;
     
     if(listener)
         this.addChangeListener(listener);
+};
+
+ABCXJS.edit.EditArea.prototype.setGutter = function (visible) {
+    if(typeof visible === 'boolean') {
+        this.gutterVisible = visible;
+    } else {
+        this.gutterVisible = ! this.gutterVisible;
+    }
+    this.aceEditor.renderer.setShowGutter(this.gutterVisible);
+};
+
+ABCXJS.edit.EditArea.prototype.setSyntaxHighLight = function (visible) {
+    if(typeof visible === 'boolean') {
+        this.syntaxHighLightVisible = visible;
+    } else {
+        this.syntaxHighLightVisible = ! this.syntaxHighLightVisible;
+    }
+    this.aceEditor.getSession().setMode( this.syntaxHighLightVisible?'ace/mode/abcx':'ace/mode/text');
 };
 
 ABCXJS.edit.EditArea.prototype.setVisible = function (visible) {
@@ -80,8 +105,11 @@ ABCXJS.edit.EditArea.prototype.setReadOnly = function (readOnly) {
 ABCXJS.edit.EditArea.prototype.resize = function () {
     
     if( this.container.isResizable && this.container.isResizable() ) {
-        var h = this.container.topDiv.clientHeight;
-        this.container.dataDiv.style.height = ( h - 24 - 20 - 42  ) + 'px';
+        var h = this.container.topDiv.clientHeight -
+                (this.container.menuDiv ? this.container.menuDiv.clientHeight : 0 ) -
+                (this.container.toolBar ? this.container.toolBar.clientHeight : 0 ) -
+                (this.container.bottomDiv ? this.container.bottomDiv.clientHeight : 0 );
+        this.container.dataDiv.style.height =  h + 'px';
     }
     
     this.aceEditor.resize();

@@ -1,0 +1,52 @@
+{
+  "name": "abcx2",
+  "css_prefix_text": "icon-",
+  "css_use_suffix": false,
+  "hinting": true,
+  "units_per_em": 1000,
+  "ascent": 850,
+  "glyphs": [
+    {
+      "uid": "f6766a8b042c2453a4e153af03294383",
+      "css": "list-numbered",
+      "code": 61643,
+      "src": "fontawesome"
+    },
+    {
+      "uid": "ca1c07c0df52dbf2af6813c9e36c2611",
+      "css": "popup",
+      "code": 59392,
+      "src": "typicons"
+    },
+    {
+      "uid": "c9d395b295ad7d9c28298dcea916c6df",
+      "css": "popup-1",
+      "code": 59393,
+      "src": "websymbols"
+    },
+    {
+      "uid": "0e26e70b4aa537cc206f41b21dcf2fcc",
+      "css": "lock",
+      "code": 59394,
+      "src": "elusive"
+    },
+    {
+      "uid": "8f562a6dca9c14c9c8268bdb64efa89f",
+      "css": "lock-open",
+      "code": 59395,
+      "src": "elusive"
+    },
+    {
+      "uid": "599d6c088f4a1c64611b989459d65f6b",
+      "css": "lightbulb",
+      "code": 59396,
+      "src": "elusive"
+    },
+    {
+      "uid": "3b6f20ef4c4940aeaed84d973b2f6e64",
+      "css": "fontsize",
+      "code": 61576,
+      "src": "mfglabs"
+    }
+  ]
+}
