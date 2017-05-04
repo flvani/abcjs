@@ -17,6 +17,14 @@
     z-index: 100;    
 }
 
+.editorBorder { 
+    display: block; 
+    margin: 1px; 
+    border: 4px solid;  
+    border-color: #73C20E;
+    border-radius: 4px;
+}
+
 .editorText { 
     position: relative;
     display: block;

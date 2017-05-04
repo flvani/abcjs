@@ -30,6 +30,10 @@ DRAGGABLE.Div = function( parent, aButtons, options, callback ) {
     div.setAttribute("class", "draggableWindow" ); 
     this.topDiv = div;
     
+    if( opts.zIndex ) {
+        this.topDiv.style.zIndex = opts.zIndex;
+    }
+    
     if(!parent) {
         document.body.appendChild(this.topDiv);
     }else{
@@ -56,6 +60,12 @@ DRAGGABLE.Div = function( parent, aButtons, options, callback ) {
     div.setAttribute("class", "draggableMenu" ); 
     this.topDiv.appendChild( div );
     this.menuDiv = div;
+
+    var div = document.createElement("DIV");
+    div.setAttribute("id", "dToolBar" +  this.id ); 
+    div.setAttribute("class", "draggableToolBar" ); 
+    this.topDiv.appendChild( div );
+    this.toolBar = div;
     
     div = document.createElement("DIV");
     div.setAttribute("id", "draggableData" + this.id ); 
@@ -129,6 +139,7 @@ DRAGGABLE.Div = function( parent, aButtons, options, callback ) {
             self.y = e.clientY;
         };
 
+        this.resizeCorner.addEventListener( 'mouseover', this.resizeCorner.style.cursor='nwse-resize', false);
         this.resizeCorner.addEventListener( 'mousedown', this.mouseResize, false);
         this.resizeCorner.addEventListener('touchstart', this.mouseResize, false);
     }
@@ -179,6 +190,7 @@ DRAGGABLE.Div = function( parent, aButtons, options, callback ) {
     };
     
     this.addButtons( this.id, aButtons );
+    this.addToolButtons( this.id, [ 'search|Procurar', 'undo|Dezfazer', 'redo|Refazer', 'light|Realçar texto' ] );
     this.addTitle( this.id, this.title );
     
     this.titleSpan = document.getElementById("dSpanTitle"+this.id);
@@ -201,6 +213,10 @@ DRAGGABLE.Div.prototype.eventsCentral = function (ev) {
             this.close();
         }
     }
+};
+
+DRAGGABLE.Div.prototype.isResizable = function(  ) {
+    return this.hasStatusBar;
 };
 
 DRAGGABLE.Div.prototype.setTitle = function( title ) {
@@ -228,10 +244,9 @@ DRAGGABLE.Div.prototype.addTitle = function( id, title  ) {
 
 DRAGGABLE.Div.prototype.addButtons = function( id,  aButtons ) {
     var defaultButtons = ['close|Fechar'];
-    var txt = "";
     var self = this;
     
-    var buttonMap = { CLOSE: 'close', MOVE: 'move', ROTATE: 'rotate', GLOBE: 'globe-1', ZOOM:'search-plus' };
+    var buttonMap = { CLOSE: 'close', MOVE: 'move', ROTATE: 'rotate', GLOBE: 'globe-1', ZOOM:'search-plus', SEARCH:'search', UNDO:'undo', REDO:'redo', LIGHT:'lightbulb' };
     
     if(aButtons)
         defaultButtons = defaultButtons.concat(aButtons);
@@ -258,5 +273,33 @@ DRAGGABLE.Div.prototype.addButtons = function( id,  aButtons ) {
         }, false);
         
     });
-    return txt;
+};
+
+DRAGGABLE.Div.prototype.addToolButtons = function( id,  aButtons ) {
+    var self = this;
+    
+    var buttonMap = { CLOSE: 'close', MOVE: 'move', ROTATE: 'rotate', GLOBE: 'globe-1', ZOOM:'search-plus', SEARCH:'search', UNDO:'undo', REDO:'redo', LIGHT:'lightbulb' };
+    
+    aButtons.forEach( function (label) {
+        label = label.split('|');
+        var action = label[0].toUpperCase();
+        var rotulo = label.length > 1 ? label[1] : "";
+        var icon = 'icon-' + (buttonMap[action] ? buttonMap[action] : action.toLowerCase());
+        
+        if( self.translate ) {
+            DR.forcedResource('d'+ action +'ButtonA', rotulo, id, 'd'+ action +'ButtonA'+id); 
+        }
+        
+        var div = document.createElement("DIV");
+        div.setAttribute("id", 'd'+ action +'Button'+id ); 
+        div.setAttribute("class", "dButton" ); 
+        div.innerHTML = '<a href="" title="'+ rotulo +'"><i class="'+ icon +' icon-lightblue icon-large"></i></a>';
+        self.toolBar.appendChild(div);
+        div.addEventListener( 'click', function(e) {
+            e.stopPropagation(); 
+            e.preventDefault(); 
+            self.eventsCentral(action);
+        }, false);
+        
+    });
 };

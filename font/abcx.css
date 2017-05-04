@@ -119,6 +119,10 @@
 .icon-lightbulb-2:before { content: '\f0eb'; } /* '' */
 
 
+.icon-large {
+  font-size: 200%;
+}
+
 .icon-black {
     color: black;
 }

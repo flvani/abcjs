@@ -2,7 +2,7 @@
 // the same interface is used, ABCXJS.Editor can use a different type of object.
 //
 // EditArea:
-// - constructor(textareaid)
+// - constructor(editor_id, listener)
 //		This contains the id of a textarea control that will be used.
 // - addChangeListener(listener)
 //		A callback class that contains the entry point fireChanged()
@@ -64,8 +64,7 @@ ABCXJS.edit.EditArea = function (editor_id, listener) {
 };
 
 ABCXJS.edit.EditArea.prototype.setVisible = function (visible) {
-    var div = this.aceEditor.container;
-    div.parentNode.style.display = visible ? 'inline' : 'none';
+    this.container.topDiv.style.display = visible ? 'block' : 'none';
 };
 
 ABCXJS.edit.EditArea.prototype.setReadOnly = function (readOnly) {
@@ -78,10 +77,13 @@ ABCXJS.edit.EditArea.prototype.setReadOnly = function (readOnly) {
     this.aceditor.textInput.getElement().disabled=readOnly;  
 };
 
-
 ABCXJS.edit.EditArea.prototype.resize = function () {
-    var h = this.container.topDiv.clientHeight;
-    this.container.dataDiv.style.height = ( h - 48  ) + 'px';
+    
+    if( this.container.isResizable && this.container.isResizable() ) {
+        var h = this.container.topDiv.clientHeight;
+        this.container.dataDiv.style.height = ( h - 24 - 20 - 42  ) + 'px';
+    }
+    
     this.aceEditor.resize();
 };
 
@@ -146,10 +148,6 @@ ABCXJS.edit.EditArea.prototype.setString = function ( str ) {
 
 ABCXJS.edit.EditArea.prototype.getSelection = function() {
     return this.aceEditor.selection.getAllRanges();
-};
-
-ABCXJS.edit.EditArea.prototype.getSelectionState = function(enable) {
-    return this.selectionEnabled=enable;
 };
 
 ABCXJS.edit.EditArea.prototype.setSelection = function (abcelem) {

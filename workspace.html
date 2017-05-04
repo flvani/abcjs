@@ -275,7 +275,7 @@ V:3 accordionTab
 </textarea>
         
 <div id="editorDiv" class="editor" > 
-    <div id="textDiv" ></div>
+    <div id="textDiv" class="editorBorder" ></div>
     <div id="outrosControles" class="editorControles">
         <span id="spanNomeGaita">Acordeons: </span>
         <select id="selGaitas" ></select>
@@ -451,7 +451,11 @@ V:3 accordionTab
                 player.defineCallbackOnPlay(playerCallBackOnPlay);
                 player.defineCallbackOnScroll(playerCallBackOnScroll);
                 
-                var w2 = new DRAGGABLE.Div( null, [ 'move|Mover', 'rotate|Rotacionar', 'zoom|Zoom','globe|Mudar Notação'], {title:'KB', translate:false, statusBar:false, top:100, left:900 } );
+                var w2 = new DRAGGABLE.Div( 
+                    null
+                    , [ 'move|Mover', 'rotate|Rotacionar', 'zoom|Zoom','globe|Mudar Notação']
+                    , { title:'KB', translate:false, statusBar:false, top:100, left:900, zIndex: 1000 } 
+                );
  
                 myEditor = new ABCXJS.Editor(
                     {
