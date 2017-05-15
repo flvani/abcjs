@@ -1,16 +1,10 @@
 @font-face {
-  font-family: 'londrina';
-  src: url('../font/LondrinaShadow-Regular.ttf') format('truetype');
-}
-
-@font-face {
   font-family: 'abcx';
-  src: url('../font/abcx.ttf?81969744') format('truetype'),
-       url('../font/abcx.svg?81969744#abcx') format('svg');
+  src: url('../css/abcx.ttf?81969744') format('truetype'),
+       url('../css/abcx.svg?81969744#abcx') format('svg');
   font-weight: normal;
   font-style: normal;
 }
-
 
 /* Chrome hack: SVG is rendered more smooth in Windozze. 100% magic, uncomment if you need it. */
 /* Note, that will break hinting! In other OS-es font will be not as sharp as it could be */

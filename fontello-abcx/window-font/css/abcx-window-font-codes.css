@@ -1,0 +1,11 @@
+
+.ico-dock:before { content: '\e800'; } /* '' */
+.ico-dock-2:before { content: '\e801'; } /* '' */
+.ico-close:before { content: '\e802'; } /* '' */
+.ico-move-2:before { content: '\e803'; } /* '' */
+.ico-move:before { content: '\e804'; } /* '' */
+.ico-rotate:before { content: '\e805'; } /* '' */
+.ico-restore:before { content: '\e806'; } /* '' */
+.ico-globe:before { content: '\e807'; } /* '' */
+.ico-zoom-in:before { content: '\e808'; } /* '' */
+.ico-zoom-out:before { content: '\e809'; } /* '' */

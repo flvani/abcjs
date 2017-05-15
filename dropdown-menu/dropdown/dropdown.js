@@ -1,0 +1,102 @@
+/* 
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
+
+if (!window.ABCXJS)
+	window.ABCXJS = {};
+
+if (!ABCXJS.edit)
+	ABCXJS.edit = {};
+
+ABCXJS.edit.element = {id:0};
+
+ABCXJS.edit.DropdownMenu = function (topDiv, options, menu) {
+    var self = this;
+    var opts = options || {};
+    
+    this.id = ++ ABCXJS.edit.element.id;
+    this.container = document.getElementById(topDiv);
+    this.title = opts.title || '';
+    this.listener = opts.listener || null;
+    this.method = opts.method || null;
+    
+    if (!this.container) {
+        console.log('Elemento ' + topDiv + ' não existe!');
+        return;
+    }
+    
+    var c = this.container.getAttribute("class");
+    this.container.setAttribute("class", (c?c+" ":"") + "dropdown-font dropdown-container" );
+    
+    if( this.title ) {
+        var e = document.createElement("h1");
+        e.setAttribute( "id", "mTitle" + this.id ); 
+        e.setAttribute( "class", 'dropdown-title-font' );
+        e.innerHTML = this.title;
+        this.container.appendChild(e);
+        this.title = e;
+    }
+    
+    for ( var m = 0; m < menu.length; m++ ) {
+        var e1 = document.createElement("div");
+        e1.setAttribute( "class", 'dropdown' );
+        this.container.appendChild(e1);
+        
+        var e2 = document.createElement("input");
+        e2.setAttribute( "id", 'ch'+ this.id  +m );
+        e2.setAttribute( "type", "checkbox" );
+        e1.appendChild(e2);
+        
+        e2 = document.createElement("span");
+        e2.setAttribute( "data-state", 'ch'+ this.id +m );
+        e2.innerHTML = (menu[m].title || '' ) +'<i class="ico-down-2" data-toggle="toggle"></i>';
+        e2.addEventListener( 'click', function(e) {
+           e.stopPropagation(); 
+           e.preventDefault(); 
+           self.eventsCentral(this.getAttribute("data-state"));
+        }, false);
+        e1.appendChild(e2);
+        
+        e2 = document.createElement("div");
+        e2.setAttribute( "class", "dropdown-menu dropdown-menu-font" );
+        e2.setAttribute( "data-toggle", "toggle-menu" );
+        if(typeof(menu[m].scroll) !== 'undefined' && !menu[m].scroll ) {
+            e2.style = 'overflow-y: hidden;';
+        }
+        e1.appendChild(e2);
+        
+        var e3 = document.createElement("ul");
+        e2.appendChild(e3);
+        
+        for ( var i = 0; i < menu[m].itens.length; i++ ) {
+            var e4 = document.createElement("li"); 
+            e3.appendChild(e4);
+            var e5 = document.createElement("a");
+            var tags = menu[m].itens[i].split('|'); 
+            e5.innerHTML = tags[0];
+            e5.setAttribute( "data-state", 'ch'+ this.id +m );
+            e5.setAttribute( "data-value", tags.length > 1 ? tags[1] : tags[0] );
+            e5.addEventListener( 'click', function(e) {
+               e.stopPropagation(); 
+               e.preventDefault(); 
+               self.eventsCentral(this.getAttribute("data-state"), this.getAttribute("data-value") );
+            }, false);
+            e4.appendChild(e5);
+        }
+    }
+};
+
+ABCXJS.edit.DropdownMenu.prototype.eventsCentral = function (state, ev) {
+    var e = document.getElementById(state);
+    e.checked=!e.checked;
+    ev && alert( ev );
+//    if (this.listener && this.method ) {
+//        //(this.method)(ev);
+//    } else {
+//        if (ev === 'CLOSE') {
+//            this.close();
+//        }
+//    }
+};

@@ -1,0 +1,89 @@
+/*
+To change this license header, choose License Headers in Project Properties.
+To change this template file, choose Tools | Templates
+and open the template in the editor.
+*/
+/* 
+    Created on : 09/05/2017, 16:58:41
+    Author     : Flávio Vani
+*/
+
+
+body {
+  font-family: 'Londrina';
+  font-size: 16px;
+  margin: 0;
+  padding: 0;
+  padding-top: 50px;
+}
+
+.topSettings {
+    position:absolute; 
+    top:8px; 
+    right:10px; 
+    font-size: 1.4em;
+}    
+    
+.topBar {
+    position: fixed;
+    top: 0; 
+    left: 0;
+    min-height: 66px;
+    width: 100%;
+    padding: 0;
+    padding-top: 4px;
+    padding-left: 5px;
+    background: -moz-linear-gradient(left, darkblue 0%, black 100%);
+    background: -webkit-linear-gradient(left, darkblue 0%, black 100%);
+    background: -o-linear-gradient(left, darkblue 0%, black 100%);
+    background: -ms-linear-gradient(left, darkblue 0%, black 100%);
+    background: linear-gradient(left, darkblue 0%, black 100%);
+    color: orange;
+}
+
+.topTitle {
+  position: relative;
+  float: left;
+  width: 100%;
+  font-family: 'titleFont';
+  font-weight: normal;
+  font-size: 30px;
+  text-align: left;
+  line-height: 38px;
+  color: orange;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+  margin-top: 2px;
+    
+}
+
+.menuBar {
+    position: relative;
+    top: 0; 
+    left: 0;
+    height: 40px;
+    width: 100%;
+    padding: 0;
+    padding-left: 5px;
+    background: -moz-linear-gradient(left, darkblue 0%, black 100%);
+    background: -webkit-linear-gradient(left, darkblue 0%, white 100%);
+    background: -o-linear-gradient(left, darkblue 0%, black 100%);
+    background: -ms-linear-gradient(left, darkblue 0%, black 100%);
+    background: linear-gradient(left, darkblue 0%, black 100%);
+    color: orange;
+}
+
+.topMenu {
+   position: relative;
+   float: left;
+   display: inline;
+   border: none;
+   background: none;
+   margin-top: 4px;
+}
+
+.dropdown-menu {
+    box-shadow: 4px 4px 6px #444;
+    -moz-box-shadow: 4px 4px 6px #444;
+    -webkit-box-shadow: 4px 4px 6px #444;
+    -o-box-shadow: 4px 4px 6px #444;
+}   

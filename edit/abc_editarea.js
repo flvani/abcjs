@@ -44,7 +44,7 @@ ABCXJS.edit.EditArea = function (editor_id, listener) {
         this.container = new DRAGGABLE.Div( 
             null
             , [ 'move|Mover', 'dock|Fixar Janela' ]
-            , {translate:false, statusBar:true, width: 600, height: 300 }
+            , {translate:false, statusBar:true, width: 600, height: 300, title: 'Editor ABCX' }
             , {listener : listener, method: 'editorCallback' }
             , [ 'gutter|Numeração das Linhas', 'fontsize|Tamanho da fonte', 'down|Tom', 'arrowdn|Oitava|Oitava', 'arrowup|Oitava|Oitava', 'search|Procurar', 'undo|Dezfazer', 'redo|Refazer', 'light|Realçar texto' ] 
         );

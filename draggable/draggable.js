@@ -97,7 +97,7 @@ DRAGGABLE.Div = function( parent, aButtons, options, callback, aToolBarButtons )
         this.resizeCorner.innerHTML = '<img src="images/statusbar_resize.gif">';
         
         this.divResize = function (e) {
-            self.stopMouse(e);
+            e.stopPropagation();
             var touches = e.changedTouches;
             var p = {x: e.clientX, y: e.clientY};
 
@@ -123,16 +123,14 @@ DRAGGABLE.Div = function( parent, aButtons, options, callback, aToolBarButtons )
             window.removeEventListener('mousemove', self.divResize, false);
             window.removeEventListener('mouseout', self.divResize, false);
             self.dataDiv.style.pointerEvents = "auto";
-            e.stopPropagation();
-            e.preventDefault();
             self.eventsCentral('RESIZE');
         };
 
         this.mouseResize = function (e) {
+            e.preventDefault();
+            self.dataDiv.style.pointerEvents = "none";
             window.addEventListener('mouseup', self.mouseEndResize, false);
             window.addEventListener('touchend', self.mouseEndResize, false);
-            self.stopMouse(e);
-            self.dataDiv.style.pointerEvents = "none";
             window.addEventListener('touchmove', self.divResize, false);
             window.addEventListener('touchleave', self.divResize, false);
             window.addEventListener('mousemove', self.divResize, false);
@@ -147,7 +145,7 @@ DRAGGABLE.Div = function( parent, aButtons, options, callback, aToolBarButtons )
     }
     
     this.divMove = function (e) {
-        self.stopMouse(e);
+        e.stopPropagation();
         var touches = e.changedTouches;
         var p = {x: e.clientX, y: e.clientY};
 
@@ -165,7 +163,6 @@ DRAGGABLE.Div = function( parent, aButtons, options, callback, aToolBarButtons )
     };
 
     this.mouseEndMove = function (e) {
-        self.stopMouse(e);
         window.removeEventListener('touchmove', self.divMove, false);
         window.removeEventListener('touchleave', self.divMove, false);
         window.removeEventListener('mousemove', self.divMove, false);
@@ -175,10 +172,10 @@ DRAGGABLE.Div = function( parent, aButtons, options, callback, aToolBarButtons )
     };
     
     this.mouseMove = function (e) {
+        e.preventDefault();
+        self.dataDiv.style.pointerEvents = "none";
         window.addEventListener('mouseup', self.mouseEndMove, false);
         window.addEventListener('touchend', self.mouseEndMove, false);
-        self.stopMouse(e);
-        self.dataDiv.style.pointerEvents = "none";
         window.addEventListener('touchmove', self.divMove, false);
         window.addEventListener('touchleave', self.divMove, false);
         window.addEventListener('mousemove', self.divMove, false);
@@ -198,8 +195,8 @@ DRAGGABLE.Div = function( parent, aButtons, options, callback, aToolBarButtons )
     this.titleSpan = document.getElementById("dSpanTitle"+this.id);
     
     this.closeButton = document.getElementById("dCLOSEButton"+this.id);
-    this.closeButton.addEventListener( 'mousedown', self.stopMouse, false);
-    this.closeButton.addEventListener( 'touchstart', self.stopMouse, false);
+    this.closeButton.addEventListener( 'mousedown', function (e) { e.stopPropagation(); }, false);
+    this.closeButton.addEventListener( 'touchstart', function (e) { e.stopPropagation(); }, false);
     
 };
 
@@ -248,7 +245,7 @@ DRAGGABLE.Div.prototype.addButtons = function( id,  aButtons ) {
     var defaultButtons = ['close|Fechar'];
     var self = this;
     
-    var buttonMap = { CLOSE: 'close', MOVE: 'move', ROTATE: 'rotate', GLOBE: 'globe-1', ZOOM:'search-plus', DOCK: 'arrow-down-left' };
+    var buttonMap = { CLOSE: 'close', MOVE: 'move', ROTATE: 'rotate', GLOBE: 'globe', ZOOM:'zoom-in', DOCK: 'dock' };
     
     if(aButtons)
         defaultButtons = defaultButtons.concat(aButtons);
@@ -257,7 +254,7 @@ DRAGGABLE.Div.prototype.addButtons = function( id,  aButtons ) {
         label = label.split('|');
         var action = label[0].toUpperCase();
         var rotulo = label.length > 1 ? label[1] : "";
-        var icon = 'ico-' + (buttonMap[action] ? buttonMap[action] : action.toLowerCase());
+        var icon = 'wico-' + (buttonMap[action] ? buttonMap[action] : action.toLowerCase());
         
         if( self.translate ) {
             DR.forcedResource('d'+ action +'ButtonA', rotulo, id, 'd'+ action +'ButtonA'+id); 
@@ -266,10 +263,9 @@ DRAGGABLE.Div.prototype.addButtons = function( id,  aButtons ) {
         var div = document.createElement("DIV");
         div.setAttribute("id", 'd'+ action +'Button'+id ); 
         div.setAttribute("class", "dButton" ); 
-        div.innerHTML = '<a href="" title="'+ rotulo +'"><i class="'+ icon +' ico-lightblue"></i></a>';
+        div.innerHTML = '<a href="" title="'+ rotulo +'"><i class="'+ icon +' ico-white"></i></a>';
         self.menuDiv.appendChild(div);
         div.addEventListener( 'click', function(e) {
-            e.stopPropagation(); 
             e.preventDefault(); 
             self.eventsCentral(action);
         }, false);
@@ -296,10 +292,9 @@ DRAGGABLE.Div.prototype.addToolButtons = function( id,  aButtons ) {
         var div = document.createElement("DIV");
         div.setAttribute("id", 'd'+ action +'Button'+id ); 
         div.setAttribute("class", "dButton" ); 
-        div.innerHTML = '<a href="" title="'+ rotulo +'"><i class="'+ icon +' ico-lightblue ico-large"></i></a>';
+        div.innerHTML = '<a href="" title="'+ rotulo +'"><i class="'+ icon +' ico-black ico-large"></i></a>';
         self.toolBar.appendChild(div);
         div.addEventListener( 'click', function(e) {
-            e.stopPropagation(); 
             e.preventDefault(); 
             self.eventsCentral(action);
         }, false);
