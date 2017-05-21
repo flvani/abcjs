@@ -69,11 +69,10 @@
   background: #2c3e50;
   text-align: left;
   text-shadow: 0 -1px 0 rgba(255, 255, 255, 0.3);
-  
 }
 
 .dropdown-menu {
-  z-index: 1000;
+  z-index: 1;
   max-height: 0;
   position:absolute;
   display:  block;

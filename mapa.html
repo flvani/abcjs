@@ -10,6 +10,7 @@ and open the template in the editor.
         <meta charset="UTF-8">
         <meta name="viewport" content="height=device-width, initial-scale=1.0, minimum-scale=0.5, maximum-scale=2.0" >
         <link rel="stylesheet" href="fontsGoogle/fonts.css">
+        <link rel="stylesheet" href="tabbed-view/css/tabbed-view.css">
         <link rel="stylesheet" href="dropdown-menu/css/dropdown-menu.css">
         <link rel="stylesheet" href="css/mapa.css">
     </head>
@@ -25,7 +26,43 @@ and open the template in the editor.
             <div id="menu2Div" class="topMenu"></div>
             <div id="menu3Div" class="topMenu"></div>
         </div>
+        <div id="corpo" class="mainDiv">
+            <section class="tabs">
+                <label class="tab-label-1">Gaita</label>
 
+                <div class="clear-shadow"></div>
+
+                <div class="tv-content">
+                    <div class="tv-content-3">
+                        <p>Some content</p>
+                    </div>
+                </div>
+            </section>
+            <section class="tabs">
+                <input id="tab-1" type="radio" name="radio-set" class="tab-selector-1" checked="checked" />
+                <label for="tab-1" class="tab-label-1">About us</label>
+
+                <input id="tab-2" type="radio" name="radio-set" class="tab-selector-2" />
+                <label for="tab-2" class="tab-label-2">How we work</label>
+
+                <input id="tab-3" type="radio" name="radio-set" class="tab-selector-3" />
+                <label for="tab-3" class="tab-label-3">References</label>
+
+                <div class="clear-shadow"></div>
+
+                <div class="tv-content">
+                    <div class="tv-content-1">
+                        <p>Some content</p>
+                    </div>
+                    <div class="tv-content-2">
+                        <p>Some content</p>
+                    </div>
+                    <div class="tv-content-3">
+                        <p>Some content</p>
+                    </div>
+                </div>
+            </section>
+        </div>
         <script id="mainScript" type="text/javascript">
 
             window.addEventListener( 'load', initApp );
