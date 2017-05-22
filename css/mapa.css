@@ -24,9 +24,10 @@ body {
     user-select: none;
     /* fim - evita que textos fiquem selecionáveis */
     background:url("../images/background.fole.png");
-    background-repeat:no-repeat;
-    background-size: cover;
-    background-color: #eeeeee;
+    background-repeat: repeat;
+    background-size:  100%, 100%;
+    background-origin: content-box;
+    background-color: #ededed;
     }
 
 .topSettings {
@@ -43,7 +44,7 @@ body {
     top: 0; 
     left: 0;
     min-height: 70px;
-    min-width: 800px;
+    min-width: 640px;
     width: 100%;
 
     padding: 0;
@@ -55,6 +56,7 @@ body {
     background: -ms-linear-gradient(left, darkblue 0%, black 100%);
     background: linear-gradient(left, darkblue 0%, black 100%);
     color: orange;
+    cursor:default;
 }
 
 .topTitle {
@@ -63,12 +65,14 @@ body {
     width: 100%;
     font-family: 'titleFont';
     font-weight: normal;
-    font-size: 30px;
+    font-size: 28px;
     text-align: left;
-    line-height: 38px;
+    line-height: 34px;
     color: orange;
     text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
-    margin-top: 2px;
+    margin-top: 4px;
+    margin-bottom: 4px;
+    z-index: 100;
 
 }
 
@@ -79,9 +83,9 @@ body {
     height: 40px;
     width: 100%;
     padding: 0;
-    padding-left: 5px;
+    padding-left: 4px;
     background: -moz-linear-gradient(left, darkblue 0%, black 100%);
-    background: -webkit-linear-gradient(left, darkblue 0%, white 100%);
+    background: -webkit-linear-gradient(left, darkblue 0%, black 100%);
     background: -o-linear-gradient(left, darkblue 0%, black 100%);
     background: -ms-linear-gradient(left, darkblue 0%, black 100%);
     background: linear-gradient(left, darkblue 0%, black 100%);

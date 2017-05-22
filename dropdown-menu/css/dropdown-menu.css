@@ -1,139 +1,147 @@
 @import './abcx.css';
 
 .dropdown-container {
-  width: fit-content;
-  border:none;
+    width: fit-content;
+    border:none;
 }
 
 .dropdown-title-font {
-  font-family: 'Lucida','Sans','Arial';
-  font-weight: normal;
-  font-size: 40px;
-  text-align: center;
-  line-height: 1.4;
-  color: darkred;
+    font-family: 'Lucida','Sans','Arial';
+    font-weight: normal;
+    font-size: 40px;
+    text-align: center;
+    line-height: 1.4;
+    color: darkred;
 }
 
 .dropdown {
-  position: relative;
-  display: inline;
-  width: fit-content;
-  font-family: 'titleFont3','Arial';
-  font-weight: normal;
-  font-size: 1em;
-  line-height: 1em;
-  text-align: left;
-  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
-  color: white;
-  background: none;
-  margin-right: 10px;
+    position: relative;
+    display: inline;
+    width: fit-content;
+    font-family: 'titleFont3','Arial';
+    font-weight: normal;
+    font-size: 1.1em;
+    line-height: 1.1em;
+    text-align: left;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+    color: white;
+    background: none;
+    margin-right: 10px;
 }
 
 .dropdown ul {
-  list-style: none;
-  padding: 0;
-  margin: 0;
+    list-style: none;
+    padding: 0;
+    margin: 0;
 }
 
-
 .dropdown > span {
-  padding-left: 8px;
-  padding-right: 1.5em;
+    padding: 3px;
+    padding-right: 1.4em;
 }
 
 .dropdown > span:hover {
-  background:  #cd3d2e;
+    background:  #cd3d2e;
+    cursor: pointer;
 }
 
 .dropdown [data-toggle="toggle"] {
-  position:  absolute;
-  display: block;
-  top: 3px;
-  right: 1px;
-  -moz-transform: rotate(0deg);
-  -ms-transform: rotate(0deg);
-  -webkit-transform: rotate(0deg);
-  transform: rotate(0deg);
-  -moz-transition: -moz-transform 0.5s;
-  -o-transition: -o-transform 0.5s;
-  -webkit-transition: -webkit-transform 0.5s;
-  transition: transform 0.5s;
+    position:  absolute;
+    display: block;
+    top: 3px;
+    right: 1px;
+    -moz-transform: rotate(0deg);
+    -ms-transform: rotate(0deg);
+    -webkit-transform: rotate(0deg);
+    transform: rotate(0deg);
+    -moz-transition: -moz-transform 0.5s;
+    -o-transition: -o-transform 0.5s;
+    -webkit-transition: -webkit-transform 0.5s;
+    transition: transform 0.5s;
 }
 
 .dropdown-menu-font {
-  font-family: 'titleFont3','Arial';
-  font-weight: normal;
-  font-size: 0.9em;
-  line-height: 1em;
-  color: white;
-  background: #2c3e50;
-  text-align: left;
-  text-shadow: 0 -1px 0 rgba(255, 255, 255, 0.3);
+    font-family: 'titleFont3','Arial';
+    font-weight: normal;
+    font-size: 0.9em;
+    line-height: 1em;
+    color: white;
+    background: #2c3e50;
+    text-align: left;
+    text-shadow: 0 -1px 0 rgba(255, 255, 255, 0.3);
 }
 
 .dropdown-menu {
-  z-index: 1;
-  max-height: 0;
-  position:absolute;
-  display:  block;
-  top:100%;
-  padding: 0;
-  margin: 0;
-  margin-top: 3px;
-  margin-left: 8px;
-  min-width: 200px;
-  min-width: max-content;
-  overflow-y: scroll;
- -moz-transition: max-height 0.5s ease-out;
-  -o-transition: max-height 0.5s ease-out;
-  -webkit-transition: max-height 0.5s ease-out;
-  transition: max-height 0.5s ease-out;
+    z-index: 1;
+    max-height: 0;
+    position:absolute;
+    display:  block;
+    top:100%;
+    left: 0px;
+    padding: 0;
+    margin: 0;
+    margin-top: 3px;
+    margin-left: 8px;
+    min-width: max-content;
+    min-width: -moz-max-content;
+    overflow-y: scroll;
+    -moz-transition: max-height 0.5s ease-out;
+    -o-transition: max-height 0.5s ease-out;
+    -webkit-transition: max-height 0.5s ease-out;
+    transition: max-height 0.5s ease-out;
+    cursor: pointer;
+}
+
+.dropdown-menu hr {
+    margin: 2px;
+    border-top: 1px solid #ecf0f1;
+    border-bottom: 1px solid #fff;
 }
 
 .dropdown-menu li a {
-  padding: 8px;
-  display:  block;
-  -moz-box-shadow: 0 1px 0 white inset, 0 -1px 0 #d5d5d5 inset;
-  -webkit-box-shadow: 0 1px 0 white inset, 0 -1px 0 #d5d5d5 inset;
-  box-shadow: 0 1px 0 white inset, 0 -1px 0 #d5d5d5 inset;
-  box-shadow: none;
+    padding: 8px;
+    display:  block;
+    -moz-box-shadow: 0 1px 0 white inset, 0 -1px 0 #d5d5d5 inset;
+    -webkit-box-shadow: 0 1px 0 white inset, 0 -1px 0 #d5d5d5 inset;
+    box-shadow: 0 1px 0 white inset, 0 -1px 0 #d5d5d5 inset;
+    box-shadow: none;
 }
 
-.dropdown-menu li a:hover {
-  background: #f6f6f6;
-  background: lightblue;
+.dropdown-menu li:hover {
+    background: #f6f6f6;
+    background: lightblue;
 }
 
 .dropdown > input[type="checkbox"] {
-  display: none;
+    display: none;
 }
 
 .dropdown > input[type="checkbox"]:checked  ~ span > [data-toggle="toggle"] {
-  -moz-transform: rotate(-180deg);
-  -ms-transform: rotate(-180deg);
-  -webkit-transform: rotate(-180deg);
-  transform: rotate(-180deg);
-  -moz-transition: -moz-transform 0.5s;
-  -o-transition: -o-transform 0.5s;
-  -webkit-transition: -webkit-transform 0.5s;
-  transition: transform 0.5s;
+    -moz-transform: rotate(-180deg);
+    -ms-transform: rotate(-180deg);
+    -webkit-transform: rotate(-180deg);
+    transform: rotate(-180deg);
+    -moz-transition: -moz-transform 0.5s;
+    -o-transition: -o-transform 0.5s;
+    -webkit-transition: -webkit-transform 0.5s;
+    transition: transform 0.5s;
 }
 
 .dropdown > input[type="checkbox"]:checked  ~ [data-toggle="toggle-menu"] {
-  max-height: 200px;
-  display:  block;
-  top:100%;
-  padding: 0;
-  margin: 0;
-  margin-top: 3px;
-  margin-left: 8px;
-  overflow-y: scroll;
-  -moz-transform: scaleY(1);
-  -ms-transform: scaleY(1);
-  -webkit-transform: scaleY(1);
-  transform: scaleY(1);
-  -moz-transition: max-height 0.5s ease-in-out;
-  -o-transition: max-height 0.5s ease-in-out;
-  -webkit-transition: max-height 0.5s ease-in-out;
-  transition: max-height 0.5s ease-in-out;
+    max-height: 250px;
+    display:  block;
+    top:100%;
+    padding: 0;
+    margin: 0;
+    margin-top: 3px;
+    margin-left: 8px;
+    overflow-y: scroll;
+    -moz-transform: scaleY(1);
+    -ms-transform: scaleY(1);
+    -webkit-transform: scaleY(1);
+    transform: scaleY(1);
+    -moz-transition: max-height 0.5s ease-in-out;
+    -o-transition: max-height 0.5s ease-in-out;
+    -webkit-transition: max-height 0.5s ease-in-out;
+    transition: max-height 0.5s ease-in-out;
 }

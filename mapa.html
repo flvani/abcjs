@@ -10,8 +10,8 @@ and open the template in the editor.
         <meta charset="UTF-8">
         <meta name="viewport" content="height=device-width, initial-scale=1.0, minimum-scale=0.5, maximum-scale=2.0" >
         <link rel="stylesheet" href="fontsGoogle/fonts.css">
-        <link rel="stylesheet" href="tabbed-view/css/tabbed-view.css">
         <link rel="stylesheet" href="dropdown-menu/css/dropdown-menu.css">
+        <link rel="stylesheet" href="tabbed-view/css/tabbed-view.css">
         <link rel="stylesheet" href="css/mapa.css">
     </head>
     <body>
@@ -23,12 +23,10 @@ and open the template in the editor.
                 <i class="ico-cogs topSettings" ></i>
             </span>
             <div id="menu1Div" class="topMenu"></div>
-            <div id="menu2Div" class="topMenu"></div>
-            <div id="menu3Div" class="topMenu"></div>
         </div>
         <div id="corpo" class="mainDiv">
             <section class="tabs">
-                <label class="tab-label-1">Gaita</label>
+                <label class="tab-label-1">MINUANO G/C - 21/8 BOTÕES</label>
 
                 <div class="clear-shadow"></div>
 
@@ -39,14 +37,14 @@ and open the template in the editor.
                 </div>
             </section>
             <section class="tabs">
-                <input id="tab-1" type="radio" name="radio-set" class="tab-selector-1" checked="checked" />
-                <label for="tab-1" class="tab-label-1">About us</label>
+                <input id="tab-1" type="radio" name="radio-set" class="tab-selector-1" />
+                <label for="tab-1" class="tab-label-1">Músicas</label>
 
                 <input id="tab-2" type="radio" name="radio-set" class="tab-selector-2" />
-                <label for="tab-2" class="tab-label-2">How we work</label>
+                <label for="tab-2" class="tab-label-2">Acordes</label>
 
-                <input id="tab-3" type="radio" name="radio-set" class="tab-selector-3" />
-                <label for="tab-3" class="tab-label-3">References</label>
+                <input id="tab-3" type="radio" name="radio-set" class="tab-selector-3" checked="checked" />
+                <label for="tab-3" class="tab-label-3">Exercícios</label>
 
                 <div class="clear-shadow"></div>
 
@@ -69,38 +67,39 @@ and open the template in the editor.
 
             function initApp () {
                 var m1 = new ABCXJS.edit.DropdownMenu(
-                        'menu1Div'
-                        , {listener: this, method: 'callback1'}
-                , [{title: 'Acordeons', scroll: false,
-                        itens: ['Hohner Club IIIM (BR)|GAITA_HOHNER_CLUB_IIIM_BR',
-                            'Hohner/Hëring|GAITA_HOHNER_GC',
-                            'Leticce (transportada)|GAITA_LETICCE_CF_NE', 'Adicionar...']}]
-                        );
-                var m2 = new ABCXJS.edit.DropdownMenu(
-                        'menu2Div'
-                        , {listener: this, method: 'callback2'}
-                , [{title: 'Repertório', scroll: false,
-                        itens: ['Hohner Club IIIM (BR)|GAITA_HOHNER_CLUB_IIIM_BR',
-                            'Hohner/Hëring|GAITA_HOHNER_GC',
-                            'Leticce (transportada)|GAITA_LETICCE_CF_NE', 'Adicionar...']}]
-                        );
-                var m3 = new ABCXJS.edit.DropdownMenu(
-                        'menu3Div'
-                        , {listener: this, method: 'callback3'}
-                , [{title: 'Informações', scroll: false,
-                        itens: ['Hohner Club IIIM (BR)|GAITA_HOHNER_CLUB_IIIM_BR',
-                            'Hohner/Hëring|GAITA_HOHNER_GC',
-                            'Leticce (transportada)|GAITA_LETICCE_CF_NE', 'Adicionar...']}]
-                        );
+                          'menu1Div'
+                        , {listener: this, method: 'callback'}
+                        , [ {title: 'Acordeons', scroll: false,
+                                itens: [
+                                    'Hohner Club IIIM (BR)|GAITA_HOHNER_CLUB_IIIM_BR',
+                                    'Hohner/Hëring|GAITA_HOHNER_GC',
+                                    'Leticce (transportada)|GAITA_LETICCE_CF_NE', 
+                                    '------------------------------',
+                                    'Salvar mapa corrente',
+                                    'Carregar mapa do disco local'
+                                ]},
+                            {title: 'Repertório', scroll: false,
+                                itens: [
+                                    'Restaurar o original',
+                                    'Carregar do drive local',
+                                    'Exportar para drive local', 
+                                    'Partitura <i class="ico-play"> Tablatura',
+                                    'Tablatura <i class="ico-play"> Partitura'
+                                ]},
+                            {title: 'Informações', scroll: false,
+                                itens: [
+                                    'Tutoriais <i class="ico-novo">',
+                                    'Mapas para acordeons',
+                                    'Tablaturas para acordeons',
+                                    'Tablaturas para gaita transportada',
+                                    'Símbolos de Repetição',
+                                    'Estúdio ABCX',
+                                    'Formato ABCX',
+                                    'Sobre'
+                                ]}
+                        ]
+                    );
             }
-            function callBack1(e) {
-                e.checked = !e.checked;
-            }
-            function callBack2(e) {
-                e.checked = !e.checked; }
-            function callBack3(e) {
-                e.checked = !e.checked; }
-
         </script>
     </body>
 </html>

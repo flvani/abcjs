@@ -50,6 +50,7 @@
    text-shadow: 1px 1px 1px rgba(180, 180, 180, 0.8); 
 }
  
+.ico-novo:before { content:  url(../../images/novo.mini.png);  height: 10px; width: 10px; }
 .ico-headphones:before { content: '\e800'; } /* '' */
 .ico-learning:before { content: '\e801'; } /* '' */
 .ico-close:before { content: '\e802'; } /* '' */

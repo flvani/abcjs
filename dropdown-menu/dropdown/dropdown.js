@@ -57,6 +57,11 @@ ABCXJS.edit.DropdownMenu = function (topDiv, options, menu) {
            e.preventDefault(); 
            self.eventsCentral(this.getAttribute("data-state"));
         }, false);
+//        e2.addEventListener( 'mouseout', function(e) {
+//           e.stopPropagation(); 
+//           e.preventDefault(); 
+//           self.closeMenu(this.getAttribute("data-state"));
+//        }, false);
         e1.appendChild(e2);
         
         e2 = document.createElement("div");
@@ -71,19 +76,24 @@ ABCXJS.edit.DropdownMenu = function (topDiv, options, menu) {
         e2.appendChild(e3);
         
         for ( var i = 0; i < menu[m].itens.length; i++ ) {
-            var e4 = document.createElement("li"); 
-            e3.appendChild(e4);
-            var e5 = document.createElement("a");
             var tags = menu[m].itens[i].split('|'); 
-            e5.innerHTML = tags[0];
-            e5.setAttribute( "data-state", 'ch'+ this.id +m );
-            e5.setAttribute( "data-value", tags.length > 1 ? tags[1] : tags[0] );
-            e5.addEventListener( 'click', function(e) {
-               e.stopPropagation(); 
-               e.preventDefault(); 
-               self.eventsCentral(this.getAttribute("data-state"), this.getAttribute("data-value") );
-            }, false);
-            e4.appendChild(e5);
+            if( tags[0].substring(0, 3) ===  '---' ) {
+                var e4 = document.createElement("hr");
+                e3.appendChild(e4);
+            } else {
+                var e4 = document.createElement("li"); 
+                e3.appendChild(e4);
+                var e5 = document.createElement("a");
+                e5.innerHTML = tags[0];
+                e5.setAttribute( "data-state", 'ch'+ this.id +m );
+                e5.setAttribute( "data-value", tags.length > 1 ? tags[1] : tags[0] );
+                e5.addEventListener( 'click', function(e) {
+                   e.stopPropagation(); 
+                   e.preventDefault(); 
+                   self.eventsCentral(this.getAttribute("data-state"), this.getAttribute("data-value") );
+                }, false);
+                e4.appendChild(e5);
+            }
         }
     }
 };
@@ -100,3 +110,8 @@ ABCXJS.edit.DropdownMenu.prototype.eventsCentral = function (state, ev) {
 //        }
 //    }
 };
+
+//ABCXJS.edit.DropdownMenu.prototype.closeMenu = function (state) {
+//    var e = document.getElementById(state);
+//    e.checked=false;
+//};

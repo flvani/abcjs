@@ -13,10 +13,10 @@ and open the template in the editor.
     display: block;
     float:  bottom;
     top: 75px;
-    margin-top:2px;
-    margin-left:2px;
+    margin-top:4px;
+    margin-left:4px;
     width: fit-content;
-    min-width: 800px;
+    min-width: 640px;
 }
 
 .tabs input {
@@ -39,6 +39,7 @@ and open the template in the editor.
 }
 
 .tabs label {
+    /*
     background: #5ba4a4;
     background: -moz-linear-gradient(top, #5ba4a4 0%, #4e8c8a 100%);
     background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#5ba4a4), color-stop(100%,#4e8c8a));
@@ -46,6 +47,10 @@ and open the template in the editor.
     background: -o-linear-gradient(top, #5ba4a4 0%,#4e8c8a 100%);
     background: -ms-linear-gradient(top, #5ba4a4 0%,#4e8c8a 100%);
     background: linear-gradient(top, #5ba4a4 0%,#4e8c8a 100%);
+    */
+    background: lavender;
+  
+
     font-family: 'titleFont3';
     font-size: 15px;
     line-height: 40px;
@@ -56,6 +61,7 @@ and open the template in the editor.
     display: block;
     width: auto;
     color: #385c5b;
+    color: orange;
     letter-spacing: 1px;
     text-transform: uppercase;
     font-weight: bold;
@@ -78,6 +84,7 @@ and open the template in the editor.
 
 .tabs input:hover + label {
     background: #5ba4a4;
+    background: darkblue;
     cursor: pointer;
 }
 
@@ -99,7 +106,11 @@ and open the template in the editor.
 }
 
 .tabs input:checked + label {
-    background: #fff;
+    background: -moz-linear-gradient(left, darkblue 0%, black 100%);
+    background: -webkit-linear-gradient(left, darkblue 0%, black 100%);
+    background: -o-linear-gradient(left, darkblue 0%, black 100%);
+    background: -ms-linear-gradient(left, darkblue 0%, black 100%);
+    background: linear-gradient(left, darkblue 0%, black 100%);
     z-index: 5;
 }
 
@@ -110,9 +121,11 @@ and open the template in the editor.
 .tv-content {
     background: #fff;
     position: relative;
-    width: 100%;
-    height: 370px;
-    z-index: 5;
+    min-width: 400px;
+    min-height: 200px;
+    height: 300px;
+    width: 620px;
+    z-index: 0;
     box-shadow: 0 -2px 3px -2px rgba(0,0,0,0.2), 0 2px 2px rgba(0,0,0,0.1);
     border-radius: 0 3px 3px 3px;
 }
