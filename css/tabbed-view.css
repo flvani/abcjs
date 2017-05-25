@@ -13,13 +13,14 @@ and open the template in the editor.
     display: block;
     float:  bottom;
     top: 75px;
-    margin-top:4px;
-    margin-left:4px;
+    margin-top: 4px;
+    margin-bottom: 8px;
+    margin-left: 4px;
     width: fit-content;
     min-width: 640px;
 }
 
-.tabs input {
+.tabs input[type="radio"] {
     position: absolute;
     display: inline;
     z-index: 100;
@@ -39,34 +40,42 @@ and open the template in the editor.
 }
 
 .tabs label {
+    
+    background: #003050;
+    background: #ccc;
+    background: -moz-linear-gradient(top, white 0%, #ccc   100%);
+    background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,white), color-stop(100%,#ccc ));
+    background: -webkit-linear-gradient(top, white 0%, #ccc  100%);
+    background: -o-linear-gradient(top, #003050 0%, #ccc  100%);
+    background: -ms-linear-gradient(top, #003050 0%, #ccc  100%);
+    background: linear-gradient(top, #003050 0%, #ccc  100%);
     /*
-    background: #5ba4a4;
-    background: -moz-linear-gradient(top, #5ba4a4 0%, #4e8c8a 100%);
-    background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#5ba4a4), color-stop(100%,#4e8c8a));
-    background: -webkit-linear-gradient(top, #5ba4a4 0%,#4e8c8a 100%);
-    background: -o-linear-gradient(top, #5ba4a4 0%,#4e8c8a 100%);
-    background: -ms-linear-gradient(top, #5ba4a4 0%,#4e8c8a 100%);
-    background: linear-gradient(top, #5ba4a4 0%,#4e8c8a 100%);
-    */
-    background: lavender;
-  
+    background: -moz-linear-gradient(top, lavender 0%, white 100%);
+    background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,lavender), color-stop(100%,lavender));
+    background: -webkit-linear-gradient(top, lavender 0%, white 100%);
+    background: -o-linear-gradient(top, lavender 0%, white 100%);
+    background: -ms-linear-gradient(top, lavender 0%, white 100%);
+    background: linear-gradient(top, lavender 0%, white 100%);
+  */
 
     font-family: 'titleFont3';
     font-size: 15px;
-    line-height: 40px;
-    height: 40px;
+    line-height: 30px;
+    height: 30px;
     position: relative;
-    padding: 0 20px;
+    padding: 0 6px;
     float: left;
     display: block;
     width: auto;
     color: #385c5b;
-    color: orange;
+    color: #dab390;
+    color: #777;
     letter-spacing: 1px;
     text-transform: uppercase;
     font-weight: bold;
     text-align: center;
-    text-shadow: 1px 1px 1px rgba(255,255,255,0.3);
+    /*text-shadow: 1px 1px 1px #385c5b;
+    */
     border-radius: 3px 3px 0 0;
     box-shadow: 2px 0 2px rgba(0,0,0,0.1), -2px 0 2px rgba(0,0,0,0.1);
 }
@@ -74,8 +83,9 @@ and open the template in the editor.
 .tabs label:after {
     content: '';
     background: #fff;
+    background: #e9edf0;
     position: absolute;
-    bottom: -2px;
+    bottom: -1px;
     left: 0;
     width: 100%;
     height: 2px;
@@ -84,7 +94,10 @@ and open the template in the editor.
 
 .tabs input:hover + label {
     background: #5ba4a4;
-    background: darkblue;
+    background: lavender;
+    background: #eee;
+    background: #003050;
+    background: -webkit-linear-gradient(bottom, #ccc 0%, white 50%);
     cursor: pointer;
 }
 
@@ -106,20 +119,41 @@ and open the template in the editor.
 }
 
 .tabs input:checked + label {
-    background: -moz-linear-gradient(left, darkblue 0%, black 100%);
-    background: -webkit-linear-gradient(left, darkblue 0%, black 100%);
-    background: -o-linear-gradient(left, darkblue 0%, black 100%);
-    background: -ms-linear-gradient(left, darkblue 0%, black 100%);
-    background: linear-gradient(left, darkblue 0%, black 100%);
+    color: #777;
+    color: orange;
+    text-shadow: 1px 1px 1px #385c5b;
+    background: #003050;
+    background: -moz-linear-gradient(top, #003050 0%, #e9edf0 100%);
+    background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#003050), color-stop(100%,lavender));
+    background: -webkit-linear-gradient(top, #003050 0%, #e9edf0 60%);
+    background: -o-linear-gradient(top, #003050 0%, #e9edf0 100%);
+    background: -ms-linear-gradient(top, #003050 0%, #e9edf0 100%);
+    background: linear-gradient(top, #003050 0%, #e9edf0 100%);
     z-index: 5;
 }
 
-.clear-shadow {
+.branca {
     clear: both;
+    position: relative;
+    top: 0;
+    left: 0;
+    background: #e9edf0;
+    min-width: 400px;
+    min-height: 200px;
+    height: 300px;
+    width: 620px;
+    z-index: 0;
+    box-shadow: 0 -2px 3px -2px rgba(0,0,0,0.2), 2px 2px 2px rgba(0,0,0,0.1);
+    box-shadow: 4px 4px 6px #444;
+    -moz-box-shadow: 4px 4px 6px #444;
+    -webkit-box-shadow: 4px 4px 6px #444;
+    -o-box-shadow: 4px 4px 6px #444;
+    /*border-radius: 0 3px 3px 3px;*/
 }
 
 .tv-content {
-    background: #fff;
+    clear: both;
+    background: #e9edf0;
     position: relative;
     min-width: 400px;
     min-height: 200px;
@@ -127,7 +161,11 @@ and open the template in the editor.
     width: 620px;
     z-index: 0;
     box-shadow: 0 -2px 3px -2px rgba(0,0,0,0.2), 0 2px 2px rgba(0,0,0,0.1);
-    border-radius: 0 3px 3px 3px;
+    box-shadow: 4px 4px 6px #444;
+    -moz-box-shadow: 4px 4px 6px #444;
+    -webkit-box-shadow: 4px 4px 6px #444;
+    -o-box-shadow: 4px 4px 6px #444;
+    /*border-radius: 0 3px 3px 3px;*/
 }
 
 .tv-content div {
@@ -152,7 +190,6 @@ and open the template in the editor.
     -ms-filter:"progid:DXImageTransform.Microsoft.Alpha(Opacity=100)";
     filter: alpha(opacity=100);
     opacity: 1;
-
     -webkit-transition: opacity ease-out 0.2s 0.1s;
     -moz-transition: opacity ease-out 0.2s 0.1s;
     -o-transition: opacity ease-out 0.2s 0.1s;
@@ -170,7 +207,7 @@ and open the template in the editor.
     text-align: left;
     margin: 0;
     color: #777;
-    padding-left: 15px;
     font-family: Cambria, Georgia, serif;
-    border-left: 8px solid rgba(63,148,148, 0.1);
+    /*padding-left: 15px;
+    border-left: 8px solid rgba(63,148,148, 0.1);*/
 }

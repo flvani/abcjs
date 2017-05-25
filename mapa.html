@@ -9,14 +9,15 @@ and open the template in the editor.
         <title>Mapa para Acordeons Diatônicos</title>
         <meta charset="UTF-8">
         <meta name="viewport" content="height=device-width, initial-scale=1.0, minimum-scale=0.5, maximum-scale=2.0" >
+        <link rel="stylesheet" href="fontsIco/abcx.css">
         <link rel="stylesheet" href="fontsGoogle/fonts.css">
-        <link rel="stylesheet" href="dropdown-menu/css/dropdown-menu.css">
-        <link rel="stylesheet" href="tabbed-view/css/tabbed-view.css">
+        <link rel="stylesheet" href="css/dropdown-menu.css">
+        <link rel="stylesheet" href="css/tabbed-view.css">
         <link rel="stylesheet" href="css/mapa.css">
     </head>
     <body>
-        <script type="text/javascript" src="dropdown-menu/dropdown/dropdown.js"></script>
-        
+        <script type="text/javascript" src="dropdown-menu/dropdown.js"></script>
+
         <div id="topBar" class="topBar" >
             <span class="topTitle">
                 Mapa para Acordeons Diatônicos
@@ -26,14 +27,21 @@ and open the template in the editor.
         </div>
         <div id="corpo" class="mainDiv">
             <section class="tabs">
-                <label class="tab-label-1">MINUANO G/C - 21/8 BOTÕES</label>
+                <input type="radio" checked="checked"  />
+                <label >MINUANO G/C - 21/8 BOTÕES</label>
+                <div class="btn-group">
+                    <button id="buttonChangeNotation" class="btn" >
+                        <i class="ico-globe"></i>&nbsp;<span id="DR_chlabel">Mudar a notação</span>
+                    </button>
 
-                <div class="clear-shadow"></div>
-
-                <div class="tv-content">
-                    <div class="tv-content-3">
-                        <p>Some content</p>
-                    </div>
+                    <button id="btnSongs" class="btn dropdown-toggle" data-toggle="dropdown">
+                        <span id="spanSongs">Repertório</span>
+                        &nbsp;&nbsp;&nbsp;
+                        <i class="ico-down-2"></i>
+                    </button>
+                </div>
+                <div class="branca" style="height: 200px;">
+                    <p>Some content</p>
                 </div>
             </section>
             <section class="tabs">
@@ -46,9 +54,14 @@ and open the template in the editor.
                 <input id="tab-3" type="radio" name="radio-set" class="tab-selector-3" checked="checked" />
                 <label for="tab-3" class="tab-label-3">Exercícios</label>
 
-                <div class="clear-shadow"></div>
-
-                <div class="tv-content">
+                <div class="btn-group">
+                    <button id="buttonChangeNotation" class="btn" >
+                        <i class="ico-globe"></i>&nbsp;<span id="DR_chlabel">Mudar a notação</span>
+                    </button>
+                    <div id="menu2Div" class="topMenu"></div>
+                </div>
+                
+                <div class="tv-content" style="height: 400px; width: 890px;">
                     <div class="tv-content-1">
                         <p>Some content</p>
                     </div>
@@ -67,38 +80,51 @@ and open the template in the editor.
 
             function initApp () {
                 var m1 = new ABCXJS.edit.DropdownMenu(
-                          'menu1Div'
+                        'menu1Div'
                         , {listener: this, method: 'callback'}
-                        , [ {title: 'Acordeons', scroll: false,
-                                itens: [
-                                    'Hohner Club IIIM (BR)|GAITA_HOHNER_CLUB_IIIM_BR',
-                                    'Hohner/Hëring|GAITA_HOHNER_GC',
-                                    'Leticce (transportada)|GAITA_LETICCE_CF_NE', 
-                                    '------------------------------',
-                                    'Salvar mapa corrente',
-                                    'Carregar mapa do disco local'
-                                ]},
-                            {title: 'Repertório', scroll: false,
-                                itens: [
-                                    'Restaurar o original',
-                                    'Carregar do drive local',
-                                    'Exportar para drive local', 
-                                    'Partitura <i class="ico-play"> Tablatura',
-                                    'Tablatura <i class="ico-play"> Partitura'
-                                ]},
-                            {title: 'Informações', scroll: false,
-                                itens: [
-                                    'Tutoriais <i class="ico-novo">',
-                                    'Mapas para acordeons',
-                                    'Tablaturas para acordeons',
-                                    'Tablaturas para gaita transportada',
-                                    'Símbolos de Repetição',
-                                    'Estúdio ABCX',
-                                    'Formato ABCX',
-                                    'Sobre'
-                                ]}
-                        ]
-                    );
+                , [{title: 'Acordeons', scroll: false,
+                        itens: [
+                            'Hohner Club IIIM (BR)|GAITA_HOHNER_CLUB_IIIM_BR',
+                            'Hohner/Hëring|GAITA_HOHNER_GC',
+                            'Leticce (transportada)|GAITA_LETICCE_CF_NE',
+                            '------------------------------',
+                            'Salvar mapa corrente',
+                            'Carregar mapa do disco local'
+                        ]},
+                    {title: 'Repertório', scroll: false,
+                        itens: [
+                            'Restaurar o original',
+                            'Carregar do drive local',
+                            'Exportar para drive local',
+                            'Partitura <i class="ico-play"> Tablatura',
+                            'Tablatura <i class="ico-play"> Partitura'
+                        ]},
+                    {title: 'Informações', scroll: false,
+                        itens: [
+                            'Tutoriais <i class="ico-novo">',
+                            'Mapas para acordeons',
+                            'Tablaturas para acordeons',
+                            'Tablaturas para gaita transportada',
+                            'Símbolos de Repetição',
+                            'Estúdio ABCX',
+                            'Formato ABCX',
+                            'Sobre'
+                        ]}
+                ]);
+                var m2 = new ABCXJS.edit.DropdownMenu(
+                        'menu2Div'
+                        , {listener: this, method: 'callback1'}
+                        , [{title: 'Acordeons', scroll: false,
+                        itens: [
+                            'Hohner Club IIIM (BR)|GAITA_HOHNER_CLUB_IIIM_BR',
+                            'Hohner/Hëring|GAITA_HOHNER_GC',
+                            'Leticce (transportada)|GAITA_LETICCE_CF_NE',
+                            '------------------------------',
+                            'Salvar mapa corrente',
+                            'Carregar mapa do disco local'
+                        ]}
+                ]);
+                
             }
         </script>
     </body>
