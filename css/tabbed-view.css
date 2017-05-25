@@ -121,6 +121,7 @@ and open the template in the editor.
 .tabs input:checked + label {
     color: #777;
     color: orange;
+    color: #ff9922;
     text-shadow: 1px 1px 1px #385c5b;
     background: #003050;
     background: -moz-linear-gradient(top, #003050 0%, #e9edf0 100%);
@@ -130,25 +131,6 @@ and open the template in the editor.
     background: -ms-linear-gradient(top, #003050 0%, #e9edf0 100%);
     background: linear-gradient(top, #003050 0%, #e9edf0 100%);
     z-index: 5;
-}
-
-.branca {
-    clear: both;
-    position: relative;
-    top: 0;
-    left: 0;
-    background: #e9edf0;
-    min-width: 400px;
-    min-height: 200px;
-    height: 300px;
-    width: 620px;
-    z-index: 0;
-    box-shadow: 0 -2px 3px -2px rgba(0,0,0,0.2), 2px 2px 2px rgba(0,0,0,0.1);
-    box-shadow: 4px 4px 6px #444;
-    -moz-box-shadow: 4px 4px 6px #444;
-    -webkit-box-shadow: 4px 4px 6px #444;
-    -o-box-shadow: 4px 4px 6px #444;
-    /*border-radius: 0 3px 3px 3px;*/
 }
 
 .tv-content {
@@ -172,7 +154,7 @@ and open the template in the editor.
     position: absolute;
     top: 0;
     left: 0;
-    padding: 10px 40px;
+    padding: 10px 10px;
     z-index: 1;
     opacity: 0;
 
@@ -183,6 +165,7 @@ and open the template in the editor.
     transition: opacity linear 0.1s;
 }
 
+.tabs .tv-content-always,
 .tabs input.tab-selector-1:checked ~ .tv-content .tv-content-1,
 .tabs input.tab-selector-2:checked ~ .tv-content .tv-content-2,
 .tabs input.tab-selector-3:checked ~ .tv-content .tv-content-3 {
@@ -196,10 +179,7 @@ and open the template in the editor.
     -ms-transition: opacity ease-out 0.2s 0.1s;
     transition: opacity ease-out 0.2s 0.1s;
 }
-.tv-content div h2,
-.tv-content div h3{
-    color: #398080;
-}
+
 .tv-content div p {
     font-size: 14px;
     line-height: 22px;

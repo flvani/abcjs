@@ -28,7 +28,7 @@ ABCXJS.edit.DropdownMenu = function (topDiv, options, menu) {
     }
     
     var c = this.container.getAttribute("class");
-    this.container.setAttribute("class", (c?c+" ":"") + "dropdown-font dropdown-container" );
+    this.container.setAttribute("class", (c?c+" ":"") + "dropdown-container" );
     
     if( this.title ) {
         var e = document.createElement("h1");
