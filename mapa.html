@@ -7,30 +7,37 @@ and open the template in the editor.
 <html>
     <head>
         <title>Mapa para Acordeons Diatônicos</title>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="height=device-width, initial-scale=1.0, minimum-scale=0.5, maximum-scale=2.0" >
-        <link rel="stylesheet" href="fontsIco/abcx.css">
-        <link rel="stylesheet" href="fontsGoogle/fonts.css">
-        <link rel="stylesheet" href="css/dropdown-menu.css">
-        <link rel="stylesheet" href="css/tabbed-view.css">
-        <link rel="stylesheet" href="css/mapa.css">
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="height=device-width, initial-scale=1.0, minimum-scale=0.5, maximum-scale=2.0" />
+        <link rel="stylesheet" href="fontsIco/abcx.css" />
+        <link rel="stylesheet" href="fontsIco/abcx-window-font.css" />
+        <link rel="stylesheet" href="fontsGoogle/fonts.css" />
+        <link rel="stylesheet" href="css/dropdown-menu.css" />
+        <link rel="stylesheet" href="css/tabbed-view.css" />
+        <link rel="stylesheet" href="css/draggable.css" />
+        <link rel="stylesheet" href="css/mapa.css" />
     </head>
     <body>
+        
+        <script type="text/javascript" src="parse/abc_common.js"></script>
         <script type="text/javascript" src="dropdown-menu/dropdown.js"></script>
+        <script type="text/javascript" src="draggable/draggable.js"></script>
 
-        <div id="topBar" class="topBar" >
+        <div id="topBar" class="topBar gradiente" >
             <span class="topTitle">
                 Mapa para Acordeons Diatônicos
                 <i class="ico-cogs topSettings" ></i>
             </span>
-            <div id="menu1Div" class="topMenu"></div>
-        </div>
+            <div class="dropdown-group">
+                <div id="menu1Div" class="topMenu"></div>
+            </div>
+        </div> <!-- topBar -->
         <div id="corpo" class="mainDiv">
             <section class="tabs">
-                <input type="radio" checked="checked"  />
+                <input type="radio" checked="checked" />
                 <label >MINUANO G/C - 21/8 BOTÕES</label>
                 <div class="btn-group">
-                    <button id="buttonChangeNotation" class="btn" >
+                    <button id="buttonChangeNotation" >
                         <i class="ico-globe"></i>&nbsp;<span id="DR_chlabel">Mudar a notação</span>
                     </button>
                 </div>
@@ -50,9 +57,8 @@ and open the template in the editor.
                 <input id="tab-3" type="radio" name="radio-set" class="tab-selector-3" checked="checked" />
                 <label for="tab-3" class="tab-label-3">Exercícios</label>
 
-                <div class="btn-group">
+                <div class="btn-group" >
                     <div id="menu2Div" class="topMenu"></div>
-                    <!--button id="menu2Div" class="btn" ></button-->
                     <button id="buttonTools" class="btn" >
                         <i class="ico-wrench"></i>&nbsp;<span id="DR_chlabel">Ferramentas</span>
                     </button>
@@ -61,8 +67,9 @@ and open the template in the editor.
                     </button>
                     <button id="buttonPlay" class="btn" ><i class="ico-play"></i></button>
                     <button id="buttonStop" class="btn" ><i class="ico-stop"></i></button>
+                    <span id="timer" class="text" >00:00:01</span>
                 </div>
-                
+
                 <div class="tv-content" style="height: 400px; width: 890px;">
                     <div class="tv-content-1">
                         <p>Some content</p>
@@ -75,12 +82,13 @@ and open the template in the editor.
                     </div>
                 </div>
             </section>
-        </div>
+        </div> <!-- corpo -->
+        
         <script id="mainScript" type="text/javascript">
 
-            window.addEventListener( 'load', initApp );
+            window.addEventListener( 'load', initApp);
 
-            function initApp () {
+            function initApp() {
                 var m1 = new ABCXJS.edit.DropdownMenu(
                         'menu1Div'
                         , {listener: this, method: 'callback'}
@@ -103,20 +111,20 @@ and open the template in the editor.
                         ]},
                     {title: 'Informações', scroll: false,
                         itens: [
-                            'Tutoriais <i class="ico-novo">',
-                            'Mapas para acordeons',
-                            'Tablaturas para acordeons',
-                            'Tablaturas para gaita transportada',
-                            'Símbolos de Repetição',
-                            'Estúdio ABCX',
-                            'Formato ABCX',
-                            'Sobre'
+                            'Tutoriais <i class="ico-novo">|TUTORIAL',
+                            'Mapas para acordeons|MAPS',
+                            'Tablaturas para acordeons|TABS',
+                            'Tablaturas para gaita transportada|TABSTRANSPORTADA',
+                            'Símbolos de Repetição|JUMPS',
+                            'Estúdio ABCX|ESTUDIO',
+                            'Formato ABCX|ABCX',
+                            'Sobre|ABOUT'
                         ]}
                 ]);
                 var m2 = new ABCXJS.edit.DropdownMenu(
                         'menu2Div'
                         , {listener: this, method: 'callback1'}
-                        , [{title: 'Acordeons', scroll: false,
+                , [{title: 'Acordeons', scroll: false,
                         itens: [
                             'Hohner Club IIIM (BR)|GAITA_HOHNER_CLUB_IIIM_BR',
                             'Hohner/Hëring|GAITA_HOHNER_GC',
@@ -126,8 +134,15 @@ and open the template in the editor.
                             'Carregar mapa do disco local'
                         ]}
                 ]);
-                
+
+                w1 = new DRAGGABLE.Div(
+                        null
+                        , null
+                        , {title: 'Sobre...', translate: false, statusBar: false, top: 100, left: 300, zIndex: 100}
+                );
+
             }
-        </script>
+            
+        </script> <!-- mainScript -->
     </body>
 </html>

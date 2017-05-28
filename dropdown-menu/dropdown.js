@@ -15,6 +15,7 @@ ABCXJS.edit.element = {id:0};
 ABCXJS.edit.DropdownMenu = function (topDiv, options, menu) {
     var self = this;
     var opts = options || {};
+    this.headers = {};
     
     this.id = ++ ABCXJS.edit.element.id;
     this.container = document.getElementById(topDiv);
@@ -27,8 +28,8 @@ ABCXJS.edit.DropdownMenu = function (topDiv, options, menu) {
         return;
     }
     
-    var c = this.container.getAttribute("class");
-    this.container.setAttribute("class", (c?c+" ":"") + "dropdown-container" );
+//    var c = this.container.getAttribute("class");
+//    this.container.setAttribute("class", (c?c+" ":"") + "dropdown-container" );
     
     if( this.title ) {
         var e = document.createElement("h1");
@@ -48,10 +49,11 @@ ABCXJS.edit.DropdownMenu = function (topDiv, options, menu) {
         e2.setAttribute( "id", 'ch'+ this.id  +m );
         e2.setAttribute( "type", "checkbox" );
         e1.appendChild(e2);
+        this.headers['ch'+ this.id  +m] = e2;
         
-        e2 = document.createElement("span");
+        e2 = document.createElement("button");
         e2.setAttribute( "data-state", 'ch'+ this.id +m );
-        e2.innerHTML = (menu[m].title || '' ) +'<i class="ico-down-2" data-toggle="toggle"></i>';
+        e2.innerHTML = (menu[m].title.replaceAll( ' ', '&nbsp;' ) || '' ) +'&nbsp;&nbsp;'+'<i class="ico-down-2" data-toggle="toggle"></i>';
         e2.addEventListener( 'click', function(e) {
            e.stopPropagation(); 
            e.preventDefault(); 
@@ -84,7 +86,7 @@ ABCXJS.edit.DropdownMenu = function (topDiv, options, menu) {
                 var e4 = document.createElement("li"); 
                 e3.appendChild(e4);
                 var e5 = document.createElement("a");
-                e5.innerHTML = tags[0];
+                e5.innerHTML = tags[0].replaceAll( ' ', '&nbsp;' );
                 e5.setAttribute( "data-state", 'ch'+ this.id +m );
                 e5.setAttribute( "data-value", tags.length > 1 ? tags[1] : tags[0] );
                 e5.addEventListener( 'click', function(e) {
@@ -99,17 +101,44 @@ ABCXJS.edit.DropdownMenu = function (topDiv, options, menu) {
 };
 
 ABCXJS.edit.DropdownMenu.prototype.eventsCentral = function (state, ev) {
-    var e = document.getElementById(state);
-    e.checked=!e.checked;
-    ev && alert( ev );
-//    if (this.listener && this.method ) {
-//        //(this.method)(ev);
-//    } else {
-//        if (ev === 'CLOSE') {
-//            this.close();
-//        }
-//    }
+    for( var e in this.headers ) {
+        if( e === state ) {
+            this.headers[e].checked = ! this.headers[e].checked;
+        } else {
+            this.headers[e].checked = false;
+        }
+    }
+    
+    switch(ev) {
+        case 'TUTORIAL':
+            w1.topDiv.style.display = 'inline';
+            w1.dataDiv.style.margin = 0;
+            w1.dataDiv.style.padding = 0;
+            w1.dataDiv.innerHTML = '<embed src="/abcxjs/html/tutoriais.pt_BR.html" height="600" width="1024"></embed>';
+            break;
+        case 'TABS':
+            w1.topDiv.style.display = 'inline';
+            w1.dataDiv.style.margin = 0;
+            w1.dataDiv.style.padding = 0;
+            w1.dataDiv.innerHTML = '<embed src="/abcxjs/html/tablatura.pt_BR.html" height="600" width="1024"></embed>';
+            break;
+        case 'MAPS':
+            w1.topDiv.style.display = 'inline';
+            w1.dataDiv.style.margin = 0;
+            w1.dataDiv.style.padding = 0;
+            w1.dataDiv.innerHTML = '<embed src="/abcxjs/html/mapas.pt_BR.html" height="600" width="1024"></embed>';
+            break;
+        case 'ABOUT':
+            w1.topDiv.style.display = 'inline';
+            w1.dataDiv.style.margin = 0;
+            w1.dataDiv.style.padding = 0;
+            w1.dataDiv.innerHTML = '<embed src="/abcxjs/html/sobre.html" height="440" width="800"></embed>';
+            break;
+        default:
+            break;
+    }
 };
+
 
 //ABCXJS.edit.DropdownMenu.prototype.closeMenu = function (state) {
 //    var e = document.getElementById(state);

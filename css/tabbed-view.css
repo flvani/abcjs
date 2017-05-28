@@ -9,9 +9,10 @@ and open the template in the editor.
 */
 
 .tabs {
+    clear: both;
     position: relative;
     display: block;
-    float:  bottom;
+    float:  left;
     top: 75px;
     margin-top: 4px;
     margin-bottom: 8px;
@@ -74,12 +75,14 @@ and open the template in the editor.
     text-transform: uppercase;
     font-weight: bold;
     text-align: center;
+    bottom: 0px;
     /*text-shadow: 1px 1px 1px #385c5b;
     */
     border-radius: 3px 3px 0 0;
     box-shadow: 2px 0 2px rgba(0,0,0,0.1), -2px 0 2px rgba(0,0,0,0.1);
 }
 
+/*
 .tabs label:after {
     content: '';
     background: #fff;
@@ -91,7 +94,7 @@ and open the template in the editor.
     height: 2px;
     display: block;
 }
-
+*/
 .tabs input:hover + label {
     background: #5ba4a4;
     background: lavender;
@@ -101,10 +104,11 @@ and open the template in the editor.
     cursor: pointer;
 }
 
+/*
 .tabs label:first-of-type {
     z-index: 4;
-    box-shadow: 2px 0 2px rgba(0,0,0,0.1);
 }
+*/
 
 .tab-label-1 {
     z-index: 3;
@@ -125,12 +129,16 @@ and open the template in the editor.
     text-shadow: 1px 1px 1px #385c5b;
     background: #003050;
     background: -moz-linear-gradient(top, #003050 0%, #e9edf0 100%);
-    background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#003050), color-stop(100%,lavender));
     background: -webkit-linear-gradient(top, #003050 0%, #e9edf0 60%);
     background: -o-linear-gradient(top, #003050 0%, #e9edf0 100%);
     background: -ms-linear-gradient(top, #003050 0%, #e9edf0 100%);
     background: linear-gradient(top, #003050 0%, #e9edf0 100%);
     z-index: 5;
+    box-shadow: 2px 0px 2px -1px rgba(0,0,0,0.7);
+    -webkit-box-shadow: 2px 0px 2px -1px rgba(0,0,0,0.7);
+    -moz-box-shadow: 2px 0px 2px -1px rgba(0,0,0,0.7);
+    -ms-box-shadow: 2px 0px 2px -1px rgba(0,0,0,0.7);
+    -o-box-shadow: 2px 0px 2px -1px rgba(0,0,0,0.7);
 }
 
 .tv-content {
@@ -141,13 +149,13 @@ and open the template in the editor.
     min-height: 200px;
     height: 300px;
     width: 620px;
-    z-index: 0;
-    box-shadow: 0 -2px 3px -2px rgba(0,0,0,0.2), 0 2px 2px rgba(0,0,0,0.1);
-    box-shadow: 4px 4px 6px #444;
-    -moz-box-shadow: 4px 4px 6px #444;
-    -webkit-box-shadow: 4px 4px 6px #444;
-    -o-box-shadow: 4px 4px 6px #444;
+    z-index: 10;
     /*border-radius: 0 3px 3px 3px;*/
+    box-shadow: 2px 2px 2px -1px rgba(0,0,0,0.7);
+    -webkit-box-shadow: 2px 2px 2px -1px rgba(0,0,0,0.7);
+    -moz-box-shadow: 2px 2px 2px -1px rgba(0,0,0,0.7);
+    -ms-box-shadow: 2px 2px 2px -1px rgba(0,0,0,0.7);
+    -o-box-shadow: 2px 2px 2px -1px rgba(0,0,0,0.7);
 }
 
 .tv-content div {

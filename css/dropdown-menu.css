@@ -1,6 +1,48 @@
-.dropdown-container {
-    width: fit-content;
-    border:none;
+.dropdown-group {
+    width: auto;
+}
+
+.btn-group {
+    width: auto;
+}
+
+.btn-group button,
+.dropdown-group button {
+    position: relative;
+    display: block;
+    float:left;
+    font-family: 'titleFont3','Arial';
+    text-align: left;
+    /*text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);*/
+    font-weight: normal;
+    font-size: 1.1em;
+    line-height: 1.1em;
+    top: 0;
+    left: 0;
+    margin: 0;
+    margin-left: 4px;
+    padding: 0;
+    padding-top: 2px;
+    padding-left:4px;
+    padding-right: 4px;
+    width: auto;
+    height: 26px;
+    text-align: left;
+    outline: none !important;
+    border: none;
+    color: #dab390;
+    background-color: transparent;
+}
+
+.btn-group button:hover,
+.dropdown-group  button:hover {
+    background:  lavender;
+    cursor: pointer;
+}
+
+.btn-group button::-moz-focus-inner,
+.dropdown-group  button::-moz-focus-inner {
+  border: 0;
 }
 
 .dropdown-title-font {
@@ -13,42 +55,18 @@
 }
 
 .dropdown {
+    float: left;
     position: relative;
-    display: inline;
-    width: fit-content;
-    font-family: 'titleFont3','Arial';
-    font-weight: normal;
-    font-size: 1.1em;
-    line-height: 1.1em;
-    text-align: left;
-    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
-    color: white;
-    background: none;
-    margin-right: 0px;
-    color: #dab390;
-}
-
-.dropdown ul {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-}
-
-.dropdown > span {
-    padding: 3px;
-    padding-right: 1.4em;
-}
-
-.dropdown:hover {
-    /*background:  #cd3d2e;*/
-    cursor: pointer;
+    display: block;
+    width: auto;
 }
 
 .dropdown [data-toggle="toggle"] {
-    position:  absolute;
+    float:right;
+    position:  relative;
     display: block;
-    top: 3px;
-    right: 1px;
+    top: 1px;
+    right: 0px;
     -moz-transform: rotate(0deg);
     -ms-transform: rotate(0deg);
     -webkit-transform: rotate(0deg);
@@ -67,11 +85,11 @@
     color: white;
     background: #2c3e50;
     text-align: left;
-    text-shadow: 0 -1px 0 rgba(255, 255, 255, 0.3);
+    /*text-shadow: 0 -1px 0 rgba(255, 255, 255, 0.3);*/
 }
 
 .dropdown-menu {
-    z-index: 1;
+    z-index: 11;
     max-height: 0;
     position:absolute;
     display:  block;
@@ -81,16 +99,24 @@
     margin: 0;
     margin-top: 3px;
     margin-left: 8px;
-    min-width: max-content;
-    min-width: -moz-max-content;
-    min-width: -o-max-content;
-    min-width: -ms-max-content;
+    min-width: fit-content;
     overflow-y: scroll;
     -moz-transition: max-height 0.5s ease-out;
     -o-transition: max-height 0.5s ease-out;
     -webkit-transition: max-height 0.5s ease-out;
     transition: max-height 0.5s ease-out;
     cursor: pointer;
+    box-shadow: 2px 2px 2px -1px rgba(0,0,0,0.7);
+    -webkit-box-shadow: 2px 2px 2px -1px rgba(0,0,0,0.7);
+    -moz-box-shadow: 2px 2px 2px -1px rgba(0,0,0,0.7);
+    -ms-box-shadow: 2px 2px 2px -1px rgba(0,0,0,0.7);
+    -o-box-shadow: 2px 2px 2px -1px rgba(0,0,0,0.7);
+}
+
+.dropdown-menu ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
 }
 
 .dropdown-menu hr {
@@ -117,7 +143,7 @@
     display: none;
 }
 
-.dropdown > input[type="checkbox"]:checked  ~ span > [data-toggle="toggle"] {
+.dropdown > input[type="checkbox"]:checked  ~ button > [data-toggle="toggle"] {
     -moz-transform: rotate(-180deg);
     -ms-transform: rotate(-180deg);
     -webkit-transform: rotate(-180deg);
@@ -146,37 +172,3 @@
     -webkit-transition: max-height 0.5s ease-in-out;
     transition: max-height 0.5s ease-in-out;
 }
-
-.btn-group {
-    position: relative;
-    float: left;
-    top: 0;
-    left: 0;
-    width: max-content;
-    width: -moz-max-content;
-    margin: 2px;
-    margin-left: 4px;
-}
-
-.btn {
-    font-family: 'titleFont3';
-    font-size: 15px;
-    position: relative;
-    float: left;
-    top: 0;
-    left: 0;
-    width: fit-content;
-    width: -moz-fit-content;
-    margin: 0;
-    background-color: white;
-    background-color: transparent;
-    height: 26px;
-    text-align: left;
-    outline: none !important;
-    border: none;
-}
-
-.btn:hover {
-    background-color: lavender;
-}
-

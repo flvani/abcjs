@@ -57,7 +57,7 @@ DRAGGABLE.Div = function( parent, aButtons, options, callback, aToolBarButtons )
     
     var div = document.createElement("DIV");
     div.setAttribute("id", "dMenu" +  this.id ); 
-    div.setAttribute("class", "draggableMenu" ); 
+    div.setAttribute("class", "draggableMenu gradiente" ); 
     this.topDiv.appendChild( div );
     this.menuDiv = div;
 

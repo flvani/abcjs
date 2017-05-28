@@ -53,6 +53,9 @@ body {
     padding: 0;
     padding-top: 4px;
     padding-left: 5px;
+}
+
+.gradiente {
     background: -moz-linear-gradient(left, #003050 0%, black 100%);
     background: -webkit-linear-gradient(left, #003050 0%, black 100%);
     background: -o-linear-gradient(left, #003050 0%, black 100%);
@@ -87,7 +90,6 @@ body {
     height: 40px;
     width: 100%;
     padding: 0;
-    padding-left: 4px;
 }
 
 .topMenu {
@@ -96,16 +98,37 @@ body {
     display: inline;
     border: none;
     background: none;
-    margin-top: 4px;
-    margin-left: 4px;
+    margin-top: 0px;
 }
 
-.dropdown-menu {
-    box-shadow: 4px 4px 6px #444;
-    -moz-box-shadow: 4px 4px 6px #444;
-    -webkit-box-shadow: 4px 4px 6px #444;
-    -o-box-shadow: 4px 4px 6px #444;
-}   
+.btn-group button {
+    color: red;
+    background-color: transparent;
+    padding-left: 8px;
+    padding-right: 4px;
+}
+
+
+.text {
+    position: relative;
+    display: inline;
+    float: left;
+    font-family: 'titleFont3';
+    font-weight: bold;
+    font-size: 14px;
+    text-align: left;
+    line-height: 14px;
+    top:9px;
+    left:2px;
+    color: coral;
+}
+
+/*
+.dropdown-group button:hover {
+    color: orange;
+    background-color: transparent;
+}
+*/
 
 .mainDiv {
     position:absolute;
