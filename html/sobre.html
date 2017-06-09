@@ -12,7 +12,7 @@ and open the template in the editor.
               width: 100%;
               height: 100%;
               position: relative;
-              font-family: arial;
+              font-family: "Arial";
               font-size:80%;
               top: 0;
               right: 0;
@@ -29,8 +29,10 @@ and open the template in the editor.
 
             .modalContent h3 { 
 
-            /*color: #189CDA; border-bottom: 0px groove #efefef; */
-
+              position: relative;
+              float: left;
+              display: block;
+            
               background: #5ba4a4;
               background: -moz-linear-gradient(top, #5ba4a4 0%, #4e8c8a 100%);
               background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#5ba4a4), color-stop(100%,#4e8c8a));
@@ -38,18 +40,14 @@ and open the template in the editor.
               background: -o-linear-gradient(top, #5ba4a4 0%,#4e8c8a 100%);
               background: -ms-linear-gradient(top, #5ba4a4 0%,#4e8c8a 100%);
               background: linear-gradient(top, #5ba4a4 0%,#4e8c8a 100%);
-              position: relative;
-              float: left;
-              display: block;
               margin-right: 1em;
               line-height: 1em;
-              /*
+              
               padding: 5px 10px;
-               width: 80px;
               text-transform: uppercase;
               color: #385c5b;
               background: #5ba4a4;
-            */
+            
               color: lightgreen;
               font-size: 18px;
               font-weight: bold;
@@ -97,16 +95,36 @@ and open the template in the editor.
               background: #F1F1F1;
               border-top: 1px solid #999;
             }
+            
+            .modalFooter span {
+                line-height: 25px;
+            }
+            
             .modalFooter p {
               color:#D4482D;
               text-align:right;
               margin:0;
               padding: 5px;
             }
+            
+            a {
+                color: #1dd2af;
+                text-decoration: none;
+            }
+            
+            .modalFooter a:hover, .modalFooter a:focus {
+                color: #1dd2af;
+                text-decoration: underline;
+            }            
+            
+            strong, b {
+                font-weight: bold;
+            } 
+            
             .ok, .cancel {
               background: #606061;
               color: #FFFFFF;
-              line-height: 25px;
+              line-height: 30px;
               text-align: center;
               text-decoration: none;
               font-weight: bold;
@@ -171,10 +189,10 @@ and open the template in the editor.
                   </li>
                 </ul>
               </div>
-              <div class="modalFooter">
-                  Esta obra é distribuída sob uma Licença <b><a rel="license" href="http://creativecommons.org/licenses/by/3.0/br/deed.pt_BR" target="_blank" title="Ver a Licença">
-                                 Creative Commons Atribuição 3.0 Brasil</a></b>.
-                <a href="/abcxjs/html/release.pt_BR.html" target="_blank" title="Ver Notas de Lançamento" class="ok">Release</a>
+                <div class="modalFooter">
+                <span>Esta obra é distribuída sob uma Licença
+                <a rel="license" href="http://creativecommons.org/licenses/by/3.0/br/deed.pt_BR" target="_blank" title="Ver a Licença">Creative Commons Atribuição 3.0 Brasil</a>. 
+                <a href="/abcxjs/html/release.pt_BR.html" target="_blank" title="Ver Notas de Lançamento" class="ok">Release</a></span>
                 <div class="clear"></div>
               </div>
             </div>

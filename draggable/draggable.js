@@ -232,8 +232,10 @@ DRAGGABLE.Div.prototype.addTitle = function( id, title  ) {
         if( this.translate ) {
             DR.forcedResource("dSpanTranslatableTitle"+id, title); 
         }
-        div.innerHTML = '<span id="dSpanTranslatableTitle'+id+'" style="padding-left: 5px;">'+title+'</span><span id="dSpanTitle'+id+'" style="padding-left: 5px;"></span>';
     }
+    
+    div.innerHTML = '<span id="dSpanTranslatableTitle'+id+'" style="padding-left: 5px;">'+title+'</span><span id="dSpanTitle'+id+'" style="padding-left: 5px;"></span>';
+    
     self.menuDiv.appendChild(div);
     
     self.menuDiv.addEventListener( 'mousedown', self.mouseMove, false);

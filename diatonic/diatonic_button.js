@@ -105,15 +105,11 @@ DIATONIC.map.Button.prototype.setText = function( showLabel, open, close ) {
 };
 
 DIATONIC.map.Button.prototype.getLabel = function(nota, showLabel) {
-    var l = '';
-    if (showLabel) {
-        l= DIATONIC.map.number2key_br[nota.value];
-    } else {
-        l = DIATONIC.map.number2key[nota.value];
-    }
+    var l = nota.key;
     
-    if( showLabel )  {
+    if (showLabel) {
         l = l.toUpperCase() + '';
+        l = ABCXJS.parse.key2br[l].toUpperCase();
     }
     
     if ( nota.isChord ) {

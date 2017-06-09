@@ -111,28 +111,39 @@ ABCXJS.edit.DropdownMenu.prototype.eventsCentral = function (state, ev) {
     
     switch(ev) {
         case 'TUTORIAL':
-            w1.topDiv.style.display = 'inline';
-            w1.dataDiv.style.margin = 0;
-            w1.dataDiv.style.padding = 0;
+            w1.setTitle('Tutoriais')
             w1.dataDiv.innerHTML = '<embed src="/abcxjs/html/tutoriais.pt_BR.html" height="600" width="1024"></embed>';
+            w1.topDiv.style.display = 'inline';
             break;
         case 'TABS':
-            w1.topDiv.style.display = 'inline';
-            w1.dataDiv.style.margin = 0;
-            w1.dataDiv.style.padding = 0;
+            w1.setTitle('Tablaturas para Acordeons')
             w1.dataDiv.innerHTML = '<embed src="/abcxjs/html/tablatura.pt_BR.html" height="600" width="1024"></embed>';
+            w1.topDiv.style.display = 'inline';
+            break;
+        case 'TABSTRANSPORTADA':
+            w1.setTitle('Tablaturas para Transportada')
+            w1.dataDiv.innerHTML = '<embed src="/abcxjs/html/tablaturaTransportada.pt_BR.html" height="600" width="1024"></embed>';
+            w1.topDiv.style.display = 'inline';
             break;
         case 'MAPS':
-            w1.topDiv.style.display = 'inline';
-            w1.dataDiv.style.margin = 0;
-            w1.dataDiv.style.padding = 0;
+            w1.setTitle('Mapas para Acordeons')
             w1.dataDiv.innerHTML = '<embed src="/abcxjs/html/mapas.pt_BR.html" height="600" width="1024"></embed>';
+            w1.topDiv.style.display = 'inline';
             break;
         case 'ABOUT':
+            var e = document.createElement("iframe"); 
+            w1.setTitle('Sobre...')
+            w1.dataDiv.innerHTML = '';
+            w1.dataDiv.appendChild(e);
+            e.setAttribute("src", "/abcxjs/html/sobre.html" );
+            e.setAttribute("frameborder", "0" );
+            e.setAttribute("scrolling", "no" );
+            e.setAttribute("height", "440" );
+            e.setAttribute("width", "800" );
+            e.addEventListener("load", function () { 
+                e.style.height = e.contentWindow.document.body.scrollHeight + 'px';  
+            } );
             w1.topDiv.style.display = 'inline';
-            w1.dataDiv.style.margin = 0;
-            w1.dataDiv.style.padding = 0;
-            w1.dataDiv.innerHTML = '<embed src="/abcxjs/html/sobre.html" height="440" width="800"></embed>';
             break;
         default:
             break;

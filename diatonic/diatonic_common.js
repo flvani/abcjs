@@ -12,13 +12,6 @@ if (!window.DIATONIC.map)
 
 DIATONIC.map.accordionMaps = [];
 
-DIATONIC.map.key2number = 
-    {"C":0, "C♯":1, "D♭":1, "D":2, "D♯":3, "E♭":3, "E":4, 
-     "F":5 ,"F♯":6 ,"G♭":6, "G":7, "G♯":8 ,"A♭":8, "A":9, "A♯":10, "B♭":10, "B":11 };
-
-DIATONIC.map.number2key    = ["C", "C♯", "D", "E♭", "E", "F", "F♯", "G", "G♯", "A", "B♭", "B"];
-DIATONIC.map.number2key_br = ["Dó", "Dó♯", "Ré", "Mi♭", "Mi", "Fá", "Fá♯", "Sol", "Sol♯", "Lá", "Si♭", "Si"];
-
 DIATONIC.map.loadAccordionMaps = function ( files, cb )  {
     var toLoad = 0;
     for( var f = 0; f <  files.length; f ++ ) {

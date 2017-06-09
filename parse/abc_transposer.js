@@ -15,12 +15,6 @@ if (!window.ABCXJS.parse)
 window.ABCXJS.parse.Transposer = function ( offSet ) {
     
     this.pitches           = ABCXJS.parse.pitches;
-    this.key2number        = ABCXJS.parse.key2number;
-    this.number2keyflat    = ABCXJS.parse.number2keyflat;
-    this.number2keysharp   = ABCXJS.parse.number2keysharp;
-    this.number2key_br     = ABCXJS.parse.number2key_br;
-    this.number2staff      = ABCXJS.parse.number2staff;
-    this.number2staffSharp = ABCXJS.parse.number2staffSharp;
     
     this.tokenizer         = new ABCXJS.parse.tokenizer();
     
@@ -44,9 +38,9 @@ window.ABCXJS.parse.Transposer.prototype.reset = function( offSet ) {
 window.ABCXJS.parse.Transposer.prototype.numberToStaff = function(number, newKacc) {
     var s ;
     if(newKacc.length > 0 && newKacc[0].acc === 'flat')
-        s = this.number2staff[number];
+        s = ABCXJS.parse.number2staff[number];
     else
-        s = this.number2staffSharp[number];
+        s = ABCXJS.parse.number2staffSharp[number];
     
     // octave can be altered below
     s.octVar = 0;
@@ -453,14 +447,14 @@ window.ABCXJS.parse.Transposer.prototype.extractStaffOctave = function(pitch) {
 };
 
 window.ABCXJS.parse.Transposer.prototype.numberToKey = function(number) {
-    number %= this.number2keyflat.length;
-    if( number < 0 ) number += this.number2keyflat.length;
-    return this.number2keyflat[number];
+    number %= ABCXJS.parse.number2keyflat.length;
+    if( number < 0 ) number += ABCXJS.parse.number2keyflat.length;
+    return ABCXJS.parse.number2keyflat[number];
 };
 
 window.ABCXJS.parse.Transposer.prototype.keyToNumber = function(key) {
     key = this.normalizeAcc(key);
-    return this.key2number[key];
+    return ABCXJS.parse.key2number[key];
 };
 
 window.ABCXJS.parse.Transposer.prototype.getAccOffset = function(txtAcc)

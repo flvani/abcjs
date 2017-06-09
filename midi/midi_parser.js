@@ -217,7 +217,7 @@ ABCXJS.midi.Parse.prototype.handleButtons = function(pitches, buttons ) {
                 }
             }
             
-            midipitch = 12 + 12 * note.octave + DIATONIC.map.key2number[ note.key ];
+            midipitch = 12 + 12 * note.octave + ABCXJS.parse.key2number[ note.key ];
         }
         
         // TODO:  no caso dos baixos, quando houver o baixo e o acorde simultaneamente
@@ -228,7 +228,7 @@ ABCXJS.midi.Parse.prototype.handleButtons = function(pitches, buttons ) {
             if(note.isBass && pitches[r].midipitch.clef === 'bass') {
                 pitch = pitches[r].midipitch.midipitch % 12;
                 hasBass=true;
-                if( pitch === DIATONIC.map.key2number[ key ] && ! pitches[r].button ){
+                if( pitch === ABCXJS.parse.key2number[ key ] && ! pitches[r].button ){
                     pitches[r].button = item.button;
                     item.button = null;
                     return;
