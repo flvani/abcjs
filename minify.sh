@@ -27,7 +27,9 @@ cat svg/svg.js svg/glyphs.js > tmp/svg.js
 cat api/abc_tunebook.js data/abc_tune.js tmp/parse.js tmp/write.js tmp/svg.js \
         edit/abc_selectors.js edit/abc_editarea.js > tmp/abcjs-nomidi.js
 
-cat tmp/abcjs-nomidi.js tmp/midi.js > tmp/abcjs-all.js
+cat draggable/draggable.js dropdown-menu/dropdown.js > tmp/abcjs-windows.js
+
+cat tmp/abcjs-nomidi.js tmp/midi.js tmp/abcjs-windows.js > tmp/abcjs-all.js
 
 cat tmp/abcjs-all.js edit/abc_editor.js > tmp/abcjs-editor.js
 cat tmp/abcjs-nomidi.js edit/abc_editor.js > tmp/abcjs-editor-nomidi.js
@@ -36,6 +38,11 @@ cat tmp/abcjs-all.js tmp/tablature.js > tmp/abcxjs.js
 cat tmp/abcjs-nomidi.js tmp/tablature.js > tmp/abcxjs-nomidi.js
 
 cat ace/src/ace.js ace/src/mode-abcx.js ace/src/theme-abcx.js > tmp/ace4abcx.js
+
+cat css/dropdown-menu.css css/tabbed-view.css css/draggable.css > tmp/styles4abcx.css
+
+echo "Compressing STYLES4ABCX css ..."
+java -jar yuicompressor-2.4.2.jar  --line-break 7000 -o bin/styles4abcx_$1-min.css tmp/styles4abcx.css
 
 echo "Compressing ACE4ABCX lib ..."
 java -jar yuicompressor-2.4.2.jar  --line-break 7000 -o bin/ace4abcx_$1-min.js tmp/ace4abcx.js
@@ -59,6 +66,9 @@ java -jar yuicompressor-2.4.2.jar  --line-break 7000 -o bin/filemanager_$1-min.j
 
 #echo "Compressing tabeditor..."
 #java -jar yuicompressor-2.4.2.jar  --line-break 7000 -o bin/abcxjs_nomidi_$1-min.js tmp/abcxjs-nomidi.js
+
+cp tmp/styles4abcx.css  ../diatonic-map/css/
+cp bin/styles4abcx_$1-min.css  ../diatonic-map/css/
 
 cp tmp/abcxjs.js  ../diatonic-map/abcxjs/
 cp tmp/ace4abcx.js  ../diatonic-map/ace4abcx/

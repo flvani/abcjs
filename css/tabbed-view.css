@@ -13,10 +13,7 @@ and open the template in the editor.
     position: relative;
     display: block;
     float:  left;
-    top: 75px;
-    margin-top: 4px;
-    margin-bottom: 8px;
-    margin-left: 4px;
+    margin: 4px;
     width: fit-content;
     min-width: 640px;
 }
@@ -141,16 +138,14 @@ and open the template in the editor.
     -o-box-shadow: 2px 0px 2px -1px rgba(0,0,0,0.7);
 }
 
-.tv-content {
+.tv-content,
+.tv-content-always {
     clear: both;
     background: #e9edf0;
     position: relative;
     min-width: 400px;
     min-height: 200px;
-    height: 300px;
-    width: 620px;
     z-index: 10;
-    /*border-radius: 0 3px 3px 3px;*/
     box-shadow: 2px 2px 2px -1px rgba(0,0,0,0.7);
     -webkit-box-shadow: 2px 2px 2px -1px rgba(0,0,0,0.7);
     -moz-box-shadow: 2px 2px 2px -1px rgba(0,0,0,0.7);

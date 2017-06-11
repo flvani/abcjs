@@ -1,7 +1,7 @@
 @font-face {
   font-family: 'abcx';
-  src: url('../fontsIco/abcx.ttf?81969744') format('truetype'),
-       url('../fontsIco/abcx.svg?81969744#abcx') format('svg');
+  src: url('./abcx.ttf?81969744') format('truetype'),
+       url('./abcx.svg?81969744#abcx') format('svg');
   font-weight: normal;
   font-style: normal;
 }

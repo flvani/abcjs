@@ -1,7 +1,7 @@
 @font-face {
   font-family: 'abcx-window-font';
-  src: url('../window-font/abcx-window-font.ttf?76920283') format('truetype'),
-       url('../window-font/abcx-window-font.svg?76920283#abcx-window-font') format('svg');
+  src: url('./abcx-window-font.ttf?76920283') format('truetype'),
+       url('./abcx-window-font.svg?76920283#abcx-window-font') format('svg');
   font-weight: normal;
   font-style: normal;
 }
