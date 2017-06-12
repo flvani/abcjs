@@ -92,7 +92,7 @@ and open the template in the editor.
                 var m1 = new ABCXJS.edit.DropdownMenu(
                         'menu1Div'
                         , {listener: this, method: 'callback'}
-                , [{title: 'Acordeons', scroll: false,
+                , [{title: 'Acordeons', scroll: false, ddmId: 'acordeonsMenu',
                         itens: [
                             'Hohner Club IIIM (BR)|GAITA_HOHNER_CLUB_IIIM_BR',
                             'Hohner/Hëring|GAITA_HOHNER_GC',
@@ -124,7 +124,7 @@ and open the template in the editor.
                 var m2 = new ABCXJS.edit.DropdownMenu(
                         'menu2Div'
                         , {listener: this, method: 'callback1'}
-                        , [{title: 'Acordeons', scroll: false,
+                        , [{title: 'Acordeons', scroll: false, ddmId: 'repertorioMenu',
                         itens: [
                             'Hohner Club IIIM (BR)|GAITA_HOHNER_CLUB_IIIM_BR',
                             'Hohner/Hëring|GAITA_HOHNER_GC',
@@ -134,6 +134,12 @@ and open the template in the editor.
                             'Carregar mapa do disco local'
                         ]}
                 ]);
+                
+                m1.addItemSubMenu('acordeonsMenu', 'Gaita Velha|VEIA', 3);
+                m2.setListener( this );
+                m2.emptySubMenu('repertorioMenu' );
+                m2.addItemSubMenu('repertorioMenu', 'Flor de Maracuja|TEST');
+                m2.setSubMenuTitle('repertorioMenu', 'Flor de Maracuja');
 
                 w1 = new DRAGGABLE.Div(
                         null
