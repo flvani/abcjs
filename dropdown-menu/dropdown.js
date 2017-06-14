@@ -18,22 +18,15 @@ ABCXJS.edit.DropdownMenu = function (topDiv, options, menu) {
     this.headers = {};
     
     this.id = ++ ABCXJS.edit.element.id;
-    this.container = document.getElementById(topDiv);
-    this.title = opts.title || '';
+    this.container = ( typeof topDiv === 'object' ) ? topDiv : document.getElementById(topDiv);
     this.listener = opts.listener || null;
     this.method = opts.method || null;
     
     if (!this.container) {
         console.log('Elemento ' + topDiv + ' não existe!');
         return;
-    }
-    
-    if( this.title ) {
-        var e = document.createElement("h1");
-        e.setAttribute( "class", 'dropdown-title-font' );
-        e.innerHTML = this.title;
-        this.container.appendChild(e);
-        this.title = e;
+    } else {
+        this.container.innerHTML = "";
     }
     
     for ( var m = 0; m < menu.length; m++ ) {
@@ -136,7 +129,7 @@ ABCXJS.edit.DropdownMenu.prototype.addItemSubMenu = function (ddm, newItem, pos)
         }, false);
         e4.appendChild(e5);
     }
-    if(pos) {
+    if(pos>=0) {
         self.headers[ddm].list.insertBefore(e4, self.headers[ddm].list.children[pos]);
     } else {
         self.headers[ddm].list.appendChild(e4);

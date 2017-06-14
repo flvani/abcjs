@@ -157,27 +157,37 @@
 .tv-content {
     min-width: 1024px;
     min-height: 300px;
-    width: auto;
+    width: inherit;
+    height: inherit;
     overflow: hidden;
     overflow-y: auto;
 }
-
+.tv-m1,
+.tv-m2,
+.tv-m3,
 .tv-content > div {
-    margin: 4px;
     display:none;
-    top: 0;
-    left: 0;
     opacity: 0;
     z-index: 1;
 }
 
-.tabs input.tab-selector-1:checked ~ .tv-content .tv-content-1,
-.tabs input.tab-selector-2:checked ~ .tv-content .tv-content-2,
+.tv-content > div {
+    margin: 4px;
+    top: 0;
+    left: 0;
+ }
+ 
+.tabs input.tab-selector-1:checked ~ .btn-group .tv-m1,
+.tabs input.tab-selector-2:checked ~ .btn-group .tv-m2,
+.tabs input.tab-selector-3:checked ~ .btn-group .tv-m3, 
+.tabs input.tab-selector-1:checked ~ .tv-content .tv-content-1 ,
+.tabs input.tab-selector-2:checked ~ .tv-content .tv-content-2 ,
 .tabs input.tab-selector-3:checked ~ .tv-content .tv-content-3 {
-    z-index: 10;
-    -ms-filter:"progid:DXImageTransform.Microsoft.Alpha(Opacity=100)";
-    filter: alpha(opacity=100);
     opacity: 1;
     display:block;
+    z-index: 100;
+    -ms-filter:"progid:DXImageTransform.Microsoft.Alpha(Opacity=100)";
+    filter: alpha(opacity=100);
+    width: auto;
+    height: auto;
 }
-

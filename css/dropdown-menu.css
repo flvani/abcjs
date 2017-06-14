@@ -4,7 +4,9 @@
 
 .btn-group {
     width: auto;
+    height: 24px;
     margin-top: 2px;
+    display: inline-block;
 }
 
 .btn-group button,
@@ -90,7 +92,7 @@
 }
 
 .dropdown-menu {
-    z-index: 11;
+    z-index: 10;
     max-height: 0;
     position:absolute;
     display:  block;
@@ -101,7 +103,7 @@
     margin-top: 3px;
     margin-left: 8px;
     min-width: fit-content;
-    overflow-y: scroll;
+    overflow-y: auto;
     -moz-transition: max-height 0.5s ease-out;
     -o-transition: max-height 0.5s ease-out;
     -webkit-transition: max-height 0.5s ease-out;
@@ -163,7 +165,7 @@
     margin: 0;
     margin-top: 3px;
     margin-left: 8px;
-    overflow-y: scroll;
+    overflow-y: auto;
     -moz-transform: scaleY(1);
     -ms-transform: scaleY(1);
     -webkit-transform: scaleY(1);
