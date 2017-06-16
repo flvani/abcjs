@@ -144,7 +144,7 @@ DIATONIC.map.Keyboard.prototype.print = function ( div, options ) {
     var keyboardPane = document.createElement("div");
     keyboardPane.setAttribute( "class", 'keyboardPane' );
     div.innerHTML = "";
-    div.append(keyboardPane);
+    div.appendChild(keyboardPane);
     
     this.paper = new SVG.Printer( keyboardPane ); 
     this.paper.initDoc( 'keyb', 'Diatonic Map Keyboard', estilo, options );
