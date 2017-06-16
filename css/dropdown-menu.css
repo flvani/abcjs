@@ -37,8 +37,23 @@
     background-color: transparent;
 }
 
+.btn-group > span {
+    position: relative;
+    display: inline;
+    float: left;
+    font-family: 'titleFont3','Arial';
+    font-weight: bold;
+    font-size: 14px;
+    text-align: left;
+    line-height: 14px;
+    top:7px;
+    left:2px;
+    padding-left: 2px;
+    color: #dab390;
+}
+
 .btn-group button:hover,
-.dropdown-group  button:hover {
+.dropdown-group button:hover {
     background:  lavender;
     cursor: pointer;
 }
@@ -46,15 +61,6 @@
 .btn-group button::-moz-focus-inner,
 .dropdown-group  button::-moz-focus-inner {
   border: 0;
-}
-
-.dropdown-title-font {
-    font-family: 'Lucida','Sans','Arial';
-    font-weight: normal;
-    font-size: 40px;
-    text-align: center;
-    line-height: 1.4;
-    color: darkred;
 }
 
 .dropdown {
@@ -92,7 +98,7 @@
 }
 
 .dropdown-menu {
-    z-index: 10;
+    z-index: 100;
     max-height: 0;
     position:absolute;
     display:  block;
@@ -100,21 +106,34 @@
     left: 0px;
     padding: 0;
     margin: 0;
-    margin-top: 3px;
+    margin-top: 1px;
     margin-left: 8px;
     min-width: fit-content;
-    overflow-y: auto;
+    overflow-y: hidden;
     -moz-transition: max-height 0.5s ease-out;
     -o-transition: max-height 0.5s ease-out;
     -webkit-transition: max-height 0.5s ease-out;
     transition: max-height 0.5s ease-out;
     cursor: pointer;
-    box-shadow: 2px 2px 2px -1px rgba(0,0,0,0.7);
-    -webkit-box-shadow: 2px 2px 2px -1px rgba(0,0,0,0.7);
-    -moz-box-shadow: 2px 2px 2px -1px rgba(0,0,0,0.7);
-    -ms-box-shadow: 2px 2px 2px -1px rgba(0,0,0,0.7);
-    -o-box-shadow: 2px 2px 2px -1px rgba(0,0,0,0.7);
+    box-shadow: 6px 6px 6px -3px rgba(0,0,0,0.7);
+    -webkit-box-shadow: 6px 6px 6px -3px rgba(0,0,0,0.7);
+    -moz-box-shadow: 6px 6px 6px -3px rgba(0,0,0,0.7);
+    -ms-box-shadow: 6px 6px 6px -3px rgba(0,0,0,0.7);
+    -o-box-shadow: 6px 6px 6px -3px rgba(0,0,0,0.7);
 }
+
+.dropdown-menu::-webkit-scrollbar {
+    width: 5px;
+}
+ 
+.dropdown-menu::-webkit-scrollbar-track {
+    -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.3);
+}
+ 
+.dropdown-menu::-webkit-scrollbar-thumb {
+  background-color: rgba(255,0,0,0.8);
+  outline: 1px solid slategrey;
+}       
 
 .dropdown-menu ul {
     list-style: none;
@@ -146,7 +165,7 @@
     display: none;
 }
 
-.dropdown > input[type="checkbox"]:checked  ~ button > [data-toggle="toggle"] {
+.dropdown > input[type="checkbox"]:checked ~ button > [data-toggle="toggle"] {
     -moz-transform: rotate(-180deg);
     -ms-transform: rotate(-180deg);
     -webkit-transform: rotate(-180deg);
@@ -157,15 +176,15 @@
     transition: transform 0.5s;
 }
 
-.dropdown > input[type="checkbox"]:checked  ~ [data-toggle="toggle-menu"] {
+.dropdown > input[type="checkbox"]:checked ~ [data-toggle="toggle-menu"] {
     max-height: 250px;
+    overflow-y: hidden;
     display:  block;
     top:100%;
     padding: 0;
     margin: 0;
-    margin-top: 3px;
+    margin-top: 1px;
     margin-left: 8px;
-    overflow-y: auto;
     -moz-transform: scaleY(1);
     -ms-transform: scaleY(1);
     -webkit-transform: scaleY(1);

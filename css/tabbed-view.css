@@ -13,6 +13,7 @@
     display: block;
     float:  left;
     margin: 4px;
+    margin-left: 1px;
     width: fit-content;
     min-width: 640px;
 }
@@ -119,10 +120,15 @@
 }
 
 .tabs input:checked + label {
-    color: #777;
-    color: orange;
+    /*opc 2*/
     color: #ff9922;
-    text-shadow: 1px 1px 1px #385c5b;
+    color: orange;
+    text-shadow: 1px 1px 1px #385c5b, 1px -1px 1px white;
+    
+    /*opc 1*/
+    color: red;
+    text-shadow: 1px 1px 1px #ff9922, 1px -1px 1px white;
+    
     background: #003050;
     background: -moz-linear-gradient(top, #003050 0%, #e9edf0 100%);
     background: -webkit-linear-gradient(top, #003050 0%, #e9edf0 60%);
@@ -130,11 +136,11 @@
     background: -ms-linear-gradient(top, #003050 0%, #e9edf0 100%);
     background: linear-gradient(top, #003050 0%, #e9edf0 100%);
     z-index: 5;
-    box-shadow: 2px 0px 2px -1px rgba(0,0,0,0.7);
-    -webkit-box-shadow: 2px 0px 2px -1px rgba(0,0,0,0.7);
-    -moz-box-shadow: 2px 0px 2px -1px rgba(0,0,0,0.7);
-    -ms-box-shadow: 2px 0px 2px -1px rgba(0,0,0,0.7);
-    -o-box-shadow: 2px 0px 2px -1px rgba(0,0,0,0.7);
+    box-shadow: 5px 5px 5px -3px rgba(0,0,0,0.7);
+    -webkit-box-shadow: 5px 5px 5px -3px rgba(0,0,0,0.7);
+    -moz-box-shadow: 5px 5px 5px -3px rgba(0,0,0,0.7);
+    -ms-box-shadow: 5px 5px 5px -3px rgba(0,0,0,0.7);
+    -o-box-shadow: 5px 5px 5px -3px rgba(0,0,0,0.7);
 }
 
 .tv-content,
@@ -147,11 +153,11 @@
     z-index: 10;
     opacity: 1;
     display:block;
-    box-shadow: 2px 2px 2px -1px rgba(0,0,0,0.7);
-    -webkit-box-shadow: 2px 2px 2px -1px rgba(0,0,0,0.7);
-    -moz-box-shadow: 2px 2px 2px -1px rgba(0,0,0,0.7);
-    -ms-box-shadow: 2px 2px 2px -1px rgba(0,0,0,0.7);
-    -o-box-shadow: 2px 2px 2px -1px rgba(0,0,0,0.7);
+    box-shadow: 5px 5px 5px -3px rgba(0,0,0,0.7);
+    -webkit-box-shadow: 5px 5px 5px -3px rgba(0,0,0,0.7);
+    -moz-box-shadow: 5px 5px 5px -3px rgba(0,0,0,0.7);
+    -ms-box-shadow: 5px 5px 5px -3px rgba(0,0,0,0.7);
+    -o-box-shadow: 5px 5px 5px -3px rgba(0,0,0,0.7);
 }
 
 .tv-content {
@@ -162,6 +168,21 @@
     overflow: hidden;
     overflow-y: auto;
 }
+
+.tv-content::-webkit-scrollbar {
+    width: 5px;
+}
+ 
+.tv-content::-webkit-scrollbar-track {
+    -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.3);
+}
+ 
+.tv-content::-webkit-scrollbar-thumb {
+  background-color: rgba(0,0,0,0.5);
+  outline: 1px solid slategrey;
+}       
+
+
 .tv-m1,
 .tv-m2,
 .tv-m3,

@@ -67,7 +67,7 @@ and open the template in the editor.
                     </button>
                     <button id="buttonPlay" class="btn" ><i class="ico-play"></i></button>
                     <button id="buttonStop" class="btn" ><i class="ico-stop"></i></button>
-                    <span id="timer" class="text" >00:00:01</span>
+                    <span id="timer">00:00:01</span>
                 </div>
 
                 <div class="tv-content" style="height: 400px; width: 890px;">
@@ -92,16 +92,16 @@ and open the template in the editor.
                 var m1 = new ABCXJS.edit.DropdownMenu(
                         'menu1Div'
                         , {listener: this, method: 'callback'}
-                , [{title: 'Acordeons', scroll: false, ddmId: 'acordeonsMenu',
+                , [{title: 'Acordeons', ddmId: 'acordeonsMenu',
                         itens: [
                             'Hohner Club IIIM (BR)|GAITA_HOHNER_CLUB_IIIM_BR',
                             'Hohner/Hëring|GAITA_HOHNER_GC',
                             'Leticce (transportada)|GAITA_LETICCE_CF_NE',
-                            '------------------------------',
+                            '---',
                             'Salvar mapa corrente',
                             'Carregar mapa do disco local'
                         ]},
-                    {title: 'Repertório', scroll: false,
+                    {title: 'Repertório', ddmId: 'repertorioMenu',
                         itens: [
                             'Restaurar o original',
                             'Carregar do drive local',
@@ -109,7 +109,7 @@ and open the template in the editor.
                             'Partitura <i class="ico-play"> Tablatura',
                             'Tablatura <i class="ico-play"> Partitura'
                         ]},
-                    {title: 'Informações', scroll: false,
+                    {title: 'Informações', ddmId: 'infoMenu',
                         itens: [
                             'Tutoriais <i class="ico-novo">|TUTORIAL',
                             'Mapas para acordeons|MAPS',
@@ -124,7 +124,7 @@ and open the template in the editor.
                 var m2 = new ABCXJS.edit.DropdownMenu(
                         'menu2Div'
                         , {listener: this, method: 'callback1'}
-                        , [{title: 'Acordeons', scroll: false, ddmId: 'repertorioMenu',
+                        , [{title: 'Acordeons', ddmId: 'songs',
                         itens: [
                             'Hohner Club IIIM (BR)|GAITA_HOHNER_CLUB_IIIM_BR',
                             'Hohner/Hëring|GAITA_HOHNER_GC',
@@ -136,10 +136,27 @@ and open the template in the editor.
                 ]);
                 
                 m1.addItemSubMenu('acordeonsMenu', 'Gaita Velha|VEIA', 3);
+
+                m1.disableSubMenu('acordeonsMenu');
+                
+                m1.enableSubMenu('acordeonsMenu');
+                
                 m2.setListener( this );
-                m2.emptySubMenu('repertorioMenu' );
-                m2.addItemSubMenu('repertorioMenu', 'Flor de Maracuja|TEST');
-                m2.setSubMenuTitle('repertorioMenu', 'Flor de Maracuja');
+                m2.emptySubMenu('songs' );
+                m2.setSubMenuTitle('songs', 'Flor de Maracuja');
+                m2.addItemSubMenu('songs', 'Flor de Maracuja|TEST');
+                m2.addItemSubMenu('songs', 'Flor de Maracuja2|TEST2');
+                m2.addItemSubMenu('songs', 'Flor de Maracuja|TEST');
+                m2.addItemSubMenu('songs', 'Flor de Maracuja2|TEST2');
+                m2.addItemSubMenu('songs', 'Flor de Maracuja|TEST');
+                m2.addItemSubMenu('songs', 'Flor de Maracuja2|TEST2');
+                m2.addItemSubMenu('songs', 'Flor de Maracuja|TEST');
+                m2.addItemSubMenu('songs', 'Flor de Maracuja2|TEST2');
+                m2.addItemSubMenu('songs', 'Flor de Maracuja|TEST');
+                m2.addItemSubMenu('songs', 'Flor de Maracuja2|TEST2');
+                m2.addItemSubMenu('songs', 'Flor de Maracuja|TEST');
+                m2.addItemSubMenu('songs', 'Flor de Maracuja2|TEST2');
+                m2.addItemSubMenu('songs', 'Flor de Maracuja|TEST');
 
                 w1 = new DRAGGABLE.Div(
                         null

@@ -61,11 +61,19 @@ ABCXJS.edit.DropdownMenu = function (topDiv, options, menu) {
         e2 = document.createElement("div");
         e2.setAttribute( "class", "dropdown-menu dropdown-menu-font" );
         e2.setAttribute( "data-toggle", "toggle-menu" );
-        if(typeof(menu[m].scroll) !== 'undefined' && !menu[m].scroll ) {
-            e2.style = 'overflow-y: hidden;';
-        }
         e1.appendChild(e2);
         
+        //element.addEventListener("msTransitionEnd", callfunction,false);
+        //element.addEventListener("oTransitionEnd", callfunction,false);
+        //element.addEventListener("webkitTransitionEnd", callfunction,false);        
+        e2.addEventListener( 'transitionend', function(e) {
+            if( e2.clientHeight > 0 && e2.clientHeight < e2.scrollHeight ) {
+                e2.style = 'overflow-y: auto;';
+            } else {     
+                e2.style = 'overflow-y: hidden;';
+            }
+        }, false);
+
         var e3 = document.createElement("ul");
         e2.appendChild(e3);
         this.headers[ddmId].list = e3;
@@ -75,6 +83,35 @@ ABCXJS.edit.DropdownMenu = function (topDiv, options, menu) {
         }
     }
 };
+
+ABCXJS.edit.DropdownMenu.prototype.disableSubMenu = function (ddm) {
+    
+    var self = this;
+    
+    if( ! self.headers[ddm] ) {
+        console.log( 'Menu não encontrado!' );
+        return;
+    }
+    self.headers[ddm].chk.checked = false;
+    self.headers[ddm].btn.style.pointerEvents = 'none';
+    self.headers[ddm].btn.style.opacity = '0.5';
+    
+};
+
+ABCXJS.edit.DropdownMenu.prototype.enableSubMenu = function (ddm) {
+    
+    var self = this;
+    
+    if( ! self.headers[ddm] ) {
+        console.log( 'Menu não encontrado!' );
+        return;
+    }
+    self.headers[ddm].chk.checked = false;
+    self.headers[ddm].btn.style.pointerEvents = '';
+    self.headers[ddm].btn.style.opacity = '';
+    
+};
+
 
 ABCXJS.edit.DropdownMenu.prototype.emptySubMenu = function (ddm) {
     
