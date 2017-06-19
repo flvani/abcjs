@@ -45,103 +45,233 @@ if (!window.ABCXJS)
 if (!ABCXJS.edit)
 	ABCXJS.edit = {};
 
-ABCXJS.Editor = function(params) {
-    
-  this.fireTime =0;
-  this.printTimeStart =0;
-  this.printTimeEnd =0;
-  this.endTime =0;
-  
-  this.bReentry = false;
-  this.accordion = null;
-  this.accordionSelector = null;
-  this.keySelector = null;
-  this.indicate_changed = params.indicate_changed;
+ABCXJS.Editor = function (params) {
 
-  this.parserparams = params.parser_options || {};
-  this.printerparams = params.render_options || {};
-  
-  if( params.onchange )
-    this.onchangeCallback = params.onchange;
+    var self = this;
+    this.fireTime = 0;
+    this.printTimeStart = 0;
+    this.printTimeEnd = 0;
+    this.endTime = 0;
 
-  this.editareaFixa = new ABCXJS.edit.EditArea(params.editor_id, this);
-  this.editareaMovel = new ABCXJS.edit.EditArea(null, this);
-  this.editareaMovel.setVisible(false);
+    this.bReentry = false;
+    this.accordion = null;
+    this.accordionSelector = null;
+    this.keySelector = null;
+    this.indicate_changed = params.indicate_changed;
 
-  this.editarea = this.editareaFixa;
-   
-  if (params.canvas_id) {
-    this.div = document.getElementById(params.canvas_id);
-  } else if (params.paper_id) {
-    this.div = document.getElementById(params.paper_id);
-  } else {
-    alert( 'canvas_id or paper_id must be informed.');
-  }
-  
-  if (params.generate_warnings ) {
-    if (params.warnings_id) {
-      this.warningsdiv = document.getElementById(params.warnings_id);
-    } else {
-      this.warningsdiv = this.div;
-    }
-  }
-  
-  if(params.refreshController_id)  
-    this.refreshController = document.getElementById(params.refreshController_id);
+    this.parserparams = params.parser_options || {};
+    this.printerparams = params.render_options || {};
 
-  if( params.generate_tablature ) {
-    if(params.generate_tablature === 'accordion')  {
-        this.accordion = new ABCXJS.tablature.Accordion(params.accordion_options);
-        
-        if( params.accordionSelector_id ) {
-            this.accordionSelector = new ABCXJS.edit.AccordionSelector(params.accordionSelector_id, this);
-            this.accordionSelector.populate();
-            this.accordionSelector.set(this.accordion.selected);
-        } else {
-            if( params.accordionNameSpan ) {
-                this.accordionNameSpan = document.getElementById(params.accordionNameSpan);
-                this.accordionNameSpan.innerHTML = this.accordion.getName();
-            }
+    if (params.onchange)
+        this.onchangeCallback = params.onchange;
+
+    this.studio = new DRAGGABLE.Div(
+            params.studio_id
+            , ['restore|RESTORE']
+            , {translate: false, statusBar: false, draggable: false, top: "3px", left: "1px", width: '100%', height: "100%", title: 'Estúdio ABCX'}
+    , {listener: this, method: 'studioCallback'}
+    );
+
+    this.resize();
+    this.studio.setVisible(true);
+
+    this.editareaFixa = new ABCXJS.edit.EditArea(this.studio.dataDiv, this);
+
+    this.editareaMovel = new ABCXJS.edit.EditArea(null, this);
+    this.editareaMovel.setVisible(false);
+
+    this.editarea = this.editareaFixa;
+
+    this.editarea.setVisible(true);
+    this.editarea.setToolBarVisible(false);
+    this.editarea.resize(true);
+
+    this.controldiv = document.createElement("DIV");
+    this.controldiv.setAttribute("id", 'internalControlDiv');
+    this.studio.dataDiv.appendChild(this.controldiv);
+    this.controldiv.innerHTML = document.getElementById(params.control_id).innerHTML;
+    document.getElementById(params.control_id).innerHTML = "";
+
+
+    var canvas_id = 'internalCanvasDiv';
+    var warnings_id = 'internalWarningsDiv';
+
+    if (params.generate_warnings) {
+        if (params.warnings_id) {
+            warnings_id = params.warnings_id;
         }
-        
-        this.keyboardWindow = params.keyboardWindow;
-        this.keyboardWindow.defineCallback( {listener : this, method: 'keyboardCallback' } );
-        
-        //this.accordion.printKeyboard(this.keyboardWindow.dataDiv , {fillColor:'yellow', openColor:'navy', closeColor:'purple', backgroundColor:'gray' } );
-        this.accordion.printKeyboard(this.keyboardWindow.dataDiv);
-
-    } else {
-        throw new Error( 'Tablatura para '+params.generate_tablature+' não suportada!');
+        this.warningsdiv = document.createElement("DIV");
+        this.warningsdiv.setAttribute("id", warnings_id);
+        this.studio.dataDiv.appendChild(this.warningsdiv);
     }
-  }
 
-  if(params.keySelector_id) {  
-    this.keySelector = new ABCXJS.edit.KeySelector(params.keySelector_id, this);
-  }  
+    if (params.canvas_id) {
+        canvas_id = params.canvas_id;
+    } else if (params.paper_id) {
+        canvas_id = params.paper_id;
+    }
 
-  if( params.generate_midi ) {
-      this.midiParser = new ABCXJS.midi.Parse( params.midi_options );
-  }
-  
-  this.addClassName = function(element, className) {
-    var hasClassName = function(element, className) {
-      var elementClassName = element.className;
-      return (elementClassName.length > 0 && (elementClassName === className ||
-        new RegExp("(^|\\s)" + className + "(\\s|$)").test(elementClassName)));
+    this.div = document.createElement("DIV");
+    this.div.setAttribute("id", canvas_id);
+    this.studio.dataDiv.appendChild(this.div);
+
+    if (params.refreshController_id)
+        this.refreshController = document.getElementById(params.refreshController_id);
+
+    if (params.generate_tablature) {
+        if (params.generate_tablature === 'accordion') {
+            this.accordion = new ABCXJS.tablature.Accordion(params.accordion_options);
+
+            if (params.accordionSelector_id) {
+                this.accordionSelector = new ABCXJS.edit.AccordionSelector(params.accordionSelector_id, this);
+                this.accordionSelector.populate();
+                this.accordionSelector.set(this.accordion.selected);
+            } else {
+                if (params.accordionNameSpan) {
+                    this.accordionNameSpan = document.getElementById(params.accordionNameSpan);
+                    this.accordionNameSpan.innerHTML = this.accordion.getName();
+                }
+            }
+
+            this.keyboardWindow = params.keyboardWindow;
+            this.keyboardWindow.defineCallback({listener: this, method: 'keyboardCallback'});
+
+            //this.accordion.printKeyboard(this.keyboardWindow.dataDiv , {fillColor:'yellow', openColor:'navy', closeColor:'purple', backgroundColor:'gray' } );
+            this.accordion.printKeyboard(this.keyboardWindow.dataDiv);
+
+        } else {
+            throw new Error('Tablatura para ' + params.generate_tablature + ' não suportada!');
+        }
+    }
+
+    if (params.keySelector_id) {
+        this.keySelector = new ABCXJS.edit.KeySelector(params.keySelector_id, this);
+    }
+
+    if (params.generate_midi) {
+        this.midiParser = new ABCXJS.midi.Parse(params.midi_options);
+    }
+
+    printButton = document.getElementById("printBtn");
+    playButton = document.getElementById("playBtn");
+    pauseButton = document.getElementById("pauseBtn");
+    stopButton = document.getElementById("stopBtn");
+    textButton = document.getElementById("textBtn");
+    roButton = document.getElementById("roBtn");
+    showMapButton = document.getElementById("showMapBtn");
+    switchSourceButton = document.getElementById("switch_source");
+    cpt = document.getElementById("currentPlayTime");
+
+    switchSourceButton.addEventListener("click", function () {
+        return;
+        a = document.getElementById('abc');
+        s = document.getElementById('svg_source');
+        if (s.style.display === 'inline') {
+            s.style.display = 'none';
+            a.style.display = 'inline';
+        } else {
+            s.value = document.getElementById('canvasDiv').innerHTML;
+            s.style.display = 'inline';
+            a.style.display = 'none';
+        }
+    }, false);
+
+    printButton.addEventListener("click", function (e) {
+        e.preventDefault();
+
+        //document.getElementById("keyboardDiv").style.display = 'none';
+        document.getElementById("editorDiv").style.display = "none";
+        document.getElementById("warningsDiv").style.display = "none";
+        document.body.style.paddingTop = '0px';
+
+        window.print();
+
+        document.body.style.paddingTop = '240px';
+        document.getElementById("warningsDiv").style.display = "inline";
+        document.getElementById("editorDiv").style.display = "inline";
+        //document.getElementById("keyboardDiv").style.display = kd;
+    }, false);
+
+    playButton.addEventListener("click", function (e) {
+        e.preventDefault();
+        myEditor.accordion.clearKeyboard();
+        //myEditor.editarea.cmEditor.setOption("readOnly", true);
+        player.startPlay(myEditor.tunes[0].midi);
+        //player.startDidacticPlay(myEditor.tunes[0].midi, 'note');
+        //player.startDidacticPlay(myEditor.tunes[0].midi, 'measure', 2 );
+        //player.startDidacticPlay(myEditor.tunes[0].midi, 'repeat', 1, 4);
+    }, false);
+    
+    var visible = true;
+    textButton.addEventListener("click", function (e) {
+        e.preventDefault();
+        visible = ! visible;
+        self.editarea.setVisible(visible);
+    }, false);
+    
+    var readOnly = false;
+    roButton.addEventListener("click", function (e) {
+        readOnly = !readOnly;
+        self.editarea.setReadOnly(readOnly);
+    }, false);
+
+    pauseButton.addEventListener("click", function (e) {
+        e.preventDefault();
+        player.pausePlay();
+    }, false);
+    
+    stopButton.addEventListener("click", function (e) {
+        e.preventDefault();
+        myEditor.accordion.clearKeyboard();
+        player.stopPlay();
+    }, false);
+    
+    showMapButton.addEventListener("click", function (e) {
+        e.preventDefault();
+        myEditor.switchMap();
+        this.value = myEditor.accordion.render_keyboard_opts.show ? 'Hide Map' : 'Show Map';
+    }, false);
+
+    this.addClassName = function (element, className) {
+        var hasClassName = function (element, className) {
+            var elementClassName = element.className;
+            return (elementClassName.length > 0 && (elementClassName === className ||
+                    new RegExp("(^|\\s)" + className + "(\\s|$)").test(elementClassName)));
+        };
+
+        if (!hasClassName(element, className))
+            element.className += (element.className ? ' ' : '') + className;
+        return element;
     };
 
-    if (!hasClassName(element, className))
-      element.className += (element.className ? ' ' : '') + className;
-    return element;
-  };
-
-  this.removeClassName = function(element, className) {
-    element.className = ABCXJS.parse.strip(element.className.replace(
-      new RegExp("(^|\\s+)" + className + "(\\s+|$)"), ' '));
-    return element;
-  };
+    this.removeClassName = function (element, className) {
+        element.className = ABCXJS.parse.strip(element.className.replace(
+                new RegExp("(^|\\s+)" + className + "(\\s+|$)"), ' '));
+        return element;
+    };
 };
   
+ABCXJS.Editor.prototype.resize = function( ) {
+    
+    // redimensiona a workspace
+    var winH = window.innerHeight
+                || document.documentElement.clientHeight
+                || document.body.clientHeight;
+
+    var winW = window.innerWidth
+            || document.documentElement.clientWidth
+            || daocument.body.clientWidth;
+
+    // -paddingTop 75
+    var h = (winH -75 - 10 ); 
+    var w = (winW - 10 ); 
+    
+    this.studio.topDiv.style.height = Math.max(h,200) +"px";
+    this.studio.topDiv.style.width = Math.max(w,400) +"px";
+    this.studio.dataDiv.style.height = "100%";
+  
+};
+
 ABCXJS.Editor.prototype.selectAccordionById = function( id ) {
     if( this.accordion ) {
         this.accordion.loadById(id);
@@ -306,7 +436,7 @@ ABCXJS.Editor.prototype.updateSelection = function (force) {
 
 ABCXJS.Editor.prototype.switchMap = function() {
     this.accordion.render_keyboard_opts.show = !this.accordion.render_keyboard_opts.show;
-    this.keyboardWindow.topDiv.style.display = this.accordion.render_keyboard_opts.show? 'inline': 'none';
+    this.keyboardWindow.topDiv.style.display = this.accordion.render_keyboard_opts.show? 'block': 'none';
     this.accordion.printKeyboard(this.keyboardWindow.dataDiv);
 };
 
@@ -398,6 +528,16 @@ ABCXJS.Editor.prototype.modelChanged2 = function(loader) {
     
 };
 
+ABCXJS.Editor.prototype.studioCallback = function (e) {
+    switch(e) {
+        case 'CLOSE':
+            this.studio.setVisible(false);
+            break;
+        case 'RESTORE':
+            break;
+    }
+};
+
 ABCXJS.Editor.prototype.keyboardCallback = function (e) {
     switch(e) {
         case 'MOVE':
@@ -430,14 +570,25 @@ ABCXJS.Editor.prototype.editorCallback = function (e) {
         case 'LIGHT': // liga/desliga realce de sintaxe
             this.editarea.setSyntaxHighLight();
             break;
-        case 'MOVE':
-            break;
-        case 'CLOSE':
-            document.body.style.paddingTop = '240px';
+        case 'DOCK':
             this.editarea.setVisible(false);
             this.editarea = this.editareaFixa;
             this.editarea.setString(this.editareaMovel.getString());
             this.editarea.setVisible(true);
+            break;
+        case 'POPOUT':
+            this.editarea.setVisible(false);
+            this.editarea = this.editareaMovel;
+            this.editarea.setString(this.editareaFixa.getString());
+            this.editarea.setVisible(true);
+            break;
+        case 'MOVE':
+            break;
+        case 'CLOSE':
+            this.editarea.setVisible(false);
+            //this.editarea = this.editareaFixa;
+            //this.editarea.setString(this.editareaMovel.getString());
+            //this.editarea.setVisible(true);
             break;
         case 'ROTATE':
             //this.accordion.rotateKeyboard(this.keyboardWindow.dataDiv);

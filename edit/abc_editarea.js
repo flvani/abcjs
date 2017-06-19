@@ -28,14 +28,24 @@ if (!ABCXJS.edit)
 
 ABCXJS.edit.EditArea = function (editor_id, listener) {
     
+    this.container = {};
+    
     if(editor_id) {
-        this.container = {};
-        this.container.topDiv = document.getElementById( editor_id );
-        if(this.container.topDiv) {
-            var div = document.createElement("DIV");
-            div.setAttribute("id", "editorWindow" + editor_id ); 
-            this.container.topDiv.appendChild( div );
-            this.container.dataDiv = div;
+        var topDiv;
+        if(typeof editor_id === 'string'  )
+            topDiv = document.getElementById( editor_id );
+        else 
+            topDiv = editor_id;
+        if(topDiv) {
+            
+            this.container = new DRAGGABLE.Div( 
+                  topDiv
+                , [ 'popout|Expandir Janela' ]
+                , {translate:false, draggable:false, width: "100%", height: "200px", title: 'Editor ABCX' }
+                , {listener : listener, method: 'editorCallback' }
+                , [ 'gutter|Numeração das Linhas', 'fontsize|Tamanho da fonte', 'down|Tom', 'arrowdn|Oitava|Oitava', 'arrowup|Oitava|Oitava', 'search|Procurar', 'undo|Dezfazer', 'redo|Refazer', 'light|Realçar texto' ] 
+            );
+            
             this.container.dataDiv.setAttribute("class", "editorText fixedSize"); 
         } else {
             alert( 'this.container: elemento "'+editor_id+'" não encontrado.');
@@ -44,7 +54,7 @@ ABCXJS.edit.EditArea = function (editor_id, listener) {
         this.container = new DRAGGABLE.Div( 
             null
             , [ 'move|Mover', 'dock|Fixar Janela' ]
-            , {translate:false, statusBar:true, width: 600, height: 300, title: 'Editor ABCX' }
+            , {translate:false, statusBar:true, left:"0", top:"0", width: "640px", height: "480px", title: 'Editor ABCX' }
             , {listener : listener, method: 'editorCallback' }
             , [ 'gutter|Numeração das Linhas', 'fontsize|Tamanho da fonte', 'down|Tom', 'arrowdn|Oitava|Oitava', 'arrowup|Oitava|Oitava', 'search|Procurar', 'undo|Dezfazer', 'redo|Refazer', 'light|Realçar texto' ] 
         );
@@ -57,9 +67,6 @@ ABCXJS.edit.EditArea = function (editor_id, listener) {
     this.aceEditor.renderer.setOptions( {highlightGutterLine: true, showPrintMargin: false, showFoldWidgets: false } );
     this.aceEditor.$blockScrolling = Infinity;
     this.Range = require("ace/range").Range;
-    
-    this.setVisible(true);
-    this.resize();
     
     this.gutterVisible = true;
     this.syntaxHighLightVisible = true;
@@ -88,6 +95,12 @@ ABCXJS.edit.EditArea.prototype.setSyntaxHighLight = function (visible) {
     this.aceEditor.getSession().setMode( this.syntaxHighLightVisible?'ace/mode/abcx':'ace/mode/text');
 };
 
+ABCXJS.edit.EditArea.prototype.setToolBarVisible = function (visible) {
+    this.toolBarVisible = visible;
+    this.container.toolBar.style.display = this.toolBarVisible ? 'block' : 'none';
+    this.resize(true);
+};
+
 ABCXJS.edit.EditArea.prototype.setVisible = function (visible) {
     this.container.topDiv.style.display = visible ? 'block' : 'none';
 };
@@ -102,14 +115,16 @@ ABCXJS.edit.EditArea.prototype.setReadOnly = function (readOnly) {
     this.aceditor.textInput.getElement().disabled=readOnly;  
 };
 
-ABCXJS.edit.EditArea.prototype.resize = function () {
+ABCXJS.edit.EditArea.prototype.resize = function (force) {
     
-    if( this.container.isResizable && this.container.isResizable() ) {
+    if( force || ( this.container.isResizable && this.container.isResizable() ) ) {
         var h = this.container.topDiv.clientHeight -
                 (this.container.menuDiv ? this.container.menuDiv.clientHeight : 0 ) -
                 (this.container.toolBar ? this.container.toolBar.clientHeight : 0 ) -
                 (this.container.bottomDiv ? this.container.bottomDiv.clientHeight : 0 );
         this.container.dataDiv.style.height =  h + 'px';
+        if(this.container.parent)
+            this.container.topDiv.style.width =  (this.container.parent.clientWidth - 5) + 'px';
     }
     
     this.aceEditor.resize();

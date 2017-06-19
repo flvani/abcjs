@@ -4,8 +4,9 @@
         <meta name="viewport" content="width=device-width, initial-scale=0.8, minimum-scale=0.8, maximum-scale=2.0" />
         <meta http-equiv="content-type" content="text/html; charset=UTF-8"></meta>
         <link rel="icon" type="image/icon" href="images/favicon.ico" />
-        <link href="fontsIco/abcx.css" rel="stylesheet" />
-        <link href="fontsIco/abcx-window-font.css" rel="stylesheet" />
+        <link rel="stylesheet" href="fontsIco/abcx.css" />
+        <link rel="stylesheet" href="fontsIco/abcx-window-font.css" />
+        <link rel="stylesheet" href="fontsGoogle/fonts.css" />
         <link href="css/workspace.css" rel="stylesheet"/>
         <link href="css/draggable.css" rel="stylesheet"/>
         
@@ -74,7 +75,7 @@
         
         -->
     </head>
-    <body class="mapa">
+    <body>
 
 	<script type="text/javascript" src="proto_noconflict.js" ></script>
         <script type="text/javascript" src="jquery/jquery-1.11.1.min.js" ></script>
@@ -275,31 +276,38 @@ V:3 accordionTab
 | D-[7'3]2 >-[>4] d-[>>] D-[>3]2 d-[>4]2 | D-[>3']2 >-[>4] d-[>>] D-[>2']2 d-[>3]2 | G+[83]2 >+[>5] g+[>>] G+[>4]2 g+[>3']2 | G+[>4']2 >+[>5] g+[>>] G+[>3']2 g+[>4]2 | D-[7'3]2 >-[>4] d-[>>] D-[>3]2 d-[>4]2 | D-[>3']2 >-[>4] d-[>>] D-[>2']2 d-[>3]2 | G+42 >+[455'] g+[>>>] G+z >+4 g+3' >+5 | z+[57]2 z+[4'6']2 g+[55'7]2 z+z2 |]
 </textarea>
         
-<div id="editorDiv" class="editor" > 
-    <div id="textDiv" class="editorBorder" ></div>
-    <div id="outrosControles" class="editorControles">
-        <span id="spanNomeGaita">Acordeons: </span>
-        <select id="selGaitas" ></select>
-        <select id="selKey" ></select>
-        <input type="submit" id="maisOitava" value="+ Oitava" onclick="javascript:doTranspose(12);" />
-        <input type="submit" id="menosOitava" value="- Oitava" onclick="javascript:doTranspose(-12);" />
-        <input type="button" id="printBtn" value="Print Preview" />
-        <input type="submit" id="forceRefresh" value="Refresh" onclick="javascript:doForceRefresh();" />
-        <input type="checkbox" id="chkAutoRefresh" />Auto refresh 
-        <input type="checkbox" id="chkDebug" onclick="javascript:doCheckDebug();" />Debug
-        <input type="button" id="showMapBtn" value="Show Map" />
-        <input type="button" id="switch_source" value="ABC/SVG" />
-        <input type="button" id="playBtn" value="Play" />
-        <input type="button" id="pauseBtn" value="Pause" />
-        <input type="button" id="stopBtn" value="Stop" />
-        <input type="button" id="textBtn" value="TextArea" />
-        <input type="button" id="roBtn" value="R.O." />
-        <label id="currentPlayTime" style="font-weight: bold; color: yellow; padding-left: 5px; padding-right: 3px;">00:00.00</label>
+<div id="topBar" class="topBar gradiente" >
+    <span class="topTitle">
+        Mapa para Acordeons Diatônicos
+        <i class="ico-cogs topSettings" ></i>
+    </span>
+    <div class="dropdown-group">
+        <div id="menu1Div" class="topMenu"></div>
     </div>
-</div> <!-- editorDiv -->
-<div id="warningsDiv" class="genericDivClass"><hr></div>
-<div id="canvasDiv" class="printPreviewClass" > </div>
-        
+</div> <!-- topBar -->
+<div id="studioDiv" class="studio" > 
+    <div id="editorDiv" class="editor" style="display:none;"> 
+        <div id="controlDiv" class="editorControles">
+            <span id="spanNomeGaita">Acordeons: </span>
+            <select id="selGaitas" ></select>
+            <select id="selKey" ></select>
+            <input type="submit" id="maisOitava" value="+ Oitava" onclick="javascript:doTranspose(12);" />
+            <input type="submit" id="menosOitava" value="- Oitava" onclick="javascript:doTranspose(-12);" />
+            <input type="button" id="printBtn" value="Print Preview" />
+            <input type="submit" id="forceRefresh" value="Refresh" onclick="javascript:doForceRefresh();" />
+            <input type="checkbox" id="chkAutoRefresh" />Auto refresh 
+            <input type="checkbox" id="chkDebug" onclick="javascript:doCheckDebug();" />Debug
+            <input type="button" id="showMapBtn" value="Show Map" />
+            <input type="button" id="switch_source" value="ABC/SVG" />
+            <input type="button" id="playBtn" value="Play" />
+            <input type="button" id="pauseBtn" value="Pause" />
+            <input type="button" id="stopBtn" value="Stop" />
+            <input type="button" id="textBtn" value="TextArea" />
+            <input type="button" id="roBtn" value="R.O." />
+            <label id="currentPlayTime" style="font-weight: bold; color: yellow; padding-left: 5px; padding-right: 3px;">00:00.00</label>
+        </div>
+    </div> <!-- editorDiv -->
+</div>        
         <script type="text/javascript">
             
             window.addEventListener('load', loadAccordions, false);
@@ -367,29 +375,6 @@ V:3 accordionTab
                 debug = false;
                 myEditor = {};
 
-                printButton = document.getElementById("printBtn");
-                playButton = document.getElementById("playBtn");
-                pauseButton = document.getElementById("pauseBtn");
-                stopButton = document.getElementById("stopBtn");
-                textButton = document.getElementById("textBtn");
-                roButton = document.getElementById("roBtn");
-                showMapButton = document.getElementById("showMapBtn");
-                switchSourceButton = document.getElementById("switch_source");
-                cpt = document.getElementById("currentPlayTime");
-                
-                switchSourceButton.addEventListener("click", function() {
-                    a = document.getElementById('abc');
-                    s = document.getElementById('svg_source');
-                    if( s.style.display === 'inline' ) {
-                        s.style.display = 'none';
-                        a.style.display = 'inline';
-                    } else {
-                        s.value = document.getElementById('canvasDiv').innerHTML;
-                        s.style.display = 'inline';
-                        a.style.display = 'none';
-                    }
-                }, false);
-                
                 player = new ABCXJS.midi.Player();
                 
                 
@@ -455,20 +440,22 @@ V:3 accordionTab
                 var w2 = new DRAGGABLE.Div( 
                     null
                     , [ 'move|Mover', 'rotate|Rotacionar', 'zoom|Zoom','globe|Mudar Notação']
-                    , { title:'Keyboard', translate:false, statusBar:false, top:100, left:900, zIndex: 1000 } 
+                    , { title:'Keyboard', translate:false, statusBar:false, top:"100px", left:"900px", zIndex: 1000 } 
                 );
  
                 myEditor = new ABCXJS.Editor(
                     {
-                         editor_id: "textDiv"
+                         studio_id: "studioDiv"
                         ,canvas_id: "canvasDiv"
+                        ,control_id: 'controlDiv'
+                        ,warnings_id: "warningsDiv"
+                        ,generate_warnings: true
+                        
                         ,refreshController_id: "chkAutoRefresh"
                         ,keySelector_id: "selKey"
                         ,accordionSelector_id: "selGaitas"
                         ,accordionNameSpan: "spanNomeGaita"
                         ,generate_midi: true
-                        ,warnings_id: "warningsDiv"
-                        ,generate_warnings: true
                         ,generate_tablature: 'accordion'
                         ,keyboardWindow: w2
                         ,accordion_options: {
@@ -484,72 +471,11 @@ V:3 accordionTab
                         ,gui: false
                     } );
                     
+                    
                 myEditor.setString( document.getElementById("abc").value );
+                myEditor.editarea.resize();
+                    
                 myEditor.fireChanged( 0, {force: true} );
-                    
-                printButton.addEventListener("click", function(e) {
-                    e.preventDefault();
-
-                    //document.getElementById("keyboardDiv").style.display = 'none';
-                    document.getElementById("editorDiv").style.display = "none";
-                    document.getElementById("warningsDiv").style.display = "none";
-                    document.body.style.paddingTop = '0px';
-                    
-                    window.print();
-                    
-                    document.body.style.paddingTop = '240px';
-                    document.getElementById("warningsDiv").style.display = "inline";
-                    document.getElementById("editorDiv").style.display = "inline";
-                    //document.getElementById("keyboardDiv").style.display = kd;
-                }, false);
-                
-                playButton.addEventListener("click", function(e) {
-                    e.preventDefault();
-                    myEditor.accordion.clearKeyboard();
-                    //myEditor.editarea.cmEditor.setOption("readOnly", true);
-                    player.startPlay( myEditor.tunes[0].midi );
-                    //player.startDidacticPlay(myEditor.tunes[0].midi, 'note');
-                    //player.startDidacticPlay(myEditor.tunes[0].midi, 'measure', 2 );
-                    //player.startDidacticPlay(myEditor.tunes[0].midi, 'repeat', 1, 4);
-                }, false);
-                pauseButton.addEventListener("click", function(e) {
-                    e.preventDefault();
-                    player.pausePlay();
-                }, false);
-                stopButton.addEventListener("click", function(e) {
-                    e.preventDefault();
-                    myEditor.accordion.clearKeyboard();
-                    player.stopPlay();
-                }, false);
-                var visible = true;
-                textButton.addEventListener("click", function(e) {
-                    visible = !visible;
-                    if( visible ) {
-                        document.body.style.paddingTop = '240px';
-                        myEditor.editarea.setVisible(false);
-                        myEditor.editarea = myEditor.editareaFixa;
-                        myEditor.editarea.setString(myEditor.editareaMovel.getString());
-                        myEditor.editarea.setVisible(true);
-                    } else {
-                        document.body.style.paddingTop = '20px';
-                        myEditor.editarea.setVisible(false);
-                        myEditor.editarea = myEditor.editareaMovel;
-                        myEditor.editarea.setString(myEditor.editareaFixa.getString());
-                        myEditor.editarea.setVisible(true);
-                    }
-                    
-                }, false);
-                var readOnly=false;
-                roButton.addEventListener("click", function(e) {
-                    readOnly = !readOnly;
-                    myEditor.editarea.setReadOnly(readOnly);
-                }, false);
-                
-                showMapButton.addEventListener("click", function(e) {
-                    e.preventDefault();
-                    myEditor.switchMap();
-                    this.value = myEditor.accordion.render_keyboard_opts.show? 'Hide Map':'Show Map';
-                }, false);
                 
             }
 

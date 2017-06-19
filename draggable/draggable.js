@@ -15,8 +15,8 @@ DRAGGABLE.Div = function( parent, aButtons, options, callback, aToolBarButtons )
     var opts = options || {};
 
     this.title = opts.title || '';
-    this.top = opts.top || 100;
-    this.left = opts.left || 100;
+    this.top = opts.top || 0;
+    this.left = opts.left || 0;
     this.width = opts.width || '';
     this.height = opts.height || '';
     this.minTop = opts.minTop ||  1;
@@ -24,6 +24,7 @@ DRAGGABLE.Div = function( parent, aButtons, options, callback, aToolBarButtons )
     this.minHeight = opts.minHeight ||  48;
     this.hasStatusBar = opts.statusBar || false;
     this.translate = opts.translate || false;
+    this.draggable = typeof opts.draggable !== 'undefined' ? opts.draggable : true;
 
     var div = document.createElement("DIV");
     div.setAttribute("id", "draggableWindow" +  this.id ); 
@@ -37,7 +38,14 @@ DRAGGABLE.Div = function( parent, aButtons, options, callback, aToolBarButtons )
     if(!parent) {
         document.body.appendChild(this.topDiv);
     }else{
-        document.getElementById(parent).appendChild(this.topDiv);
+        this.topDiv.style.position = "relative";
+        this.topDiv.style.margin = "1px";
+        if(typeof parent === 'string') {
+            document.getElementById(parent).appendChild(this.topDiv);
+        } else {
+            this.parent = parent;
+            parent.appendChild(this.topDiv);
+        }
     }
     
     if(callback) {
@@ -50,10 +58,10 @@ DRAGGABLE.Div = function( parent, aButtons, options, callback, aToolBarButtons )
         DR.addAgent(this);
     }
     
-    if(this.topDiv.style.top === "" ) this.topDiv.style.top = this.top+"px";
-    if(this.topDiv.style.left === "" ) this.topDiv.style.left = this.left+"px";
-    if(this.topDiv.style.height === "" ) this.topDiv.style.height = this.height+"px";
-    if(this.topDiv.style.width === "" ) this.topDiv.style.width = this.width+"px";
+    if(this.topDiv.style.top === "" ) this.topDiv.style.top = this.top;
+    if(this.topDiv.style.left === "" ) this.topDiv.style.left = this.left;
+    if(this.topDiv.style.height === "" ) this.topDiv.style.height = this.height;
+    if(this.topDiv.style.width === "" ) this.topDiv.style.width = this.width;
     
     var div = document.createElement("DIV");
     div.setAttribute("id", "dMenu" +  this.id ); 
@@ -173,6 +181,7 @@ DRAGGABLE.Div = function( parent, aButtons, options, callback, aToolBarButtons )
     
     this.mouseMove = function (e) {
         e.preventDefault();
+        if(!self.draggable) return;
         self.dataDiv.style.pointerEvents = "none";
         window.addEventListener('mouseup', self.mouseEndMove, false);
         window.addEventListener('touchend', self.mouseEndMove, false);
@@ -218,6 +227,11 @@ DRAGGABLE.Div.prototype.isResizable = function(  ) {
     return this.hasStatusBar;
 };
 
+DRAGGABLE.Div.prototype.setVisible = function( visible ) {
+    this.topDiv.style.display=(visible? 'block':'none');
+};
+
+
 DRAGGABLE.Div.prototype.setTitle = function( title ) {
     this.titleSpan.innerHTML = title;
 };
@@ -238,6 +252,9 @@ DRAGGABLE.Div.prototype.addTitle = function( id, title  ) {
     
     self.menuDiv.appendChild(div);
     
+    if(self.draggable) {
+        self.menuDiv.addEventListener( 'mouseover', self.menuDiv.style.cursor='move', false);
+    }
     self.menuDiv.addEventListener( 'mousedown', self.mouseMove, false);
     self.menuDiv.addEventListener('touchstart', self.mouseMove, false);
     
@@ -247,7 +264,7 @@ DRAGGABLE.Div.prototype.addButtons = function( id,  aButtons ) {
     var defaultButtons = ['close|Fechar'];
     var self = this;
     
-    var buttonMap = { CLOSE: 'close', MOVE: 'move', ROTATE: 'rotate', GLOBE: 'globe', ZOOM:'zoom-in', DOCK: 'dock' };
+    var buttonMap = { CLOSE: 'close', MOVE: 'move', ROTATE: 'rotate', GLOBE: 'globe', ZOOM:'zoom-in', DOCK: 'dock', POPOUT: 'popout'  };
     
     if(aButtons)
         defaultButtons = defaultButtons.concat(aButtons);
