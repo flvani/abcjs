@@ -11,10 +11,11 @@ if (!window.DIATONIC)
 if (!window.DIATONIC.map)
     window.DIATONIC.map = {};
 
-DIATONIC.map.Button = function( x, y, options ) {
+DIATONIC.map.Button = function( kb, x, y, options ) {
 
     var opt = options || {};
     
+    this.kb = kb;
     this.x = x;
     this.y = y;
     
@@ -26,8 +27,6 @@ DIATONIC.map.Button = function( x, y, options ) {
     
     this.radius = opt.radius;
     this.isPedal  = opt.isPedal || false;
-    this.openColor = opt.openColor || '#00ff00';
-    this.closeColor = opt.closeColor || '#00b2ee';
     this.borderWidth = opt.borderWidth || (this.isPedal?2:1);
     this.borderColor = opt.borderColor || (this.isPedal?'red':'black');
 
@@ -48,10 +47,13 @@ DIATONIC.map.Button.prototype.draw = function( id, printer, limits, options ) {
     }
     
     options = options || {};
+    options.radius = this.radius;
     options.borderColor = this.borderColor;
     options.borderWidth = this.borderWidth;
-    options.radius = this.radius;
-   
+    options.fillColor = this.kb.render_opts.fillColor;
+    options.openColor = (options.kls && options.kls === 'blegenda'? this.kb.render_opts.openColor : 'none' );
+    options.closeColor = (options.kls && options.kls === 'blegenda'? this.kb.render_opts.closeColor : 'none' );
+    
     this.SVG.gid = printer.printButton( id, currX, currY, options );
 
 };
@@ -74,7 +76,7 @@ DIATONIC.map.Button.prototype.setOpen = function(delay) {
         window.setTimeout(function(){that.setOpen();}, delay*1000 );
         return;
     } 
-    this.SVG.openArc.style.setProperty( 'fill', this.openColor );
+    this.SVG.openArc.style.setProperty( 'fill', this.kb.render_opts.openColor );
 };
 
 DIATONIC.map.Button.prototype.setClose = function(delay) {
@@ -84,7 +86,7 @@ DIATONIC.map.Button.prototype.setClose = function(delay) {
         window.setTimeout(function(){that.setClose();}, delay*1000);
         return;
     } 
-    this.SVG.closeArc.style.setProperty( 'fill', this.closeColor );
+    this.SVG.closeArc.style.setProperty( 'fill', this.kb.render_opts.closeColor );
 };
 
 DIATONIC.map.Button.prototype.setSVG = function(showLabel, open, close ) {

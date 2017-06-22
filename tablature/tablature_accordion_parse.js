@@ -302,7 +302,7 @@ ABCXJS.tablature.Parse.prototype.getColumn = function() {
 };
 
 ABCXJS.tablature.Parse.prototype.checkBassButton = function( bellows, b ) {
-    var kb = this.accordion.getKeyboard();
+    var kb = this.accordion.loadedKeyboard;
     
     if( !kb  || b === undefined || ('.>.x.z.').indexOf(b) > 0 ) return true;
     

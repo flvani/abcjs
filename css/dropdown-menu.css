@@ -98,7 +98,7 @@
 }
 
 .dropdown-menu {
-    z-index: 100;
+    z-index: 101;
     max-height: 0;
     position:absolute;
     display:  block;

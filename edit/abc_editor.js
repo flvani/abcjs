@@ -65,11 +65,18 @@ ABCXJS.Editor = function (params) {
     if (params.onchange)
         this.onchangeCallback = params.onchange;
 
+    this.keyboardWindow = new DRAGGABLE.Div( 
+          null 
+        , [ 'move|Mover', 'rotate|Rotacionar', 'zoom|Zoom','globe|Mudar Notação']
+        , {title: 'Keyb', translate: false, statusBar: false, top: "100px", left: "300px", zIndex: 100} 
+        , {listener: this, method: 'keyboardCallback'}
+    );
+                
     this.studio = new DRAGGABLE.Div(
             params.studio_id
-            , ['restore|RESTORE']
+            , ['restore|Restaurar configurações']
             , {translate: false, statusBar: false, draggable: false, top: "3px", left: "1px", width: '100%', height: "100%", title: 'Estúdio ABCX'}
-    , {listener: this, method: 'studioCallback'}
+            , {listener: this, method: 'studioCallback'}
     );
 
     this.resize();
@@ -84,7 +91,7 @@ ABCXJS.Editor = function (params) {
 
     this.editarea.setVisible(true);
     this.editarea.setToolBarVisible(false);
-    this.editarea.resize(true);
+    //this.editarea.resize();//já é chamada por setsetToolBarVisible
 
     this.controldiv = document.createElement("DIV");
     this.controldiv.setAttribute("id", 'internalControlDiv');
@@ -133,9 +140,6 @@ ABCXJS.Editor = function (params) {
                 }
             }
 
-            this.keyboardWindow = params.keyboardWindow;
-            this.keyboardWindow.defineCallback({listener: this, method: 'keyboardCallback'});
-
             //this.accordion.printKeyboard(this.keyboardWindow.dataDiv , {fillColor:'yellow', openColor:'navy', closeColor:'purple', backgroundColor:'gray' } );
             this.accordion.printKeyboard(this.keyboardWindow.dataDiv);
 
@@ -143,7 +147,7 @@ ABCXJS.Editor = function (params) {
             throw new Error('Tablatura para ' + params.generate_tablature + ' não suportada!');
         }
     }
-
+        
     if (params.keySelector_id) {
         this.keySelector = new ABCXJS.edit.KeySelector(params.keySelector_id, this);
     }
@@ -229,7 +233,7 @@ ABCXJS.Editor = function (params) {
     showMapButton.addEventListener("click", function (e) {
         e.preventDefault();
         myEditor.switchMap();
-        this.value = myEditor.accordion.render_keyboard_opts.show ? 'Hide Map' : 'Show Map';
+        this.value = myEditor.accordion.loadedKeyboard.render_opts.show ? 'Hide Map' : 'Show Map';
     }, false);
 
     this.addClassName = function (element, className) {
@@ -249,6 +253,7 @@ ABCXJS.Editor = function (params) {
                 new RegExp("(^|\\s+)" + className + "(\\s+|$)"), ' '));
         return element;
     };
+        
 };
   
 ABCXJS.Editor.prototype.resize = function( ) {
@@ -398,7 +403,7 @@ ABCXJS.Editor.prototype.parseABC = function(transpose, force ) {
     }
 
     if ( this.midiParser ) {
-        this.midiParser.parse( this.tunes[i], this.accordion.getKeyboard() );
+        this.midiParser.parse( this.tunes[i], this.accordion.loadedKeyboard );
          var warnings = this.midiParser.getWarnings();
          for (var j=0; j<warnings.length; j++) {
            this.warnings.push(warnings[j]);
@@ -435,15 +440,16 @@ ABCXJS.Editor.prototype.updateSelection = function (force) {
 };
 
 ABCXJS.Editor.prototype.switchMap = function() {
-    this.accordion.render_keyboard_opts.show = !this.accordion.render_keyboard_opts.show;
-    this.keyboardWindow.topDiv.style.display = this.accordion.render_keyboard_opts.show? 'block': 'none';
+    var k = this.accordion.loadedKeyboard;
+    k.render_opts.show = !k.render_opts.show;
+    this.keyboardWindow.topDiv.style.display = k.render_opts.show? 'block': 'none';
     this.accordion.printKeyboard(this.keyboardWindow.dataDiv);
 };
 
 ABCXJS.Editor.prototype.highlight = function(abcelem) {
   try {
         this.editarea.setSelection(abcelem);
-        if(this.accordion.render_keyboard_opts.show && !player.playing) {
+        if(this.accordion.loadedKeyboard.render_opts.show && !player.playing) {
             this.accordion.clearKeyboard(true);
             this.midiParser.setSelection(abcelem);
         }    
@@ -581,6 +587,7 @@ ABCXJS.Editor.prototype.editorCallback = function (e) {
             this.editarea = this.editareaMovel;
             this.editarea.setString(this.editareaFixa.getString());
             this.editarea.setVisible(true);
+            this.editarea.resize();
             break;
         case 'MOVE':
             break;

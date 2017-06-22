@@ -46,7 +46,7 @@ ABCXJS.edit.EditArea = function (editor_id, listener) {
                 , [ 'gutter|Numeração das Linhas', 'fontsize|Tamanho da fonte', 'down|Tom', 'arrowdn|Oitava|Oitava', 'arrowup|Oitava|Oitava', 'search|Procurar', 'undo|Dezfazer', 'redo|Refazer', 'light|Realçar texto' ] 
             );
             
-            this.container.dataDiv.setAttribute("class", "editorText fixedSize"); 
+            this.container.dataDiv.setAttribute("class", "ace-datadiv"); 
         } else {
             alert( 'this.container: elemento "'+editor_id+'" não encontrado.');
         }
@@ -58,7 +58,7 @@ ABCXJS.edit.EditArea = function (editor_id, listener) {
             , {listener : listener, method: 'editorCallback' }
             , [ 'gutter|Numeração das Linhas', 'fontsize|Tamanho da fonte', 'down|Tom', 'arrowdn|Oitava|Oitava', 'arrowup|Oitava|Oitava', 'search|Procurar', 'undo|Dezfazer', 'redo|Refazer', 'light|Realçar texto' ] 
         );
-        this.container.dataDiv.setAttribute("class", "editorText"); 
+        this.container.dataDiv.setAttribute("class", "ace-editor"); 
     }
     
     this.aceEditor = ace.edit(this.container.dataDiv);
@@ -112,20 +112,20 @@ ABCXJS.edit.EditArea.prototype.setReadOnly = function (readOnly) {
         highlightGutterLine: !readOnly
     });
     
-    this.aceditor.textInput.getElement().disabled=readOnly;  
+    this.aceEditor.textInput.getElement().disabled=readOnly;  
 };
 
-ABCXJS.edit.EditArea.prototype.resize = function (force) {
+ABCXJS.edit.EditArea.prototype.resize = function () {
     
-    if( force || ( this.container.isResizable && this.container.isResizable() ) ) {
-        var h = this.container.topDiv.clientHeight -
-                (this.container.menuDiv ? this.container.menuDiv.clientHeight : 0 ) -
-                (this.container.toolBar ? this.container.toolBar.clientHeight : 0 ) -
-                (this.container.bottomDiv ? this.container.bottomDiv.clientHeight : 0 );
-        this.container.dataDiv.style.height =  h + 'px';
-        if(this.container.parent)
-            this.container.topDiv.style.width =  (this.container.parent.clientWidth - 5) + 'px';
-    }
+    var h = this.container.topDiv.clientHeight -
+            (this.container.menuDiv ? this.container.menuDiv.clientHeight : 0 ) -
+            (this.container.toolBar ? this.container.toolBar.clientHeight : 0 ) -
+            (this.container.bottomDiv ? this.container.bottomDiv.clientHeight : 0 );
+    
+    this.container.dataDiv.style.height =  (h-2) + 'px';
+    
+    if(this.container.parent)
+        this.container.topDiv.style.width =  (this.container.parent.clientWidth-5) + 'px';
     
     this.aceEditor.resize();
 };

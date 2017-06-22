@@ -399,7 +399,7 @@ ABCXJS.tablature.Infer.prototype.addTABChild = function(token, line ) {
             default:
                 var item = { bass:true, type: tt, c: "", pitch: pitchBase - (b * 3) - 0.5, inTie: token.bassNote[b].inTie || false };
                 var note = this.accordion.getNoteName(token.bassNote[b], this.accBassKey, this.bassBarAcc, true);
-                item.buttons = this.accordion.getKeyboard().getButtons(note);
+                item.buttons = this.accordion.loadedKeyboard.getButtons(note);
                 baixoOpen  = baixoOpen  ? typeof (item.buttons.open) !== "undefined" : false;
                 baixoClose = baixoClose ? typeof (item.buttons.close) !== "undefined" : false;
                 item.note = note.key;
@@ -432,7 +432,7 @@ ABCXJS.tablature.Infer.prototype.addTABChild = function(token, line ) {
                     }
                 }
                 
-                item.buttons = this.accordion.getKeyboard().getButtons(note);
+                item.buttons = this.accordion.loadedKeyboard.getButtons(note);
                 item.note = note.key + note.octave;
                 item.c =  (item.buttons.close || item.buttons.open) ? ( item.inTie ?  'scripts.rarrow': item.note ) :  'x';
                 item.pitch = (qtd === 1 ? 11.7 : 13.4 -( c * 2.8));

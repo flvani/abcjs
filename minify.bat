@@ -5,9 +5,9 @@
 @IF [%1]==[] echo Informe o numero da versao. Formato x.xx
 @IF [%1]==[] goto :fim
 
-copy /b/y ace\src\ace.js+ace\src\mode-abcx.js+ace\src\theme-abcx.js  tmp\ace4abcx.js
+copy /b/y ace\src\ace.js+ace\src\mode-abcx.js+ace\src\theme-abcx.js tmp\ace4abcx.js
 
-copy /b/y css\dropdown-menu.css+css\tabbed-view.css+css\draggable.css  tmp\styles4abcx.css
+copy /b/y css\dropdown-menu.css+css\tabbed-view.css+css\draggable.css tmp\styles4abcx.css
 
 copy /b/y diatonic\* tmp\diatonic.js
 copy /b/y parse\* tmp\parse.js

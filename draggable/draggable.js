@@ -41,11 +41,11 @@ DRAGGABLE.Div = function( parent, aButtons, options, callback, aToolBarButtons )
         this.topDiv.style.position = "relative";
         this.topDiv.style.margin = "1px";
         if(typeof parent === 'string') {
-            document.getElementById(parent).appendChild(this.topDiv);
+            this.parent = document.getElementById(parent);
         } else {
             this.parent = parent;
-            parent.appendChild(this.topDiv);
         }
+        this.parent.appendChild(this.topDiv);
     }
     
     if(callback) {
@@ -100,7 +100,7 @@ DRAGGABLE.Div = function( parent, aButtons, options, callback, aToolBarButtons )
         div = document.createElement("DIV");
         div.setAttribute("id", "draggableStatusResize" + this.id ); 
         div.setAttribute("class", "draggableStatusResize" ); 
-        this.topDiv.appendChild( div );
+        this.bottomDiv.appendChild( div );
         this.resizeCorner = div;
         this.resizeCorner.innerHTML = '<img src="images/statusbar_resize.gif">';
         

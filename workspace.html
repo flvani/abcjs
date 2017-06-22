@@ -2,13 +2,18 @@
     <head>
 	<title>Draw The Dots: Tune Editor</title>
         <meta name="viewport" content="width=device-width, initial-scale=0.8, minimum-scale=0.8, maximum-scale=2.0" />
-        <meta http-equiv="content-type" content="text/html; charset=UTF-8"></meta>
+        <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
         <link rel="icon" type="image/icon" href="images/favicon.ico" />
+        
         <link rel="stylesheet" href="fontsIco/abcx.css" />
         <link rel="stylesheet" href="fontsIco/abcx-window-font.css" />
         <link rel="stylesheet" href="fontsGoogle/fonts.css" />
-        <link href="css/workspace.css" rel="stylesheet"/>
-        <link href="css/draggable.css" rel="stylesheet"/>
+        
+        <link rel="stylesheet" href="css/dropdown-menu.css" />
+        <link rel="stylesheet" href="css/tabbed-view.css" />
+        <link rel="stylesheet" href="css/draggable.css" >
+        
+        <link rel="stylesheet" href="css/workspace.css" />
         
             <!-- 
           MAIN DATA STRUCTURES
@@ -87,6 +92,8 @@
         <script type="text/javascript" src="svg/glyphs.js" ></script>
         
         <script type="text/javascript" src="draggable/draggable.js"></script>
+        
+        <script type="text/javascript" src="dropdown-menu/dropdown.js"></script>
         
         <script type="text/javascript" src="file/filemanager.js" ></script>
 
@@ -278,7 +285,7 @@ V:3 accordionTab
         
 <div id="topBar" class="topBar gradiente" >
     <span class="topTitle">
-        Mapa para Acordeons Diatônicos
+        Draw the dots
         <i class="ico-cogs topSettings" ></i>
     </span>
     <div class="dropdown-group">
@@ -437,15 +444,10 @@ V:3 accordionTab
                 player.defineCallbackOnPlay(playerCallBackOnPlay);
                 player.defineCallbackOnScroll(playerCallBackOnScroll);
                 
-                var w2 = new DRAGGABLE.Div( 
-                    null
-                    , [ 'move|Mover', 'rotate|Rotacionar', 'zoom|Zoom','globe|Mudar Notação']
-                    , { title:'Keyboard', translate:false, statusBar:false, top:"100px", left:"900px", zIndex: 1000 } 
-                );
- 
                 myEditor = new ABCXJS.Editor(
                     {
-                         studio_id: "studioDiv"
+                         menu_id: "menu1Div"
+                        ,studio_id: "studioDiv"
                         ,canvas_id: "canvasDiv"
                         ,control_id: 'controlDiv'
                         ,warnings_id: "warningsDiv"
@@ -457,7 +459,6 @@ V:3 accordionTab
                         ,accordionNameSpan: "spanNomeGaita"
                         ,generate_midi: true
                         ,generate_tablature: 'accordion'
-                        ,keyboardWindow: w2
                         ,accordion_options: {
                                  //id: 'GAITA_LETICCE_CF_NE'
                                  id: 'GAITA_HOHNER_GC'
@@ -471,6 +472,18 @@ V:3 accordionTab
                         ,gui: false
                     } );
                     
+                m1 = new ABCXJS.edit.DropdownMenu(
+                   'menu1Div'
+                ,  { listener:myEditor, method:'menuCallback' }
+                ,  [{title: 'Informações', ddmId: 'menuInformacoes',
+                        itens: [
+                            'Tutoriais <i class="ico-novo">|TUTORIAL',
+                            'Partitura <i class="ico-play">Tablatura|PART2TAB',
+                            'Tablatura <i class="ico-play">Partitura|TAB2PART',
+                            'Sobre|ABOUT'
+                        ]}
+                ]);
+
                     
                 myEditor.setString( document.getElementById("abc").value );
                 myEditor.editarea.resize();

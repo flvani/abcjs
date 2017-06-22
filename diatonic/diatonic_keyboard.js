@@ -10,7 +10,11 @@ if (!window.DIATONIC)
 if (!window.DIATONIC.map)
     window.DIATONIC.map = {};
 
-DIATONIC.map.Keyboard = function ( keyMap, pedalInfo ) {
+DIATONIC.map.Keyboard = function ( keyMap, pedalInfo, options ) {
+    
+    this.render_opts = {};
+    this.setRenderOptions( options, true );
+    
     this.pedalInfo = pedalInfo;
     this.layout = keyMap.layout;
     this.keys = keyMap.keys;
@@ -82,7 +86,7 @@ DIATONIC.map.Keyboard.prototype.setup = function (keyMap) {
             this.limits.maxX = Math.max(this.limits.maxX, x );
             this.limits.maxY = Math.max(this.limits.maxY, y );
 
-            var btn = new DIATONIC.map.Button( x-this.radius, y-this.radius, { radius: this.radius, isPedal: this.isPedal(i,j) } );
+            var btn = new DIATONIC.map.Button( this, x-this.radius, y-this.radius, { radius: this.radius, isPedal: this.isPedal(i,j) } );
             
             btn.tabButton = (i + 1) + Array(j + 1).join("'");
             btn.openNote = this.parseNote(openRow[i], bass);
@@ -107,22 +111,30 @@ DIATONIC.map.Keyboard.prototype.setup = function (keyMap) {
     
     // adiciona o botão de legenda
     var raio=40;
-    this.legenda = new DIATONIC.map.Button( this.limits.maxX-(raio+this.radius), this.limits.minY+raio, { radius: raio, borderWidth: 2 } );
+    this.legenda = new DIATONIC.map.Button( this, this.limits.maxX-(raio+this.radius), this.limits.minY+raio, { radius: raio, borderWidth: 2 } );
 };
 
-DIATONIC.map.Keyboard.prototype.print = function ( div, options ) {
+DIATONIC.map.Keyboard.prototype.setRenderOptions = function ( options, force ) {
+    
+    var opt = options || {};
+
+    this.render_opts.transpose = opt.transpose || (force? false : this.render_opts.transpose );
+    this.render_opts.mirror = opt.mirror || (force? false : this.render_opts.mirror );
+    this.render_opts.scale = opt.scale || (force? 1 : this.render_opts.scale );
+    this.render_opts.draggable = opt.draggable || (force? false : this.render_opts.draggable );
+    this.render_opts.show = opt.show || (force? false : this.render_opts.show );
+    this.render_opts.label = opt.label || (force? false : this.render_opts.label );
+
+    this.render_opts.fillColor = opt.fillColor || ( force? 'none' : this.render_opts.fillColor );
+    this.render_opts.backgroundColor = opt.backgroundColor || ( force? 'none' : this.render_opts.backgroundColor );
+    this.render_opts.openColor = opt.openColor || ( force? '#00ff00' : this.render_opts.openColor );
+    this.render_opts.closeColor = opt.closeColor || ( force? '#00b2ee' : this.render_opts.closeColor ); 
+    
+};
+
+DIATONIC.map.Keyboard.prototype.print = function ( div  ) {
     
     var sz;
-    options = options || {};
-    
-    options.fillColor = options.fillColor || 'none';
-    options.backgroundColor = options.backgroundColor || 'none';
-    options.openColor = options.openColor || '#00ff00';
-    options.closeColor = options.closeColor || '#00b2ee';
-    options.scale = options.scale || 1;
-    options.mirror = options.mirror || false;
-    options.transpose = options.transpose || false;
-    options.label = options.label|| false;
     
     var estilo = 
 '   .keyboardPane {\n\
@@ -147,31 +159,30 @@ DIATONIC.map.Keyboard.prototype.print = function ( div, options ) {
     div.appendChild(keyboardPane);
     
     this.paper = new SVG.Printer( keyboardPane ); 
-    this.paper.initDoc( 'keyb', 'Diatonic Map Keyboard', estilo, options );
-    this.paper.initPage( options.scale );
+    this.paper.initDoc( 'keyb', 'Diatonic Map Keyboard', estilo, this.render_opts );
+    this.paper.initPage( this.render_opts.scale );
     
-    var legenda_opt = ABCXJS.parse.clone( options );
+    var legenda_opt = ABCXJS.parse.clone( this.render_opts );
     legenda_opt.kls = 'blegenda';
     
     this.legenda.draw('l00', this.paper, this.limits, legenda_opt );
     
-    if(options.transpose) {
+    if(this.render_opts.transpose) {
         sz = {w:this.height, h:this.width};
-        var mirr = options.mirror ? this.baseLine.x : this.limits.maxX - (this.baseLine.x - this.limits.minX);
+        var mirr = this.render_opts.mirror ? this.baseLine.x : this.limits.maxX - (this.baseLine.x - this.limits.minX);
         for (var x = mirr-10; x <= mirr+10; x+=10) {
             this.drawLine(this.baseLine.yi, x, this.baseLine.yf, x);
         }
     } else {
         sz = {w:this.width, h:this.height};
-        var mirr = options.mirror ? this.limits.maxX - (this.baseLine.x - this.limits.minX) : this.baseLine.x;
+        var mirr = this.render_opts.mirror ? this.limits.maxX - (this.baseLine.x - this.limits.minX) : this.baseLine.x;
         for (var x = mirr-10; x <= mirr+10; x+=10) {
             this.drawLine(x, this.baseLine.yi, x, this.baseLine.yf);
         }
     }
  
-    var btn_opt = ABCXJS.parse.clone( options );
+    var btn_opt = ABCXJS.parse.clone( this.render_opts );
     btn_opt.kls = 'button';
-    btn_opt.openColor = btn_opt.closeColor = 'none';
      
     for (var j = 0; j < this.keyMap.length; j++) {
         for (var i = 0; i < this.keyMap[j].length; i++) {
@@ -183,10 +194,10 @@ DIATONIC.map.Keyboard.prototype.print = function ( div, options ) {
     this.paper.endDoc();
 
     //binds SVG elements
-    this.legenda.setSVG(options.label, 'Abre', 'Fecha');
+    this.legenda.setSVG(this.render_opts.label, 'Abre', 'Fecha');
     for (var j = 0; j < this.keyMap.length; j++) {
         for (var i = 0; i < this.keyMap[j].length; i++) {
-            this.keyMap[j][i].setSVG(options.label); 
+            this.keyMap[j][i].setSVG(this.render_opts.label); 
         }
     }
 };
@@ -250,10 +261,10 @@ DIATONIC.map.Keyboard.prototype.parseNote = function(txtNota, isBass) {
   return nota;
 };
 
-DIATONIC.map.Keyboard.prototype.redraw = function(opts) {
+DIATONIC.map.Keyboard.prototype.redraw = function() {
     for (var j = 0; j < this.keyMap.length; j++) {
         for (var i = 0; i < this.keyMap[j].length; i++) {
-            this.keyMap[j][i].setText( opts.label );
+            this.keyMap[j][i].setText( this.render_opts.label );
         }
     }
 };
