@@ -44,7 +44,7 @@ ABCXJS.edit.DropdownMenu = function (topDiv, options, menu) {
         
         e2 = document.createElement("button");
         e2.setAttribute( "data-state", ddmId );
-        e2.innerHTML = (menu[m].title.replaceAll( ' ', '&nbsp;' ) || '' ) +'&nbsp;&nbsp;'+'<i class="ico-down-2" data-toggle="toggle"></i>';
+        e2.innerHTML = (menu[m].title || '' ) +'&#160;&#160;'+'<i class="ico-down-2" data-toggle="toggle"></i>';
         e2.addEventListener( 'click', function(e) {
            e.stopPropagation(); 
            e.preventDefault(); 
@@ -59,7 +59,7 @@ ABCXJS.edit.DropdownMenu = function (topDiv, options, menu) {
         this.headers[ddmId].btn = e2;
         
         e2 = document.createElement("div");
-        e2.setAttribute( "class", "dropdown-menu dropdown-menu-font" );
+        e2.setAttribute( "class", "dropdown-menu customScrollBar" );
         e2.setAttribute( "data-toggle", "toggle-menu" );
         e1.appendChild(e2);
         
@@ -137,7 +137,7 @@ ABCXJS.edit.DropdownMenu.prototype.setSubMenuTitle = function (ddm, newTitle) {
         return;
     }
     
-    self.headers[ddm].btn.innerHTML = (newTitle.replaceAll( ' ', '&nbsp;' ) || '' ) +'&nbsp;&nbsp;'+'<i class="ico-down-2" data-toggle="toggle"></i>';
+    self.headers[ddm].btn.innerHTML = (newTitle || '' ) +'&#160;&#160;<i class="ico-down-2" data-toggle="toggle"></i>';
     
 };
     
@@ -156,7 +156,7 @@ ABCXJS.edit.DropdownMenu.prototype.addItemSubMenu = function (ddm, newItem, pos)
     } else {
         var e4 = document.createElement("li"); 
         var e5 = document.createElement("a");
-        e5.innerHTML = tags[0].replaceAll( ' ', '&nbsp;' );
+        e5.innerHTML = tags[0];
         e5.setAttribute( "data-state", ddm );
         e5.setAttribute( "data-value", tags.length > 1 ? tags[1] : tags[0] );
         e5.addEventListener( 'click', function(e) {

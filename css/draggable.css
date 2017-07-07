@@ -19,11 +19,11 @@ and open the template in the editor.
     min-height: 60px;
     z-index: 100;
     border: thin solid rgba(100,100,100,0.3);
-    box-shadow: 2px 2px 2px -1px rgba(0,0,0,0.7);
-    -webkit-box-shadow: 2px 2px 2px -1px rgba(0,0,0,0.7);
-    -moz-box-shadow: 2px 2px 2px -1px rgba(0,0,0,0.7);
-    -ms-box-shadow: 2px 2px 2px -1px rgba(0,0,0,0.7);
-    -o-box-shadow: 2px 2px 2px -1px rgba(0,0,0,0.7);
+    box-shadow: 6px 6px 6px -3px rgba(0,0,0,0.7);
+    -webkit-box-shadow: 6px 6px 6px -3px rgba(0,0,0,0.7);
+    -moz-box-shadow: 6px 6px 6px -3px rgba(0,0,0,0.7);
+    -ms-box-shadow: 6px 6px 6px -3px rgba(0,0,0,0.7);
+    -o-box-shadow: 6px 6px 6px -3px rgba(0,0,0,0.7);
     
     background: #F1F1F1;
     pointer-events: auto;
@@ -66,6 +66,7 @@ and open the template in the editor.
     margin: 0;
     overflow: auto;
     width: 100%;
+    height: 100%;
 }
 
 .withStatusBar  {
@@ -129,3 +130,19 @@ and open the template in the editor.
     right: 2px;
     height: 18px;
 }
+
+.customScrollBar::-webkit-scrollbar {
+    width: 5px;
+    height: 5px;
+}
+ 
+.customScrollBar::-webkit-scrollbar-track {
+    -moz-box-shadow: inset 0 0 6px rgba(0,0,0,0.3);
+    -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.3);
+}
+ 
+.customScrollBar::-webkit-scrollbar-thumb {
+  background-color: rgba(255,0,0,0.8);
+  background-color: rgba(255, 153, 34,0.8);
+  outline: 1px solid slategrey;
+} 

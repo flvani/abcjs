@@ -147,7 +147,7 @@ DRAGGABLE.Div = function( parent, aButtons, options, callback, aToolBarButtons )
             self.y = e.clientY;
         };
 
-        this.resizeCorner.addEventListener( 'mouseover', this.resizeCorner.style.cursor='nwse-resize', false);
+        this.resizeCorner.addEventListener( 'mouseover', function() { this.resizeCorner.style.cursor='nwse-resize'; }, false);
         this.resizeCorner.addEventListener( 'mousedown', this.mouseResize, false);
         this.resizeCorner.addEventListener('touchstart', this.mouseResize, false);
     }
@@ -252,8 +252,8 @@ DRAGGABLE.Div.prototype.addTitle = function( id, title  ) {
     
     self.menuDiv.appendChild(div);
     
-    if(self.draggable) {
-        self.menuDiv.addEventListener( 'mouseover', self.menuDiv.style.cursor='move', false);
+    if(self.draggable && self.menuDiv) {
+        self.menuDiv.addEventListener( 'mouseover', function() { self.menuDiv.style.cursor='move'; }, false);
     }
     self.menuDiv.addEventListener( 'mousedown', self.mouseMove, false);
     self.menuDiv.addEventListener('touchstart', self.mouseMove, false);
@@ -285,6 +285,10 @@ DRAGGABLE.Div.prototype.addButtons = function( id,  aButtons ) {
         div.innerHTML = '<a href="" title="'+ rotulo +'"><i class="'+ icon +' ico-white"></i></a>';
         self.menuDiv.appendChild(div);
         div.addEventListener( 'click', function(e) {
+            e.preventDefault(); 
+            self.eventsCentral(action);
+        }, false);
+        div.addEventListener( 'touchstart', function(e) {
             e.preventDefault(); 
             self.eventsCentral(action);
         }, false);

@@ -65,6 +65,36 @@ ABCXJS.Editor = function (params) {
     if (params.onchange)
         this.onchangeCallback = params.onchange;
 
+
+    this.menu = new ABCXJS.edit.DropdownMenu(
+         params.menu_id
+        ,{ listener:this, method:'menuCallback' }
+        ,[{title: 'Acordeons', ddmId: 'menuGaitas',
+                itens: [
+                    'Acordeon 1',
+                    'Acordeon 2',
+                    '----',
+                    'Salvar mapa corrente',
+                    'Carregar mapa do disco local'
+                ]},
+            {title: 'Repertório', ddmId: 'menuRepertorio',
+                itens: [
+                    'Restaurar o original',
+                    'Carregar do drive local',
+                    'Exportar para drive local',
+                    'Partitura <i class="ico-play" /> Tablatura',
+                    'Tablatura <i class="ico-play" /> Partitura'
+                ]},
+            {title: 'Informações', ddmId: 'menuInformacoes',
+                itens: [
+                 'Tutoriais&#160;&#160;<img src="images/novo.png" />|TUTORIAL',
+                 'Partitura&#160;<i class="ico-play"></i>&#160;Tablatura|PART2TAB',
+                 'Tablatura&#160;<i class="ico-play"></i>&#160;Partitura|TAB2PART',
+                 'Sobre|ABOUT'
+            ]}
+        ]
+    );
+
     this.keyboardWindow = new DRAGGABLE.Div( 
           null 
         , [ 'move|Mover', 'rotate|Rotacionar', 'zoom|Zoom','globe|Mudar Notação']
@@ -98,6 +128,17 @@ ABCXJS.Editor = function (params) {
     this.studio.dataDiv.appendChild(this.controldiv);
     this.controldiv.innerHTML = document.getElementById(params.control_id).innerHTML;
     document.getElementById(params.control_id).innerHTML = "";
+
+    var menu2 = new ABCXJS.edit.DropdownMenu(
+           'menu2Div'
+        ,  { listener:self, method:'menuCallback' }
+        ,  [{title: 'Idioma', ddmId: 'menuIdiomas2',
+                itens: [
+                    '<img src="images/pt_BR.png" alt="idiomas" />&#160;&#160;Português|pt_BR',
+                    '<img src="images/en_US.png" alt="idiomas" />&#160;&#160;English|en_US',
+                    '<img src="images/de_DE.png" alt="idiomas" />&#160;&#160;Deustch|de_DE' 
+                ]}]
+        );
 
 
     var canvas_id = 'internalCanvasDiv';
@@ -155,6 +196,14 @@ ABCXJS.Editor = function (params) {
     if (params.generate_midi) {
         this.midiParser = new ABCXJS.midi.Parse(params.midi_options);
     }
+    
+    this.settingsMenu = document.getElementById(params.settingsMenu);
+    
+    this.settingsMenu.addEventListener("click", function(evt) {
+        evt.preventDefault();
+        this.blur();
+        self.showSettings();
+    }, false );
 
     printButton = document.getElementById("printBtn");
     playButton = document.getElementById("playBtn");
@@ -612,4 +661,33 @@ ABCXJS.Editor.prototype.editorCallback = function (e) {
         default:
             alert(e);
     }
+};
+
+ABCXJS.Editor.prototype.showSettings = function() {
+    
+    if(!this.settingsWindow) {
+    
+        this.settingsWindow = new DRAGGABLE.Div( 
+              null 
+            , null
+            , {title: 'Preferências', translate: false, statusBar: false, top: "300px", left: "500px", height:'300px',  width:'600px', zIndex: 50} 
+            //, {listener: this, method: 'keyboardCallback'}
+        );
+        var e = document.getElementById("settingsDiv"); 
+        this.settingsWindow.dataDiv.innerHTML= e.innerHTML;
+        e.innerHTML = "";
+        var menu = new ABCXJS.edit.DropdownMenu(
+               'settingsLanguageMenu'
+            ,  null // { listener:that, method:'menuCallback' }
+            ,  [{title: 'Idioma', ddmId: 'menuIdiomas',
+                    itens: [
+                        '<img src="images/pt_BR.png" alt="idiomas" />&#160;&#160;Português|pt_BR',
+                        '<img src="images/en_US.png" alt="idiomas" />&#160;&#160;English|en_US',
+                        '<img src="images/de_DE.png" alt="idiomas" />&#160;&#160;Deustch|de_DE' 
+                    ]}]
+            );
+            menu.setSubMenuTitle('menuIdiomas', '<img src="images/pt_BR.png" alt="idiomas" />&#160;&#160;Português');
+    }            
+    this.settingsWindow.setVisible(true);
+    
 };

@@ -286,34 +286,60 @@ V:3 accordionTab
 <div id="topBar" class="topBar gradiente" >
     <span class="topTitle">
         Draw the dots
-        <i class="ico-cogs topSettings" ></i>
+        <a id="topSettings" class="topSettings"><i class="ico-cogs" ></i></a>
     </span>
     <div class="dropdown-group">
         <div id="menu1Div" class="topMenu"></div>
     </div>
 </div> <!-- topBar -->
-<div id="studioDiv" class="studio" > 
-    <div id="editorDiv" class="editor" style="display:none;"> 
-        <div id="controlDiv" class="editorControles">
-            <span id="spanNomeGaita">Acordeons: </span>
-            <select id="selGaitas" ></select>
-            <select id="selKey" ></select>
-            <input type="submit" id="maisOitava" value="+ Oitava" onclick="javascript:doTranspose(12);" />
-            <input type="submit" id="menosOitava" value="- Oitava" onclick="javascript:doTranspose(-12);" />
-            <input type="button" id="printBtn" value="Print Preview" />
-            <input type="submit" id="forceRefresh" value="Refresh" onclick="javascript:doForceRefresh();" />
-            <input type="checkbox" id="chkAutoRefresh" />Auto refresh 
-            <input type="checkbox" id="chkDebug" onclick="javascript:doCheckDebug();" />Debug
-            <input type="button" id="showMapBtn" value="Show Map" />
-            <input type="button" id="switch_source" value="ABC/SVG" />
-            <input type="button" id="playBtn" value="Play" />
-            <input type="button" id="pauseBtn" value="Pause" />
-            <input type="button" id="stopBtn" value="Stop" />
-            <input type="button" id="textBtn" value="TextArea" />
-            <input type="button" id="roBtn" value="R.O." />
-            <label id="currentPlayTime" style="font-weight: bold; color: yellow; padding-left: 5px; padding-right: 3px;">00:00.00</label>
+<div id="studioDiv" class="studio"> 
+<div id="editorDiv" class="editor"> 
+<div id="controlDiv" style="display: none;" >
+    <div class="btn-group" >
+        <div id="menu2Div" class="topMenu" ></div>
+        <button id="buttonTools">
+            <i class="ico-wrench"></i>&nbsp;<span id="DR_tools">Ferramentas</span>
+        </button>
+        <button id="buttonPrinter" >
+            <i class="ico-printer"></i>&nbsp;<span id="DR_print">Imprimir</span>
+        </button>
+        <button id="buttonPlay" ><i class="ico-play"></i></button>
+        <button id="buttonStop" ><i class="ico-stop"></i></button>
+        <input type="text" id="roBt" value="R.O." />
+        <label id="currentPlayTimeLabel" >00:00:00</label>
+    </div>
+</div>
+<div id="controlDiv2" style="display: none;">
+    <div class="btn-group" >
+    <span id="spanNomeGaita">Acordeons: </span>
+    <select id="selGaitas" ></select>
+    <select id="selKey" ></select>
+    <input type="submit" id="maisOitava" value="+ Oitava" onclick="javascript:doTranspose(12);" />
+    <input type="submit" id="menosOitava" value="- Oitava" onclick="javascript:doTranspose(-12);" />
+    <input type="button" id="printBtn" value="Print Preview" />
+    <input type="submit" id="forceRefresh" value="Refresh" onclick="javascript:doForceRefresh();" />
+    <input type="checkbox" id="chkAutoRefresh" />Auto refresh 
+    <input type="checkbox" id="chkDebug" onclick="javascript:doCheckDebug();" />Debug
+    <input type="button" id="showMapBtn" value="Show Map" />
+    <input type="button" id="switch_source" value="ABC/SVG" />
+    <input type="button" id="playBtn" value="Play" />
+    <input type="button" id="pauseBtn" value="Pause" />
+    <input type="button" id="stopBtn" value="Stop" />
+    <input type="button" id="textBtn" value="TextArea" />
+    <input type="button" id="roBtn" value="R.O." />
+    <label id="currentPlayTime" >00:00.00</label>
+    </div>
+</div>
+</div> <!-- editorDiv -->
+    <div id="settingsDiv" style="display:none;">
+        <div class="menu-group">
+            <label>Acordeon:&nbsp;</label><div id="settingsAcordeonsMenu" class="topMenu"></div>
+            <br><br>
+            <label>Idioma:&nbsp;</label><div id="settingsLanguageMenu" class="topMenu"></div>
+            <br><br>
+            <label>Mostrar avisos e erros:&nbsp;</label><div id="languageMenu" class="topMenu"></div>
         </div>
-    </div> <!-- editorDiv -->
+    </div> <!-- settingsDiv - este bloco é tratado internamente -->
 </div>        
         <script type="text/javascript">
             
@@ -452,6 +478,8 @@ V:3 accordionTab
                         ,control_id: 'controlDiv'
                         ,warnings_id: "warningsDiv"
                         ,generate_warnings: true
+                        ,settingsMenu:'topSettings'
+                        ,settingsDiv: 'settingsDiv'
                         
                         ,refreshController_id: "chkAutoRefresh"
                         ,keySelector_id: "selKey"
@@ -471,19 +499,6 @@ V:3 accordionTab
                         ,onchange: editorCallbackOnChange
                         ,gui: false
                     } );
-                    
-                m1 = new ABCXJS.edit.DropdownMenu(
-                   'menu1Div'
-                ,  { listener:myEditor, method:'menuCallback' }
-                ,  [{title: 'Informações', ddmId: 'menuInformacoes',
-                        itens: [
-                            'Tutoriais <i class="ico-novo">|TUTORIAL',
-                            'Partitura <i class="ico-play">Tablatura|PART2TAB',
-                            'Tablatura <i class="ico-play">Partitura|TAB2PART',
-                            'Sobre|ABOUT'
-                        ]}
-                ]);
-
                     
                 myEditor.setString( document.getElementById("abc").value );
                 myEditor.editarea.resize();

@@ -12,8 +12,7 @@
     position: relative;
     display: block;
     float:  left;
-    margin: 4px;
-    margin-left: 1px;
+    margin: 8px 0px 0px 1px;
     width: fit-content;
     min-width: 640px;
 }
@@ -37,7 +36,7 @@
     left: 240px;
 }
 
-.tabs label {
+.tabs > label {
     
     background: #003050;
     background: #ccc;
@@ -79,19 +78,6 @@
     box-shadow: 2px 0 2px rgba(0,0,0,0.1), -2px 0 2px rgba(0,0,0,0.1);
 }
 
-/*
-.tabs label:after {
-    content: '';
-    background: #fff;
-    background: #e9edf0;
-    position: absolute;
-    bottom: -1px;
-    left: 0;
-    width: 100%;
-    height: 2px;
-    display: block;
-}
-*/
 .tabs input:hover + label {
     background: #5ba4a4;
     background: lavender;
@@ -100,12 +86,6 @@
     background: -webkit-linear-gradient(bottom, #ccc 0%, white 50%);
     cursor: pointer;
 }
-
-/*
-.tabs label:first-of-type {
-    z-index: 4;
-}
-*/
 
 .tab-label-1 {
     z-index: 3;
@@ -168,20 +148,6 @@
     overflow: hidden;
     overflow-y: auto;
 }
-
-.tv-content::-webkit-scrollbar {
-    width: 5px;
-}
- 
-.tv-content::-webkit-scrollbar-track {
-    -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.3);
-}
- 
-.tv-content::-webkit-scrollbar-thumb {
-  background-color: rgba(0,0,0,0.5);
-  outline: 1px solid slategrey;
-}       
-
 
 .tv-m1,
 .tv-m2,

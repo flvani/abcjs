@@ -27,6 +27,13 @@ body {
     top:8px; 
     right:20px; 
     font-size: 1.4em;
+    color: #dab390;
+}    
+
+.topSettings:hover {
+    color:#ff9922;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+    cursor:pointer;
 }    
 
 .topBar {
