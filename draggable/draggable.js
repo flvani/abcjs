@@ -264,7 +264,7 @@ DRAGGABLE.Div.prototype.addButtons = function( id,  aButtons ) {
     var defaultButtons = ['close|Fechar'];
     var self = this;
     
-    var buttonMap = { CLOSE: 'close', MOVE: 'move', ROTATE: 'rotate', GLOBE: 'globe', ZOOM:'zoom-in', DOCK: 'dock', POPOUT: 'popout'  };
+    var buttonMap = { CLOSE: 'close', MOVE: 'move', ROTATE: 'rotate', GLOBE: 'world', ZOOM:'zoom-in', POPIN: 'popin', POPOUT: 'popout'  };
     
     if(aButtons)
         defaultButtons = defaultButtons.concat(aButtons);

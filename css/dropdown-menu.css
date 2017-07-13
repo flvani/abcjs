@@ -23,7 +23,7 @@
     float:left;
     text-align: left;
     vertical-align: middle;
-    font-family: 'titleFont3','Arial';
+    font-family: 'menuFont','Arial';
     font-weight: normal;
     font-size: 20px;
     line-height: 16px;
@@ -95,15 +95,21 @@
 }
 
 .btn-group i,
-.btn-group img,
 .menu-group i,
+.dropdown i {
+    position: relative;
+    vertical-align: middle;
+    top: -1px;
+    height:22px;
+}    
+
+.btn-group img,
 .menu-group img,
-.dropdown i,
 .dropdown img {
     position: relative;
     vertical-align: middle;
-    top: 0px;
-    height:20px;
+    top: -1px;
+    height:22px;
 }    
 
 .dropdown [data-toggle="toggle"] {
@@ -144,6 +150,7 @@
     -moz-box-shadow: 6px 6px 6px -3px rgba(0,0,0,0.7);
     -ms-box-shadow: 6px 6px 6px -3px rgba(0,0,0,0.7);
     -o-box-shadow: 6px 6px 6px -3px rgba(0,0,0,0.7);
+    font-family: "subMenuFont", "arial";
     font-weight: normal;
     font-size: 18px;
     font-style: italic;

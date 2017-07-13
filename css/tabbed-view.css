@@ -55,7 +55,7 @@
     background: linear-gradient(top, lavender 0%, white 100%);
   */
 
-    font-family: 'titleFont3';
+    font-family: 'menuFont';
     font-size: 15px;
     line-height: 30px;
     height: 30px;
@@ -126,10 +126,11 @@
 .tv-content,
 .tv-content-always {
     clear: both;
+    float: left;
     background: #e9edf0;
     position: relative;
-    min-width: 400px;
-    min-height: 200px;
+    min-width: 756px;
+    min-height: 304px;
     z-index: 10;
     opacity: 1;
     display:block;
@@ -142,7 +143,7 @@
 
 .tv-content {
     min-width: 1024px;
-    min-height: 300px;
+    min-height: 400px;
     width: inherit;
     height: inherit;
     overflow: hidden;
