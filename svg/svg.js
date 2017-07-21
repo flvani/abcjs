@@ -188,24 +188,35 @@ SVG.Printer.prototype.printLine = function (x,y,dx,dy) {
         dy = ABCXJS.misc.isIE() ? 1: 0.6;
         dx -=  x;
     }
-    var pathString = ABCXJS.write.sprintf('<rect style="fill:'+this.color+';"  x="%.2f" y="%.2f" width="%.2f" height="%.2f"/>\n', x, y, dx, dy);
+    var pathString = ABCXJS.write.sprintf('<rect style="fill:'+this.color+';"  x="%.1f" y="%.1f" width="%.1f" height="%.1f"/>\n', x, y, dx, dy);
     this.svg_pages[this.currentPage] += pathString;
 };
 
 SVG.Printer.prototype.printLedger = function (x,y,dx,dy) {
-    var pathString = ABCXJS.write.sprintf('<path style="stroke:'+this.baseColor+'; fill: white; stroke-width:0.6; stroke-dasharray: 1 1;" d="M %.2f %.2f h%.2f"/>\n', x, y, dx-x);
+    var pathString = ABCXJS.write.sprintf('<path style="stroke:'+this.baseColor+'; fill: white; stroke-width:0.6; stroke-dasharray: 1 1;" d="M %.1f %.1f h%.1f"/>\n', x, y, dx-x);
     this.svg_pages[this.currentPage] += pathString;
 };
 
 SVG.Printer.prototype.printBeam = function (x1,y1,x2,y2,x3,y3,x4,y4) {
-    var pathString = ABCXJS.write.sprintf('<path style="fill:'+this.color+'; stroke:none" d="M %.2f %.2f L %.2f %.2f L %.2f %.2f L %.2f %.2f z"/>\n',  x1, y1, x2, y2, x3, y3, x4, y4);
-    this.svg_pages[this.currentPage] += pathString;
+    
+//    this.svg_pages[this.currentPage] += ABCXJS.write.sprintf(
+//        '<path style="fill:'+this.color + '; stroke:none;" ' +
+//        'd="M %.1f %.1f L %.1f %.1f L %.1f %.1f L %.1f %.1f Z" />\n'
+//        , x1, y1, x2, y2, x3, y3, x4, y4);
+        
+// Por algum motivo o path acima apresenta vazamento do preenchimento em algumas escalas de zoom.
+// Resolvi usando um path diferente (e não muito eficiente para desenhar o beam
+        
+    this.svg_pages[this.currentPage] += ABCXJS.write.sprintf(
+        '<path style="stroke:none; fill:'+ this.color + ';" ' +
+        'd="M %.1f %.1f L %.1f %.1f L %.1f %.1f Z L %.1f %.1f L %.1f %.1f Z" />\n'
+        , x1, y1, x2, y2, x3, y3, x3, y3, x4, y4 );
 };
 
 SVG.Printer.prototype.printStaveLine = function (x1, x2, y, debug) {
     var color = debug? debug : this.baseColor;
     var dy =0.6;   
-    var pathString = ABCXJS.write.sprintf('<rect style="stroke:none; fill: %s;" x="%.2f" y="%.2f" width="%.2f" height="%.2f"/>\n', 
+    var pathString = ABCXJS.write.sprintf('<rect style="stroke:none; fill: %s;" x="%.1f" y="%.1f" width="%.1f" height="%.1f"/>\n', 
                                                 color, x1, y, Math.abs(x2-x1), dy );
     this.svg_pages[this.currentPage] += pathString;
 };
@@ -222,7 +233,7 @@ SVG.Printer.prototype.printBar = function (x, dx, y1, y2, real) {
     var dy = Math.abs(y2-y1);
     dx = Math.abs(dx); 
     
-    var pathString = ABCXJS.write.sprintf('<rect '+kls+' x="%.2f" y="%.2f" width="%.2f" height="%.2f"/>\n', Math.min(x,x2), Math.min(y1,y2), dx, dy );
+    var pathString = ABCXJS.write.sprintf('<rect '+kls+' x="%.1f" y="%.1f" width="%.1f" height="%.1f"/>\n', Math.min(x,x2), Math.min(y1,y2), dx, dy );
 
     this.svg_pages[this.currentPage] += pathString;
 };
@@ -238,7 +249,7 @@ SVG.Printer.prototype.printStem = function (x, dx, y1, y2) {
     var dy = Math.abs(y2-y1);
     dx = Math.abs(dx); 
     
-    var pathString = ABCXJS.write.sprintf('<rect x="%.2f" y="%.2f" width="%.2f" height="%.2f"/>\n', Math.min(x,x2), Math.min(y1,y2), dx, dy );
+    var pathString = ABCXJS.write.sprintf('<rect x="%.1f" y="%.1f" width="%.1f" height="%.1f"/>\n', Math.min(x,x2), Math.min(y1,y2), dx, dy );
 
     this.svg_pages[this.currentPage] += pathString;
 };
@@ -262,7 +273,7 @@ SVG.Printer.prototype.printTieArc = function (x1,y1,x2,y2,up) {
     var controly2 = y2-flatten*uy+curve*ux;
     var thickness = 2;
     
-    var pathString = ABCXJS.write.sprintf('<path style="fill:'+this.color+'; stroke-width:0.6px; stroke:none;" d="M %.2f %.2f C %.2f %.2f %.2f %.2f %.2f %.2f C %.2f %.2f %.2f %.2f %.2f %.2f z"/>\n', 
+    var pathString = ABCXJS.write.sprintf('<path style="fill:'+this.color+'; stroke-width:0.6px; stroke:none;" d="M %.1f %.1f C %.1f %.1f %.1f %.1f %.1f %.1f C %.1f %.1f %.1f %.1f %.1f %.1f z"/>\n', 
                             x1, y1,
                             controlx1, controly1, controlx2, controly2, x2, y2, 
                             controlx2-thickness*uy, controly2+thickness*ux, controlx1-thickness*uy, controly1+thickness*ux, x1, y1 );
@@ -274,13 +285,13 @@ SVG.Printer.prototype.printBrace = function (x, y1, y2) {
     var sz = Math.abs(y1-y2); // altura esperada
     var scale = sz / 1027; // altura real do simbolo
     this.setDefine('scripts.lbrace');
-    var pathString = ABCXJS.write.sprintf('<use style="fill:'+this.baseColor+'" x="0" y="0" xlink:href="#scripts.lbrace" transform="translate(%.2f %.2f) scale(0.13 %.5f)" />\n', x, y2, scale );
+    var pathString = ABCXJS.write.sprintf('<use style="fill:'+this.baseColor+'" x="0" y="0" xlink:href="#scripts.lbrace" transform="translate(%.1f %.1f) scale(0.13 %.5f)" />\n', x, y2, scale );
     this.svg_pages[this.currentPage] += pathString;
 };
 
 SVG.Printer.prototype.printSymbol = function (x, y, symbol) {
     if (this.setDefine(symbol)) {
-        var pathString = ABCXJS.write.sprintf('<use x="%.2f" y="%.2f" xlink:href="#%s" />\n', x, y, symbol );
+        var pathString = ABCXJS.write.sprintf('<use x="%.1f" y="%.1f" xlink:href="#%s" />\n', x, y, symbol );
         this.svg_pages[this.currentPage] += pathString;
     } else {
         throw 'Undefined: ' + symbol;
@@ -336,7 +347,7 @@ SVG.Printer.prototype.printButton = function (id, x, y, options) {
     var gid = 'p'+this.printerId+id;
     var estilo = 'stroke:'+options.borderColor+'; stroke-width:'+options.borderWidth+'px; fill: none;';
 
-    var pathString = ABCXJS.write.sprintf( '<g id="%s" transform="translate(%.2f %.2f) scale(%.5f)">\n\
+    var pathString = ABCXJS.write.sprintf( '<g id="%s" transform="translate(%.1f %.1f) scale(%.5f)">\n\
         <circle cx="28" cy="28" r="26" style="stroke:none; fill: %s;" ></circle>\n\
         <path id="%s_ac" style="stroke: none; fill: %s;" d="M 2 34 a26 26 0 0 1 52 -12"></path>\n\
         <path id="%s_ao" style="stroke: none; fill: %s;" d="M 54 22 a26 26 0 0 1 -52 12"></path>\n\

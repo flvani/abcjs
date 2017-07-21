@@ -118,6 +118,9 @@ ABCXJS.tablature.Accordion.prototype.printKeyboard = function(div_id, options) {
     }
 };
 
+ABCXJS.tablature.Accordion.prototype.getId = function () {
+    return this.loaded.getId();
+};
 ABCXJS.tablature.Accordion.prototype.getFullName = function () {
     return this.loaded.getFullName();
 };

@@ -49,7 +49,7 @@ define("ace/mode/abcx_highlight_rules",["require","exports","module","ace/lib/oo
                     comment: 'ABCX annotation'
                 },
                 {
-                    token: ['attribute','information.variable'],
+                    token: ['attribute.attribute','information.variable'],
                     regex: '([\\s].*?[\\=])([^\\s\\\\]*)',
                     comment: 'ABCX attribute'
                 },
@@ -59,7 +59,7 @@ define("ace/mode/abcx_highlight_rules",["require","exports","module","ace/lib/oo
                     comment: 'Notes'
                 },
                 {
-                    token: ['bass.constant', 'bellows.decoration.strong', 'buttons.constant', 'duration.constant.numeric'],
+                    token: ['bass.constant', 'bellows.constant.bellows', 'buttons.constant', 'duration.constant.numeric'],
                     regex: '([A-Ga-gzxZX>]*[♭♯]*[,\']*)([+-])([0-9abc>xz][\']*)([0-9]*[\.\/><0-9]*)',
                     comment: 'ABCX tablature elements'
                 },

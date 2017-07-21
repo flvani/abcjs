@@ -51,8 +51,8 @@ DIATONIC.map.Button.prototype.draw = function( id, printer, limits, options ) {
     options.borderColor = this.borderColor;
     options.borderWidth = this.borderWidth;
     options.fillColor = this.kb.render_opts.fillColor;
-    options.openColor = (options.kls && options.kls === 'blegenda'? this.kb.render_opts.openColor : 'none' );
-    options.closeColor = (options.kls && options.kls === 'blegenda'? this.kb.render_opts.closeColor : 'none' );
+    options.openColor = (options.kls && options.kls === 'blegenda'? options.openColor : 'none' );
+    options.closeColor = (options.kls && options.kls === 'blegenda'? options.closeColor : 'none' );
     
     this.SVG.gid = printer.printButton( id, currX, currY, options );
 

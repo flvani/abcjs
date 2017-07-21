@@ -138,8 +138,8 @@ ABCXJS.midi.Player.prototype.startPlay = function(what) {
     
     if(this.currentTime === 0 ) {
         //flavio - pq no IOS tenho que tocar uma nota antes de qualquer pausa
-        MIDI.noteOn(0, 21, 0, 0);
-        MIDI.noteOff(0, 21, 0.01);
+        MIDI.noteOn(0, 20, 0, 0);
+        MIDI.noteOff(0, 20, 0.01);
     }
    
     this.playlist = what.playlist;
@@ -287,7 +287,7 @@ ABCXJS.midi.Player.prototype.doDidacticPlay = function(criteria) {
 ABCXJS.midi.Player.prototype.executa = function(pl) {
     
     var self = this;
-    var loudness = 256;
+    var loudness = 128;
     var delay = 0;
     var aqui;
 
@@ -338,8 +338,8 @@ ABCXJS.midi.Player.prototype.executa = function(pl) {
             pl.item.abcelems.forEach( function( elem ) {
                 delay = self.calcTempo( elem.delay );
                 aqui=4;
+                self.currAbsElem = elem.abcelem.parent;
                 if( self.callbackOnScroll ) {
-                    self.currAbsElem = elem.abcelem.parent;
                     self.callbackOnScroll(self);
                 }
                 aqui=5;

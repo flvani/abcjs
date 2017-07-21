@@ -29,6 +29,9 @@ if (!ABCXJS.edit)
 ABCXJS.edit.EditArea = function (editor_id, listener) {
     
     this.container = {};
+    var aBotoes = [ 'gutter|Numeração das Linhas', 'download|Salvar Local', 'fontsize|Tamanho da fonte', 'down|Tom', 
+                    'octavedown|Oitava|Oitava', 'octaveup|Oitava|Oitava', 'search|Localizar e substituir', 
+                    'undo|Dezfazer', 'redo|Refazer', 'lighton|Realçar texto', 'readonly|Bloquear edição' ] ;
     
     if(editor_id) {
         var topDiv;
@@ -40,41 +43,64 @@ ABCXJS.edit.EditArea = function (editor_id, listener) {
             
             this.container = new DRAGGABLE.Div( 
                   topDiv
-                , [ 'popout|Expandir Janela' ]
+                , [ 'popout|Expandir janela' ]
                 , {translate:false, draggable:false, width: "100%", height: "200px", title: 'Editor ABCX' }
                 , {listener : listener, method: 'editorCallback' }
-                , [ 'gutter|Numeração das Linhas', 'fontsize|Tamanho da fonte', 'down|Tom', 'arrowdn|Oitava|Oitava', 'arrowup|Oitava|Oitava', 'search|Procurar', 'undo|Dezfazer', 'redo|Refazer', 'light|Realçar texto' ] 
+                , aBotoes
             );
             
-            this.container.dataDiv.setAttribute("class", "ace-datadiv"); 
+            //this.container.dataDiv.setAttribute("class", "ace-datadiv"); 
         } else {
             alert( 'this.container: elemento "'+editor_id+'" não encontrado.');
         }
     } else {
         this.container = new DRAGGABLE.Div( 
             null
-            , [ 'move|Mover', 'popin|Fixar Janela' ]
+            , [ 'move|Mover', 'popin|Fixar janela' , 'maximize|Maximizar janela' ]
             , {translate:false, statusBar:true, left:"0", top:"0", width: "640px", height: "480px", title: 'Editor ABCX' }
             , {listener : listener, method: 'editorCallback' }
-            , [ 'gutter|Numeração das Linhas', 'fontsize|Tamanho da fonte', 'down|Tom', 'arrowdn|Oitava|Oitava', 'arrowup|Oitava|Oitava', 'search|Procurar', 'undo|Dezfazer', 'redo|Refazer', 'light|Realçar texto' ] 
+            , aBotoes
         );
-        this.container.dataDiv.setAttribute("class", "ace-editor"); 
+//        this.container.dataDiv.setAttribute("class", "ace-datadiv"); 
+        
+        document.getElementById('dDOWNButton4').innerHTML = '<div id="menu4Div" class="topMenu" ></div>';
+        
+        this.keySelector = new ABCXJS.edit.KeySelector( 'k2', 'menu4Div', {listener: this, method: 'editorCallback'} );
     }
+    
+    //this.container.dataDiv.className += " ace-datadiv"; 
     
     this.aceEditor = ace.edit(this.container.dataDiv);
     this.aceEditor.setOptions( {highlightActiveLine: true, selectionStyle: "text", cursorStyle: "smooth"/*, maxLines: Infinity*/ } );
-    this.aceEditor.setOptions( {fontFamily: "monospace",  fontSize: "11pt", fontWeight: "normal" });
+    this.aceEditor.setOptions( {fontFamily: "monospace",  fontSize: "15px", fontWeight: "normal" });
     this.aceEditor.renderer.setOptions( {highlightGutterLine: true, showPrintMargin: false, showFoldWidgets: false } );
     this.aceEditor.$blockScrolling = Infinity;
     this.Range = require("ace/range").Range;
-    
     this.gutterVisible = true;
     this.syntaxHighLightVisible = true;
     this.isDragging = false;
     this.selectionEnabled = true;
     
+    this.createStyleSheet();
+    
     if(listener)
         this.addChangeListener(listener);
+};
+
+// Este css é usado apenas quando o playback da partitura está funcionando
+// e então a cor de realce é no edidor fica igual a cor de destaque da partitura.
+ABCXJS.edit.EditArea.prototype.createStyleSheet = function () {
+    this.style = document.createElement('style');
+    this.style.type = 'text/css';
+    document.getElementsByTagName('head')[0].appendChild(this.style);        
+};
+
+ABCXJS.edit.EditArea.prototype.setEditorHighLightStyle = function () {
+    this.style.innerHTML = '.ABCXHighLight { background-color: '+ABCXJS.write.highLightColor+' !important; opacity: 0.15; }';
+};
+
+ABCXJS.edit.EditArea.prototype.clearEditorHighLightStyle = function () {
+    this.style.innerHTML = '.ABCXHighLight { }';
 };
 
 ABCXJS.edit.EditArea.prototype.setGutter = function (visible) {
@@ -106,6 +132,12 @@ ABCXJS.edit.EditArea.prototype.setVisible = function (visible) {
 };
 
 ABCXJS.edit.EditArea.prototype.setReadOnly = function (readOnly) {
+    
+//    if( readOnly)
+//        this.aceEditor.renderer.hideCursor();
+//    else
+//        this.aceEditor.renderer.showCursor();
+
     this.aceEditor.setOptions({
         readOnly: readOnly,
         highlightActiveLine: !readOnly,
@@ -117,17 +149,9 @@ ABCXJS.edit.EditArea.prototype.setReadOnly = function (readOnly) {
 
 ABCXJS.edit.EditArea.prototype.resize = function () {
     
-    var h = this.container.topDiv.clientHeight -
-            (this.container.menuDiv ? this.container.menuDiv.clientHeight : 0 ) -
-            (this.container.toolBar ? this.container.toolBar.clientHeight : 0 ) -
-            (this.container.bottomDiv ? this.container.bottomDiv.clientHeight : 0 );
-    
-    this.container.dataDiv.style.height =  (h-2) + 'px';
-    
-    if(this.container.parent)
-        this.container.topDiv.style.width =  (this.container.parent.clientWidth-5) + 'px';
-    
+    this.container.resize();
     this.aceEditor.resize();
+    
 };
 
 ABCXJS.edit.EditArea.prototype.setOptions = function (editorOptions, rendererOptions ) {
@@ -196,9 +220,13 @@ ABCXJS.edit.EditArea.prototype.getSelection = function() {
 ABCXJS.edit.EditArea.prototype.setSelection = function (abcelem) {
     if (abcelem && abcelem.position) {
         
-        var range = new this.Range(abcelem.position.anchor.line, abcelem.position.anchor.ch, abcelem.position.head.line, abcelem.position.head.ch);
+        var range = new this.Range(
+            abcelem.position.anchor.line, abcelem.position.anchor.ch, 
+            abcelem.position.head.line, abcelem.position.head.ch
+        );
 
         this.aceEditor.selection.addRange(range);
+        
         if(abcelem.position.selectable || !this.selectionEnabled)
             this.aceEditor.scrollToLine(range.start.row);
     }   
@@ -206,18 +234,12 @@ ABCXJS.edit.EditArea.prototype.setSelection = function (abcelem) {
 
 ABCXJS.edit.EditArea.prototype.clearSelection = function (abcelem) {
     if (abcelem && abcelem.position) {
-        var range = new this.Range(abcelem.position.anchor.line, abcelem.position.anchor.ch, abcelem.position.head.line, abcelem.position.head.ch);
-        var aSel = this.getSelection();
         
-        this.aceEditor.selection.toSingleRange(); 
-        this.aceEditor.clearSelection(); 
-        
-        for( var r = 0; r < aSel.length; r ++  ) { 
-            if( ! aSel[r].isEqual(range) ) {
-                this.aceEditor.selection.addRange(aSel[r], false);
-            }
-        }
+        var range = new this.Range(
+            abcelem.position.anchor.line, abcelem.position.anchor.ch, 
+            abcelem.position.head.line, abcelem.position.head.ch
+        );
+
+        this.aceEditor.selection.clearRange(range); 
     }
 };
-    
-

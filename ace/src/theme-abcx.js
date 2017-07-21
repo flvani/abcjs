@@ -1,10 +1,6 @@
 define("ace/theme/abcx",["require","exports","module","ace/lib/dom"], function(require, exports, module) {
 "use strict";
 
-
-
-
-
 exports.isDark = false;
 exports.cssText = ".ace-abcx {\
 background-color: #FFFFFF;\
@@ -13,9 +9,10 @@ color: black;\
 .ace-datadiv {\
 position: relative;\
 display: block;\
+overflow: auto;\
 top: 0;\
 left: 0;\
-height:100%;\
+height:100% !important; \
 width:100%;\
 }\
 .ace-abcx .ace_cursor {\
@@ -27,25 +24,23 @@ font-weight:bold;\
 .ace-abcx .ace_italic {\
 font-style: italic;\
 }\
-.ace-abcx .ace_marker-layer .ace_selected-word {\
-border: 1px solid rgb(181, 213, 255);\
-}\
-.ace-abcx .ace_marker-layer .ace_selection {\
-background: rgb(181, 213, 255);\
-}\
 .ace-abcx .ace_invisible {\
 color: #ddd;\
 }\
 .ace-abcx .ace_marker-layer .ace_step {\
 background: rgb(255, 255, 0);\
 }\
-.ace-abcx .ace_active-line {\
-background: rgb(232, 242, 254);\
+.ace-abcx .ace_marker-layer .ace_selected-word {\
+border: none;\
 }\
-.ace-abcx .ace_gutter-active-line {\
-background-color : #DADADA;\
-background: rgb(232, 242, 254);\
-color:white;\
+.ace-abcx .ace_marker-layer .ace_selection {\
+background-color: blue;\
+opacity:0.15;\
+}\
+.ace-abcx .ace_gutter-active-line,\
+.ace-abcx .ace_active-line {\
+background: blue;\
+opacity:0.05;\
 }\
 .ace-abcx .ace_gutter {\
 background: #EBEBEB;\

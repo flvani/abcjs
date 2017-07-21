@@ -6,7 +6,6 @@
         <link rel="icon" type="image/icon" href="images/favicon.ico" />
         
         <link rel="stylesheet" href="fontsIco/abcx.css" />
-        <link rel="stylesheet" href="fontsIco/abcx-window-font.css" />
         <link rel="stylesheet" href="fontsGoogle/fonts.css" />
         
         <link rel="stylesheet" href="css/dropdown-menu.css" />
@@ -85,8 +84,11 @@
 	<script type="text/javascript" src="proto_noconflict.js" ></script>
         <script type="text/javascript" src="jquery/jquery-1.11.1.min.js" ></script>
         
+        <!-- color picker -->
+        <script type="text/javascript" src="jscolor/jscolor.js"></script>
+        
         <!-- suporte a MIDI -->
-        <script type="text/javascript" src="MIDI.js/MIDI_3.00-min.js"></script>
+        <script type="text/javascript" src="jslib/MIDI.js"></script>
 
         <script type="text/javascript" src="svg/svg.js" ></script>
         <script type="text/javascript" src="svg/glyphs.js" ></script>
@@ -295,57 +297,37 @@ V:3 accordionTab
     </div>
 </div> <!-- topBar -->
 <div id="studioDiv" class="studio"> 
-<div id="editorDiv" class="editor"> 
-<div id="controlDiv" style="display: none;" >
-    <div class="btn-group" >
-        <div id="menu2Div" class="topMenu" ></div>
-        <button id="buttonTools">
-            <i class="ico-wrench"></i>&nbsp;<span id="DR_tools">Ferramentas</span>
-        </button>
-        <button id="buttonPrinter" >
-            <i class="ico-printer"></i>&nbsp;<span id="DR_print">Imprimir</span>
-        </button>
-        <button id="buttonPlay" ><i class="ico-play"></i></button>
-        <button id="buttonStop" ><i class="ico-stop"></i></button>
-        <input type="text" id="roBt" value="R.O." />
-        <label id="currentPlayTimeLabel" >00:00:00</label>
-    </div>
-</div>
-<div id="controlDiv2" style="display: none;">
-    <div class="btn-group" >
-    <span id="spanNomeGaita">Acordeons: </span>
-    <select id="selGaitas" ></select>
-    <select id="selKey" ></select>
-    <input type="submit" id="maisOitava" value="+ Oitava" onclick="javascript:doTranspose(12);" />
-    <input type="submit" id="menosOitava" value="- Oitava" onclick="javascript:doTranspose(-12);" />
-    <input type="button" id="printBtn" value="Print Preview" />
-    <input type="submit" id="forceRefresh" value="Refresh" onclick="javascript:doForceRefresh();" />
-    <input type="checkbox" id="chkAutoRefresh" />Auto refresh 
-    <input type="checkbox" id="chkDebug" onclick="javascript:doCheckDebug();" />Debug
-    <input type="button" id="showMapBtn" value="Show Map" />
-    <input type="button" id="switch_source" value="ABC/SVG" />
-    <input type="button" id="playBtn" value="Play" />
-    <input type="button" id="pauseBtn" value="Pause" />
-    <input type="button" id="stopBtn" value="Stop" />
-    <input type="button" id="textBtn" value="TextArea" />
-    <input type="button" id="roBtn" value="R.O." />
-    <label id="currentPlayTime" >00:00.00</label>
-    </div>
-</div>
-</div> <!-- editorDiv -->
-    <div id="settingsDiv" style="display:none;">
-        <div class="menu-group">
-            <label>Acordeon:&nbsp;</label><div id="settingsAcordeonsMenu" class="topMenu"></div>
-            <br><br>
-            <label>Idioma:&nbsp;</label><div id="settingsLanguageMenu" class="topMenu"></div>
-            <br><br>
-            <label>Mostrar avisos e erros:&nbsp;</label><div id="languageMenu" class="topMenu"></div>
+    <div id="editorDiv" class="editor"> 
+    <div id="controlDiv" style="display: none;" >
+        <div class="btn-group" >
+            <div id="menuAcordeonsDiv" class="topMenu" ></div>
+            <div id="menuKeyDiv" class="topMenu" ></div>
+            <button id="button8Up" onclick="javascript:doTranspose(12);" ><i class="ico-octave-up"></i></button>
+            <button id="button8Down" onclick="javascript:doTranspose(-12);" ><i class="ico-octave-down"></i></button>
+            <button id="showMapBtn" ><i class="ico-folder"></i>&nbsp;<span >Teclado</span></button>
+            <button id="showEditBtn" ><i class="ico-folder"></i>&nbsp;<span >Editor</span></button>
+            <button id="buttonPrint" ><i class="ico-printer"></i>&nbsp;<span id="DR_print">Imprimir</span></button>
+            <button id="buttonRefresh" onclick="javascript:doForceRefresh();" ><i class="ico-bolt"></i><span id="forceRefresh">Atualizar</span></button>
+            <button id="switch_source" ><i class="ico-bolt"></i><span id="xx">ABC/SVG</span></button>
+            <button id="buttonPlay" ><i class="ico-play"></i></button>
+            <button id="buttonPause" ><i class="ico-pause"></i></button>
+            <button id="buttonStop" ><i class="ico-stop"></i></button>
+            <input type="text" id="roBt" value="Ir..." />
+            <input type="checkbox" id="chkAutoRefresh" />Auto refresh 
+            <input type="checkbox" id="chkDebug" onclick="javascript:doCheckDebug();" />Debug
+            <label id="currentPlayTimeLabel" >00:00:00</label>
         </div>
-    </div> <!-- settingsDiv - este bloco é tratado internamente -->
+    </div>
+    </div> <!-- editorDiv -->
 </div>        
         <script type="text/javascript">
             
             window.addEventListener('load', loadAccordions, false);
+            
+            window.onresize = function()
+            {
+                myEditor.resize();
+            };
             
             function loadAccordions() {
                 
@@ -382,14 +364,12 @@ V:3 accordionTab
                 
                 MIDI.loadPlugin({
                      soundfontUrl: "./soundfont/"
-                    ,instruments: "accordion" // default
-                    ,onprogress: function(event) {
-                        MIDI.widget.setValue(10+Math.round(MIDI.getPercent(event)*.4));
-                    }         
-                    ,onprogress2: function( percent ) {
-                        MIDI.widget.setValue(50+Math.round(percent*.5));
-                    }        
-                    ,callback: initApp
+                    ,instruments: ["accordion", "acoustic_grand_piano" ] // default
+                ,onprogress: function( total, done, currentPercent ) {
+                    var percent = ((done*100)+currentPercent)*90/(total*100);
+                    MIDI.widget.setValue(10+Math.round(percent));
+                }
+                ,callback: initApp
                 });
             }
             
@@ -403,6 +383,11 @@ V:3 accordionTab
                     + '\nfirefox: ' + ABCXJS.misc.isFirefox()  
                     + '\nIE: ' + ABCXJS.misc.isIE() + '\n '
                 );
+        
+                /*MIDI.programChange( 0, 0 );
+                MIDI.programChange( 1, 0 );
+                MIDI.programChange( 2, 0 );
+                MIDI.programChange( 3, 0 );*/
                 
                 ypos = 0;
                 lastYpos = 0;
@@ -410,67 +395,9 @@ V:3 accordionTab
                 debug = false;
                 myEditor = {};
 
-                player = new ABCXJS.midi.Player();
-                
-                
-                playerCallBackOnPlay = function ( player ) {
-                    cpt.innerHTML = player.getTime().cTime;
-                };
-                
-                playerCallBackOnScroll = function ( player ) {
-//                { // se possivel aplicar esta mesma lógica em playerCallBackOnScroll 
-//                    var fixedTop = player.printer.staffgroups[0].top;
-//                    var vp = this.studioCanvasDiv.clientHeight - fixedTop;
-//                    var top = player.printer.staffgroups[player.currAbsElem.staffGroup].top;
-//                    var bottom = top + player.printer.staffgroups[player.currAbsElem.staffGroup].height;
-//
-//                    if( bottom > vp+this.ypos || this.ypos > top-fixedTop ) {
-//
-//                        this.ypos = top;
-//                        this.studioCanvasDiv.scrollTop = this.ypos;    
-//                   }
-//                }  
-                
-                    if( player.currAbsElem.staffGroup === lastStaffGroup )  return;
-                    
-                    lastStaffGroup = player.currAbsElem.staffGroup;
-                    
-                    var fixedTop = document.getElementById('editorDiv').clientHeight;
-                    var wtop = document.getElementById('canvasDiv').offsetTop -
-                               fixedTop;
-
-                    var wh = window.innerHeight || document.documentElement.clientHeight || document.body.clientHeight;                   
-
-                    var vp = wh - fixedTop;
-                        
-                    var top = player.printer.staffgroups[player.currAbsElem.staffGroup].top;
-                    var bottom = top + player.printer.staffgroups[player.currAbsElem.staffGroup].height;
-                    
-                    if( wtop+bottom > vp+window.ypos || window.ypos-wtop > top ) {
-                        window.ypos = wtop + top;
-                        window.scrollTo( 0, window.ypos );    
-                    }
-                };
-                
-                playerCallBackOnEnd = function (player) {
-                    cpt.innerHTML = "00:00.00";
-                    myEditor.printer.clearSelection();
-                    var warns = player.getWarnings();
-                    window.scrollTo( 0, 0 );
-                    if( warns ) {
-                        var txt = "";
-                        warns.forEach(function(msg){ txt += msg + '<br>'; });
-                        document.getElementById("warningsDiv").innerHTML = '<hr>'+txt;
-                    }
-                };
-                
                 editorCallbackOnChange = function ( editor ) {
                     window.scrollTo( 0, window.lastYpos );
                 };
-                
-                player.defineCallbackOnEnd(playerCallBackOnEnd);
-                player.defineCallbackOnPlay(playerCallBackOnPlay);
-                player.defineCallbackOnScroll(playerCallBackOnScroll);
                 
                 myEditor = new ABCXJS.Editor(
                     {
@@ -484,8 +411,8 @@ V:3 accordionTab
                         ,settingsDiv: 'settingsDiv'
                         
                         ,refreshController_id: "chkAutoRefresh"
-                        ,keySelector_id: "selKey"
-                        ,accordionSelector_id: "selGaitas"
+                        ,keySelector_id: "menuKeyDiv"
+                        ,accordionSelector_id: "menuAcordeonsDiv"
                         ,accordionNameSpan: "spanNomeGaita"
                         ,generate_midi: true
                         ,generate_tablature: 'accordion'
@@ -503,10 +430,8 @@ V:3 accordionTab
                     } );
                     
                 myEditor.setString( document.getElementById("abc").value );
-                myEditor.editarea.resize();
-                    
                 myEditor.fireChanged( 0, {force: true} );
-                
+                //myEditor.resize();
             }
 
             function doTranspose(value) {

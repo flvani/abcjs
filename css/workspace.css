@@ -116,6 +116,17 @@ body {
     z-index: 50;
 }
 
+.canvas {
+    position:relative;
+    display: block;
+    width: 100%;
+    z-index: 50;
+    height: 300px;
+    max-height: 300px;
+    overflow: hidden;
+ }
+
+
 .printPreviewClass {
     position:relative;
     display:block;

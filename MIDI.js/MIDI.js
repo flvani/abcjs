@@ -131,8 +131,10 @@ window.OfflineAudioContext = window.OfflineAudioContext || window.webkitOfflineA
 	Test to see what types of <audio> MIME types are playable by the browser.
 	-------------------------------------
 */
+if (!window.MIDI)
+    window.MIDI = {};
 
-if (typeof(MIDI) === "undefined") var MIDI = {};
+//if (typeof(MIDI) === "undefined") var MIDI = {};
 
 (function() { "use strict";
 
@@ -210,7 +212,12 @@ MIDI.audioDetect = function(callback) {
 	});
 */
 
-if (typeof (MIDI) === "undefined") var MIDI = {};
+if (!window.MIDI)
+    window.MIDI = {};
+
+
+//if (typeof (MIDI) === "undefined") var MIDI = {};
+
 if (typeof (MIDI.Soundfont) === "undefined") MIDI.Soundfont = {};
 
 (function() { "use strict";
@@ -289,13 +296,18 @@ MIDI.loadPlugin = function(conf) {
 var connect = {};
 
 connect.webmidi = function(filetype, instruments, conf) {
+    
 	if (MIDI.loader) MIDI.loader.message("Web MIDI API...");
+        
 	MIDI.WebMIDI.connect(conf);
+        
 };
 
 connect.flash = function(filetype, instruments, conf) {
+    
 	// fairly quick, but requires loading of individual MP3s (more http requests).
 	if (MIDI.loader) MIDI.loader.message("Flash API...");
+        
 	DOMLoader.script.add({
 		src: conf.soundManagerUrl || "./inc/SoundManager2/script/soundmanager2.js",
 		verify: "SoundManager",
@@ -306,8 +318,8 @@ connect.flash = function(filetype, instruments, conf) {
 };
 
 connect.audiotag = function(filetype, instruments, conf) {
+    
 	// works ok, kinda like a drunken tuna fish, across the board.
-
         if (MIDI.loader) MIDI.loader.message("HTML5 Audio API...");
         
         var onload = conf.onload || defaultOnLoad;
@@ -331,8 +343,8 @@ connect.audiotag = function(filetype, instruments, conf) {
 };
 
 connect.webaudio = function(filetype, instruments, conf) {
+    
 	// works awesome! safari, chrome and firefox support.
-        
 	if (MIDI.loader) MIDI.loader.message("Web Audio API...");
          
         var onload = conf.onload || defaultOnLoad;
@@ -377,6 +389,7 @@ var addSoundfont = function(text) {
 var defaultOnProgress = function( event ) {
     MIDI.loader && MIDI.loader.update(null, "Downloading...", MIDI.getPercent(event));
 };
+
 var defaultOnLoad = function( event ) {
     MIDI.loader && MIDI.loader.update(null, "Downloading", 100);
 };
@@ -419,7 +432,10 @@ var createQueue = function(conf) {
 		MIDI.noteToKey
 */
 
-if (typeof (MIDI) === "undefined") var MIDI = {};
+if (!window.MIDI)
+    window.MIDI = {};
+    
+//if (typeof (MIDI) === "undefined") var MIDI = {};
 
 (function() { "use strict";
 
@@ -1048,7 +1064,8 @@ MIDI.noteToKey = {}; // 108 ==  C8
 	}
 })();
 
-})();/*
+})();
+/*
 	-------------------------------------
 	MIDI.Player : 0.3
 	-------------------------------------
@@ -1058,7 +1075,11 @@ MIDI.noteToKey = {}; // 108 ==  C8
 	-------------------------------------
 */
 
-if (typeof (MIDI) === "undefined") var MIDI = {};
+if (!window.MIDI)
+    window.MIDI = {};
+
+//if (typeof (MIDI) === "undefined") var MIDI = {};
+
 if (typeof (MIDI.Player) === "undefined") MIDI.Player = {};
 
 (function() { "use strict";

@@ -28,7 +28,7 @@ DRAGGABLE.Div = function( parent, aButtons, options, callback, aToolBarButtons )
 
     var div = document.createElement("DIV");
     div.setAttribute("id", "draggableWindow" +  this.id ); 
-    div.setAttribute("class", "draggableWindow" ); 
+    div.setAttribute("class", "draggableWindow" + (this.draggable? "" : " noShadow") ); 
     this.topDiv = div;
     
     if( opts.zIndex ) {
@@ -147,7 +147,7 @@ DRAGGABLE.Div = function( parent, aButtons, options, callback, aToolBarButtons )
             self.y = e.clientY;
         };
 
-        this.resizeCorner.addEventListener( 'mouseover', function() { this.resizeCorner.style.cursor='nwse-resize'; }, false);
+        this.resizeCorner.addEventListener( 'mouseover', function() { self.resizeCorner.style.cursor='nwse-resize'; }, false);
         this.resizeCorner.addEventListener( 'mousedown', this.mouseResize, false);
         this.resizeCorner.addEventListener('touchstart', this.mouseResize, false);
     }
@@ -209,13 +209,28 @@ DRAGGABLE.Div = function( parent, aButtons, options, callback, aToolBarButtons )
     
 };
 
+DRAGGABLE.Div.prototype.resize = function( ) {
+    
+    var h = this.topDiv.clientHeight 
+            - (this.menuDiv ? this.menuDiv.clientHeight : 0 ) 
+            - (this.toolBar ? this.toolBar.clientHeight : 0 ) 
+            - (this.bottomDiv ? this.bottomDiv.clientHeight : 0 );
+    
+    this.dataDiv.style.height =  (h-2) + 'px';
+    
+    if(this.parent) {
+        this.topDiv.style.width =  (this.parent.clientWidth-5) + 'px';
+    }
+
+};
+
 DRAGGABLE.Div.prototype.defineCallback = function( cb ) {
     this.callback = cb;
 };
 
-DRAGGABLE.Div.prototype.eventsCentral = function (ev) {
+DRAGGABLE.Div.prototype.eventsCentral = function (action, elem) {
     if (this.callback) {
-        this.callback.listener[this.callback.method](ev);
+        this.callback.listener[this.callback.method](action, elem);
     } else {
         if (ev === 'CLOSE') {
             this.close();
@@ -264,7 +279,8 @@ DRAGGABLE.Div.prototype.addButtons = function( id,  aButtons ) {
     var defaultButtons = ['close|Fechar'];
     var self = this;
     
-    var buttonMap = { CLOSE: 'close', MOVE: 'move', ROTATE: 'rotate', GLOBE: 'world', ZOOM:'zoom-in', POPIN: 'popin', POPOUT: 'popout'  };
+    var buttonMap = { CLOSE: 'close', MOVE: 'move', ROTATE: 'rotate', GLOBE: 'world', ZOOM:'zoom-in', 
+                        POPIN: 'popin', POPOUT: 'popout', RESTORE:'restore', MAXIMIZE:'full-screen'  };
     
     if(aButtons)
         defaultButtons = defaultButtons.concat(aButtons);
@@ -273,7 +289,7 @@ DRAGGABLE.Div.prototype.addButtons = function( id,  aButtons ) {
         label = label.split('|');
         var action = label[0].toUpperCase();
         var rotulo = label.length > 1 ? label[1] : "";
-        var icon = 'wico-' + (buttonMap[action] ? buttonMap[action] : action.toLowerCase());
+        var icon = 'ico-' + (buttonMap[action] ? buttonMap[action] : action.toLowerCase());
         
         if( self.translate ) {
             DR.forcedResource('d'+ action +'ButtonA', rotulo, id, 'd'+ action +'ButtonA'+id); 
@@ -286,11 +302,11 @@ DRAGGABLE.Div.prototype.addButtons = function( id,  aButtons ) {
         self.menuDiv.appendChild(div);
         div.addEventListener( 'click', function(e) {
             e.preventDefault(); 
-            self.eventsCentral(action);
+            self.eventsCentral(action, div);
         }, false);
         div.addEventListener( 'touchstart', function(e) {
             e.preventDefault(); 
-            self.eventsCentral(action);
+            self.eventsCentral(action, div);
         }, false);
         
     });
@@ -300,7 +316,8 @@ DRAGGABLE.Div.prototype.addToolButtons = function( id,  aButtons ) {
     if(!aButtons) return;
     var self = this;
     
-    var buttonMap = { GUTTER:'list-numbered', FONTSIZE: 'fontsize', DOWN:'down-2', ARROWDN:'long-arrow-down', ARROWUP:'long-arrow-up', SEARCH:'search', UNDO:'undo', REDO:'redo', LIGHT:'lightbulb-2' };
+    var buttonMap = { GUTTER:'list-numbered', DOWNLAOD:'download', FONTSIZE: 'fontsize', DOWN:'open-down', OCTAVEDOWN:'octave-down', OCTAVEUP:'octave-up', 
+                        SEARCH:'find-and-replace', UNDO:'undo', REDO:'redo', LIGHTON:'lightbulb-on', READONLY:'lock-open' };
     
     aButtons.forEach( function (label) {
         label = label.split('|');
@@ -319,7 +336,7 @@ DRAGGABLE.Div.prototype.addToolButtons = function( id,  aButtons ) {
         self.toolBar.appendChild(div);
         div.addEventListener( 'click', function(e) {
             e.preventDefault(); 
-            self.eventsCentral(action);
+            self.eventsCentral(action, div);
         }, false);
         
     });

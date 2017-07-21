@@ -23,6 +23,7 @@ if (!window.ABCXJS.write)
     window.ABCXJS.write = {};
 
 ABCXJS.write.highLightColor = "#5151ff";
+ABCXJS.write.highLightColor = "#ff0000";
 ABCXJS.write.unhighLightColor = 'black';
 
 ABCXJS.write.StaffGroupElement = function() {
@@ -540,10 +541,44 @@ ABCXJS.write.AbsoluteElement.prototype.draw = function(printer, staveInfo ) {
                                                                  // lembrando que o staffgroup sera incluido mais adiante.
     
 };
+/*
+var svgns = "http://www.w3.org/2000/svg";
+for (var x = 0; x < 5000; x += 50) {
+    for (var y = 0; y < 3000; y += 50) {
+        var rect = document.createElementNS(svgns, 'rect');
+        rect.setAttributeNS(null, 'x', x);
+        rect.setAttributeNS(null, 'y', y);
+        rect.setAttributeNS(null, 'height', '50');
+        rect.setAttributeNS(null, 'width', '50');
+        rect.setAttributeNS(null, 'fill', '#'+Math.round(0xffffff * Math.random()).toString(16));
+        document.getElementById('svgOne').appendChild(rect);
 
+  var translate = d3.transform(d3.select(this.parentNode).attr("transform")).translate;
+        var dataset = [1,2,3,4]                                    // HERE
+        vis.selectAll("line")                                      // HERE
+            .data(dataset)                                 // HERE
+            .enter()                                       // HERE
+            .append("line")                                // HERE
+            .attr("x1", translate[0])                            // HERE'S THE PROBLEM FOR PERRY
+            .attr("y1", translate[1])   
+
+ */
 ABCXJS.write.AbsoluteElement.prototype.setMouse = function(printer) {
     var self = this;
+    var svgns = "http://www.w3.org/2000/svg";
     this.svgElem = document.getElementById(self.gid);
+    
+    var bounds = this.svgElem.getBBox();
+    var rect = document.createElementNS(svgns, 'rect');
+        rect.setAttributeNS(null, 'x', bounds.x.toFixed(1)-1);
+        rect.setAttributeNS(null, 'y', bounds.y.toFixed(1)-1);
+        rect.setAttributeNS(null, 'height', bounds.height.toFixed(1)+2);
+        rect.setAttributeNS(null, 'width', bounds.width.toFixed(1)+2);
+        rect.setAttributeNS(null, 'fill', 'none' );
+
+    this.svgElem.appendChild(rect);
+    this.svgArea = rect;
+    
     this.svgElem.onmouseover =  function() {self.highlight(true);};
     this.svgElem.onmouseout =  function() {self.unhighlight(true);};
     this.svgElem.onclick =  function() {printer.notifyClearNSelect(self, true);};
@@ -553,12 +588,15 @@ ABCXJS.write.AbsoluteElement.prototype.highlight = function(keepState) {
     if(!this.svgElem) return;
     if(keepState) this.svgElem.prevFill = this.svgElem.style.fill;
     this.svgElem.style.setProperty( 'fill', ABCXJS.write.highLightColor );
+    this.svgArea.style.setProperty( 'fill', ABCXJS.write.highLightColor );
+    this.svgArea.style.setProperty( 'fill-opacity', '0.15' );
 };
 
 ABCXJS.write.AbsoluteElement.prototype.unhighlight = function(keepState) {
     if(!this.svgElem) return;
     var fill = (keepState && this.svgElem.prevFill ) ? this.svgElem.prevFill : ABCXJS.write.unhighLightColor;
     this.svgElem.style.setProperty( 'fill', fill );
+    this.svgArea.style.setProperty( 'fill-opacity', '0' );
 };
 
 ABCXJS.write.RelativeElement = function(c, dx, w, pitch, opt) {
@@ -879,7 +917,14 @@ ABCXJS.write.BeamElem.prototype.draw = function(printer) {
         this.starty = printer.calcY(6);
         this.endy = printer.calcY(6);
     }
-    printer.paper.printBeam(this.startx, this.starty, this.endx, this.endy, this.endx, (this.endy + this.dy), this.startx, this.starty + this.dy);
+    printer.paper.printBeam(
+        this.startx, this.starty
+       ,this.startx, (this.starty + this.dy) 
+       ,this.endx, (this.endy + this.dy)
+       ,this.endx, this.endy
+       
+    );
+
     
     this.drawAuxBeams(printer);
 };

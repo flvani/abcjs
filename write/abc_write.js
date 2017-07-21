@@ -259,7 +259,7 @@ ABCXJS.write.Printer.prototype.printTune = function(abctune, options) {
     }    
     
     if(h1> 0) {
-        height = ABCXJS.write.spacing.STEP*3 + h1*1.5*17; 
+        height = ABCXJS.write.spacing.STEP*3 + h1*1.5*16; 
         if( ( this.pageNumber - ((this.y+height)/this.estimatedPageLength) ) < 0 ) {
            this.skipPage();
         } else {
@@ -270,7 +270,7 @@ ABCXJS.write.Printer.prototype.printTune = function(abctune, options) {
     }
 
     if(h2> 0) {
-        height = ABCXJS.write.spacing.STEP*3 + h2*1.5*17;
+        height = ABCXJS.write.spacing.STEP*3 + h2*1.5*16;
         if( ( this.pageNumber - ((this.y+height)/this.estimatedPageLength) ) < 0 ) {
            this.skipPage();
         } else {
@@ -563,6 +563,7 @@ ABCXJS.write.Printer.prototype.skipPage = function(lastPage) {
     if( ! lastPage || this.pageNumber > 1) {
         this.printPageNumber();
     }
+    
     this.totalY += this.y;
     
     this.paper.endPage({w: (this.maxwidth + this.paddingright) , h: this.y });

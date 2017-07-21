@@ -52,6 +52,9 @@ ABCXJS.Editor = function (params) {
     this.printTimeStart = 0;
     this.printTimeEnd = 0;
     this.endTime = 0;
+    this.showingABC = true;
+    
+    this.player = new ABCXJS.midi.Player();
 
     this.bReentry = false;
     this.accordion = null;
@@ -88,8 +91,8 @@ ABCXJS.Editor = function (params) {
             {title: 'Informações', ddmId: 'menuInformacoes',
                 itens: [
                  'Tutoriais&#160;&#160;<img src="images/novo.png" />|TUTORIAL',
-                 'Partitura&#160;<i class="ico-play"></i>&#160;Tablatura|PART2TAB',
-                 'Tablatura&#160;<i class="ico-play"></i>&#160;Partitura|TAB2PART',
+                 'Partitura&#160;&#160;<i class="ico-open-right"></i>&#160;Tablatura|PART2TAB',
+                 'Tablatura&#160;&#160;<i class="ico-open-right"></i>&#160;Partitura|TAB2PART',
                  'Sobre|ABOUT'
             ]}
         ]
@@ -104,12 +107,12 @@ ABCXJS.Editor = function (params) {
                 
     this.studio = new DRAGGABLE.Div(
             params.studio_id
-            , ['restore|Restaurar configurações']
+            , null
             , {translate: false, statusBar: false, draggable: false, top: "3px", left: "1px", width: '100%', height: "100%", title: 'Estúdio ABCX'}
             , {listener: this, method: 'studioCallback'}
     );
-
-    this.resize();
+    
+    this.studio.dataDiv.className += ' customScrollBar';
     this.studio.setVisible(true);
 
     this.editareaFixa = new ABCXJS.edit.EditArea(this.studio.dataDiv, this);
@@ -121,30 +124,15 @@ ABCXJS.Editor = function (params) {
 
     this.editarea.setVisible(true);
     this.editarea.setToolBarVisible(false);
-    //this.editarea.resize();//já é chamada por setsetToolBarVisible
-
+    
     this.controldiv = document.createElement("DIV");
     this.controldiv.setAttribute("id", 'internalControlDiv');
     this.studio.dataDiv.appendChild(this.controldiv);
     this.controldiv.innerHTML = document.getElementById(params.control_id).innerHTML;
     document.getElementById(params.control_id).innerHTML = "";
 
-    var menu2 = new ABCXJS.edit.DropdownMenu(
-           'menu2Div'
-        ,  { listener:self, method:'menuCallback' }
-        ,  [{title: 'Idioma', ddmId: 'menuIdiomas2',
-                itens: [
-                    '<img src="images/pt_BR.png" alt="idiomas" />&#160;&#160;Português|pt_BR',
-                    '<img src="images/en_US.png" alt="idiomas" />&#160;&#160;English|en_US',
-                    '<img src="images/de_DE.png" alt="idiomas" />&#160;&#160;Deustch|de_DE' 
-                ]}]
-        );
-
-
-    var canvas_id = 'internalCanvasDiv';
-    var warnings_id = 'internalWarningsDiv';
-
     if (params.generate_warnings) {
+        var warnings_id = 'warningsDiv';
         if (params.warnings_id) {
             warnings_id = params.warnings_id;
         }
@@ -153,16 +141,24 @@ ABCXJS.Editor = function (params) {
         this.studio.dataDiv.appendChild(this.warningsdiv);
     }
 
+    var canvas_id = 'canvasDiv';
     if (params.canvas_id) {
         canvas_id = params.canvas_id;
     } else if (params.paper_id) {
         canvas_id = params.paper_id;
     }
 
-    this.div = document.createElement("DIV");
-    this.div.setAttribute("id", canvas_id);
-    this.studio.dataDiv.appendChild(this.div);
-
+    this.canvasContainer = document.createElement("DIV");
+    this.canvasContainer.id = 'canvasContainer';
+    this.canvasContainer.className =  'canvas customScrollBar';
+    
+    this.canvasDiv = document.createElement("DIV");
+    this.canvasDiv.id = canvas_id;
+    this.canvasContainer.appendChild(this.canvasDiv);
+    this.studio.dataDiv.appendChild(this.canvasContainer);
+    
+    this.resize();
+    
     if (params.refreshController_id)
         this.refreshController = document.getElementById(params.refreshController_id);
 
@@ -171,9 +167,18 @@ ABCXJS.Editor = function (params) {
             this.accordion = new ABCXJS.tablature.Accordion(params.accordion_options);
 
             if (params.accordionSelector_id) {
-                this.accordionSelector = new ABCXJS.edit.AccordionSelector(params.accordionSelector_id, this);
-                this.accordionSelector.populate();
-                this.accordionSelector.set(this.accordion.selected);
+                this.accordionSelector = new ABCXJS.edit.AccordionSelector( 
+                        'sel1', params.accordionSelector_id, 
+                        { listener:this, method: 'studioCallback' }, 
+                        [
+                            '---',
+                            'Salvar mapa corrente|SAVEMAP',
+                            'Carregar mapa do disco local|LOADMAP'
+                        ]
+                );
+        
+                this.accordionSelector.populate(true);
+                
             } else {
                 if (params.accordionNameSpan) {
                     this.accordionNameSpan = document.getElementById(params.accordionNameSpan);
@@ -190,7 +195,7 @@ ABCXJS.Editor = function (params) {
     }
         
     if (params.keySelector_id) {
-        this.keySelector = new ABCXJS.edit.KeySelector(params.keySelector_id, this);
+        this.keySelector = new ABCXJS.edit.KeySelector( 'k1', params.keySelector_id, { listener:this, method: 'keyCallback' } );
     }
 
     if (params.generate_midi) {
@@ -205,27 +210,23 @@ ABCXJS.Editor = function (params) {
         self.showSettings();
     }, false );
 
-    printButton = document.getElementById("printBtn");
-    playButton = document.getElementById("playBtn");
-    pauseButton = document.getElementById("pauseBtn");
-    stopButton = document.getElementById("stopBtn");
-    textButton = document.getElementById("textBtn");
-    roButton = document.getElementById("roBtn");
+    printButton = document.getElementById("buttonPrint");
+    playButton = document.getElementById("buttonPlay");
+    pauseButton = document.getElementById("buttonPause");
+    stopButton = document.getElementById("buttonStop");
     showMapButton = document.getElementById("showMapBtn");
+    showEditButton = document.getElementById("showEditBtn");
     switchSourceButton = document.getElementById("switch_source");
-    cpt = document.getElementById("currentPlayTime");
+    cpt = document.getElementById("currentPlayTimeLabel");
 
     switchSourceButton.addEventListener("click", function () {
-        return;
-        a = document.getElementById('abc');
-        s = document.getElementById('svg_source');
-        if (s.style.display === 'inline') {
-            s.style.display = 'none';
-            a.style.display = 'inline';
-        } else {
-            s.value = document.getElementById('canvasDiv').innerHTML;
-            s.style.display = 'inline';
-            a.style.display = 'none';
+        self.showingABC =  ! self.showingABC;
+        if( self.showingABC )
+            self.editarea.setString(  self.abcText );
+        else {
+            self.abcText = self.editarea.getString();
+            self.editarea.setString( self.canvasDiv.innerHTML );
+            
         }
     }, false);
 
@@ -247,65 +248,112 @@ ABCXJS.Editor = function (params) {
 
     playButton.addEventListener("click", function (e) {
         e.preventDefault();
-        myEditor.accordion.clearKeyboard();
-        //myEditor.editarea.cmEditor.setOption("readOnly", true);
-        player.startPlay(myEditor.tunes[0].midi);
-        //player.startDidacticPlay(myEditor.tunes[0].midi, 'note');
-        //player.startDidacticPlay(myEditor.tunes[0].midi, 'measure', 2 );
-        //player.startDidacticPlay(myEditor.tunes[0].midi, 'repeat', 1, 4);
-    }, false);
-    
-    var visible = true;
-    textButton.addEventListener("click", function (e) {
-        e.preventDefault();
-        visible = ! visible;
-        self.editarea.setVisible(visible);
-    }, false);
-    
-    var readOnly = false;
-    roButton.addEventListener("click", function (e) {
-        readOnly = !readOnly;
-        self.editarea.setReadOnly(readOnly);
+        self.accordion.clearKeyboard();
+        self.editarea.setReadOnly(true);
+        document.body.classList.add("home");
+        
+        self.editarea.setEditorHighLightStyle();
+        self.player.startPlay(self.tunes[0].midi);
+        
+        //self.player.startDidacticPlay(myEditor.tunes[0].midi, 'note');
+        //self.player.startDidacticPlay(myEditor.tunes[0].midi, 'measure', 2 );
+        //self.player.startDidacticPlay(myEditor.tunes[0].midi, 'repeat', 1, 4);
     }, false);
 
     pauseButton.addEventListener("click", function (e) {
         e.preventDefault();
-        player.pausePlay();
+        self.editarea.clearEditorHighLightStyle();
+        self.player.pausePlay();
     }, false);
     
     stopButton.addEventListener("click", function (e) {
         e.preventDefault();
-        myEditor.accordion.clearKeyboard();
-        player.stopPlay();
+        self.accordion.clearKeyboard();
+        self.editarea.setReadOnly(false);
+        self.editarea.clearEditorHighLightStyle();
+        self.player.stopPlay();
     }, false);
     
     showMapButton.addEventListener("click", function (e) {
         e.preventDefault();
-        myEditor.switchMap();
-        this.value = myEditor.accordion.loadedKeyboard.render_opts.show ? 'Hide Map' : 'Show Map';
+        self.switchMap();
+        //this.value = myEditor.accordion.loadedKeyboard.render_opts.show ? 'Hide Map' : 'Show Map';
+    }, false);
+    
+    showEditButton.addEventListener("click", function (e) {
+        e.preventDefault();
+        self.editarea.setVisible(true);
+        self.editarea.resize();
     }, false);
 
-    this.addClassName = function (element, className) {
-        var hasClassName = function (element, className) {
-            var elementClassName = element.className;
-            return (elementClassName.length > 0 && (elementClassName === className ||
-                    new RegExp("(^|\\s)" + className + "(\\s|$)").test(elementClassName)));
-        };
+    this.player.defineCallbackOnPlay(function( player ) {
+        cpt.innerHTML = player.getTime().cTime;
+    });
+    
+    this.player.defineCallbackOnScroll(function( player ) {
+        if( player.currAbsElem.staffGroup === lastStaffGroup )  return;
 
-        if (!hasClassName(element, className))
-            element.className += (element.className ? ' ' : '') + className;
-        return element;
-    };
+        lastStaffGroup = player.currAbsElem.staffGroup;
 
-    this.removeClassName = function (element, className) {
-        element.className = ABCXJS.parse.strip(element.className.replace(
-                new RegExp("(^|\\s+)" + className + "(\\s+|$)"), ' '));
-        return element;
-    };
-        
+        var fixedTop = document.getElementById('editorDiv').clientHeight;
+
+        var wtop = self.canvasDiv.offsetTop - fixedTop;
+
+        var wh = window.innerHeight || document.documentElement.clientHeight || document.body.clientHeight;                   
+
+        var vp = wh - fixedTop;
+
+        var top = player.printer.staffgroups[player.currAbsElem.staffGroup].top;
+        var bottom = top + player.printer.staffgroups[player.currAbsElem.staffGroup].height;
+
+        if( wtop+bottom > vp+window.ypos || window.ypos-wtop > top ) {
+            window.ypos = wtop + top;
+            window.scrollTo( 0, window.ypos );    
+        }
+    });    
+    
+    this.player.defineCallbackOnEnd( function( player ) {
+        cpt.innerHTML = "00:00.00";
+        this.printer.clearSelection();
+        var warns = player.getWarnings();
+        window.scrollTo( 0, 0 );
+        if( warns ) {
+            var txt = "";
+            warns.forEach(function(msg){ txt += msg + '<br>'; });
+            document.getElementById("warningsDiv").innerHTML = '<hr>'+txt;
+        }
+    });
+    
 };
-  
+
 ABCXJS.Editor.prototype.resize = function( ) {
+    
+    // redimensiona a workspace
+    var winH = window.innerHeight
+                || document.documentElement.clientHeight
+                || document.body.clientHeight;
+
+    var winW = window.innerWidth
+            || document.documentElement.clientWidth
+            || document.body.clientWidth;
+
+    // -paddingTop 75
+    var h = Math.max((winH -75 -10 ),200); 
+    var w =  Math.max((winW - 6 ),400); 
+    
+    this.studio.topDiv.style.height = h +"px";
+    this.studio.topDiv.style.width = w +"px";
+    
+    
+    this.canvasContainer.style.height =  (h - this.canvasContainer.offsetTop - 25) + "px";
+    this.canvasContainer.style.overflowY = 'auto';
+    this.canvasContainer.style.maxHeight = 'none';
+    
+    this.editarea.resize();
+  
+};
+
+ABCXJS.Editor.prototype.fullEditarea = function( ) {
     
     // redimensiona a workspace
     var winH = window.innerHeight
@@ -320,33 +368,14 @@ ABCXJS.Editor.prototype.resize = function( ) {
     var h = (winH -75 - 10 ); 
     var w = (winW - 10 ); 
     
-    this.studio.topDiv.style.height = Math.max(h,200) +"px";
-    this.studio.topDiv.style.width = Math.max(w,400) +"px";
-    this.studio.dataDiv.style.height = "100%";
+    this.editarea.container.topDiv.style.zIndex = 99;
+    this.editarea.container.topDiv.style.left = "3px";
+    this.editarea.container.topDiv.style.top = "78px";
+    this.editarea.container.topDiv.style.height = Math.max(h,200) +"px";
+    this.editarea.container.topDiv.style.width = Math.max(w,400) +"px";
+    this.editarea.container.dataDiv.style.height = "100%";
+    this.editarea.resize();
   
-};
-
-ABCXJS.Editor.prototype.selectAccordionById = function( id ) {
-    if( this.accordion ) {
-        this.accordion.loadById(id);
-        this.doSelAccordion();
-    }    
-};
-ABCXJS.Editor.prototype.selectAccordion = function( n ) {
-    if( this.accordion ) {
-        this.accordion.load(n);
-        this.doSelAccordion();
-    }    
-};
-
-ABCXJS.Editor.prototype.doSelAccordion = function( ) {
-    if( this.accordionSelector ) {
-        this.accordionSelector.set(this.accordion.selected);
-    } else {
-        if( this.accordionNameSpan ) {
-            this.accordionNameSpan.innerHTML = this.accordion.getName();
-        }
-    }
 };
 
 ABCXJS.Editor.prototype.getString = function() {
@@ -443,7 +472,8 @@ ABCXJS.Editor.prototype.parseABC = function(transpose, force ) {
     delete this.parsing;
     
     if( this.transposer && this.keySelector ) {
-        this.keySelector.set( this.transposer.keyToNumber( this.transposer.getKeyVoice(0) ) );       
+        this.keySelector.populate( this.transposer.keyToNumber( this.transposer.getKeyVoice(0) ) );       
+        this.editareaMovel.keySelector.populate( this.transposer.keyToNumber( this.transposer.getKeyVoice(0) ) );       
     }
 
     var warnings = abcParser.getWarnings() || [];
@@ -462,15 +492,6 @@ ABCXJS.Editor.prototype.parseABC = function(transpose, force ) {
   }
   return true;
 };
-
-//ABCXJS.Editor.prototype.updateSelection = function () {
-//    var that = this;
-//    var selection = that.editarea.getSelection();
-//    try {
-//        that.printer.rangeHighlight(selection);
-//    } catch (e) {
-//    } // maybe printer isn't defined yet?
-//};
 
 ABCXJS.Editor.prototype.updateSelection = function (force) {
     var that = this;
@@ -498,7 +519,7 @@ ABCXJS.Editor.prototype.switchMap = function() {
 ABCXJS.Editor.prototype.highlight = function(abcelem) {
   try {
         this.editarea.setSelection(abcelem);
-        if(this.accordion.loadedKeyboard.render_opts.show && !player.playing) {
+        if(this.accordion.loadedKeyboard.render_opts.show && !this.player.playing) {
             this.accordion.clearKeyboard(true);
             this.midiParser.setSelection(abcelem);
         }    
@@ -537,11 +558,10 @@ ABCXJS.Editor.prototype.fireChanged = function (transpose, _opts) {
 ABCXJS.Editor.prototype.modelChanged = function() {
     var self = this;
     var loader = this.startLoader( "ModelChanged" );
-    this.warningsdiv.innerHTML = '<hr>Aguarde...' ;
-    loader.start(  function() { self.modelChanged2(loader); }, '<br>&nbsp;&nbsp;&nbsp;Gerando partitura...<br><br>' );
+    loader.start(  function() { self.onModelChanged(loader); }, '<br>&nbsp;&nbsp;&nbsp;Gerando partitura...<br><br>' );
 };
 
-ABCXJS.Editor.prototype.modelChanged2 = function(loader) {
+ABCXJS.Editor.prototype.onModelChanged = function(loader) {
     var self = this;
     
     MIDI.loader = new widgets.Loader();
@@ -549,7 +569,7 @@ ABCXJS.Editor.prototype.modelChanged2 = function(loader) {
     this.fireTime = new Date();
     
     if (this.tunes === undefined) {
-        this.div.innerHTML = "";
+        this.canvasDiv.innerHTML = "";
         return;
     }
 
@@ -558,8 +578,8 @@ ABCXJS.Editor.prototype.modelChanged2 = function(loader) {
     
     this.bReentry = true;
     this.timerId = null;
-    this.div.innerHTML = "";
-    var paper = new SVG.Printer( this.div );
+    this.canvasDiv.innerHTML = "";
+    var paper = new SVG.Printer( this.canvasDiv );
     this.printer = new ABCXJS.write.Printer(paper, this.printerparams );
     this.printTimeStart = new Date();
     //this.printer.printABC(this.tunes, {color:'red', baseColor:'green'} );
@@ -578,23 +598,42 @@ ABCXJS.Editor.prototype.modelChanged2 = function(loader) {
    loader.stop();
     
     window.setTimeout(function() {
-            self.printWarnings();
+        self.printWarnings();
+        self.resize();
     }, 1);
     
 };
 
-ABCXJS.Editor.prototype.studioCallback = function (e) {
-    switch(e) {
+ABCXJS.Editor.prototype.keyCallback = function (action) {
+    var a = parseInt(action);
+    if( a !== 0 )
+        this.fireChanged( a, {force: true} );
+
+};
+    
+ABCXJS.Editor.prototype.studioCallback = function (action) {
+    switch(action) {
         case 'CLOSE':
-            this.studio.setVisible(false);
+            //this.studio.setVisible(false);
             break;
         case 'RESTORE':
             break;
+        case 'SAVEMAP':
+        case 'LOADMAP':
+            alert(action);
+            break;
+        default:
+            if( this.accordion.getId() !== action ) {
+                this.accordion.loadById(action);
+                this.accordionSelector.populate(true);
+                this.accordion.printKeyboard(this.keyboardWindow.dataDiv);
+                this.fireChanged( 0, {force: true} );
+            }    
     }
 };
 
-ABCXJS.Editor.prototype.keyboardCallback = function (e) {
-    switch(e) {
+ABCXJS.Editor.prototype.keyboardCallback = function (action, elem) {
+    switch(action) {
         case 'MOVE':
             break;
         case 'CLOSE':
@@ -613,19 +652,41 @@ ABCXJS.Editor.prototype.keyboardCallback = function (e) {
             //this.accordion.changeNotation();
             break;
         default:
-            alert(e);
+            alert(action);
     }
 };
             
-ABCXJS.Editor.prototype.editorCallback = function (e) {
-    switch(e) {
+ABCXJS.Editor.prototype.editorCallback = function (action, elem) {
+    switch(action) {
         case 'GUTTER': // liga/desliga a numeracao de linhas
             this.editarea.setGutter();
             break;
-        case 'LIGHT': // liga/desliga realce de sintaxe
+        case 'MAXIMIZE': // liga/desliga realce de sintaxe
+            if( elem.innerHTML.indexOf('ico-full' ) > 0 ) {
+                elem.innerHTML = '<a href="" title="Restaurar janela"><i class="ico-restore"></i></a>';
+                this.fullEditarea();
+            } else {
+                elem.innerHTML = '<a href="" title="Maximizar janela"><i class="ico-full-screen"></i></a>';
+            }
+            break;
+            
+        case 'READONLY': // habilita/bloqueia a edição
+            if( elem.innerHTML.indexOf('ico-lock-open' ) > 0 ) {
+                elem.innerHTML = '<a href="" title="Bloquear edição"><i class="ico-lock ico-black ico-large"></i></a>';
+                this.editarea.setReadOnly(true);
+            } else {
+                elem.innerHTML = '<a href="" title="Bloquear edição"><i class="ico-lock-open ico-black ico-large"></i></a>';
+                this.editarea.setReadOnly(false);
+            }
+            break;
+        case 'LIGHTON': // liga/desliga realce de sintaxe
+            if( elem.innerHTML.indexOf('ico-lightbulb-on' ) > 0 )
+                elem.innerHTML = '<a href="" title="Realçar texto"><i class="ico-lightbulb-off ico-black ico-large"></i></a>';
+            else 
+                elem.innerHTML = '<a href="" title="Realçar texto"><i class="ico-lightbulb-on ico-black ico-large"></i></a>';
             this.editarea.setSyntaxHighLight();
             break;
-        case 'DOCK':
+        case 'POPIN':
             this.editarea.setVisible(false);
             this.editarea = this.editareaFixa;
             this.editarea.setString(this.editareaMovel.getString());
@@ -642,6 +703,7 @@ ABCXJS.Editor.prototype.editorCallback = function (e) {
             break;
         case 'CLOSE':
             this.editarea.setVisible(false);
+            this.resize();
             //this.editarea = this.editareaFixa;
             //this.editarea.setString(this.editareaMovel.getString());
             //this.editarea.setVisible(true);
@@ -659,8 +721,22 @@ ABCXJS.Editor.prototype.editorCallback = function (e) {
             this.editarea.resize();
             break;
         default:
-            alert(e);
+            alert(action);
     }
+};
+
+ABCXJS.Editor.prototype.settingsCallback = function(action) {
+    switch(action) {
+        case 'MOVE': 
+            break;
+        case 'CLOSE': 
+           ABCXJS.write.highLightColor = '#'+this.p1.value;
+           this.accordion.loadedKeyboard.render_opts.closeColor = '#'+this.p2.value;
+           this.accordion.loadedKeyboard.render_opts.openColor = '#'+this.p3.value;
+           this.accordion.loadedKeyboard.legenda.setOpen();
+           this.accordion.loadedKeyboard.legenda.setClose();
+           this.settingsWindow.setVisible(false);
+   }
 };
 
 ABCXJS.Editor.prototype.showSettings = function() {
@@ -670,24 +746,103 @@ ABCXJS.Editor.prototype.showSettings = function() {
         this.settingsWindow = new DRAGGABLE.Div( 
               null 
             , null
-            , {title: 'Preferências', translate: false, statusBar: false, top: "300px", left: "500px", height:'300px',  width:'600px', zIndex: 50} 
-            //, {listener: this, method: 'keyboardCallback'}
+            , {title: 'Preferências', translate: false, statusBar: false, top: "300px", left: "500px", height:'400px',  width:'600px', zIndex: 50} 
+            , {listener: this, method: 'settingsCallback'}
         );
-        var e = document.getElementById("settingsDiv"); 
-        this.settingsWindow.dataDiv.innerHTML= e.innerHTML;
-        e.innerHTML = "";
+
+        this.settingsWindow.topDiv.style.zIndex = 101;
+        this.settingsWindow.dataDiv.style.padding = '10px';
+        
+        this.settingsWindow.dataDiv.innerHTML= '\
+        <div class="menu-group">\
+        <label>Acordeon:&nbsp;</label><div id="settingsAcordeonsMenu" class="topMenu"></div>\
+        <br><br>\
+        <label>Idioma:&nbsp;</label><div id="settingsLanguageMenu" class="topMenu"></div>\
+        <br><br>\
+        <label><input type="checkbox"> Mostrar avisos e erros de compilação</label>\
+        <br>\
+        <label><input type="checkbox"> Atualizar partitura automaticamente</label>\
+        <br>\
+        <label><input type="checkbox"> Mostrar linhas de debug</label>\
+        <br><br><br><br>Cores:<br>\
+        <br>Cor de Realce:&nbsp;<input id="corRealce">\
+        <br><br>Fole Fechando:&nbsp;<input id="foleFechando">\
+        <br><br>Fole Abrindo:&nbsp;<input id="foleAbrindo">\
+        <br>\
+        </div>';
+        
+        var selector = new ABCXJS.edit.AccordionSelector( 'sel2', 'settingsAcordeonsMenu', {listener: this, method: 'settingsCallback'} );
+        selector.populate();
+        
         var menu = new ABCXJS.edit.DropdownMenu(
                'settingsLanguageMenu'
-            ,  null // { listener:that, method:'menuCallback' }
+            ,  { listener:this, method:'settingsCallback' }
             ,  [{title: 'Idioma', ddmId: 'menuIdiomas',
                     itens: [
-                        '<img src="images/pt_BR.png" alt="idiomas" />&#160;&#160;Português|pt_BR',
-                        '<img src="images/en_US.png" alt="idiomas" />&#160;&#160;English|en_US',
-                        '<img src="images/de_DE.png" alt="idiomas" />&#160;&#160;Deustch|de_DE' 
+                        '<img src="images/pt_BR.png" alt="idiomas" />&#160;Português|pt_BR',
+                        '<img src="images/en_US.png" alt="idiomas" />&#160;English|en_US',
+                        '<img src="images/de_DE.png" alt="idiomas" />&#160;Deustch|de_DE' 
                     ]}]
             );
-            menu.setSubMenuTitle('menuIdiomas', '<img src="images/pt_BR.png" alt="idiomas" />&#160;&#160;Português');
+            menu.setSubMenuTitle('menuIdiomas', '<img src="images/pt_BR.png" alt="idiomas" />&#160;Português');
+            
+            this.p1 = document.getElementById( 'corRealce');
+            this.p2 = document.getElementById( 'foleFechando');
+            this.p3 = document.getElementById( 'foleAbrindo');
+            
+            this.p1.setAttribute( "value", ABCXJS.write.highLightColor );
+            this.p2.setAttribute( "value", this.accordion.loadedKeyboard.render_opts.closeColor );
+            this.p3.setAttribute( "value", this.accordion.loadedKeyboard.render_opts.openColor );
+            
+            var picker1 = new jscolor( this.p1 );
+            var picker2 = new jscolor( this.p2 );
+            var picker3 = new jscolor( this.p3 );
+
     }            
     this.settingsWindow.setVisible(true);
     
 };
+
+/*
+     this.addClassName = function (element, className) {
+        var hasClassName = function (element, className) {
+            var elementClassName = element.className;
+            return (elementClassName.length > 0 && (elementClassName === className ||
+                    new RegExp("(^|\\s)" + className + "(\\s|$)").test(elementClassName)));
+        };
+
+        if (!hasClassName(element, className))
+            element.className += (element.className ? ' ' : '') + className;
+        return element;
+    };
+
+    this.removeClassName = function (element, className) {
+        element.className = ABCXJS.parse.strip(element.className.replace(
+                new RegExp("(^|\\s+)" + className + "(\\s+|$)"), ' '));
+        return element;
+    };
+
+
+ABCXJS.Editor.prototype.selectAccordionById = function( id ) {
+    if( this.accordion ) {
+        this.accordion.loadById(id);
+        this.doSelAccordion();
+    }    
+};
+ABCXJS.Editor.prototype.selectAccordion = function( n ) {
+    if( this.accordion ) {
+        this.accordion.load(n);
+        this.doSelAccordion();
+    }    
+};
+
+ABCXJS.Editor.prototype.doSelAccordion = function( ) {
+    if( this.accordionSelector ) {
+        this.accordionSelector.set(this.accordion.selected);
+    } else {
+        if( this.accordionNameSpan ) {
+            this.accordionNameSpan.innerHTML = this.accordion.getName();
+        }
+    }
+};
+*/

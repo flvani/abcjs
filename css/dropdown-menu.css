@@ -94,15 +94,6 @@
     width: auto;
 }
 
-.btn-group i,
-.menu-group i,
-.dropdown i {
-    position: relative;
-    vertical-align: middle;
-    top: -1px;
-    height:22px;
-}    
-
 .btn-group img,
 .menu-group img,
 .dropdown img {
@@ -184,6 +175,12 @@
     background: lightblue;
     background: lavender;
 }
+
+
+.dropdown-menu .selected {
+    background:  lavender !important;
+}
+
 
 .dropdown-menu li a {
     display:  block;

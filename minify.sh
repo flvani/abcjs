@@ -4,8 +4,8 @@ die () {
     exit 1
 }
 
-[ "$#" -eq 1 ] || die "Call with a version number argument in the form x.y"
-echo $1 | grep -E -q '^[1-9]\.[0-9]+$' || die "Version number argument required (x.y), $1 provided"
+[ "$#" -eq 1 ] || die "Call with a version number argument in the form x.yy"
+echo $1 | grep -E -q '^[1-9]\.[0-9]+$' || die "Version number argument required (x.yy), $1 provided"
 echo "Concatenating all files..."
 
 cat ace/src/ace.js ace/src/mode-abcx.js ace/src/theme-abcx.js > tmp/ace4abcx.js
@@ -66,6 +66,10 @@ java -jar yuicompressor-2.4.2.jar  --line-break 7000 -o bin/filemanager_$1-min.j
 
 #echo "Compressing tabeditor..."
 #java -jar yuicompressor-2.4.2.jar  --line-break 7000 -o bin/abcxjs_nomidi_$1-min.js tmp/abcxjs-nomidi.js
+
+
+cp fontsIco/abcx.* ../diatonic-map/fontsIco/
+cp jscolor/*.js ../diatonic-map/jslib/
 
 
 cp tmp/abcxjs.js  ../diatonic-map/abcxjs/
