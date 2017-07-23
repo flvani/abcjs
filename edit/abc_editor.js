@@ -657,11 +657,26 @@ ABCXJS.Editor.prototype.keyboardCallback = function (action, elem) {
 };
             
 ABCXJS.Editor.prototype.editorCallback = function (action, elem) {
+    // chamadas a partir de menu dropdown não tem valor para elem
     switch(action) {
+        case '0': 
+            break;
+        case  '1':  case  '2':  case  '3':  case   '4': case   '5': case '6': 
+        case  '7':  case  '8':  case  '9':  case  '10': case  '11': 
+        case '-1':  case '-2':  case '-3':  case  '-4': case  '-5': case '-6': 
+        case '-7':  case '-8':  case '-9':  case '-10': case '-11': 
+            this.fireChanged( parseInt(action), {force: true} );
+           break;
+        case 'OCTAVEUP': 
+           this.fireChanged(12, {force: true} );
+           break;
+        case 'OCTAVEDOWN': 
+           this.fireChanged(-12, {force: true} );
+           break;
         case 'GUTTER': // liga/desliga a numeracao de linhas
             this.editarea.setGutter();
             break;
-        case 'MAXIMIZE': // liga/desliga realce de sintaxe
+        case 'MAXIMIZE': 
             if( elem.innerHTML.indexOf('ico-full' ) > 0 ) {
                 elem.innerHTML = '<a href="" title="Restaurar janela"><i class="ico-restore"></i></a>';
                 this.fullEditarea();
@@ -771,8 +786,10 @@ ABCXJS.Editor.prototype.showSettings = function() {
         <br>\
         </div>';
         
-        var selector = new ABCXJS.edit.AccordionSelector( 'sel2', 'settingsAcordeonsMenu', {listener: this, method: 'settingsCallback'} );
-        selector.populate();
+        var selector = new ABCXJS.edit.AccordionSelector( 
+                'sel2', 'settingsAcordeonsMenu', {listener: this, method: 'settingsCallback'} );
+        
+        selector.populate(true, 'GAITA_HOHNER_CLUB_IIIM_BR');
         
         var menu = new ABCXJS.edit.DropdownMenu(
                'settingsLanguageMenu'

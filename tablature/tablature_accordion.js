@@ -11,8 +11,7 @@ if (!window.ABCXJS.tablature)
 	window.ABCXJS.tablature = {};
 
 ABCXJS.tablature.Accordion = function( params ) {
-    
-    this.selected     = -1;
+    this.loaded       = undefined;
     this.tabLines     = [];
     this.accordions   = params.accordionMaps || [] ;
     this.transposer   = new window.ABCXJS.parse.Transposer();
@@ -41,8 +40,7 @@ ABCXJS.tablature.Accordion.prototype.loadById = function (id) {
 };
 
 ABCXJS.tablature.Accordion.prototype.load = function (sel) {
-    this.selected = sel;
-    this.loaded = this.accordions[this.selected];
+    this.loaded = this.accordions[sel];
     this.loadedKeyboard = this.loaded.keyboard;
     return this.loaded;
 };
@@ -56,11 +54,7 @@ ABCXJS.tablature.Accordion.prototype.accordionExists = function(id) {
 };
 
 ABCXJS.tablature.Accordion.prototype.accordionIsCurrent = function(id) {
-    var ret = false;
-    for(var a = 0; a < this.accordions.length; a++ ) {
-        if( this.accordions[a].id === id && this.selected === a) ret = true;
-    }
-    return ret;
+    return (this.accordions.loaded && this.accordions.loaded.id === id);
 };
 
 ABCXJS.tablature.Accordion.prototype.clearKeyboard = function(full) {

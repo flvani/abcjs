@@ -12,11 +12,16 @@ ABCXJS.edit.AccordionSelector = function (id, divId, callBack, extraItems ) {
     
     this.extraItems = extraItems || [];
     this.ddmId = id;
-    this.menu = new ABCXJS.edit.DropdownMenu(
-           divId
-        ,  callBack
-        ,  [{title: 'Acordeons', ddmId: this.ddmId, itens: []}]
-    );
+    
+    if (divId instanceof ABCXJS.edit.DropdownMenu) {
+        this.menu = divId;   
+    } else {
+        this.menu = new ABCXJS.edit.DropdownMenu(
+               divId
+            ,  callBack
+            ,  [{title: 'Acordeons', ddmId: this.ddmId, itens: []}]
+        );
+    }
     
     // tratar os casos os o listener não possui um acordeon definido
     if (callBack && callBack.listener && callBack.listener.accordion) {
@@ -24,33 +29,56 @@ ABCXJS.edit.AccordionSelector = function (id, divId, callBack, extraItems ) {
     }
 };
     
-ABCXJS.edit.AccordionSelector.prototype.populate = function(changeTitle) {
+ABCXJS.edit.AccordionSelector.prototype.populate = function(changeTitle, selectId ) {
+    var m, selectItem, title;
+
     this.menu.emptySubMenu( this.ddmId );    
+    
     for (var i = 0; i < this.accordion.accordions.length; i++) {
-        var m = this.menu.addItemSubMenu( 
+        m = this.menu.addItemSubMenu( 
             this.ddmId, 
             this.accordion.accordions[i].getFullName() + '|' 
                 + this.accordion.accordions[i].getId() );
-        if( this.accordion.getId() === this.accordion.accordions[i].getId() ) {
-            if(changeTitle)
-                this.menu.setSubMenuTitle(this.ddmId, this.accordion.getFullName() );
-            this.menu.selectItem(this.ddmId, m);
+        
+        // identifica o item a ser selecionado
+        if( typeof selectId === "undefined"  ) {
+            if( this.accordion.getId() === this.accordion.accordions[i].getId() ) {
+                selectItem = m;
+                title = this.accordion.getFullName();
+            }
+        } else {
+            if( selectId === this.accordion.accordions[i].getId() ) {
+                selectItem = m;
+                title = this.accordion.accordions[i].getFullName();
+            }
         }
     }
+    
+    // adiciona os itens extra
     for (var i = 0; i < this.extraItems.length; i++) {
         var m = this.menu.addItemSubMenu( this.ddmId, this.extraItems[i] );
     }
+    
+    if(changeTitle && title )
+        this.menu.setSubMenuTitle(this.ddmId, title );
+    
+    if( selectItem )
+        this.menu.selectItem(this.ddmId, selectItem );
+    
 };
 
 ABCXJS.edit.KeySelector = function(id, divId, callBack ) {
     
     this.ddmId = id;
-    this.menu = new ABCXJS.edit.DropdownMenu(
-           divId
-        ,  callBack
-        ,  [{title: 'Keys', ddmId: this.ddmId, itens: []}]
-    );
-    
+    if (divId instanceof ABCXJS.edit.DropdownMenu) {
+        this.menu = divId;   
+    } else {
+        this.menu = new ABCXJS.edit.DropdownMenu(
+               divId
+            ,  callBack
+            ,  [{title: 'Keys', ddmId: this.ddmId, itens: []}]
+        );
+    }
 };
 
 ABCXJS.edit.KeySelector.prototype.populate = function(offSet) {

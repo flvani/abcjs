@@ -316,28 +316,49 @@ DRAGGABLE.Div.prototype.addToolButtons = function( id,  aButtons ) {
     if(!aButtons) return;
     var self = this;
     
-    var buttonMap = { GUTTER:'list-numbered', DOWNLAOD:'download', FONTSIZE: 'fontsize', DOWN:'open-down', OCTAVEDOWN:'octave-down', OCTAVEUP:'octave-up', 
+    var buttonMap = { GUTTER:'list-numbered', DOWNLAOD:'download', FONTSIZE: 'fontsize', DROPDOWN:'open-down', OCTAVEDOWN:'octave-down', OCTAVEUP:'octave-up', 
                         SEARCH:'find-and-replace', UNDO:'undo', REDO:'redo', LIGHTON:'lightbulb-on', READONLY:'lock-open' };
     
     aButtons.forEach( function (label) {
         label = label.split('|');
         var action = label[0].toUpperCase();
         var rotulo = label.length > 1 ? label[1] : "";
-        var icon = 'ico-' + (buttonMap[action] ? buttonMap[action] : action.toLowerCase());
         
         if( self.translate ) {
             DR.forcedResource('d'+ action +'ButtonA', rotulo, id, 'd'+ action +'ButtonA'+id); 
         }
         
         var div = document.createElement("DIV");
-        div.setAttribute("id", 'd'+ action +'Button'+id ); 
-        div.setAttribute("class", "dButton" ); 
-        div.innerHTML = '<a href="" title="'+ rotulo +'"><i class="'+ icon +' ico-black ico-large"></i></a>';
+        div.id =  'd'+ action +'Button'+id ; 
         self.toolBar.appendChild(div);
-        div.addEventListener( 'click', function(e) {
-            e.preventDefault(); 
-            self.eventsCentral(action, div);
-        }, false);
+        
+        if( action === 'DROPDOWN' ) {
+            
+            div.className = "dButton topMenu";
+            
+            if( typeof self.menu === "undefined" ) {
+                self.menu = {};
+            }
+                    
+            var ddmId = label[2];
+            self.menu[ddmId] = new ABCXJS.edit.DropdownMenu(
+                   div
+                ,  self.callback
+                ,  [{title: '...', ddmId: ddmId, itens: []}]
+            );
+    
+        } else {
+            
+            div.className = "dButton";
+            
+            var icon = 'ico-' + (buttonMap[action] ? buttonMap[action] : action.toLowerCase());
+            div.innerHTML = '<a href="" title="'+ rotulo +'"><i class="'+ icon +' ico-black ico-large"></i></a>';
+            div.addEventListener( 'click', function(e) {
+                e.preventDefault(); 
+                self.eventsCentral(action, div);
+            }, false);
+        }
+        
         
     });
 };

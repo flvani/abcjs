@@ -563,21 +563,27 @@ for (var x = 0; x < 5000; x += 50) {
             .attr("y1", translate[1])   
 
  */
+
 ABCXJS.write.AbsoluteElement.prototype.setMouse = function(printer) {
     var self = this;
-    var svgns = "http://www.w3.org/2000/svg";
-    this.svgElem = document.getElementById(self.gid);
     
-    var bounds = this.svgElem.getBBox();
-    var rect = document.createElementNS(svgns, 'rect');
-        rect.setAttributeNS(null, 'x', bounds.x.toFixed(1)-1);
-        rect.setAttributeNS(null, 'y', bounds.y.toFixed(1)-1);
-        rect.setAttributeNS(null, 'height', bounds.height.toFixed(1)+2);
-        rect.setAttributeNS(null, 'width', bounds.width.toFixed(1)+2);
-        rect.setAttributeNS(null, 'fill', 'none' );
+    try {
+        var svgns = "http://www.w3.org/2000/svg";
+        this.svgElem = document.getElementById(self.gid);
 
-    this.svgElem.appendChild(rect);
-    this.svgArea = rect;
+        var bounds = this.svgElem.getBBox();
+        var rect = document.createElementNS(svgns, 'rect');
+            rect.setAttributeNS(null, 'x', bounds.x.toFixed(1)-1);
+            rect.setAttributeNS(null, 'y', bounds.y.toFixed(1)-1);
+            rect.setAttributeNS(null, 'height', bounds.height.toFixed(1)+2);
+            rect.setAttributeNS(null, 'width', bounds.width.toFixed(1)+2);
+            rect.setAttributeNS(null, 'fill', 'none' );
+
+        this.svgElem.appendChild(rect);
+        this.svgArea = rect;
+    } catch( e ) {
+        // Firefox dies if svgElem is not Visible
+    }
     
     this.svgElem.onmouseover =  function() {self.highlight(true);};
     this.svgElem.onmouseout =  function() {self.unhighlight(true);};
@@ -588,16 +594,17 @@ ABCXJS.write.AbsoluteElement.prototype.highlight = function(keepState) {
     if(!this.svgElem) return;
     if(keepState) this.svgElem.prevFill = this.svgElem.style.fill;
     this.svgElem.style.setProperty( 'fill', ABCXJS.write.highLightColor );
-    this.svgArea.style.setProperty( 'fill', ABCXJS.write.highLightColor );
-    this.svgArea.style.setProperty( 'fill-opacity', '0.15' );
+    (this.svgArea) && this.svgArea.style.setProperty( 'fill', ABCXJS.write.highLightColor );
+    (this.svgArea) && this.svgArea.style.setProperty( 'fill-opacity', '0.15' );
 };
 
 ABCXJS.write.AbsoluteElement.prototype.unhighlight = function(keepState) {
     if(!this.svgElem) return;
     var fill = (keepState && this.svgElem.prevFill ) ? this.svgElem.prevFill : ABCXJS.write.unhighLightColor;
     this.svgElem.style.setProperty( 'fill', fill );
-    this.svgArea.style.setProperty( 'fill-opacity', '0' );
+    (this.svgArea) && this.svgArea.style.setProperty( 'fill-opacity', '0' );
 };
+
 
 ABCXJS.write.RelativeElement = function(c, dx, w, pitch, opt) {
     opt = opt || {};

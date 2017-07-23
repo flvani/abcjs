@@ -39,7 +39,7 @@ window.ABCXJS.misc.isChrome= function() {
     if(!test1) return false;
     
     for (var i=0; i<navigator.plugins.length; i++)
-        if (navigator.plugins[i].name == 'Chrome PDF Viewer') return true;
+        if (navigator.plugins[i].name === 'Chrome PDF Viewer') return true;
     
     return false;
 };
@@ -50,7 +50,7 @@ window.ABCXJS.misc.isChromium= function() {
     if(!test1) return false;
     
     for (var i=0; i<navigator.plugins.length; i++)
-        if (navigator.plugins[i].name == 'Chrome PDF Viewer') return false;
+        if (navigator.plugins[i].name === 'Chrome PDF Viewer') return false;
     
     return true;
 };

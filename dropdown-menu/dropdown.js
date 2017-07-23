@@ -127,14 +127,34 @@ ABCXJS.edit.DropdownMenu.prototype.emptySubMenu = function (ddm) {
     
 };
 
+ABCXJS.edit.DropdownMenu.prototype.getItemByName = function (ddm, item) {
+    
+    var a_elements = this.headers[ddm].list.getElementsByTagName("a");
 
+    for (var i = 0, len = a_elements.length; i < len; i++ ) {
+        if( item === a_elements[ i ].innerHTML ) {
+            return a_elements[ i ].parentElement;
+        }
+    }        
+    return undefined;
+};
+
+//    if( tab.menu.selectItem(tab.ddmId, tab.title) ) {
 ABCXJS.edit.DropdownMenu.prototype.selectItem = function (ddm, item) {
-    if( this.selectedItem ) {
+    var toSel = item;
+    if(  typeof item === "string" ) {
+        toSel = this.getItemByName(ddm, item);
+    } 
+    
+    if( ! toSel ) return false;
+    
+    if( this.headers[ddm].selectedItem ) {
         this.headers[ddm].selectedItem.className = '';
     }
     
-    item.className = 'selected';
-    this.headers[ddm].selectedItem = item;
+    toSel.className = 'selected';
+    this.headers[ddm].selectedItem = toSel;
+    return true;
 };
     
 ABCXJS.edit.DropdownMenu.prototype.setSubMenuTitle = function (ddm, newTitle) {

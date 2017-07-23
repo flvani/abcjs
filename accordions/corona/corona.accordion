@@ -1,9 +1,9 @@
 {
    "id":"GAITA"
-  ,"menuOrder" : 0
+  ,"menuOrder" : 10
   ,"model":"Hohner Corona II"
   ,"tuning":["A","D","G"]
-  ,"buttons":["31","8"]
+  ,"buttons":["31","12"]
   ,"pedal":[]
   ,"keyboard": 
     {

@@ -1,9 +1,9 @@
 <html>
     <head>
 	<title>Draw The Dots: Tune Editor</title>
-        <meta name="viewport" content="width=device-width, initial-scale=0.8, minimum-scale=0.8, maximum-scale=2.0" />
-        <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
-        <link rel="icon" type="image/icon" href="images/favicon.ico" />
+        <meta charset="UTF-8" />
+        <link rel="icon" type="image/icon" href="images/favicon.ico"/>
+        <meta name="viewport" content="height=device-width, initial-scale=1.0, minimum-scale=0.5, maximum-scale=2.0" />
         
         <link rel="stylesheet" href="fontsIco/abcx.css" />
         <link rel="stylesheet" href="fontsGoogle/fonts.css" />
@@ -133,11 +133,11 @@
         <script type="text/javascript" src="tablature/tablature_accordion_parse.js"></script>
         <script type="text/javascript" src="tablature/tablature_accordion_layout.js"></script>
         
-        <script type="text/javascript" src="ace/src/ace.js" ></script>
  	<script type="text/javascript" src="edit/abc_selectors.js" ></script>
  	<script type="text/javascript" src="edit/abc_editarea.js" ></script>
  	<script type="text/javascript" src="edit/abc_editor.js" ></script>
         
+        <script type="text/javascript" src="ace/src/ace.js" ></script>
         <!--                     menor
             C,,   C,  E,  G,     C,  ^D,  G,
             D,,   D, ^F,  A,     D,   F,  A,
@@ -432,6 +432,9 @@ V:3 accordionTab
                 myEditor.setString( document.getElementById("abc").value );
                 myEditor.fireChanged( 0, {force: true} );
                 //myEditor.resize();
+                
+                myEditor.menu.selectItem('menuGaitas', 'Acordeon 2' );
+                
             }
 
             function doTranspose(value) {

@@ -29,7 +29,7 @@ if (!ABCXJS.edit)
 ABCXJS.edit.EditArea = function (editor_id, listener) {
     
     this.container = {};
-    var aBotoes = [ 'gutter|Numeração das Linhas', 'download|Salvar Local', 'fontsize|Tamanho da fonte', 'down|Tom', 
+    var aBotoes = [ 'gutter|Numeração das Linhas', 'download|Salvar Local', 'fontsize|Tamanho da fonte', 'DROPDOWN|Tom|selKey', 
                     'octavedown|Oitava|Oitava', 'octaveup|Oitava|Oitava', 'search|Localizar e substituir', 
                     'undo|Dezfazer', 'redo|Refazer', 'lighton|Realçar texto', 'readonly|Bloquear edição' ] ;
     
@@ -49,11 +49,11 @@ ABCXJS.edit.EditArea = function (editor_id, listener) {
                 , aBotoes
             );
             
-            //this.container.dataDiv.setAttribute("class", "ace-datadiv"); 
         } else {
             alert( 'this.container: elemento "'+editor_id+'" não encontrado.');
         }
     } else {
+        
         this.container = new DRAGGABLE.Div( 
             null
             , [ 'move|Mover', 'popin|Fixar janela' , 'maximize|Maximizar janela' ]
@@ -61,14 +61,12 @@ ABCXJS.edit.EditArea = function (editor_id, listener) {
             , {listener : listener, method: 'editorCallback' }
             , aBotoes
         );
-//        this.container.dataDiv.setAttribute("class", "ace-datadiv"); 
+
+        this.keySelector = new ABCXJS.edit.KeySelector( 
+                'selKey', this.container.menu['selKey'], {listener: this, method: 'editorCallback'} );
         
-        document.getElementById('dDOWNButton4').innerHTML = '<div id="menu4Div" class="topMenu" ></div>';
-        
-        this.keySelector = new ABCXJS.edit.KeySelector( 'k2', 'menu4Div', {listener: this, method: 'editorCallback'} );
     }
     
-    //this.container.dataDiv.className += " ace-datadiv"; 
     
     this.aceEditor = ace.edit(this.container.dataDiv);
     this.aceEditor.setOptions( {highlightActiveLine: true, selectionStyle: "text", cursorStyle: "smooth"/*, maxLines: Infinity*/ } );
@@ -228,7 +226,7 @@ ABCXJS.edit.EditArea.prototype.setSelection = function (abcelem) {
         this.aceEditor.selection.addRange(range);
         
         if(abcelem.position.selectable || !this.selectionEnabled)
-            this.aceEditor.scrollToLine(range.start.row);
+            this.aceEditor.renderer.scrollCursorIntoView(range.end, 1 );
     }   
 };
 
