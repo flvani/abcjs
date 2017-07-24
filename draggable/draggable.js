@@ -362,3 +362,10 @@ DRAGGABLE.Div.prototype.addToolButtons = function( id,  aButtons ) {
         
     });
 };
+
+if (!window.PUSHBUTTON)
+    window.PUSHBUTTON= { id: 0 };
+
+PUSHBUTTON.Button = function( parent, aButtons, options, callback, aToolBarButtons ) {
+    
+};

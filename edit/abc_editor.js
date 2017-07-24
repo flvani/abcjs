@@ -784,6 +784,10 @@ ABCXJS.Editor.prototype.showSettings = function() {
         <br><br>Fole Fechando:&nbsp;<input id="foleFechando">\
         <br><br>Fole Abrindo:&nbsp;<input id="foleAbrindo">\
         <br>\
+        </div>\
+        <div id="pg" class="pushbutton-group" style="right: 0; bottom: 40px;" >\
+            <div id="botao1" class="pushbutton">ok</div>\n\
+            <div id="botao2" class="pushbutton">cancel</div>\n\
         </div>';
         
         var selector = new ABCXJS.edit.AccordionSelector( 

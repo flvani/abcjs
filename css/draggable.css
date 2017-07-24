@@ -178,3 +178,21 @@ and open the template in the editor.
   background-color: rgba(255, 153, 34, 0.8);
   outline: 1px solid slategrey;
 } 
+
+.pushbutton-group {
+    position: absolute;
+    display: block;
+    padding-right: 5px;
+}
+
+.pushbutton {
+    position: relative;
+    display: inline-block;
+    float: right;
+    background-color: black;
+    color: white;
+    min-width: 50px;
+    min-height: 20px;
+    margin:5px;
+}
+
