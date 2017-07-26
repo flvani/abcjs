@@ -745,9 +745,9 @@ ABCXJS.Editor.prototype.settingsCallback = function(action) {
         case 'MOVE': 
             break;
         case 'CLOSE': 
-           ABCXJS.write.highLightColor = '#'+this.p1.value;
-           this.accordion.loadedKeyboard.render_opts.closeColor = '#'+this.p2.value;
-           this.accordion.loadedKeyboard.render_opts.openColor = '#'+this.p3.value;
+           ABCXJS.write.highLightColor = this.p1.value;
+           this.accordion.loadedKeyboard.render_opts.closeColor = this.p2.value;
+           this.accordion.loadedKeyboard.render_opts.openColor = this.p3.value;
            this.accordion.loadedKeyboard.legenda.setOpen();
            this.accordion.loadedKeyboard.legenda.setClose();
            this.settingsWindow.setVisible(false);
@@ -766,7 +766,7 @@ ABCXJS.Editor.prototype.showSettings = function() {
         );
 
         this.settingsWindow.topDiv.style.zIndex = 101;
-        this.settingsWindow.dataDiv.style.padding = '10px';
+        //this.settingsWindow.dataDiv.style.padding = '10px';
         
         this.settingsWindow.dataDiv.innerHTML= '\
         <div class="menu-group">\
@@ -780,14 +780,15 @@ ABCXJS.Editor.prototype.showSettings = function() {
         <br>\
         <label><input type="checkbox"> Mostrar linhas de debug</label>\
         <br><br><br><br>Cores:<br>\
-        <br>Cor de Realce:&nbsp;<input id="corRealce">\
-        <br><br>Fole Fechando:&nbsp;<input id="foleFechando">\
-        <br><br>Fole Abrindo:&nbsp;<input id="foleAbrindo">\
+        <br>Cor de Realce:&nbsp;<input id="corRealce" >\
+        <br><br>Fole Fechando:&nbsp;<input id="foleFechando" >\
+        <br><br>Fole Abrindo:&nbsp;<input id="foleAbrindo" >\
         <br>\
         </div>\
-        <div id="pg" class="pushbutton-group" style="right: 0; bottom: 40px;" >\
-            <div id="botao1" class="pushbutton">ok</div>\n\
-            <div id="botao2" class="pushbutton">cancel</div>\n\
+        <div id="pg" class="pushbutton-group" style="right: 0; bottom: 0;" >\
+            <div id="botao1" class="pushbutton"><i class="ico-circle.tick" ></i>Aplicar</div>\n\
+            <div id="botao2" class="pushbutton"><i class="ico-circle.R" ></i>Redefinir</div>\n\
+            <div id="botao3" class="pushbutton"><i class="ico-circle.error" ></i>Cancelar</div>\n\
         </div>';
         
         var selector = new ABCXJS.edit.AccordionSelector( 
@@ -805,19 +806,18 @@ ABCXJS.Editor.prototype.showSettings = function() {
                         '<img src="images/de_DE.png" alt="idiomas" />&#160;Deustch|de_DE' 
                     ]}]
             );
+    
             menu.setSubMenuTitle('menuIdiomas', '<img src="images/pt_BR.png" alt="idiomas" />&#160;Português');
             
             this.p1 = document.getElementById( 'corRealce');
             this.p2 = document.getElementById( 'foleFechando');
             this.p3 = document.getElementById( 'foleAbrindo');
             
-            this.p1.setAttribute( "value", ABCXJS.write.highLightColor );
-            this.p2.setAttribute( "value", this.accordion.loadedKeyboard.render_opts.closeColor );
-            this.p3.setAttribute( "value", this.accordion.loadedKeyboard.render_opts.openColor );
-            
-            var picker1 = new jscolor( this.p1 );
-            var picker2 = new jscolor( this.p2 );
-            var picker3 = new jscolor( this.p3 );
+            this.p1.style.backgroundColor = this.p1.value = ABCXJS.write.highLightColor;
+            this.p2.style.backgroundColor = this.p2.value = this.accordion.loadedKeyboard.render_opts.closeColor;
+            this.p3.style.backgroundColor = this.p3.value = this.accordion.loadedKeyboard.render_opts.openColor ;
+
+            new DRAGGABLE.ColorPicker(['corRealce', 'foleFechando', 'foleAbrindo']);
 
     }            
     this.settingsWindow.setVisible(true);

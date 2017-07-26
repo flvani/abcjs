@@ -232,7 +232,7 @@ DRAGGABLE.Div.prototype.eventsCentral = function (action, elem) {
     if (this.callback) {
         this.callback.listener[this.callback.method](action, elem);
     } else {
-        if (ev === 'CLOSE') {
+        if (action === 'CLOSE') {
             this.close();
         }
     }
@@ -280,7 +280,7 @@ DRAGGABLE.Div.prototype.addButtons = function( id,  aButtons ) {
     var self = this;
     
     var buttonMap = { CLOSE: 'close', MOVE: 'move', ROTATE: 'rotate', GLOBE: 'world', ZOOM:'zoom-in', 
-                        POPIN: 'popin', POPOUT: 'popout', RESTORE:'restore', MAXIMIZE:'full-screen'  };
+                        POPIN: 'popin', POPOUT: 'popout', RESTORE:'restore', MAXIMIZE:'full-screen', APPLY:'tick'  };
     
     if(aButtons)
         defaultButtons = defaultButtons.concat(aButtons);
@@ -366,6 +366,76 @@ DRAGGABLE.Div.prototype.addToolButtons = function( id,  aButtons ) {
 if (!window.PUSHBUTTON)
     window.PUSHBUTTON= { id: 0 };
 
-PUSHBUTTON.Button = function( parent, aButtons, options, callback, aToolBarButtons ) {
+DRAGGABLE.PushButton = function( parent, aButtons, options, callback, aToolBarButtons ) {
     
+};
+
+
+DRAGGABLE.ColorPicker = function( itens ) {
+    this.container = new DRAGGABLE.Div( 
+          null
+        , [ 'apply|Selecionar' ]
+        , {translate:false, draggable:true, width: "auto", height: "auto", title: 'Seletor de Cores', zIndex:"200" }
+        , {listener : this, method: 'pickerCallBack' }
+    );
+
+    this.container.dataDiv.innerHTML = '\
+<div class="picker-group">\
+    <canvas id="colorPickerCanvas"></canvas><br>\
+    <input id="originalColor"></input>\
+    <input id="newColor"></input>\
+</div>';
+   
+    this.originalColor = document.getElementById( 'originalColor' );
+    this.newColor = document.getElementById( 'newColor' );
+    
+    this.cp = new KellyColorPicker({
+        place : 'colorPickerCanvas', 
+        size : 190, 
+        input : 'newColor'  
+    });
+    
+    var self = this;
+    
+    for( var i = 0; i < itens.length; i++ ) {
+        document.getElementById(itens[i]).addEventListener('click', function( e ) { self.activate(this); e.stopPropagation(); } );
+    }
+};
+
+DRAGGABLE.ColorPicker.prototype.pickerCallBack = function( action, elem ) {
+    switch(action) {
+        case 'MOVE': 
+            break;
+        case 'APPLY': 
+            this.item.style.backgroundColor = this.item.value = this.newColor.value;
+            this.container.setVisible(false);
+            break;
+        case 'CLOSE': 
+           this.item.style.backgroundColor = this.item.value = this.originalColor.value;
+           this.container.setVisible(false);
+   }
+};
+
+DRAGGABLE.ColorPicker.prototype.activate = function( parent ) {
+    var self = this;
+    
+    var oneTimeCloseFunction = function () { 
+        self.container.setVisible(false); 
+        this.removeEventListener('click', oneTimeCloseFunction, false );
+    };
+    
+    document.addEventListener( 'click', oneTimeCloseFunction  );
+    
+    this.item = parent;
+    this.container.topDiv.addEventListener( 'click', function (e) { e.stopPropagation(); } );
+    
+    this.newColor.value = this.originalColor.value = this.item.value;
+    this.originalColor.style.backgroundColor = this.item.value;
+    this.cp.setColorByHex(this.item.value);
+    
+    var bounds = this.item.getBoundingClientRect();
+    
+    this.container.topDiv.style.top = bounds.top + bounds.height + 1 + "px";
+    this.container.topDiv.style.left = bounds.left + 5 + "px";
+    this.container.setVisible(true);
 };

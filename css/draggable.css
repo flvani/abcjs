@@ -105,7 +105,7 @@ and open the template in the editor.
     margin: 0;
     overflow: auto;
     width: 100%;
-    height: 100%;
+    height: calc( 100% - 24px );
 }
 
 .dTitle {
@@ -182,7 +182,6 @@ and open the template in the editor.
 .pushbutton-group {
     position: absolute;
     display: block;
-    padding-right: 5px;
 }
 
 .pushbutton {
@@ -193,6 +192,26 @@ and open the template in the editor.
     color: white;
     min-width: 50px;
     min-height: 20px;
-    margin:5px;
+    margin:10px;
+    margin-left: 0;
 }
 
+.picker-group { 
+    display: inline-block;
+    margin:5px;
+    width: auto;
+    height: auto;
+}
+
+.picker-group .pickerCanvas { 
+    display: block;
+}    
+
+.picker-group > input { 
+    width: 93px;
+    height: 30px;
+    font-family: "menuFont";
+    font-weight: bold;
+    border: none;
+    text-align: center;
+}    
