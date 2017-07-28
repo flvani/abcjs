@@ -2,22 +2,18 @@
  * To change this license header, choose License Headers in Project Properties.
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
- */
+*/
 
-if (!window.ABCXJS)
-	window.ABCXJS = {};
-
-if (!ABCXJS.edit)
-	ABCXJS.edit = {};
-
-ABCXJS.edit.element = {id:0};
-
-ABCXJS.edit.DropdownMenu = function (topDiv, options, menu) {
+if (! window.DRAGGABLE )
+    window.DRAGGABLE  = { windowId: 0, menuId: 0 };
+        
+DRAGGABLE.DropdownMenu = function (topDiv, options, menu) {
     var self = this;
     var opts = options || {};
     this.headers = {};
     
-    this.id = ++ ABCXJS.edit.element.id;
+    this.id = ++ DRAGGABLE.menuId;
+    
     this.container = ( typeof topDiv === 'object' ) ? topDiv : document.getElementById(topDiv);
     this.listener = opts.listener || null;
     this.method = opts.method || null;
@@ -84,7 +80,7 @@ ABCXJS.edit.DropdownMenu = function (topDiv, options, menu) {
     }
 };
 
-ABCXJS.edit.DropdownMenu.prototype.disableSubMenu = function (ddm) {
+DRAGGABLE.DropdownMenu.prototype.disableSubMenu = function (ddm) {
     
     var self = this;
     
@@ -98,7 +94,7 @@ ABCXJS.edit.DropdownMenu.prototype.disableSubMenu = function (ddm) {
     
 };
 
-ABCXJS.edit.DropdownMenu.prototype.enableSubMenu = function (ddm) {
+DRAGGABLE.DropdownMenu.prototype.enableSubMenu = function (ddm) {
     
     var self = this;
     
@@ -113,7 +109,7 @@ ABCXJS.edit.DropdownMenu.prototype.enableSubMenu = function (ddm) {
 };
 
 
-ABCXJS.edit.DropdownMenu.prototype.emptySubMenu = function (ddm) {
+DRAGGABLE.DropdownMenu.prototype.emptySubMenu = function (ddm) {
     
     var self = this;
     
@@ -127,7 +123,7 @@ ABCXJS.edit.DropdownMenu.prototype.emptySubMenu = function (ddm) {
     
 };
 
-ABCXJS.edit.DropdownMenu.prototype.getItemByName = function (ddm, item) {
+DRAGGABLE.DropdownMenu.prototype.getItemByName = function (ddm, item) {
     
     var a_elements = this.headers[ddm].list.getElementsByTagName("a");
 
@@ -140,7 +136,7 @@ ABCXJS.edit.DropdownMenu.prototype.getItemByName = function (ddm, item) {
 };
 
 //    if( tab.menu.selectItem(tab.ddmId, tab.title) ) {
-ABCXJS.edit.DropdownMenu.prototype.selectItem = function (ddm, item) {
+DRAGGABLE.DropdownMenu.prototype.selectItem = function (ddm, item) {
     var toSel = item;
     if(  typeof item === "string" ) {
         toSel = this.getItemByName(ddm, item);
@@ -157,7 +153,7 @@ ABCXJS.edit.DropdownMenu.prototype.selectItem = function (ddm, item) {
     return true;
 };
     
-ABCXJS.edit.DropdownMenu.prototype.setSubMenuTitle = function (ddm, newTitle) {
+DRAGGABLE.DropdownMenu.prototype.setSubMenuTitle = function (ddm, newTitle) {
     
     var self = this;
     
@@ -170,7 +166,7 @@ ABCXJS.edit.DropdownMenu.prototype.setSubMenuTitle = function (ddm, newTitle) {
     
 };
     
-ABCXJS.edit.DropdownMenu.prototype.addItemSubMenu = function (ddm, newItem, pos) {
+DRAGGABLE.DropdownMenu.prototype.addItemSubMenu = function (ddm, newItem, pos) {
     
     var self = this;
     var tags = newItem.split('|'); 
@@ -208,18 +204,33 @@ ABCXJS.edit.DropdownMenu.prototype.addItemSubMenu = function (ddm, newItem, pos)
     return e4;
 };
 
-ABCXJS.edit.DropdownMenu.prototype.setListener = function (listener, method) {
+DRAGGABLE.DropdownMenu.prototype.setListener = function (listener, method) {
     this.listener = listener || null;
     this.method = method || 'callback';
 };
 
-ABCXJS.edit.DropdownMenu.prototype.eventsCentral = function (state, event) {
+DRAGGABLE.DropdownMenu.prototype.eventsCentral = function (state, event) {
     for( var e in this.headers ) {
         if( e === state ) {
+            
             this.headers[e].chk.checked = ! this.headers[e].chk.checked;
-            if( this.headers[e].chk.checked && this.headers[e].selectedItem ){
-                this.headers[e].div.scrollTop = this.headers[e].selectedItem.offsetTop-115;
+            
+            if( this.headers[e].chk.checked ) {
+                
+                var menu = e;
+                var self = this;
+                var oneTimeCloseFunction = function () { 
+                    self.headers[menu].chk.checked = false; 
+                    this.removeEventListener('click', oneTimeCloseFunction, false );
+                };
+                
+                document.addEventListener( 'click', oneTimeCloseFunction  );
+                
+                if( this.headers[e].selectedItem )
+                     this.headers[e].div.scrollTop = this.headers[e].selectedItem.offsetTop-115;
+
             }
+            
         } else {
             this.headers[e].chk.checked = false;
         }
@@ -230,7 +241,7 @@ ABCXJS.edit.DropdownMenu.prototype.eventsCentral = function (state, event) {
 };
 
 
-//ABCXJS.edit.DropdownMenu.prototype.closeMenu = function (state) {
+//DRAGGABLE.DropdownMenu.prototype.closeMenu = function (state) {
 //    var e = document.getElementById(state);
 //    e.checked=false;
 //};

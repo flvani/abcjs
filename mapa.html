@@ -92,7 +92,7 @@ and open the template in the editor.
             window.addEventListener( 'load', initApp);
 
             function initApp() {
-                var m1 = new ABCXJS.edit.DropdownMenu(
+                var m1 = new DRAGGABLE.DropdownMenu(
                         'menu1Div'
                         , {listener: this, method: 'callback'}
                 , [{title: 'Acordeons', ddmId: 'acordeonsMenu',
@@ -124,7 +124,7 @@ and open the template in the editor.
                             'Sobre|ABOUT'
                         ]}
                 ]);
-                var m2 = new ABCXJS.edit.DropdownMenu(
+                var m2 = new DRAGGABLE.DropdownMenu(
                         'menu2Div'
                         , {listener: this, method: 'callback1'}
                         , [{title: 'Acordeons', ddmId: 'songs',

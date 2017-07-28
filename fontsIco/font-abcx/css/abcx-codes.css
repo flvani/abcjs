@@ -2,10 +2,10 @@
 .ico-backward:before { content: '\e800'; } /* '' */
 .ico-bolt:before { content: '\e801'; } /* '' */
 .ico-bolt-2:before { content: '\e802'; } /* '' */
-.ico-circle.error:before { content: '\e803'; } /* '' */
-.ico-circle.exclamation:before { content: '\e804'; } /* '' */
-.ico-circle.r:before { content: '\e805'; } /* '' */
-.ico-circle.tick:before { content: '\e806'; } /* '' */
+.ico-circle-error:before { content: '\e803'; } /* '' */
+.ico-circle-exclamation:before { content: '\e804'; } /* '' */
+.ico-circle-r:before { content: '\e805'; } /* '' */
+.ico-circle-tick:before { content: '\e806'; } /* '' */
 .ico-clef-bass:before { content: '\e807'; } /* '' */
 .ico-clef-bass-2:before { content: '\e808'; } /* '' */
 .ico-clef-treble:before { content: '\e809'; } /* '' */

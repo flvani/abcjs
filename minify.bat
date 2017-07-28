@@ -7,7 +7,7 @@
 
 copy /b/y ace\src\ace.js+ace\src\mode-abcx.js+ace\src\theme-abcx.js tmp\ace4abcx.js
 
-copy /b/y css\dropdown-menu.css+css\tabbed-view.css+css\draggable.css tmp\styles4abcx.css
+copy /b/y css\menu-group.css+css\dropdown-menu.css+css\tabbed-view.css+css\draggable.css tmp\styles4abcx.css
 
 copy /b/y diatonic\* tmp\diatonic.js
 copy /b/y parse\* tmp\parse.js
@@ -16,7 +16,7 @@ copy /b/y write\* tmp\write.js
 copy /b/y midi\* tmp\midi.js
 copy /b/y svg\* tmp\svg.js
 
-copy /b/y draggable\draggable.js+dropdown-menu\dropdown.js tmp\abcjs-windows.js
+copy /b/y draggable\draggable.js+draggable\dropdown.js tmp\abcjs-windows.js
 
 copy /b/y api\abc_tunebook.js+data\abc_tune.js+tmp\parse.js+tmp\write.js+edit\abc_selectors.js+edit\abc_editarea.js tmp\abcjs-nomidi.js
 
@@ -45,8 +45,8 @@ java -Dfile.encoding=utf-8 -jar yuicompressor-2.4.2.jar  --line-break 7000 -o bi
 @echo "Compressing file manager lib..."
 java -Dfile.encoding=utf-8 -jar yuicompressor-2.4.2.jar  --line-break 7000 -o bin\filemanager_%versao%-min.js file\filemanager.js
 
-rem echo "Removing temporary files..."
-rem rm tmp\*
+copy /b/y fontsIco\abcx.* ..\diatonic-map\fontsIco\
+copy /b/y jslib\* ..\diatonic-map\jslib\
 
 copy /b/y tmp\abcxjs.js ..\diatonic-map\abcxjs\
 copy /b/y tmp\ace4abcx.js ..\diatonic-map\ace4abcx\

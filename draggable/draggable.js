@@ -4,16 +4,16 @@
  * and open the template in the editor.
  */
 
-if (!window.DRAGGABLE)
-    window.DRAGGABLE= { id: 0 };
-
+if (! window.DRAGGABLE )
+    window.DRAGGABLE  = { windowId: 0, menuId: 0 };
+        
 DRAGGABLE.Div = function( parent, aButtons, options, callback, aToolBarButtons ) {
-    
-    this.id = ++ DRAGGABLE.id ;
     
     var self = this;
     var opts = options || {};
 
+    this.id = ++ DRAGGABLE.windowId;
+    
     this.title = opts.title || '';
     this.top = opts.top || 0;
     this.left = opts.left || 0;
@@ -341,7 +341,7 @@ DRAGGABLE.Div.prototype.addToolButtons = function( id,  aButtons ) {
             }
                     
             var ddmId = label[2];
-            self.menu[ddmId] = new ABCXJS.edit.DropdownMenu(
+            self.menu[ddmId] = new DRAGGABLE.DropdownMenu(
                    div
                 ,  self.callback
                 ,  [{title: '...', ddmId: ddmId, itens: []}]
@@ -362,9 +362,6 @@ DRAGGABLE.Div.prototype.addToolButtons = function( id,  aButtons ) {
         
     });
 };
-
-if (!window.PUSHBUTTON)
-    window.PUSHBUTTON= { id: 0 };
 
 DRAGGABLE.PushButton = function( parent, aButtons, options, callback, aToolBarButtons ) {
     
@@ -435,7 +432,7 @@ DRAGGABLE.ColorPicker.prototype.activate = function( parent ) {
     
     var bounds = this.item.getBoundingClientRect();
     
-    this.container.topDiv.style.top = bounds.top + bounds.height + 1 + "px";
-    this.container.topDiv.style.left = bounds.left + 5 + "px";
+    this.container.topDiv.style.top = ( bounds.top + bounds.height/2  -120 ) + "px";
+    this.container.topDiv.style.left = bounds.left + bounds.width + 5 + "px";
     this.container.setVisible(true);
 };

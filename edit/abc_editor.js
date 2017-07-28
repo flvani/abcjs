@@ -69,7 +69,7 @@ ABCXJS.Editor = function (params) {
         this.onchangeCallback = params.onchange;
 
 
-    this.menu = new ABCXJS.edit.DropdownMenu(
+    this.menu = new DRAGGABLE.DropdownMenu(
          params.menu_id
         ,{ listener:this, method:'menuCallback' }
         ,[{title: 'Acordeons', ddmId: 'menuGaitas',
@@ -770,25 +770,43 @@ ABCXJS.Editor.prototype.showSettings = function() {
         
         this.settingsWindow.dataDiv.innerHTML= '\
         <div class="menu-group">\
-        <label>Acordeon:&nbsp;</label><div id="settingsAcordeonsMenu" class="topMenu"></div>\
-        <br><br>\
-        <label>Idioma:&nbsp;</label><div id="settingsLanguageMenu" class="topMenu"></div>\
-        <br><br>\
-        <label><input type="checkbox"> Mostrar avisos e erros de compilação</label>\
-        <br>\
-        <label><input type="checkbox"> Atualizar partitura automaticamente</label>\
-        <br>\
-        <label><input type="checkbox"> Mostrar linhas de debug</label>\
-        <br><br><br><br>Cores:<br>\
-        <br>Cor de Realce:&nbsp;<input id="corRealce" >\
-        <br><br>Fole Fechando:&nbsp;<input id="foleFechando" >\
-        <br><br>Fole Abrindo:&nbsp;<input id="foleAbrindo" >\
-        <br>\
+            <table>\
+              <tr>\
+                <th colspan="2">Idioma:</th><th><div id="settingsLanguageMenu" class="topMenu"></div></th>\
+              </tr>\
+              <tr>\
+                <th colspan="2">Acordeon:</th><td><div id="settingsAcordeonsMenu" class="topMenu"></div></td>\
+              </tr>\
+              <tr>\
+                <th colspan="2"><br>Cores:</th><td></td>\
+              </tr>\
+              <tr>\
+                <td></td><td>Cor de Realce</td><td><input type="text" id="corRealce" ></td>\
+              </tr>\
+              <tr>\
+                <td></td><td>Fole Fechando</td><td><input type="text" id="foleFechando" ></td>\
+              </tr>\
+              <tr>\
+                <td></td><td>Fole Abrindo</td><td><input type="text" id="foleAbrindo" ></td>\
+              </tr>\
+              <tr>\
+                <th colspan="2"><br>Propriedades:</th><td></td>\
+              </tr>\
+              <tr>\
+                <td><input type="checkbox"> </td><td colspan="2">Mostrar avisos e erros de compilação</td>\
+              </tr>\
+              <tr>\
+                <td><input type="checkbox"> </td><td colspan="2">Atualizar partitura automaticamente</td>\
+              </tr>\
+              <tr>\
+                <td><input type="checkbox"> </td><td colspan="2">Mostrar linhas de debug</td>\
+              </tr>\
+            </table>\
         </div>\
         <div id="pg" class="pushbutton-group" style="right: 0; bottom: 0;" >\
-            <div id="botao1" class="pushbutton"><i class="ico-circle.tick" ></i>Aplicar</div>\n\
-            <div id="botao2" class="pushbutton"><i class="ico-circle.R" ></i>Redefinir</div>\n\
-            <div id="botao3" class="pushbutton"><i class="ico-circle.error" ></i>Cancelar</div>\n\
+            <div id="botao1" class="pushbutton"><i class="ico-circle-tick" ></i>Aplicar</div>\n\
+            <div id="botao2" class="pushbutton"><i class="ico-circle-R" ></i>Redefinir</div>\n\
+            <div id="botao3" class="pushbutton"><i class="ico-circle-error" ></i>Cancelar</div>\n\
         </div>';
         
         var selector = new ABCXJS.edit.AccordionSelector( 
@@ -796,7 +814,7 @@ ABCXJS.Editor.prototype.showSettings = function() {
         
         selector.populate(true, 'GAITA_HOHNER_CLUB_IIIM_BR');
         
-        var menu = new ABCXJS.edit.DropdownMenu(
+        var menu = new DRAGGABLE.DropdownMenu(
                'settingsLanguageMenu'
             ,  { listener:this, method:'settingsCallback' }
             ,  [{title: 'Idioma', ddmId: 'menuIdiomas',

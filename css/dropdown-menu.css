@@ -1,21 +1,17 @@
 .btn-group ,
-.menu-group ,
 .dropdown-group {
     width: auto;
     white-space: normal;
     display: inline-block;
 }
 
-.btn-group ,
-.menu-group {
+.btn-group {
     height: 22px;
     margin-top: 2px;
     margin-left: 5px;
 }
 
 .btn-group label,
-.menu-group label,
-.menu-group button,
 .btn-group button,
 .dropdown-group button {
     position: relative;
@@ -54,7 +50,6 @@
     background-color: transparent;
 }
 
-.menu-group label,
 .btn-group label {
     text-align: left;
     padding-top: 6px;
@@ -62,8 +57,6 @@
     font-size: 16px;
 }
 
-
-.menu-group input[type="text"],
 .btn-group input[type="text"] {
     width: 4em;
     height: 22px;
@@ -75,13 +68,11 @@
     padding-left:2px;
 }
 
-.menu-group button:hover,
 .btn-group button:hover {
     background:  lavender;
     cursor: pointer;
 }
 
-.menu-group button::-moz-focus-inner,
 .btn-group button::-moz-focus-inner,
 .dropdown-group button::-moz-focus-inner {
   border: 0;
@@ -95,7 +86,6 @@
 }
 
 .btn-group img,
-.menu-group img,
 .dropdown img {
     position: relative;
     vertical-align: middle;

@@ -13,10 +13,10 @@ ABCXJS.edit.AccordionSelector = function (id, divId, callBack, extraItems ) {
     this.extraItems = extraItems || [];
     this.ddmId = id;
     
-    if (divId instanceof ABCXJS.edit.DropdownMenu) {
+    if (divId instanceof DRAGGABLE.DropdownMenu) {
         this.menu = divId;   
     } else {
-        this.menu = new ABCXJS.edit.DropdownMenu(
+        this.menu = new DRAGGABLE.DropdownMenu(
                divId
             ,  callBack
             ,  [{title: 'Acordeons', ddmId: this.ddmId, itens: []}]
@@ -70,10 +70,10 @@ ABCXJS.edit.AccordionSelector.prototype.populate = function(changeTitle, selectI
 ABCXJS.edit.KeySelector = function(id, divId, callBack ) {
     
     this.ddmId = id;
-    if (divId instanceof ABCXJS.edit.DropdownMenu) {
+    if (divId instanceof DRAGGABLE.DropdownMenu) {
         this.menu = divId;   
     } else {
-        this.menu = new ABCXJS.edit.DropdownMenu(
+        this.menu = new DRAGGABLE.DropdownMenu(
                divId
             ,  callBack
             ,  [{title: 'Keys', ddmId: this.ddmId, itens: []}]
