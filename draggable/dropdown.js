@@ -5,14 +5,17 @@
 */
 
 if (! window.DRAGGABLE )
-    window.DRAGGABLE  = { windowId: 0, menuId: 0 };
+    window.DRAGGABLE  = {};
+
+if (! window.DRAGGABLE.ui )
+    window.DRAGGABLE.ui  = { windowId: 0, menuId: 0 };
         
-DRAGGABLE.DropdownMenu = function (topDiv, options, menu) {
+DRAGGABLE.ui.DropdownMenu = function (topDiv, options, menu) {
     var self = this;
     var opts = options || {};
     this.headers = {};
     
-    this.id = ++ DRAGGABLE.menuId;
+    this.id = ++ DRAGGABLE.ui.menuId;
     
     this.container = ( typeof topDiv === 'object' ) ? topDiv : document.getElementById(topDiv);
     this.listener = opts.listener || null;
@@ -80,7 +83,7 @@ DRAGGABLE.DropdownMenu = function (topDiv, options, menu) {
     }
 };
 
-DRAGGABLE.DropdownMenu.prototype.disableSubMenu = function (ddm) {
+DRAGGABLE.ui.DropdownMenu.prototype.disableSubMenu = function (ddm) {
     
     var self = this;
     
@@ -94,7 +97,7 @@ DRAGGABLE.DropdownMenu.prototype.disableSubMenu = function (ddm) {
     
 };
 
-DRAGGABLE.DropdownMenu.prototype.enableSubMenu = function (ddm) {
+DRAGGABLE.ui.DropdownMenu.prototype.enableSubMenu = function (ddm) {
     
     var self = this;
     
@@ -109,7 +112,7 @@ DRAGGABLE.DropdownMenu.prototype.enableSubMenu = function (ddm) {
 };
 
 
-DRAGGABLE.DropdownMenu.prototype.emptySubMenu = function (ddm) {
+DRAGGABLE.ui.DropdownMenu.prototype.emptySubMenu = function (ddm) {
     
     var self = this;
     
@@ -123,7 +126,7 @@ DRAGGABLE.DropdownMenu.prototype.emptySubMenu = function (ddm) {
     
 };
 
-DRAGGABLE.DropdownMenu.prototype.getItemByName = function (ddm, item) {
+DRAGGABLE.ui.DropdownMenu.prototype.getItemByName = function (ddm, item) {
     
     var a_elements = this.headers[ddm].list.getElementsByTagName("a");
 
@@ -136,7 +139,7 @@ DRAGGABLE.DropdownMenu.prototype.getItemByName = function (ddm, item) {
 };
 
 //    if( tab.menu.selectItem(tab.ddmId, tab.title) ) {
-DRAGGABLE.DropdownMenu.prototype.selectItem = function (ddm, item) {
+DRAGGABLE.ui.DropdownMenu.prototype.selectItem = function (ddm, item) {
     var toSel = item;
     if(  typeof item === "string" ) {
         toSel = this.getItemByName(ddm, item);
@@ -153,7 +156,7 @@ DRAGGABLE.DropdownMenu.prototype.selectItem = function (ddm, item) {
     return true;
 };
     
-DRAGGABLE.DropdownMenu.prototype.setSubMenuTitle = function (ddm, newTitle) {
+DRAGGABLE.ui.DropdownMenu.prototype.setSubMenuTitle = function (ddm, newTitle) {
     
     var self = this;
     
@@ -166,7 +169,7 @@ DRAGGABLE.DropdownMenu.prototype.setSubMenuTitle = function (ddm, newTitle) {
     
 };
     
-DRAGGABLE.DropdownMenu.prototype.addItemSubMenu = function (ddm, newItem, pos) {
+DRAGGABLE.ui.DropdownMenu.prototype.addItemSubMenu = function (ddm, newItem, pos) {
     
     var self = this;
     var tags = newItem.split('|'); 
@@ -204,12 +207,12 @@ DRAGGABLE.DropdownMenu.prototype.addItemSubMenu = function (ddm, newItem, pos) {
     return e4;
 };
 
-DRAGGABLE.DropdownMenu.prototype.setListener = function (listener, method) {
+DRAGGABLE.ui.DropdownMenu.prototype.setListener = function (listener, method) {
     this.listener = listener || null;
     this.method = method || 'callback';
 };
 
-DRAGGABLE.DropdownMenu.prototype.eventsCentral = function (state, event) {
+DRAGGABLE.ui.DropdownMenu.prototype.eventsCentral = function (state, event) {
     for( var e in this.headers ) {
         if( e === state ) {
             
@@ -241,7 +244,7 @@ DRAGGABLE.DropdownMenu.prototype.eventsCentral = function (state, event) {
 };
 
 
-//DRAGGABLE.DropdownMenu.prototype.closeMenu = function (state) {
+//DRAGGABLE.ui.DropdownMenu.prototype.closeMenu = function (state) {
 //    var e = document.getElementById(state);
 //    e.checked=false;
 //};

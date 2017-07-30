@@ -69,7 +69,7 @@ ABCXJS.Editor = function (params) {
         this.onchangeCallback = params.onchange;
 
 
-    this.menu = new DRAGGABLE.DropdownMenu(
+    this.menu = new DRAGGABLE.ui.DropdownMenu(
          params.menu_id
         ,{ listener:this, method:'menuCallback' }
         ,[{title: 'Acordeons', ddmId: 'menuGaitas',
@@ -98,14 +98,14 @@ ABCXJS.Editor = function (params) {
         ]
     );
 
-    this.keyboardWindow = new DRAGGABLE.Div( 
+    this.keyboardWindow = new DRAGGABLE.ui.Window( 
           null 
         , [ 'move|Mover', 'rotate|Rotacionar', 'zoom|Zoom','globe|Mudar Notação']
         , {title: 'Keyb', translate: false, statusBar: false, top: "100px", left: "300px", zIndex: 100} 
         , {listener: this, method: 'keyboardCallback'}
     );
                 
-    this.studio = new DRAGGABLE.Div(
+    this.studio = new DRAGGABLE.ui.Window(
             params.studio_id
             , null
             , {translate: false, statusBar: false, draggable: false, top: "3px", left: "1px", width: '100%', height: "100%", title: 'Estúdio ABCX'}
@@ -740,17 +740,36 @@ ABCXJS.Editor.prototype.editorCallback = function (action, elem) {
     }
 };
 
-ABCXJS.Editor.prototype.settingsCallback = function(action) {
+ABCXJS.Editor.prototype.settingsCallback = function(action, elem ) {
     switch(action) {
         case 'MOVE': 
             break;
         case 'CLOSE': 
+        case 'CANCEL':
+            this.settingsWindow.setVisible(false);
+            break;
+        case 'APPLY':
            ABCXJS.write.highLightColor = this.p1.value;
            this.accordion.loadedKeyboard.render_opts.closeColor = this.p2.value;
            this.accordion.loadedKeyboard.render_opts.openColor = this.p3.value;
            this.accordion.loadedKeyboard.legenda.setOpen();
            this.accordion.loadedKeyboard.legenda.setClose();
            this.settingsWindow.setVisible(false);
+           break;
+        case 'RESET':
+            this.alert = new DRAGGABLE.ui.Alert( 
+                this.settingsWindow, action, 
+                'Você deseja redefinir todos os itens?',
+                'Isto fará com que todos os itens retornem para suas configurações iniciais, \
+                 isto inclui cores e posicionamento, entre outras coisas.');
+            break;
+        case 'RESET-YES':
+            break;
+        case 'RESET-NO':
+        case 'RESET-CANCEL':
+            this.alert.close();
+            this.alert = null;
+            break;
    }
 };
 
@@ -758,7 +777,7 @@ ABCXJS.Editor.prototype.showSettings = function() {
     
     if(!this.settingsWindow) {
     
-        this.settingsWindow = new DRAGGABLE.Div( 
+        this.settingsWindow = new DRAGGABLE.ui.Window( 
               null 
             , null
             , {title: 'Preferências', translate: false, statusBar: false, top: "300px", left: "500px", height:'400px',  width:'600px', zIndex: 50} 
@@ -766,7 +785,6 @@ ABCXJS.Editor.prototype.showSettings = function() {
         );
 
         this.settingsWindow.topDiv.style.zIndex = 101;
-        //this.settingsWindow.dataDiv.style.padding = '10px';
         
         this.settingsWindow.dataDiv.innerHTML= '\
         <div class="menu-group">\
@@ -804,17 +822,24 @@ ABCXJS.Editor.prototype.showSettings = function() {
             </table>\
         </div>\
         <div id="pg" class="pushbutton-group" style="right: 0; bottom: 0;" >\
-            <div id="botao1" class="pushbutton"><i class="ico-circle-tick" ></i>Aplicar</div>\n\
-            <div id="botao2" class="pushbutton"><i class="ico-circle-R" ></i>Redefinir</div>\n\
-            <div id="botao3" class="pushbutton"><i class="ico-circle-error" ></i>Cancelar</div>\n\
+            <div id="botao1"></div>\n\
+            <div id="botao2"></div>\n\
+            <div id="botao3"></div>\n\
         </div>';
         
+        this.settingsWindow.addPushButtons([
+            'botao1|APPLY|Aplicar',
+            'botao2|RESET|Redefinir',
+            'botao3|CANCEL|Cancelar'
+        ]);
+                
+                
         var selector = new ABCXJS.edit.AccordionSelector( 
                 'sel2', 'settingsAcordeonsMenu', {listener: this, method: 'settingsCallback'} );
         
         selector.populate(true, 'GAITA_HOHNER_CLUB_IIIM_BR');
         
-        var menu = new DRAGGABLE.DropdownMenu(
+        var menu = new DRAGGABLE.ui.DropdownMenu(
                'settingsLanguageMenu'
             ,  { listener:this, method:'settingsCallback' }
             ,  [{title: 'Idioma', ddmId: 'menuIdiomas',
@@ -835,7 +860,7 @@ ABCXJS.Editor.prototype.showSettings = function() {
             this.p2.style.backgroundColor = this.p2.value = this.accordion.loadedKeyboard.render_opts.closeColor;
             this.p3.style.backgroundColor = this.p3.value = this.accordion.loadedKeyboard.render_opts.openColor ;
 
-            new DRAGGABLE.ColorPicker(['corRealce', 'foleFechando', 'foleAbrindo']);
+            new DRAGGABLE.ui.ColorPicker(['corRealce', 'foleFechando', 'foleAbrindo']);
 
     }            
     this.settingsWindow.setVisible(true);

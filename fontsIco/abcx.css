@@ -1,7 +1,7 @@
 @font-face {
   font-family: 'abcx';
-  src: url('./abcx.ttf?26107174') format('truetype'),
-       url('./abcx.svg?26107174#abcx') format('svg');
+  src: url('./abcx.ttf?56136009') format('truetype'),
+       url('./abcx.svg?56136009#abcx') format('svg');
 }
 
 /* Chrome hack: SVG is rendered more smooth in Windozze. 100% magic, uncomment if you need it. */
@@ -111,27 +111,26 @@
 .ico-rotate:before { content: '\e840'; } /* '' */
 .ico-search:before { content: '\e841'; } /* '' */
 .ico-search-2:before { content: '\e842'; } /* '' */
-.ico-square.tick:before { content: '\e843'; } /* '' */
-.ico-step-backward:before { content: '\e844'; } /* '' */
-.ico-step-forward:before { content: '\e845'; } /* '' */
-.ico-stop:before { content: '\e846'; } /* '' */
-.ico-tick:before { content: '\e847'; } /* '' */
-.ico-timer-00:before { content: '\e848'; } /* '' */
-.ico-timer-05:before { content: '\e849'; } /* '' */
-.ico-timer-15:before { content: '\e84a'; } /* '' */
-.ico-timer-20:before { content: '\e84b'; } /* '' */
-.ico-timer-30:before { content: '\e84c'; } /* '' */
-.ico-timer-45:before { content: '\e84d'; } /* '' */
-.ico-undo:before { content: '\e84e'; } /* '' */
-.ico-undo-all:before { content: '\e84f'; } /* '' */
-.ico-upload:before { content: '\e850'; } /* '' */
-.ico-world:before { content: '\e851'; } /* '' */
-.ico-world-2:before { content: '\e852'; } /* '' */
-.ico-world-3:before { content: '\e853'; } /* '' */
-.ico-world-4:before { content: '\e854'; } /* '' */
-.ico-wrench:before { content: '\e855'; } /* '' */
-.ico-zoom-in:before { content: '\e856'; } /* '' */
-.ico-zoom-out:before { content: '\e857'; } /* '' */
+.ico-step-backward:before { content: '\e843'; } /* '' */
+.ico-step-forward:before { content: '\e844'; } /* '' */
+.ico-stop:before { content: '\e845'; } /* '' */
+.ico-tick:before { content: '\e846'; } /* '' */
+.ico-timer-00:before { content: '\e847'; } /* '' */
+.ico-timer-05:before { content: '\e848'; } /* '' */
+.ico-timer-15:before { content: '\e849'; } /* '' */
+.ico-timer-20:before { content: '\e84a'; } /* '' */
+.ico-timer-30:before { content: '\e84b'; } /* '' */
+.ico-timer-45:before { content: '\e84c'; } /* '' */
+.ico-undo:before { content: '\e84d'; } /* '' */
+.ico-undo-all:before { content: '\e84e'; } /* '' */
+.ico-upload:before { content: '\e84f'; } /* '' */
+.ico-world:before { content: '\e850'; } /* '' */
+.ico-world-2:before { content: '\e851'; } /* '' */
+.ico-world-3:before { content: '\e852'; } /* '' */
+.ico-world-4:before { content: '\e853'; } /* '' */
+.ico-wrench:before { content: '\e854'; } /* '' */
+.ico-zoom-in:before { content: '\e855'; } /* '' */
+.ico-zoom-out:before { content: '\e856'; } /* '' */
 
 .ico-large {
   font-size: 200%;

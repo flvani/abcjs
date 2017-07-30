@@ -41,7 +41,7 @@ ABCXJS.edit.EditArea = function (editor_id, listener) {
             topDiv = editor_id;
         if(topDiv) {
             
-            this.container = new DRAGGABLE.Div( 
+            this.container = new DRAGGABLE.ui.Window( 
                   topDiv
                 , [ 'popout|Expandir janela' ]
                 , {translate:false, draggable:false, width: "100%", height: "200px", title: 'Editor ABCX' }
@@ -54,7 +54,7 @@ ABCXJS.edit.EditArea = function (editor_id, listener) {
         }
     } else {
         
-        this.container = new DRAGGABLE.Div( 
+        this.container = new DRAGGABLE.ui.Window( 
             null
             , [ 'move|Mover', 'popin|Fixar janela' , 'maximize|Maximizar janela' ]
             , {translate:false, statusBar:true, left:"0", top:"0", width: "640px", height: "480px", title: 'Editor ABCX' }

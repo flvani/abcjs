@@ -188,13 +188,24 @@ and open the template in the editor.
     position: relative;
     display: block;
     float: left;
-    background-color: black;
+    background-color: darkgray;
     color: white;
     min-width: 50px;
     min-height: 20px;
     margin: 5px;
     margin-left: 0;
     padding: 5px;
+}
+
+
+.pushbutton:hover {
+    background-color: blue;
+    color: white;
+    opacity: 0.4;
+}
+
+.cancel:hover {
+    background-color: red !important;
 }
 
 .pushbutton i {
@@ -223,3 +234,48 @@ and open the template in the editor.
     border: none;
     text-align: center;
 }    
+
+.alert {
+    min-height: 200px;
+    min-width: 500px;
+    display: block;
+}
+
+.alert .flag {
+    min-height: 100px;
+    min-width: 100px;
+    display: block;
+    font-size: 600%;
+    color:red;
+    margin: 20px;
+    padding: 10px 0px 10px 0px;
+    border: 1px solid red;
+    border: none;
+    float:left;
+}
+
+.alert .text-group {
+    min-height: 30px;
+    min-width: 350px;
+    max-width: 350px;
+    display: block;
+    margin: 20px 20px 20px -20px;
+    padding: 10px;
+    border: 1px solid blue;
+    border: none;
+    float:left;
+}
+
+.alert .text-group .title {
+    float:bottom;
+    font-size: 20px;
+    text-align: center;
+    padding-bottom: 10px;
+    
+}
+
+.alert .text-group .description {
+    float:bottom;
+    font-size: 15px;
+    text-align: left;
+}

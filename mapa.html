@@ -92,7 +92,7 @@ and open the template in the editor.
             window.addEventListener( 'load', initApp);
 
             function initApp() {
-                var m1 = new DRAGGABLE.DropdownMenu(
+                var m1 = new DRAGGABLE.ui.DropdownMenu(
                         'menu1Div'
                         , {listener: this, method: 'callback'}
                 , [{title: 'Acordeons', ddmId: 'acordeonsMenu',
@@ -124,7 +124,7 @@ and open the template in the editor.
                             'Sobre|ABOUT'
                         ]}
                 ]);
-                var m2 = new DRAGGABLE.DropdownMenu(
+                var m2 = new DRAGGABLE.ui.DropdownMenu(
                         'menu2Div'
                         , {listener: this, method: 'callback1'}
                         , [{title: 'Acordeons', ddmId: 'songs',
@@ -161,7 +161,7 @@ and open the template in the editor.
                 m2.addItemSubMenu('songs', 'Flor de Maracuja2|TEST2');
                 m2.addItemSubMenu('songs', 'Flor de Maracuja|TEST');
 
-                w1 = new DRAGGABLE.Div(
+                w1 = new DRAGGABLE.ui.Window(
                         null
                         , null
                         , {title: '', translate: false, statusBar: false, top: "100px", left: "300px", zIndex: 100}
