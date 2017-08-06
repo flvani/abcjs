@@ -10,9 +10,17 @@ if (!window.DIATONIC)
 if (!window.DIATONIC.map)
     window.DIATONIC.map = {};
 
-DIATONIC.map.accordionMaps = [];
+DIATONIC.map.color = {};
+DIATONIC.map.color.fill = 'none';
+DIATONIC.map.color.background = 'none';
+DIATONIC.map.color.open = '#00ff00';
+DIATONIC.map.color.close = '#00b2ee';
 
 DIATONIC.map.loadAccordionMaps = function ( files, cb )  {
+    
+    if( ! DIATONIC.map.accordionMaps )
+        DIATONIC.map.accordionMaps = [];
+    
     var toLoad = 0;
     for( var f = 0; f <  files.length; f ++ ) {
         toLoad ++;

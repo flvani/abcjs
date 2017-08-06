@@ -23,13 +23,17 @@ if (!window.ABCXJS)
 if (!window.ABCXJS.write)
 	window.ABCXJS.write = {};
 
-ABCXJS.write.spacing = function() {};
+ABCXJS.write.spacing = {};
 ABCXJS.write.spacing.FONTEM = 360;
 ABCXJS.write.spacing.FONTSIZE = 30;
 ABCXJS.write.spacing.STEP = ABCXJS.write.spacing.FONTSIZE*(93)/720;
-ABCXJS.write.spacing.SPACE = 10;
+ABCXJS.write.spacing.SPACEX = 30;
 ABCXJS.write.spacing.TOPNOTE = 10; 
-ABCXJS.write.spacing.STAVEHEIGHT = 100;
+
+ABCXJS.write.color = {};
+ABCXJS.write.color.highLight = "#5151ff";
+ABCXJS.write.color.highLight = "#ff0000";
+ABCXJS.write.color.unhighLight = 'black';
 
 
 //--------------------------------------------------------------------PRINTER
@@ -41,7 +45,6 @@ ABCXJS.write.Printer = function (paper, params) {
     this.pageNumber = 1;
     this.estimatedPageLength = 0;
     this.paper = paper;
-    this.space = 3 * ABCXJS.write.spacing.SPACE;
     this.glyphs = new ABCXJS.write.Glyphs();
     this.listeners = [];
     this.selected = [];
@@ -76,7 +79,7 @@ ABCXJS.write.Printer.prototype.printTune = function(abctune, options) {
     options.color = options.color ||'black';
     options.backgroundColor = options.backgroundColor ||'none';
     
-    ABCXJS.write.unhighLightColor = options.color;
+    ABCXJS.write.color.unhighLight = options.color;
     
     var estilo = 
 '\n\

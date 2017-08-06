@@ -17,12 +17,10 @@
 /*global window, ABCXJS */
 
 if (!window.ABCXJS)
-	window.ABCXJS = {};
+    window.ABCXJS = {};
 
 if (!window.ABCXJS.write)
-	window.ABCXJS.write = {
-            
-        };
+    window.ABCXJS.write = {};
     
 window.ABCXJS.write.chartable = {rest:{0:"rests.whole", 1:"rests.half", 2:"rests.quarter", 3:"rests.8th", 4: "rests.16th",5: "rests.32nd", 6: "rests.64th", 7: "rests.128th"},
 		   note:{"-1": "noteheads.dbl", 0:"noteheads.whole", 1:"noteheads.half", 2:"noteheads.quarter", 3:"noteheads.quarter", 4:"noteheads.quarter", 5:"noteheads.quarter", 6:"noteheads.quarter"},
@@ -168,7 +166,7 @@ ABCXJS.write.Layout.prototype.layoutJumpDecorationItem = function(jumpDecoration
 };
 
 ABCXJS.write.Layout.prototype.layoutStaffGroup = function() {
-    var newspace = this.printer.space;
+    var newspace = ABCXJS.write.spacing.SPACEX;
 
     for (var it = 0; it < 3; it++) { // TODO shouldn't need this triple pass any more
         this.staffgroup.layout(newspace, this.printer, false);

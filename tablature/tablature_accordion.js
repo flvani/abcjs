@@ -11,6 +11,7 @@ if (!window.ABCXJS.tablature)
 	window.ABCXJS.tablature = {};
 
 ABCXJS.tablature.Accordion = function( params ) {
+    
     this.loaded       = undefined;
     this.tabLines     = [];
     this.accordions   = params.accordionMaps || [] ;
@@ -20,8 +21,10 @@ ABCXJS.tablature.Accordion = function( params ) {
         throw new Error( 'No accordionMap found!');
     }
     
-    for (var g = 0; g < this.accordions.length; g ++)
-        this.accordions[g].keyboard.setRenderOptions(params.render_keyboard_opts);
+    this.render_opts = {};
+    this.setRenderOptions( params.render_keyboard_opts, true );
+
+//    this.render_opts =  params.render_keyboard_opts;
     
     if( params.id )
         this.loadById( params.id );
@@ -29,6 +32,27 @@ ABCXJS.tablature.Accordion = function( params ) {
         this.load( 0 );
     
 };
+
+ABCXJS.tablature.Accordion.prototype.setRenderOptions = function ( options, initial ) {
+    
+    var opt = options || {};
+
+    this.render_opts.transpose = (typeof opt.transpose === 'undefined'? (initial? false : this.render_opts.transpose ): opt.transpose) ;
+    this.render_opts.mirror = (typeof opt.mirror === 'undefined'? (initial? false : this.render_opts.mirror ): opt.mirror) ;
+    this.render_opts.draggable = (typeof opt.draggable === 'undefined'? (initial? false : this.render_opts.draggable ): opt.draggable) ;
+    this.render_opts.show = (typeof opt.show === 'undefined'? (initial? false : this.render_opts.show ): opt.show) ;
+    this.render_opts.label = (typeof opt.label === 'undefined'? (initial? false : this.render_opts.label ): opt.label) ;
+    
+    this.render_opts.scale = (typeof opt.scale === 'undefined'? (initial? 1 : this.render_opts.scale ): opt.scale) ;
+    
+    if( ! initial ) {
+        DIATONIC.map.color.fill = (typeof opt.fillColor === 'undefined'? DIATONIC.map.color.fill : opt.fillColor) ;
+        DIATONIC.map.color.background = (typeof opt.backgroundColor === 'undefined'? DIATONIC.map.color.background : opt.backgroundColor) ;
+        DIATONIC.map.color.open = (typeof opt.openColor === 'undefined'? DIATONIC.map.color.open : opt.openColor) ;
+        DIATONIC.map.color.close = (typeof opt.closeColor === 'undefined'? DIATONIC.map.color.close : opt.closeColor) ;
+    }    
+};
+
 
 ABCXJS.tablature.Accordion.prototype.loadById = function (id) {
     for (var g = 0; g < this.accordions.length; g ++)
@@ -62,51 +86,40 @@ ABCXJS.tablature.Accordion.prototype.clearKeyboard = function(full) {
 };
 
 ABCXJS.tablature.Accordion.prototype.changeNotation = function() {
-    var k = this.loadedKeyboard;
-    k.render_opts.label = ! k.render_opts.label;
-    k.redraw();
+    this.render_opts.label = ! this.render_opts.label;
+    this.loadedKeyboard.redraw(this.render_opts);
 };
 
-ABCXJS.tablature.Accordion.prototype.rotateKeyboard = function(div) {
-    var o = this.loadedKeyboard.render_opts;
+ABCXJS.tablature.Accordion.prototype.rotateKeyboard = function(div_id) {
+    var o = this.render_opts;
     
     if( o.transpose ) {
         o.mirror=!o.mirror;
     }
+    
     o.transpose=!o.transpose;
     
-    this.printKeyboard(div);
-};
-
-ABCXJS.tablature.Accordion.prototype.scaleKeyboard = function(div_id) {
-    var k = this.loadedKeyboard;
-    if( k.render_opts.scale < 1.2 ) {
-        k.render_opts.scale += 0.2;
-    } else {
-        k.render_opts.scale = 0.8;
-    }
     this.printKeyboard(div_id);
 };
 
-ABCXJS.tablature.Accordion.prototype.layoutKeyboard = function( div_id, options ) {
-    var k = this.loadedKeyboard;
-    if(options.transpose!==undefined)
-        k.render_opts.transpose = options.transpose;
-    if(options.mirror!==undefined)
-        k.render_opts.mirror = options.mirror;
+ABCXJS.tablature.Accordion.prototype.scaleKeyboard = function(div_id) {
+    if( this.render_opts.scale < 1.2 ) {
+        this.render_opts.scale += 0.2;
+    } else {
+        this.render_opts.scale = 0.8;
+    }
     this.printKeyboard(div_id);
 };
 
 ABCXJS.tablature.Accordion.prototype.printKeyboard = function(div_id, options) {
     
-    var k = this.loadedKeyboard;
+    this.setRenderOptions( options );
+    
     var div =( typeof(div_id) === "string" ? document.getElementById(div_id) : div_id );
 
-    k.setRenderOptions(options);
-
-    if( k.render_opts.show ) {
+    if( this.render_opts.show ) {
         div.style.display="inline-block";
-        k.print(div);
+        this.loadedKeyboard.print(div,this.render_opts);
     } else {
         div.style.display="none";
     }

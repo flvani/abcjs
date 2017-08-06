@@ -1,11 +1,11 @@
 @font-face {
   font-family: 'abcx';
-  src: url('../font/abcx.eot?56136009');
-  src: url('../font/abcx.eot?56136009#iefix') format('embedded-opentype'),
-       url('../font/abcx.woff2?56136009') format('woff2'),
-       url('../font/abcx.woff?56136009') format('woff'),
-       url('../font/abcx.ttf?56136009') format('truetype'),
-       url('../font/abcx.svg?56136009#abcx') format('svg');
+  src: url('../font/abcx.eot?34718525');
+  src: url('../font/abcx.eot?34718525#iefix') format('embedded-opentype'),
+       url('../font/abcx.woff2?34718525') format('woff2'),
+       url('../font/abcx.woff?34718525') format('woff'),
+       url('../font/abcx.ttf?34718525') format('truetype'),
+       url('../font/abcx.svg?34718525#abcx') format('svg');
   font-weight: normal;
   font-style: normal;
 }
@@ -15,7 +15,7 @@
 @media screen and (-webkit-min-device-pixel-ratio:0) {
   @font-face {
     font-family: 'abcx';
-    src: url('../font/abcx.svg?56136009#abcx') format('svg');
+    src: url('../font/abcx.svg?34718525#abcx') format('svg');
   }
 }
 */
@@ -142,3 +142,7 @@
 .ico-wrench:before { content: '\e854'; } /* '' */
 .ico-zoom-in:before { content: '\e855'; } /* '' */
 .ico-zoom-out:before { content: '\e856'; } /* '' */
+.ico-vplayer-4:before { content: '\e857'; } /* '' */
+.ico-vplayer-3:before { content: '\e858'; } /* '' */
+.ico-vplayer:before { content: '\e859'; } /* '' */
+.ico-vplayer-2:before { content: '\e85a'; } /* '' */

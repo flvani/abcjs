@@ -22,10 +22,6 @@ if (!window.ABCXJS)
 if (!window.ABCXJS.write)
     window.ABCXJS.write = {};
 
-ABCXJS.write.highLightColor = "#5151ff";
-ABCXJS.write.highLightColor = "#ff0000";
-ABCXJS.write.unhighLightColor = 'black';
-
 ABCXJS.write.StaffGroupElement = function() {
     this.voices = [];
 };
@@ -593,14 +589,14 @@ ABCXJS.write.AbsoluteElement.prototype.setMouse = function(printer) {
 ABCXJS.write.AbsoluteElement.prototype.highlight = function(keepState) {
     if(!this.svgElem) return;
     if(keepState) this.svgElem.prevFill = this.svgElem.style.fill;
-    this.svgElem.style.setProperty( 'fill', ABCXJS.write.highLightColor );
-    (this.svgArea) && this.svgArea.style.setProperty( 'fill', ABCXJS.write.highLightColor );
+    this.svgElem.style.setProperty( 'fill', ABCXJS.write.color.highLight );
+    (this.svgArea) && this.svgArea.style.setProperty( 'fill', ABCXJS.write.color.highLight );
     (this.svgArea) && this.svgArea.style.setProperty( 'fill-opacity', '0.15' );
 };
 
 ABCXJS.write.AbsoluteElement.prototype.unhighlight = function(keepState) {
     if(!this.svgElem) return;
-    var fill = (keepState && this.svgElem.prevFill ) ? this.svgElem.prevFill : ABCXJS.write.unhighLightColor;
+    var fill = (keepState && this.svgElem.prevFill ) ? this.svgElem.prevFill : ABCXJS.write.color.unhighLight;
     this.svgElem.style.setProperty( 'fill', fill );
     (this.svgArea) && this.svgArea.style.setProperty( 'fill-opacity', '0' );
 };

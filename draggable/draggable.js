@@ -22,7 +22,7 @@ DRAGGABLE.ui.Window = function( parent, aButtons, options, callback, aToolBarBut
     this.left = opts.left || 0;
     this.width = opts.width || '';
     this.height = opts.height || '';
-    this.minTop = opts.minTop ||  1;
+    //this.minTop = opts.minTop ||  1;
     this.minWidth = opts.minWidth ||  160;
     this.minHeight = opts.minHeight ||  48;
     this.hasStatusBar = opts.statusBar || false;
@@ -41,15 +41,38 @@ DRAGGABLE.ui.Window = function( parent, aButtons, options, callback, aToolBarBut
     
     if(!parent) {
         document.body.appendChild(this.topDiv);
-    }else{
-        this.topDiv.style.position = "relative";
-        this.topDiv.style.margin = "1px";
+    } else {
         if(typeof parent === 'string') {
             this.parent = document.getElementById(parent);
         } else {
             this.parent = parent;
         }
         this.parent.appendChild(this.topDiv);
+    }
+    
+    if( ! this.draggable ) {
+        this.topDiv.style.position = "relative";
+        this.topDiv.style.margin = "1px";
+    } else {
+        if(this.parent) {
+            this.topDiv.style.position = "absolute";
+        }
+        this.minTop = 1;
+        this.minLeft = 1;
+            // encontrar um jeito eficiente de limitar a janela filha dentro da principal
+            
+//            var yPos = 0;
+//            var tempEl = this.topDiv;
+//
+//            while ( tempEl !== null ) 
+//            {
+//                yPos += tempEl.getBoundingClientRect().top;
+//                tempEl = tempEl.parentElement;
+//            }              
+//                
+//            this.minTop = yPos;
+//            this.minLeft = childOffset.left;
+            
     }
     
     if(callback) {
@@ -168,8 +191,9 @@ DRAGGABLE.ui.Window = function( parent, aButtons, options, callback, aToolBarBut
         }
         e.preventDefault();
         var y = ((p.y - self.y) + parseInt(self.topDiv.style.top));
+        var x = ((p.x - self.x) + parseInt(self.topDiv.style.left));
         self.topDiv.style.top = (self.minTop && y < self.minTop ? self.minTop: y) + "px"; //hardcoded top of window
-        self.topDiv.style.left = ((p.x - self.x) + parseInt(self.topDiv.style.left)) + "px";
+        self.topDiv.style.left = (self.minLeft && x < self.minLeft ? self.minLeft: x) + "px";
         self.x = p.x;
         self.y = p.y;
     };
@@ -227,7 +251,7 @@ DRAGGABLE.ui.Window.prototype.resize = function( ) {
     
     this.dataDiv.style.height =  (h-2) + 'px';
     
-    if(this.parent) {
+    if(this.parent && !this.draggable) {
         this.topDiv.style.width =  (this.parent.clientWidth-5) + 'px';
     }
 
@@ -478,7 +502,7 @@ DRAGGABLE.ui.ColorPicker = function( itens ) {
     this.container = new DRAGGABLE.ui.Window( 
           null
         , [ 'apply|Selecionar' ]
-        , {translate:false, draggable:true, width: "auto", height: "auto", title: 'Seletor de Cores', zIndex:"200" }
+        , {translate:false, draggable:true, width: "auto", height: "auto", title: 'Selecionar cor', zIndex:"200" }
         , {listener : this, method: 'pickerCallBack' }
     );
 

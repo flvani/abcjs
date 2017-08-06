@@ -26,48 +26,49 @@ if (!window.ABCXJS)
 if (!ABCXJS.edit)
 	ABCXJS.edit = {};
 
-ABCXJS.edit.EditArea = function (editor_id, listener) {
+ABCXJS.edit.EditArea = function (editor_id, callback, options ) {
     
     this.container = {};
-    var aBotoes = [ 'gutter|Numeração das Linhas', 'download|Salvar Local', 'fontsize|Tamanho da fonte', 'DROPDOWN|Tom|selKey', 
-                    'octavedown|Oitava|Oitava', 'octaveup|Oitava|Oitava', 'search|Localizar e substituir', 
-                    'undo|Dezfazer', 'redo|Refazer', 'lighton|Realçar texto', 'readonly|Bloquear edição' ] ;
+    var aToolBotoes = [ 
+        'gutter|Numeração das Linhas', 'download|Salvar Local', 'fontsize|Tamanho da fonte', 'DROPDOWN|Tom|selKey', 
+        'octavedown|Oitava|Oitava', 'octaveup|Oitava|Oitava', 'search|Localizar e substituir', 
+        'undo|Dezfazer', 'redo|Refazer', 'lighton|Realçar texto', 'readonly|Bloquear edição' 
+    ] ;
     
-    if(editor_id) {
-        var topDiv;
-        if(typeof editor_id === 'string'  )
-            topDiv = document.getElementById( editor_id );
-        else 
-            topDiv = editor_id;
-        if(topDiv) {
-            
-            this.container = new DRAGGABLE.ui.Window( 
-                  topDiv
-                , [ 'popout|Expandir janela' ]
-                , {translate:false, draggable:false, width: "100%", height: "200px", title: 'Editor ABCX' }
-                , {listener : listener, method: 'editorCallback' }
-                , aBotoes
-            );
-            
-        } else {
-            alert( 'this.container: elemento "'+editor_id+'" não encontrado.');
-        }
-    } else {
-        
+    options.draggable = typeof( options.draggable ) === 'undefined'? true: options.draggable;
+    
+    var topDiv;
+    if(typeof editor_id === 'string'  )
+        topDiv = document.getElementById( editor_id );
+    else 
+        topDiv = editor_id;
+    
+    if(!topDiv) {
+        alert( 'this.container: elemento "'+editor_id+'" não encontrado.');
+    }
+    
+    if(! options.draggable ) {
         this.container = new DRAGGABLE.ui.Window( 
-            null
-            , [ 'move|Mover', 'popin|Fixar janela' , 'maximize|Maximizar janela' ]
-            , {translate:false, statusBar:true, left:"0", top:"0", width: "640px", height: "480px", title: 'Editor ABCX' }
-            , {listener : listener, method: 'editorCallback' }
-            , aBotoes
+              topDiv
+            , [ 'popout|Janela flutuante' ]
+            , options
+            , callback
+            , aToolBotoes
+        );
+    } else {
+        this.container = new DRAGGABLE.ui.Window( 
+              topDiv
+            , [ 'move|Mover', 'popin|Janela fixa' , 'maximize|Maximizar janela' ]
+            , options
+            , callback
+            , aToolBotoes
         );
 
         this.keySelector = new ABCXJS.edit.KeySelector( 
-                'selKey', this.container.menu['selKey'], {listener: this, method: 'editorCallback'} );
+                'selKey', this.container.menu['selKey'], callback );
         
     }
-    
-    
+   
     this.aceEditor = ace.edit(this.container.dataDiv);
     this.aceEditor.setOptions( {highlightActiveLine: true, selectionStyle: "text", cursorStyle: "smooth"/*, maxLines: Infinity*/ } );
     this.aceEditor.setOptions( {fontFamily: "monospace",  fontSize: "15px", fontWeight: "normal" });
@@ -81,8 +82,8 @@ ABCXJS.edit.EditArea = function (editor_id, listener) {
     
     this.createStyleSheet();
     
-    if(listener)
-        this.addChangeListener(listener);
+    if(callback.listener)
+        this.addChangeListener(callback.listener);
 };
 
 // Este css é usado apenas quando o playback da partitura está funcionando
@@ -94,7 +95,7 @@ ABCXJS.edit.EditArea.prototype.createStyleSheet = function () {
 };
 
 ABCXJS.edit.EditArea.prototype.setEditorHighLightStyle = function () {
-    this.style.innerHTML = '.ABCXHighLight { background-color: '+ABCXJS.write.highLightColor+' !important; opacity: 0.15; }';
+    this.style.innerHTML = '.ABCXHighLight { background-color: '+ABCXJS.write.color.highLight+' !important; opacity: 0.15; }';
 };
 
 ABCXJS.edit.EditArea.prototype.clearEditorHighLightStyle = function () {
@@ -131,11 +132,6 @@ ABCXJS.edit.EditArea.prototype.setVisible = function (visible) {
 
 ABCXJS.edit.EditArea.prototype.setReadOnly = function (readOnly) {
     
-//    if( readOnly)
-//        this.aceEditor.renderer.hideCursor();
-//    else
-//        this.aceEditor.renderer.showCursor();
-
     this.aceEditor.setOptions({
         readOnly: readOnly,
         highlightActiveLine: !readOnly,

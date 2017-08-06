@@ -115,9 +115,18 @@ ABCXJS.Editor = function (params) {
     this.studio.dataDiv.className += ' customScrollBar';
     this.studio.setVisible(true);
 
-    this.editareaFixa = new ABCXJS.edit.EditArea(this.studio.dataDiv, this);
+    this.editareaFixa = new ABCXJS.edit.EditArea(
+          this.studio.dataDiv
+        , {listener : this, method: 'editorCallback' }
+        , {draggable:false, toolbar: false, translate:false, width: "100%", height: "200px", title: 'Editor ABCX' }
+    );
 
-    this.editareaMovel = new ABCXJS.edit.EditArea(null, this);
+    this.editareaMovel = new ABCXJS.edit.EditArea(
+          this.studio.dataDiv
+        , {listener: this, method: 'editorCallback' }
+        , { toolbar: true, statusBar:true, translate:false, left:"100px", top:"100px", width: "640px", height: "480px", title: 'Editor ABCX' } 
+    );
+    
     this.editareaMovel.setVisible(false);
 
     this.editarea = this.editareaFixa;
@@ -186,7 +195,7 @@ ABCXJS.Editor = function (params) {
                 }
             }
 
-            //this.accordion.printKeyboard(this.keyboardWindow.dataDiv , {fillColor:'yellow', openColor:'navy', closeColor:'purple', backgroundColor:'gray' } );
+            //this.accordion.printKeyboard(this.keyboardWindow.dataDiv , {fillColor:'yellow', openColor:'navy', closeColor:'purple', backgroundColor:'red' } );
             this.accordion.printKeyboard(this.keyboardWindow.dataDiv);
 
         } else {
@@ -510,16 +519,15 @@ ABCXJS.Editor.prototype.updateSelection = function (force) {
 };
 
 ABCXJS.Editor.prototype.switchMap = function() {
-    var k = this.accordion.loadedKeyboard;
-    k.render_opts.show = !k.render_opts.show;
-    this.keyboardWindow.topDiv.style.display = k.render_opts.show? 'block': 'none';
+    this.accordion.render_opts.show = ! this.accordion.render_opts.show;
+    this.keyboardWindow.topDiv.style.display = this.accordion.render_opts.show? 'block': 'none';
     this.accordion.printKeyboard(this.keyboardWindow.dataDiv);
 };
 
 ABCXJS.Editor.prototype.highlight = function(abcelem) {
   try {
         this.editarea.setSelection(abcelem);
-        if(this.accordion.loadedKeyboard.render_opts.show && !this.player.playing) {
+        if(this.accordion.render_opts.show && !this.player.playing) {
             this.accordion.clearKeyboard(true);
             this.midiParser.setSelection(abcelem);
         }    
@@ -749,9 +757,9 @@ ABCXJS.Editor.prototype.settingsCallback = function(action, elem ) {
             this.settingsWindow.setVisible(false);
             break;
         case 'APPLY':
-           ABCXJS.write.highLightColor = this.p1.value;
-           this.accordion.loadedKeyboard.render_opts.closeColor = this.p2.value;
-           this.accordion.loadedKeyboard.render_opts.openColor = this.p3.value;
+           ABCXJS.write.color.highLight = this.p1.value;
+           DIATONIC.map.color.close = this.p2.value;
+           DIATONIC.map.color.open = this.p3.value;
            this.accordion.loadedKeyboard.legenda.setOpen();
            this.accordion.loadedKeyboard.legenda.setClose();
            this.settingsWindow.setVisible(false);
@@ -856,9 +864,9 @@ ABCXJS.Editor.prototype.showSettings = function() {
             this.p2 = document.getElementById( 'foleFechando');
             this.p3 = document.getElementById( 'foleAbrindo');
             
-            this.p1.style.backgroundColor = this.p1.value = ABCXJS.write.highLightColor;
-            this.p2.style.backgroundColor = this.p2.value = this.accordion.loadedKeyboard.render_opts.closeColor;
-            this.p3.style.backgroundColor = this.p3.value = this.accordion.loadedKeyboard.render_opts.openColor ;
+            this.p1.style.backgroundColor = this.p1.value = ABCXJS.write.color.highLight;
+            this.p2.style.backgroundColor = this.p2.value = DIATONIC.map.color.close;
+            this.p3.style.backgroundColor = this.p3.value = DIATONIC.map.color.open ;
 
             new DRAGGABLE.ui.ColorPicker(['corRealce', 'foleFechando', 'foleAbrindo']);
 
