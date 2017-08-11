@@ -91,6 +91,13 @@ ABCXJS.edit.EditArea = function (editor_id, callback, options ) {
 
 ABCXJS.edit.EditArea.prototype.editareaCallback = function ( action, elem, searchTerm, replaceTerm ) {
     switch(action) {
+        case 'UNDO': 
+        case 'REDO': 
+        case 'UNDO-ALL': 
+        case 'REDO-ALL': 
+        case 'FONTSIZE': 
+            alert( 'EditArea: ' + action );
+            break;
         case 'DO-SEARCH': 
             this.searchRange = this.aceEditor.find(searchTerm, {
                 wrap: true,
