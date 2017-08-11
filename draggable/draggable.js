@@ -452,8 +452,7 @@ DRAGGABLE.ui.Alert = function( parent, action, text, description ) {
     
     if(!parent) {
         
-        this.parentCallback = parent.callback;
-        callback = null;
+        this.parentCallback = null;
         
         // redimensiona a workspace
         var winH = window.innerHeight
@@ -468,7 +467,7 @@ DRAGGABLE.ui.Alert = function( parent, action, text, description ) {
         y = winH/2-200;
         
     } else {
-        callback = parent.callback;
+        this.parentCallback = parent.callback;
         x = parent.topDiv.offsetLeft + 50;
         y = parent.topDiv.offsetTop+ 50;
     }
