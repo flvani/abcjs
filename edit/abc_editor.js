@@ -124,7 +124,7 @@ ABCXJS.Editor = function (params) {
     this.editareaMovel = new ABCXJS.edit.EditArea(
           this.studio.dataDiv
         , {listener: this, method: 'editorCallback' }
-        , { toolbar: true, statusBar:true, translate:false, left:"100px", top:"100px", width: "640px", height: "480px", title: 'Editor ABCX' } 
+        , { toolbar: true, statusBar:true, translate:false, left:"100px", top:"100px", width: "680px", height: "480px", title: 'Editor ABCX' } 
     );
     
     this.editareaMovel.setVisible(false);
@@ -681,9 +681,6 @@ ABCXJS.Editor.prototype.editorCallback = function (action, elem) {
         case 'OCTAVEDOWN': 
            this.fireChanged(-12, {force: true} );
            break;
-        case 'GUTTER': // liga/desliga a numeracao de linhas
-            this.editarea.setGutter();
-            break;
         case 'MAXIMIZE': 
             if( elem.innerHTML.indexOf('ico-full' ) > 0 ) {
                 elem.innerHTML = '<a href="" title="Restaurar janela"><i class="ico-restore"></i></a>';
@@ -691,23 +688,6 @@ ABCXJS.Editor.prototype.editorCallback = function (action, elem) {
             } else {
                 elem.innerHTML = '<a href="" title="Maximizar janela"><i class="ico-full-screen"></i></a>';
             }
-            break;
-            
-        case 'READONLY': // habilita/bloqueia a edição
-            if( elem.innerHTML.indexOf('ico-lock-open' ) > 0 ) {
-                elem.innerHTML = '<a href="" title="Bloquear edição"><i class="ico-lock ico-black ico-large"></i></a>';
-                this.editarea.setReadOnly(true);
-            } else {
-                elem.innerHTML = '<a href="" title="Bloquear edição"><i class="ico-lock-open ico-black ico-large"></i></a>';
-                this.editarea.setReadOnly(false);
-            }
-            break;
-        case 'LIGHTON': // liga/desliga realce de sintaxe
-            if( elem.innerHTML.indexOf('ico-lightbulb-on' ) > 0 )
-                elem.innerHTML = '<a href="" title="Realçar texto"><i class="ico-lightbulb-off ico-black ico-large"></i></a>';
-            else 
-                elem.innerHTML = '<a href="" title="Realçar texto"><i class="ico-lightbulb-on ico-black ico-large"></i></a>';
-            this.editarea.setSyntaxHighLight();
             break;
         case 'POPIN':
             this.editarea.setVisible(false);
@@ -727,21 +707,6 @@ ABCXJS.Editor.prototype.editorCallback = function (action, elem) {
         case 'CLOSE':
             this.editarea.setVisible(false);
             this.resize();
-            //this.editarea = this.editareaFixa;
-            //this.editarea.setString(this.editareaMovel.getString());
-            //this.editarea.setVisible(true);
-            break;
-        case 'ROTATE':
-            //this.accordion.rotateKeyboard(this.keyboardWindow.dataDiv);
-            break;
-        case 'ZOOM':
-            //this.accordion.scaleKeyboard(this.keyboardWindow.dataDiv);
-            break;
-        case 'GLOBE':
-            //this.accordion.changeNotation();
-            break;
-        case 'RESIZE':
-            this.editarea.resize();
             break;
         default:
             alert(action);
@@ -767,14 +732,13 @@ ABCXJS.Editor.prototype.settingsCallback = function(action, elem ) {
         case 'RESET':
             this.alert = new DRAGGABLE.ui.Alert( 
                 this.settingsWindow, action, 
-                'Você deseja redefinir todos os itens?',
-                'Isto fará com que todos os itens retornem para suas configurações iniciais, \
-                 isto inclui cores e posicionamento, entre outras coisas.');
+                '<br>Você deseja redefinir todos os itens?',
+                '<br>Isto fará com que todos os itens retornem para suas configurações iniciais, \
+                 isto inclui posicionamento e cores, entre outras coisas.');
             break;
         case 'RESET-YES':
             break;
         case 'RESET-NO':
-        case 'RESET-CANCEL':
             this.alert.close();
             this.alert = null;
             break;

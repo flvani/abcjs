@@ -326,7 +326,7 @@ V:3 accordionTab
             
             window.onresize = function()
             {
-                myEditor.resize();
+                (myEditor) && myEditor.resize();
             };
             
             function loadAccordions() {
@@ -377,12 +377,21 @@ V:3 accordionTab
             
             function initApp() {
                 
+//                var alert = new DRAGGABLE.ui.Alert( 
+//                    null, null, 
+//                    'Notamos que você está usando o Internet Explorer.',
+//                    'Infelizmente, algumas funcionalidades do site não estarão disponíveis para este navegador. Assim, '+
+//                            ' sugerimos que você use, de preferência, os navegadores: <ul><li>Chrome (chromium)</li><li>Firefox</li><li>Safari</li><li>MS-Edge</li></ul>');
+//                return;
                 
                 console.log( 
-                      '\nchromium: ' + ABCXJS.misc.isChromium() 
-                    + '\nchrome: ' + ABCXJS.misc.isChrome() 
-                    + '\nfirefox: ' + ABCXJS.misc.isFirefox()  
-                    + '\nIE: ' + ABCXJS.misc.isIE() + '\n '
+                      '\nChrome: ' + ABCXJS.misc.isChrome() 
+                    + '\nCromium: ' + ABCXJS.misc.isChromium() 
+                    + '\nFirefox: ' + ABCXJS.misc.isFirefox()  
+                    + '\nOpera: ' + ABCXJS.misc.isOpera() 
+                    + '\nSafari: ' + ABCXJS.misc.isSafari() 
+                    + '\nInternet Explorer: ' + ABCXJS.misc.isIE() 
+                    + '\nEdge: ' + ABCXJS.misc.isEdge() + '\n '
                 );
         
                 /*MIDI.programChange( 0, 0 );

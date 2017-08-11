@@ -28,9 +28,12 @@ if (!ABCXJS.edit)
 
 ABCXJS.edit.EditArea = function (editor_id, callback, options ) {
     
+    this.parentCallback = callback;
+    this.callback = { listener: this, method: 'editareaCallback' };
+    
     this.container = {};
     var aToolBotoes = [ 
-        'gutter|Numeração das Linhas', 'download|Salvar Local', 'fontsize|Tamanho da fonte', 'DROPDOWN|Tom|selKey', 
+        'gutter|Numeração das Linhas', 'download|Salvar Local', 'REFRESH|Atualizar', 'fontsize|Tamanho da fonte', 'DROPDOWN|Tom|selKey', 
         'octavedown|Oitava|Oitava', 'octaveup|Oitava|Oitava', 'search|Localizar e substituir', 
         'undo|Dezfazer', 'redo|Refazer', 'lighton|Realçar texto', 'readonly|Bloquear edição' 
     ] ;
@@ -52,7 +55,7 @@ ABCXJS.edit.EditArea = function (editor_id, callback, options ) {
               topDiv
             , [ 'popout|Janela flutuante' ]
             , options
-            , callback
+            , this.callback
             , aToolBotoes
         );
     } else {
@@ -60,12 +63,12 @@ ABCXJS.edit.EditArea = function (editor_id, callback, options ) {
               topDiv
             , [ 'move|Mover', 'popin|Janela fixa' , 'maximize|Maximizar janela' ]
             , options
-            , callback
+            , this.callback
             , aToolBotoes
         );
 
         this.keySelector = new ABCXJS.edit.KeySelector( 
-                'selKey', this.container.menu['selKey'], callback );
+                'selKey', this.container.menu['selKey'], this.callback );
         
     }
    
@@ -84,6 +87,63 @@ ABCXJS.edit.EditArea = function (editor_id, callback, options ) {
     
     if(callback.listener)
         this.addChangeListener(callback.listener);
+};
+
+ABCXJS.edit.EditArea.prototype.editareaCallback = function ( action, elem, searchTerm, replaceTerm ) {
+    switch(action) {
+        case 'DO-SEARCH': 
+            this.searchRange = this.aceEditor.find(searchTerm, {
+                wrap: true,
+                caseSensitive: true, 
+                wholeWord: true,
+                regExp: false,
+                preventScroll: true // do not change selection
+            });
+            this.aceEditor.selection.setRange(this.searchRange);
+            break;
+        case 'DO-REPLACE': 
+            this.aceEditor.session.replace(this.searchRange, replaceTerm );
+            break;
+        case 'DO-REPLACEALL': 
+            this.aceEditor.replaceAll(searchTerm, replaceTerm );
+            break;
+        case 'SEARCH': 
+            this.alert = new DRAGGABLE.ui.ReplaceDialog( this.container );
+            break;
+        case 'GUTTER': // liga/desliga a numeracao de linhas
+            this.setGutter();
+            break;
+        case 'MAXIMIZE': 
+            if( elem.innerHTML.indexOf('ico-full' ) > 0 ) {
+                elem.innerHTML = '<a href="" title="Restaurar janela"><i class="ico-restore"></i></a>';
+                this.fullEditarea();
+            } else {
+                elem.innerHTML = '<a href="" title="Maximizar janela"><i class="ico-full-screen"></i></a>';
+            }
+            break;
+            
+        case 'READONLY': // habilita/bloqueia a edição
+            if( elem.innerHTML.indexOf('ico-lock-open' ) > 0 ) {
+                elem.innerHTML = '<a href="" title="Bloquear edição"><i class="ico-lock ico-black ico-large"></i></a>';
+                this.setReadOnly(true);
+            } else {
+                elem.innerHTML = '<a href="" title="Bloquear edição"><i class="ico-lock-open ico-black ico-large"></i></a>';
+                this.setReadOnly(false);
+            }
+            break;
+        case 'LIGHTON': // liga/desliga realce de sintaxe
+            if( elem.innerHTML.indexOf('ico-lightbulb-on' ) > 0 )
+                elem.innerHTML = '<a href="" title="Realçar texto"><i class="ico-lightbulb-off ico-black ico-large"></i></a>';
+            else 
+                elem.innerHTML = '<a href="" title="Realçar texto"><i class="ico-lightbulb-on ico-black ico-large"></i></a>';
+            this.setSyntaxHighLight();
+            break;
+        case 'RESIZE':
+            this.resize();
+            break;
+        default:
+            this.parentCallback.listener[this.parentCallback.method](action, elem);
+    }
 };
 
 // Este css é usado apenas quando o playback da partitura está funcionando

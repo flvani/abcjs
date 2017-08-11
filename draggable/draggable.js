@@ -261,13 +261,9 @@ DRAGGABLE.ui.Window.prototype.defineCallback = function( cb ) {
     this.callback = cb;
 };
 
-DRAGGABLE.ui.Window.prototype.modifyCloseAction = function( newAction ) {
-    this.closeAction = newAction;
-};
-
 DRAGGABLE.ui.Window.prototype.eventsCentral = function (action, elem) {
     if (this.callback) {
-        this.callback.listener[this.callback.method](( action === 'CLOSE' ? this.closeAction : action ), elem);
+        this.callback.listener[this.callback.method]( action, elem);
     } else {
         if (action === 'CLOSE') {
             this.close();
@@ -300,7 +296,8 @@ DRAGGABLE.ui.Window.prototype.addTitle = function( id, title  ) {
         }
     }
     
-    div.innerHTML = '<span id="dSpanTranslatableTitle'+id+'" style="padding-left: 5px;">'+title+'</span><span id="dSpanTitle'+id+'" style="padding-left: 5px;"></span>';
+    div.innerHTML = '<span id="dSpanTranslatableTitle'+id+'" style="padding-left: 5px;">'+title+
+                        '</span><span id="dSpanTitle'+id+'" style="padding-left: 5px; white-space: nowrap;"></span>';
     
     self.menuDiv.appendChild(div);
     
@@ -355,7 +352,8 @@ DRAGGABLE.ui.Window.prototype.addToolButtons = function( id,  aButtons ) {
     if(!aButtons) return;
     var self = this;
     
-    var buttonMap = { GUTTER:'list-numbered', DOWNLAOD:'download', FONTSIZE: 'fontsize', DROPDOWN:'open-down', OCTAVEDOWN:'octave-down', OCTAVEUP:'octave-up', 
+    var buttonMap = { GUTTER:'list-numbered', REFRESH:'bolt', DOWNLOAD:'download', FONTSIZE: 'fontsize', 
+                        DROPDOWN:'open-down', OCTAVEDOWN:'octave-down', OCTAVEUP:'octave-up', 
                         SEARCH:'find-and-replace', UNDO:'undo', REDO:'redo', LIGHTON:'lightbulb-on', READONLY:'lock-open' };
     
     aButtons.forEach( function (label) {
@@ -412,6 +410,18 @@ DRAGGABLE.ui.Window.prototype.addPushButtons = function( aButtons ) {
         var action = part[1].split('-');
 
         switch( action[action.length-1] ) {
+            case 'SEARCH': 
+                ico = 'ico-search';  
+                claz = 'pushbutton';  
+                break;
+            case 'REPLACE': 
+                ico = 'ico-redo';  
+                claz = 'pushbutton';  
+                break;
+            case 'REPLACEALL': 
+                ico = 'ico-redo-all';  
+                claz = 'pushbutton';  
+                break;
             case 'YES': 
             case 'APPLY': 
                 ico = 'ico-circle-tick';  
@@ -422,6 +432,7 @@ DRAGGABLE.ui.Window.prototype.addPushButtons = function( aButtons ) {
                 claz = 'pushbutton';  
                 break;
             case 'NO': 
+            case 'CLOSE': 
             case 'CANCEL':
                 ico = 'ico-circle-error'; 
                 claz = 'pushbutton cancel'; 
@@ -435,18 +446,47 @@ DRAGGABLE.ui.Window.prototype.addPushButtons = function( aButtons ) {
 
 DRAGGABLE.ui.Alert = function( parent, action, text, description ) {
     
+    var x, y, callback;
+    
+    this.callback = { listener: this, method: 'alertCallback' };
+    
+    if(!parent) {
+        
+        this.parentCallback = parent.callback;
+        callback = null;
+        
+        // redimensiona a workspace
+        var winH = window.innerHeight
+                    || document.documentElement.clientHeight
+                    || document.body.clientHeight;
+
+        var winW = window.innerWidth
+                || document.documentElement.clientWidth
+                || daocument.body.clientWidth;
+        
+        x = winW/2-350;
+        y = winH/2-200;
+        
+    } else {
+        callback = parent.callback;
+        x = parent.topDiv.offsetLeft + 50;
+        y = parent.topDiv.offsetTop+ 50;
+    }
+    
+    var w = ( action ? "500px" : "700px" );
+    
     this.container = new DRAGGABLE.ui.Window(
           null
         , null
-        , {title: 'Alerta', translate: false, statusBar: false, top: "100px", left: "300px",  zIndex: 300}
-        , parent.callback
+        , {title: 'Alerta', translate: false, statusBar: false, top: "100px", left: "300px", width: w, height:"auto", zIndex: 300}
+        , this.callback
     );
     
-    this.container.dataDiv.innerHTML = '<div class="alert" >\n\
-        <div class="flag"><i class="ico-circle-exclamation"></i></div>\n\
-        <div class="text-group">\n\
+    this.container.dataDiv.innerHTML = '<div class="dialog" >\n\
+        <div class="flag"><i class="ico-circle-'+(action? 'question' : 'exclamation')+'"></i></div>\n\
+        <div class="text-group'+(action? '' : ' wide')+'">\n\
             <div class="title">'+text+'</div>\n\
-            <div class="descrition">'+description+'</div>\n\
+            <div class="description">'+description+'</div>\n\
         </div>\n\
         <div id="pgAlert" class="pushbutton-group" style="right: 0; bottom: 0;" >\
             <div id="botao1Alert"></div>\n\
@@ -454,13 +494,20 @@ DRAGGABLE.ui.Alert = function( parent, action, text, description ) {
         </div>\n\
     </div>';
     
-    this.container.addPushButtons([
-        'botao1Alert|'+action+'-YES|Sim',
-        'botao2Alert|'+action+'-NO|Não'
-    ]);
+    if( action ) {
     
-    this.container.modifyCloseAction(action+'-CANCEL');
+        this.container.addPushButtons([
+            'botao1Alert|'+action+'-YES|Sim',
+            'botao2Alert|'+action+'-NO|Não'
+        ]);
 
+    } else {
+        
+        this.container.addPushButtons([
+            'botao1Alert|CLOSE|Ok'
+        ]);
+        
+    }   
     this.modalPane = document.getElementById('modalPane');
     
     if( ! this.modalPane ) {
@@ -474,7 +521,7 @@ DRAGGABLE.ui.Alert = function( parent, action, text, description ) {
     }    
     
     this.modalPane.style.display = 'block';
-    this.container.move( parent.topDiv.offsetLeft + 50, parent.topDiv.offsetTop+ 50 );
+    this.container.move( x, y );
         
     this.container.setVisible(true);
 
@@ -486,6 +533,19 @@ DRAGGABLE.ui.Alert.prototype.close = function( ) {
     this.container.topDiv.remove();
     this.container = null;
 };
+
+DRAGGABLE.ui.Alert.prototype.alertCallback = function ( action, elem ) {
+    switch(action) {
+        case 'CLOSE': 
+        case 'CANCEL': 
+           this.close();
+           break;
+        default:
+            if( this.parentCallback )
+                this.parentCallback.listener[this.parentCallback.method](action, elem);
+    }
+};
+
 
 DRAGGABLE.ui.PushButton = function( item, claz, ico, act, text, janela) {
     this.item = item;
@@ -565,4 +625,84 @@ DRAGGABLE.ui.ColorPicker.prototype.activate = function( parent ) {
     this.container.topDiv.style.top = ( bounds.top + bounds.height/2  -120 ) + "px";
     this.container.topDiv.style.left = bounds.left + bounds.width + 5 + "px";
     this.container.setVisible(true);
+};
+
+
+DRAGGABLE.ui.ReplaceDialog = function( parent ) {
+    
+    var x, y;
+    
+    this.parentCallback = parent.callback;
+    this.callback = { listener: this, method: 'dialogCallback' };
+    x = parent.topDiv.offsetLeft + 50;
+    y = parent.topDiv.offsetTop+ 50;
+    
+    this.container = new DRAGGABLE.ui.Window(
+          null
+        , null
+        , {title: 'Procurar e substituir', translate: false, statusBar: false, top: "100px", left: "300px", width: "700px", height:"auto", zIndex: 300}
+        , this.callback
+    );
+    
+    this.container.dataDiv.innerHTML = '<div class="dialog" >\n\
+        <div class="flag"><i class="ico-find-and-replace"></i></div>\n\
+        <div class="text-group">\n\
+            <br>Localizar:<input id="searchTerm" type="text" value="nós"></input>\n\
+            <br><br>Substituir por: <input id="replaceTerm" type="text" value="vós"></input>\n\
+        </div>\n\
+        <div id="pgAlert" class="pushbutton-group" style="right: 0; bottom: 0;" >\
+            <div id="botao1Replace"></div>\n\
+            <div id="botao2Replace"></div>\n\
+            <div id="botao3Replace"></div>\n\
+            <div id="botao4Replace"></div>\n\
+        </div>\n\
+    </div>';
+    
+        this.container.addPushButtons([
+            'botao1Replace|SEARCH|Localizar',
+            'botao2Replace|REPLACE|Substituir',
+            'botao3Replace|REPLACEALL|Substituir Tudo',
+            'botao4Replace|CANCEL|Cancelar'
+        ]);
+        
+        this.searchTerm = document.getElementById("searchTerm");
+        this.replaceTerm = document.getElementById("replaceTerm");
+        
+//    this.modalPane = document.getElementById('modalPane');
+//    
+//    if( ! this.modalPane ) {
+//        
+//        var div = document.createElement("DIV");
+//        div.id = 'modalPane';
+//        div.style = "position:absolute; z-index:250; background-color:black; opacity:0.4; top:0; left:0; bottom:0; right:0; pointer-events: block; display:none;";
+//        document.body.appendChild(div);
+//        this.modalPane = div;
+//        
+//    }    
+//    
+//    this.modalPane.style.display = 'block';
+    this.container.move( x, y );
+        
+    this.container.setVisible(true);
+
+};
+
+DRAGGABLE.ui.ReplaceDialog.prototype.close = function( ) {
+    //this.modalPane.style.display = 'none';
+    this.container.setVisible(false);
+    this.container.topDiv.remove();
+    this.container = null;
+};
+
+DRAGGABLE.ui.ReplaceDialog.prototype.dialogCallback = function ( action, elem ) {
+    switch(action) {
+        case 'MOVE': 
+           break;
+        case 'CLOSE': 
+        case 'CANCEL': 
+           this.close();
+           break;
+        default:
+            this.parentCallback.listener[this.parentCallback.method]('DO-'+action, elem, this.searchTerm.value, this.replaceTerm.value);
+    }
 };
