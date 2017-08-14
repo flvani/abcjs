@@ -67,28 +67,13 @@ DIATONIC.map.AccordionMap.prototype.getPathToImage = function () {
     return this.image;
 };
 
-DIATONIC.map.AccordionMap.prototype.getChord = function (name) {
-    return this.chords.items[name];
-};
-DIATONIC.map.AccordionMap.prototype.setChord = function (name,content, addSort) {
-    this.chords.items[name] = content;
-    if(addSort) this.chords.sortedIndex.push( name );
+DIATONIC.map.AccordionMap.prototype.getAbcText = function (type, title) {
+    return this[type].items[title];
 };
 
-DIATONIC.map.AccordionMap.prototype.getSong = function (name) {
-    return this.songs.items[name];
-};
-DIATONIC.map.AccordionMap.prototype.setSong = function (name,content, addSort) {
+DIATONIC.map.AccordionMap.prototype.setSong = function (name, content, addSort) {
     this.songs.items[name] = content;
-    if(addSort) this.songs.sortedIndex.push( name );
-};
-
-DIATONIC.map.AccordionMap.prototype.getPractice = function (name) {
-    return this.practices.items[name];
-};
-DIATONIC.map.AccordionMap.prototype.setPractice = function (name,content, addSort) {
-    this.practices.items[name] = content;
-    if(addSort) this.practices.sortedIndex.push( name );
+    if( addSort ) this.songs.sortedIndex.push( name );
 };
 
 DIATONIC.map.AccordionMap.prototype.getFirstSong = function () {
@@ -105,6 +90,28 @@ DIATONIC.map.AccordionMap.prototype.getFirstChord = function () {
     var ret = this.chords.sortedIndex[0] || "";
     return ret;
 };
+
+
+//DIATONIC.map.AccordionMap.prototype.getChord = function (name) {
+//
+//DIATONIC.map.AccordionMap.prototype.getChord = function (name) {
+//    return this.chords.items[name];
+//};
+//DIATONIC.map.AccordionMap.prototype.setChord = function (name,content, addSort) {
+//    this.chords.items[name] = content;
+//    if(addSort) this.chords.sortedIndex.push( name );
+//};
+//
+//DIATONIC.map.AccordionMap.prototype.getSong = function (name) {
+//    return this.songs.items[name];
+//};
+//DIATONIC.map.AccordionMap.prototype.getPractice = function (name) {
+//    return this.practices.items[name];
+//};
+//DIATONIC.map.AccordionMap.prototype.setPractice = function (name,content, addSort) {
+//    this.practices.items[name] = content;
+//    if(addSort) this.practices.sortedIndex.push( name );
+//};
 
 DIATONIC.map.AccordionMap.prototype.loadABCX = function(pathList, cb ) {
     var toLoad = 0;

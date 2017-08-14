@@ -124,7 +124,7 @@ ABCXJS.Editor = function (params) {
     this.editareaMovel = new ABCXJS.edit.EditArea(
           this.studio.dataDiv
         , {listener: this, method: 'editorCallback' }
-        , { toolbar: true, statusBar:true, translate:false, left:"100px", top:"100px", width: "680px", height: "480px", title: 'Editor ABCX' } 
+        , { toolbar: true, statusBar:true, translate:false, left:"100px", top:"100px", width: "700px", height: "480px", title: 'Editor ABCX' } 
     );
     
     this.editareaMovel.setVisible(false);
@@ -702,7 +702,11 @@ ABCXJS.Editor.prototype.editorCallback = function (action, elem) {
             this.editarea.setVisible(true);
             this.editarea.resize();
             break;
+        case 'RESIZE':
+            alert(action);
+            break;
         case 'MOVE':
+            alert(action);
             break;
         case 'CLOSE':
             this.editarea.setVisible(false);

@@ -32,10 +32,22 @@ ABCXJS.edit.EditArea = function (editor_id, callback, options ) {
     this.callback = { listener: this, method: 'editareaCallback' };
     
     this.container = {};
+    
     var aToolBotoes = [ 
-        'gutter|Numeração das Linhas', 'download|Salvar Local', 'REFRESH|Atualizar', 'fontsize|Tamanho da fonte', 'DROPDOWN|Tom|selKey', 
-        'octavedown|Oitava|Oitava', 'octaveup|Oitava|Oitava', 'search|Localizar e substituir', 
-        'undo|Dezfazer', 'redo|Refazer', 'lighton|Realçar texto', 'readonly|Bloquear edição' 
+         'GUTTER|Numeração das Linhas'
+        ,'DOWNLOAD|Salvar Local'
+        ,'UNDOALL|Dezfazer Tudo'
+        ,'UNDO|Dezfazer'
+        ,'REDO|Refazer'
+        ,'REDOALL|Refazer Tudo'
+        ,'REFRESH|Atualizar'
+        ,'SEARCH|Localizar e substituir'
+        ,'FONTSIZE|Tamanho da fonte'
+        ,'DROPDOWN|Tom|selKey'
+        ,'OCTAVEDOWN|Oitava|Oitava'
+        ,'OCTAVEUP|Oitava|Oitava'
+        ,'LIGHTON|Realçar texto'
+        ,'READONLY|Bloquear edição' 
     ] ;
     
     options.draggable = typeof( options.draggable ) === 'undefined'? true: options.draggable;
@@ -72,9 +84,10 @@ ABCXJS.edit.EditArea = function (editor_id, callback, options ) {
         
     }
    
+    this.currrentFontSize = '15px';
     this.aceEditor = ace.edit(this.container.dataDiv);
     this.aceEditor.setOptions( {highlightActiveLine: true, selectionStyle: "text", cursorStyle: "smooth"/*, maxLines: Infinity*/ } );
-    this.aceEditor.setOptions( {fontFamily: "monospace",  fontSize: "15px", fontWeight: "normal" });
+    this.aceEditor.setOptions( {fontFamily: "monospace",  fontSize: this.currrentFontSize, fontWeight: "normal" });
     this.aceEditor.renderer.setOptions( {highlightGutterLine: true, showPrintMargin: false, showFoldWidgets: false } );
     this.aceEditor.$blockScrolling = Infinity;
     this.Range = require("ace/range").Range;
@@ -92,11 +105,26 @@ ABCXJS.edit.EditArea = function (editor_id, callback, options ) {
 ABCXJS.edit.EditArea.prototype.editareaCallback = function ( action, elem, searchTerm, replaceTerm ) {
     switch(action) {
         case 'UNDO': 
+            this.undoManager.hasUndo() && this.undoManager.undo(false);
+            break;
         case 'REDO': 
-        case 'UNDO-ALL': 
-        case 'REDO-ALL': 
+            this.undoManager.hasRedo() && this.undoManager.redo(false);
+            break;
+        case 'UNDOALL': 
+            while( this.undoManager.hasUndo() )
+                this.undoManager.undo(false);
+            break;
+        case 'REDOALL': 
+            while( this.undoManager.hasRedo() )
+                this.undoManager.redo(false);
+            break;
         case 'FONTSIZE': 
-            alert( 'EditArea: ' + action );
+            switch(this.currrentFontSize) {
+                case '15px': this.currrentFontSize = '18px'; break;
+                case '18px': this.currrentFontSize = '22px'; break;
+                case '22px': this.currrentFontSize = '15px'; break;
+            }
+            this.aceEditor.setOptions( { fontSize: this.currrentFontSize });
             break;
         case 'DO-SEARCH': 
             this.searchRange = this.aceEditor.find(searchTerm, {
@@ -109,10 +137,30 @@ ABCXJS.edit.EditArea.prototype.editareaCallback = function ( action, elem, searc
             this.aceEditor.selection.setRange(this.searchRange);
             break;
         case 'DO-REPLACE': 
-            this.aceEditor.session.replace(this.searchRange, replaceTerm );
+            if(this.searchRange) {
+                this.aceEditor.session.replace(this.searchRange, replaceTerm );
+            }
+            this.searchRange = this.aceEditor.find(searchTerm, {
+                wrap: true,
+                caseSensitive: true, 
+                wholeWord: true,
+                regExp: false,
+                preventScroll: true // do not change selection
+            });
+            this.aceEditor.selection.setRange(this.searchRange);
             break;
         case 'DO-REPLACEALL': 
-            this.aceEditor.replaceAll(searchTerm, replaceTerm );
+            this.searchRange = true;
+            while(this.searchRange) {
+                this.searchRange = this.aceEditor.find(searchTerm, {
+                    wrap: true,
+                    caseSensitive: true, 
+                    wholeWord: true,
+                    regExp: false,
+                    preventScroll: true // do not change selection
+                });
+                this.aceEditor.session.replace(this.searchRange, replaceTerm );
+            }
             break;
         case 'SEARCH': 
             this.alert = new DRAGGABLE.ui.ReplaceDialog( this.container );
@@ -120,15 +168,6 @@ ABCXJS.edit.EditArea.prototype.editareaCallback = function ( action, elem, searc
         case 'GUTTER': // liga/desliga a numeracao de linhas
             this.setGutter();
             break;
-        case 'MAXIMIZE': 
-            if( elem.innerHTML.indexOf('ico-full' ) > 0 ) {
-                elem.innerHTML = '<a href="" title="Restaurar janela"><i class="ico-restore"></i></a>';
-                this.fullEditarea();
-            } else {
-                elem.innerHTML = '<a href="" title="Maximizar janela"><i class="ico-full-screen"></i></a>';
-            }
-            break;
-            
         case 'READONLY': // habilita/bloqueia a edição
             if( elem.innerHTML.indexOf('ico-lock-open' ) > 0 ) {
                 elem.innerHTML = '<a href="" title="Bloquear edição"><i class="ico-lock ico-black ico-large"></i></a>';
@@ -147,6 +186,7 @@ ABCXJS.edit.EditArea.prototype.editareaCallback = function ( action, elem, searc
             break;
         case 'RESIZE':
             this.resize();
+            this.parentCallback.listener[this.parentCallback.method](action, elem);
             break;
         default:
             this.parentCallback.listener[this.parentCallback.method](action, elem);
@@ -270,6 +310,8 @@ ABCXJS.edit.EditArea.prototype.setString = function ( str ) {
     this.aceEditor.setValue(str);
     this.aceEditor.clearSelection();
     this.initialText = this.getString();
+    this.aceEditor.getSession().setUndoManager(new ace.UndoManager());
+    this.undoManager = this.aceEditor.getSession().getUndoManager();
     this.aceEditor.moveCursorToPosition(cursorPosition); 
     
 };
@@ -280,7 +322,7 @@ ABCXJS.edit.EditArea.prototype.getSelection = function() {
 
 ABCXJS.edit.EditArea.prototype.setSelection = function (abcelem) {
     if (abcelem && abcelem.position) {
-        
+        this.searchRange = null;
         var range = new this.Range(
             abcelem.position.anchor.line, abcelem.position.anchor.ch, 
             abcelem.position.head.line, abcelem.position.head.ch

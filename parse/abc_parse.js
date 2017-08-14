@@ -85,9 +85,9 @@ window.ABCXJS.parse.Parse = function(transposer_, accordion_) {
     if (accordion_)
         this.accordion = accordion_;
 
-    var tune = new window.ABCXJS.data.Tune();
-    var tokenizer = new window.ABCXJS.parse.tokenizer();
-
+    var tune;
+    var tokenizer;
+    var header;
     var strTune = '';
 
     this.getTune = function() {
@@ -361,8 +361,6 @@ window.ABCXJS.parse.Parse = function(transposer_, accordion_) {
         return found;
     };
     
-    var header = new window.ABCXJS.parse.ParseHeader(tokenizer, warn, multilineVars, tune, this.transposer);
-
     var letter_to_chord = function(line, i)
     {
         if (line.charAt(i) === '"')
@@ -1845,8 +1843,15 @@ window.ABCXJS.parse.Parse = function(transposer_, accordion_) {
         // switches.stop_on_warning : stop at the first warning encountered.
         // switches.print: format for the page instead of the browser.
         //window.ABCXJS.parse.transpose = transpose;
+        
         strTune = tuneTxt;
-        tune.reset();
+        
+        tune = new window.ABCXJS.data.Tune();
+        tokenizer = new window.ABCXJS.parse.tokenizer();
+        header = new window.ABCXJS.parse.ParseHeader(tokenizer, warn, multilineVars, tune, this.transposer);
+
+        //tune.reset();
+        
         if (switches && switches.print)
             tune.media = 'print';
         multilineVars.reset();
