@@ -454,12 +454,12 @@ ABCXJS.write.Printer.prototype.addSelectListener = function (listener) {
   this.listeners[this.listeners.length] = listener;
 };
 
-// notify all listeners que o modelo mudou
-ABCXJS.write.Printer.prototype.notifyChange = function () {
-  for (var i=0; i<this.listeners.length;i++) {
-    this.listeners[i].modelChanged && this.listeners[i].modelChanged();
-  }
-};
+//// notify all listeners que o modelo mudou
+//ABCXJS.write.Printer.prototype.notifyChange = function () {
+//  for (var i=0; i<this.listeners.length;i++) {
+//    this.listeners[i].modelChanged && this.listeners[i].modelChanged();
+//  }
+//};
 
 // notify all listeners that a graphical element has been selected
 ABCXJS.write.Printer.prototype.notifySelect = function (abselem, keepState) {

@@ -52,7 +52,10 @@ ABCXJS.edit.EditArea = function (editor_id, callback, options ) {
     
     options.draggable = typeof( options.draggable ) === 'undefined'? true: options.draggable;
     
+    this.compileOnChange = typeof( options.compileOnChange ) === 'undefined'? false: options.compileOnChange;
+    
     var topDiv;
+    
     if(typeof editor_id === 'string'  )
         topDiv = document.getElementById( editor_id );
     else 
@@ -89,17 +92,22 @@ ABCXJS.edit.EditArea = function (editor_id, callback, options ) {
     this.aceEditor.setOptions( {highlightActiveLine: true, selectionStyle: "text", cursorStyle: "smooth"/*, maxLines: Infinity*/ } );
     this.aceEditor.setOptions( {fontFamily: "monospace",  fontSize: this.currrentFontSize, fontWeight: "normal" });
     this.aceEditor.renderer.setOptions( {highlightGutterLine: true, showPrintMargin: false, showFoldWidgets: false } );
+    this.aceEditor.session.setNewLineMode('unix');
     this.aceEditor.$blockScrolling = Infinity;
     this.Range = require("ace/range").Range;
     this.gutterVisible = true;
     this.syntaxHighLightVisible = true;
-    this.isDragging = false;
     this.selectionEnabled = true;
-    
+
+    this.restartUndoManager();
     this.createStyleSheet();
     
     if(callback.listener)
         this.addChangeListener(callback.listener);
+};
+
+ABCXJS.edit.EditArea.prototype.setCompileOnChange = function ( value ) {
+    this.compileOnChange = value;
 };
 
 ABCXJS.edit.EditArea.prototype.editareaCallback = function ( action, elem, searchTerm, replaceTerm ) {
@@ -267,36 +275,31 @@ ABCXJS.edit.EditArea.prototype.setOptions = function (editorOptions, rendererOpt
 ABCXJS.edit.EditArea.prototype.addChangeListener = function (listener) {
     var that = this;
     
-    that.aceEditor.textInput.getElement().addEventListener('keyup', function (ev) {
+    that.aceEditor.textInput.getElement().addEventListener('keyup', function () {
         if(that.timerId1) clearTimeout(that.timerId1);
-        that.timerId1 = setTimeout(function () { 
-            listener.updateSelection(); 
-        }, 200);	
+        that.timerId1 = setTimeout(function () { listener.updateSelection(); }, 100);	
     });
    
     that.aceEditor.on('dblclick', function () {
         if(that.timerId2) clearTimeout(that.timerId2);
-        that.timerId2 = setTimeout(function () { 
-            listener.updateSelection(); 
-        }, 200);	
+        that.timerId2 = setTimeout(function () { listener.updateSelection(); }, 100);	
     });
     
     that.aceEditor.on('mousedown', function () {
-        that.isDragging = true;
         that.aceEditor.on('mouseup', function () {
             if(that.timerId3) clearTimeout(that.timerId3);
-            that.timerId3 = setTimeout(function () { 
-                listener.updateSelection(); that.isDragging = false;  
-            }, 200);	
+            that.timerId3 = setTimeout(function () { listener.updateSelection(); }, 100);	
         });
     });
     
     that.aceEditor.on('change', function () {
-        if(listener.refreshController && listener.refreshController.checked && !listener.parsing ) {
+        
+        var text  = that.aceEditor.getValue();
+        
+        if( that.compileOnChange && text !== that.initialText ) {
+            that.initialText = text;
             if(that.timerId4) clearTimeout(that.timerId4);
-            that.timerId4 = setTimeout(function () { 
-                listener.fireChanged( 0, {force:true} ); 
-            }, 300);	
+            that.timerId4 = setTimeout(function () { listener.fireChanged( 0, {force:false, showProgress:false} ); }, 300);	
         }
     });
 };
@@ -306,14 +309,18 @@ ABCXJS.edit.EditArea.prototype.getString = function() {
 };
 
 ABCXJS.edit.EditArea.prototype.setString = function ( str ) {
+    if( str === this.aceEditor.getValue() ) return;
     var cursorPosition = this.aceEditor.getCursorPosition();
     this.aceEditor.setValue(str);
     this.aceEditor.clearSelection();
     this.initialText = this.getString();
-    this.aceEditor.getSession().setUndoManager(new ace.UndoManager());
-    this.undoManager = this.aceEditor.getSession().getUndoManager();
     this.aceEditor.moveCursorToPosition(cursorPosition); 
     
+};
+
+ABCXJS.edit.EditArea.prototype.restartUndoManager = function ( ) {
+    this.aceEditor.getSession().setUndoManager(new ace.UndoManager());
+    this.undoManager = this.aceEditor.getSession().getUndoManager();
 };
 
 ABCXJS.edit.EditArea.prototype.getSelection = function() {

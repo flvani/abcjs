@@ -118,13 +118,17 @@ ABCXJS.Editor = function (params) {
     this.editareaFixa = new ABCXJS.edit.EditArea(
           this.studio.dataDiv
         , {listener : this, method: 'editorCallback' }
-        , {draggable:false, toolbar: false, translate:false, width: "100%", height: "200px", title: 'Editor ABCX' }
+        , {draggable:false, toolbar: false, translate:false, width: "100%", height: "200px"
+            , compileOnChange: true
+            , title: 'Editor ABCX' }
     );
 
     this.editareaMovel = new ABCXJS.edit.EditArea(
           this.studio.dataDiv
         , {listener: this, method: 'editorCallback' }
-        , { toolbar: true, statusBar:true, translate:false, left:"100px", top:"100px", width: "700px", height: "480px", title: 'Editor ABCX' } 
+        , { toolbar: true, statusBar:true, translate:false, left:"100px", top:"100px", width: "700px", height: "480px"
+            , compileOnChange: false
+            , title: 'Editor ABCX' } 
     );
     
     this.editareaMovel.setVisible(false);
@@ -443,63 +447,62 @@ ABCXJS.Editor.prototype.paramChanged = function(printerparams) {
 };
 
 // return true if the model has changed
-ABCXJS.Editor.prototype.parseABC = function(transpose, force ) {
-  var t = this.getString();
-  if ( (t.length === 0 || t===this.initialText ) && !force ) {
-    this.updateSelection();
-    return false;
-  }
-  
-  this.initialText = t;
-  
-  if (t === "") {
-	this.tunes = undefined;
-	this.warnings = [];
-	return true;
-  }
-  
-  var tunebook = new ABCXJS.TuneBook(t);
-  
-  this.tunes = [];
-  this.warnings = [];
-  
-  if(typeof transpose !== "undefined") {
-      if( this.transposer )
-        this.transposer.reset(transpose);
-      else
-        this.transposer = new ABCXJS.parse.Transposer( transpose );
-  }
-  
-  for (var i=0; i<tunebook.tunes.length; i++) {
-    var abcParser = new ABCXJS.parse.Parse( this.transposer, this.accordion );
-    abcParser.parse(tunebook.tunes[i].abc, this.parserparams ); //TODO handle multiple tunes
-    this.tunes[i] = abcParser.getTune();
+// o código abaixo não está totalmente preparado para trabalhar com várias canções de uma unica vez
+ABCXJS.Editor.prototype.parseABC = function (transpose, force) {
 
-    // transposição e geracao de tablatura podem ter alterado o texto ABC
-    this.parsing = true; // tratar melhor essa forma de inibir evento change da editarea durante a atualização da string
-    this.setString( abcParser.getStrTune() );
-    delete this.parsing;
-    
-    if( this.transposer && this.keySelector ) {
-        this.keySelector.populate( this.transposer.keyToNumber( this.transposer.getKeyVoice(0) ) );       
-        this.editareaMovel.keySelector.populate( this.transposer.keyToNumber( this.transposer.getKeyVoice(0) ) );       
+    var text = this.getString();
+
+    this.warnings = [];
+    this.tunes = [];
+
+    if (text === "") {
+        this.initialText = this.tunes = undefined;
+        return true;
     }
 
-    var warnings = abcParser.getWarnings() || [];
-    for (var j=0; j<warnings.length; j++) {
-      this.warnings.push(warnings[j]);
+    if (text === this.initialText && !force) {
+        this.updateSelection();
+        return false;
     }
 
-    if ( this.midiParser ) {
-        this.midiParser.parse( this.tunes[i], this.accordion.loadedKeyboard );
-         var warnings = this.midiParser.getWarnings();
-         for (var j=0; j<warnings.length; j++) {
-           this.warnings.push(warnings[j]);
-         }
+    var tunebook = new ABCXJS.TuneBook(text);
+
+    if (typeof transpose !== "undefined") {
+        if (this.transposer)
+            this.transposer.reset(transpose);
+        else
+            this.transposer = new ABCXJS.parse.Transposer(transpose);
     }
-    
-  }
-  return true;
+
+    for (var i = 0; i < tunebook.tunes.length; i++) {
+        var abcParser = new ABCXJS.parse.Parse(this.transposer, this.accordion);
+        abcParser.parse(tunebook.tunes[i].abc, this.parserparams); //TODO handle multiple tunes
+        this.tunes[i] = abcParser.getTune();
+        this.initialText = abcParser.getStrTune();
+
+        // transposição e geracao de tablatura podem ter alterado o texto ABC
+        this.setString(abcParser.getStrTune());
+
+        if (this.transposer && this.keySelector) {
+            this.keySelector.populate(this.transposer.keyToNumber(this.transposer.getKeyVoice(0)));
+            this.editareaMovel.keySelector.populate(this.transposer.keyToNumber(this.transposer.getKeyVoice(0)));
+        }
+
+        var warnings = abcParser.getWarnings() || [];
+        for (var j = 0; j < warnings.length; j++) {
+            this.warnings.push(warnings[j]);
+        }
+
+        if (this.midiParser) {
+            this.midiParser.parse(this.tunes[i], this.accordion.loadedKeyboard);
+            var warnings = this.midiParser.getWarnings();
+            for (var j = 0; j < warnings.length; j++) {
+                this.warnings.push(warnings[j]);
+            }
+        }
+
+    }
+    return true;
 };
 
 ABCXJS.Editor.prototype.updateSelection = function (force) {
@@ -547,37 +550,39 @@ ABCXJS.Editor.prototype.unhighlight = function(abcelem) {
 
 // call when abc text is changed and needs re-parsing
 ABCXJS.Editor.prototype.fireChanged = function (transpose, _opts) {
+    
+    if( this.changing ) return;
+    
+    this.changing = true;
     var opts = _opts || {};
     var force = opts.force || false;
- 
-    if ( !force )
-        return;
+    var showProgress = opts.showProgress || false;
 
     if (this.parseABC(transpose, force)) {
-        
-        var self = this;
-        if (this.timerId)	// If the user is still typing, cancel the update
-            clearTimeout(this.timerId);
-        this.timerId = setTimeout(function () { self.modelChanged(); }, 300);	// Is this a good comprimise between responsiveness and not redrawing too much?  
-        
+        this.modelChanged(showProgress);
+    } else {
+        delete this.changing;
     }
 };
 
-ABCXJS.Editor.prototype.modelChanged = function() {
+ABCXJS.Editor.prototype.modelChanged = function(showProgress) {
     var self = this;
-    var loader = this.startLoader( "ModelChanged" );
-    loader.start(  function() { self.onModelChanged(loader); }, '<br>&nbsp;&nbsp;&nbsp;Gerando partitura...<br><br>' );
+    if(showProgress) {
+        var loader = this.startLoader( "ModelChanged" );
+        loader.start(  function() { self.onModelChanged(loader); }, '<br>&nbsp;&nbsp;&nbsp;Gerando partitura...<br><br>' );
+    } else {
+        self.onModelChanged();
+    }    
 };
 
 ABCXJS.Editor.prototype.onModelChanged = function(loader) {
     var self = this;
     
-    MIDI.loader = new widgets.Loader();
-    
     this.fireTime = new Date();
     
     if (this.tunes === undefined) {
         this.canvasDiv.innerHTML = "";
+        delete this.changing;
         return;
     }
 
@@ -602,8 +607,12 @@ ABCXJS.Editor.prototype.onModelChanged = function(loader) {
     if (this.onchangeCallback)
         this.onchangeCallback(this);
     
-   loader.update( false, '<br>&nbsp;&nbsp;&nbsp;Gerando tablatura...<br><br>' );
-   loader.stop();
+    if( loader ) {
+        loader.update( false, '<br>&nbsp;&nbsp;&nbsp;Gerando tablatura...<br><br>' );
+        loader.stop();
+    }
+    
+    delete this.changing;
     
     window.setTimeout(function() {
         self.printWarnings();

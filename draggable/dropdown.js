@@ -39,7 +39,7 @@ DRAGGABLE.ui.DropdownMenu = function (topDiv, options, menu) {
         var e2 = document.createElement("input");
         e2.setAttribute( "type", "checkbox" );
         e1.appendChild(e2);
-        this.headers[ddmId] = { div: null, chk: e2, btn: null, list: null };
+        this.headers[ddmId] = { div: null, chk: e2, btn: null, list: null, actionList: {} };
         
         e2 = document.createElement("button");
         e2.setAttribute( "data-state", ddmId );
@@ -49,11 +49,6 @@ DRAGGABLE.ui.DropdownMenu = function (topDiv, options, menu) {
            e.preventDefault(); 
            self.eventsCentral(this.getAttribute("data-state"));
         }, false);
-//        e2.addEventListener( 'mouseout', function(e) {
-//           e.stopPropagation(); 
-//           e.preventDefault(); 
-//           self.closeMenu(this.getAttribute("data-state"));
-//        }, false);
         e1.appendChild(e2);
         this.headers[ddmId].btn = e2;
         e2 = document.createElement("div");
@@ -62,9 +57,6 @@ DRAGGABLE.ui.DropdownMenu = function (topDiv, options, menu) {
         e1.appendChild(e2);
         this.headers[ddmId].div = e2;
         
-        //element.addEventListener("msTransitionEnd", callfunction,false);
-        //element.addEventListener("oTransitionEnd", callfunction,false);
-        //element.addEventListener("webkitTransitionEnd", callfunction,false);        
         e2.addEventListener( 'transitionend', function(e) {
             if( e2.clientHeight > 0 && e2.clientHeight < e2.scrollHeight ) {
                 e2.style = 'overflow-y: auto;';
@@ -85,64 +77,44 @@ DRAGGABLE.ui.DropdownMenu = function (topDiv, options, menu) {
 
 DRAGGABLE.ui.DropdownMenu.prototype.disableSubMenu = function (ddm) {
     
-    var self = this;
-    
-    if( ! self.headers[ddm] ) {
+    if( ! this.headers[ddm] ) {
         console.log( 'Menu não encontrado!' );
         return;
     }
-    self.headers[ddm].chk.checked = false;
-    self.headers[ddm].btn.style.pointerEvents = 'none';
-    self.headers[ddm].btn.style.opacity = '0.5';
+    this.headers[ddm].chk.checked = false;
+    this.headers[ddm].btn.style.pointerEvents = 'none';
+    this.headers[ddm].btn.style.opacity = '0.5';
     
 };
 
 DRAGGABLE.ui.DropdownMenu.prototype.enableSubMenu = function (ddm) {
     
-    var self = this;
-    
-    if( ! self.headers[ddm] ) {
+    if( ! this.headers[ddm] ) {
         console.log( 'Menu não encontrado!' );
         return;
     }
-    self.headers[ddm].chk.checked = false;
-    self.headers[ddm].btn.style.pointerEvents = '';
-    self.headers[ddm].btn.style.opacity = '';
+    this.headers[ddm].chk.checked = false;
+    this.headers[ddm].btn.style.pointerEvents = '';
+    this.headers[ddm].btn.style.opacity = '';
     
 };
 
-
 DRAGGABLE.ui.DropdownMenu.prototype.emptySubMenu = function (ddm) {
     
-    var self = this;
-    
-    if( ! self.headers[ddm] ) {
+    if( ! this.headers[ddm] ) {
         console.log( 'Menu não encontrado!' );
         return;
     }
     
-    self.headers[ddm].list.innerHTML = "";
+    this.headers[ddm].list.innerHTML = "";
     //self.setSubMenuTitle(ddm, '...');
     
 };
 
-DRAGGABLE.ui.DropdownMenu.prototype.getItemByName = function (ddm, item) {
-    
-    var a_elements = this.headers[ddm].list.getElementsByTagName("a");
-
-    for (var i = 0, len = a_elements.length; i < len; i++ ) {
-        if( item === a_elements[ i ].innerHTML ) {
-            return a_elements[ i ].parentElement;
-        }
-    }        
-    return undefined;
-};
-
-//    if( tab.menu.selectItem(tab.ddmId, tab.title) ) {
 DRAGGABLE.ui.DropdownMenu.prototype.selectItem = function (ddm, item) {
     var toSel = item;
     if(  typeof item === "string" ) {
-        toSel = this.getItemByName(ddm, item);
+        toSel = this.headers[ddm].actionList[item];
     } 
     
     if( ! toSel ) return false;
@@ -153,19 +125,27 @@ DRAGGABLE.ui.DropdownMenu.prototype.selectItem = function (ddm, item) {
     
     toSel.className = 'selected';
     this.headers[ddm].selectedItem = toSel;
-    return true;
+    return toSel;
 };
     
 DRAGGABLE.ui.DropdownMenu.prototype.setSubMenuTitle = function (ddm, newTitle) {
     
-    var self = this;
-    
-    if( ! self.headers[ddm] ) {
+    if( ! this.headers[ddm] ) {
         console.log( 'Menu não encontrado!' );
         return;
     }
     
-    self.headers[ddm].btn.innerHTML = (newTitle || '' ) +'&#160;<i class="ico-open-down" data-toggle="toggle"></i>';
+    var title = newTitle;
+    if(  typeof title !== "string" ) {
+        title = newTitle.getElementsByTagName('a')[0].innerHTML;
+    } 
+    
+    if( ! title ) {
+        console.log( 'Título não encontrado!' );
+        return false;
+    }
+        
+    this.headers[ddm].btn.innerHTML = (title || '' ) +'&#160;<i class="ico-open-down" data-toggle="toggle"></i>';
     
 };
     
@@ -197,6 +177,9 @@ DRAGGABLE.ui.DropdownMenu.prototype.addItemSubMenu = function (ddm, newItem, pos
         }, false);
         e4.appendChild(e5);
     }
+    
+    self.headers[ddm].actionList[action]=e4;
+    
     if(pos>=0) {
         self.headers[ddm].list.insertBefore(e4, self.headers[ddm].list.children[pos]);
     } else {

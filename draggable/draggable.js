@@ -22,13 +22,14 @@ DRAGGABLE.ui.Window = function( parent, aButtons, options, callback, aToolBarBut
     this.left = opts.left || 0;
     this.width = opts.width || '';
     this.height = opts.height || '';
-    //this.minTop = opts.minTop ||  1;
     this.minWidth = opts.minWidth ||  160;
     this.minHeight = opts.minHeight ||  48;
     this.hasStatusBar = opts.statusBar || false;
     this.translate = opts.translate || false;
-    this.closeAction = 'CLOSE';
     this.draggable = typeof opts.draggable !== 'undefined' ? opts.draggable : true;
+    
+    //this.minTop = opts.minTop ||  1;
+    //this.closeAction = 'CLOSE';
     
     var div = document.createElement("DIV");
     div.setAttribute("id", "draggableWindow" +  this.id ); 
@@ -59,20 +60,6 @@ DRAGGABLE.ui.Window = function( parent, aButtons, options, callback, aToolBarBut
         }
         this.minTop = 1;
         this.minLeft = 1;
-            // encontrar um jeito eficiente de limitar a janela filha dentro da principal
-            
-//            var yPos = 0;
-//            var tempEl = this.topDiv;
-//
-//            while ( tempEl !== null ) 
-//            {
-//                yPos += tempEl.getBoundingClientRect().top;
-//                tempEl = tempEl.parentElement;
-//            }              
-//                
-//            this.minTop = yPos;
-//            this.minLeft = childOffset.left;
-            
     }
     
     if(callback) {
@@ -109,11 +96,6 @@ DRAGGABLE.ui.Window = function( parent, aButtons, options, callback, aToolBarBut
     div.setAttribute("class", "draggableData" ); 
     this.topDiv.appendChild( div );
     this.dataDiv = div;
-    
-//    this.stopMouse = function (e) {
-//        e.stopPropagation();
-//        //e.preventDefault();
-//    };
     
     if( this.hasStatusBar ) {
         
@@ -243,10 +225,6 @@ DRAGGABLE.ui.Window = function( parent, aButtons, options, callback, aToolBarBut
     
     this.titleSpan = document.getElementById("dSpanTitle"+this.id);
     
-    this.closeButton = document.getElementById("dCLOSEButton"+this.id);
-    this.closeButton.addEventListener( 'mousedown', function (e) { e.stopPropagation(); }, false);
-    this.closeButton.addEventListener( 'touchstart', function (e) { e.stopPropagation(); }, false);
-    
 };
 
 DRAGGABLE.ui.Window.prototype.move = function( left, top ) {
@@ -254,11 +232,38 @@ DRAGGABLE.ui.Window.prototype.move = function( left, top ) {
     this.topDiv.style.top = ( parseInt(top) ? parseInt(top) + 'px' : top );
 };
 
-DRAGGABLE.ui.Window.prototype.resize = function( ) {
+DRAGGABLE.ui.Window.prototype.setToolBarVisible = function (visible) {
+    if( this.toolbar ) {
+        this.toolBar.style.display = visible ? 'block' : 'none';
+        this.resize();
+    }
+};
+
+DRAGGABLE.ui.Window.prototype.dockWindow = function (dock) {
+    /// flavio parou aqui
+    if( dock ) {
+        this.draggable = false;
+        this.bottomDiv.style.display = 'none';
+        this.resize();
+        this.topDiv.className = "draggableWindow noShadow";
+        this.topDiv.style.position = "relative";
+        this.topDiv.style.margin = "1px";
+    } else {
+
+        this.topDiv.className = "draggableWindow";
+        if(this.parent) {
+            this.topDiv.style.position = "absolute";
+        }
+        this.minTop = 1;
+        this.minLeft = 1;
+    }
+};
+
+DRAGGABLE.ui.Window.prototype.resize = function() {
     
     var h = this.topDiv.clientHeight 
             - (this.menuDiv ? this.menuDiv.clientHeight : 0 ) 
-            - (this.toolBar ? this.toolBar.clientHeight : 0 ) 
+            - (this.toolBar && this.toolBar.style.display !== 'none' ? this.toolBar.clientHeight : 0 ) 
             - (this.bottomDiv ? this.bottomDiv.clientHeight : 0 );
     
     this.dataDiv.style.height =  (h-2) + 'px';
@@ -266,7 +271,6 @@ DRAGGABLE.ui.Window.prototype.resize = function( ) {
     if(this.parent && !this.draggable) {
         this.topDiv.style.width =  (this.parent.clientWidth-5) + 'px';
     }
-
 };
 
 DRAGGABLE.ui.Window.prototype.defineCallback = function( cb ) {
@@ -352,7 +356,14 @@ DRAGGABLE.ui.Window.prototype.addButtons = function( id,  aButtons ) {
 };
 
 DRAGGABLE.ui.Window.prototype.addAction = function( action, div, self ) {
-    if(action === 'MOVE') return;
+    
+    if(action === 'MOVE') return; // move já está coberto pelo dMenu
+    
+    if(! this.actionList ) {
+        this.actionList = {};
+    }
+    this.actionList[action] = div; // salva a lista de acões 
+    
     div.addEventListener( 'mousedown', function(e) {
         e.stopPropagation(); 
     }, true);
@@ -366,6 +377,10 @@ DRAGGABLE.ui.Window.prototype.addAction = function( action, div, self ) {
         e.stopPropagation(); 
         self.eventsCentral(action, div);
     }, true);
+};
+
+DRAGGABLE.ui.Window.prototype.dispatchAction = function( action ) {
+    this.eventsCentral(action, this.actionList[action] );
 };
 
 DRAGGABLE.ui.Window.prototype.addToolButtons = function( id,  aButtons ) {
@@ -613,19 +628,23 @@ DRAGGABLE.ui.ColorPicker.prototype.pickerCallBack = function( action, elem ) {
             break;
         case 'APPLY': 
             this.item.style.backgroundColor = this.item.value = this.newColor.value;
-            this.container.setVisible(false);
+            this.close();
             break;
         case 'CLOSE': 
            this.item.style.backgroundColor = this.item.value = this.originalColor.value;
-           this.container.setVisible(false);
+           this.close();
    }
+};
+
+DRAGGABLE.ui.ColorPicker.prototype.close = function( ) {
+    this.container.setVisible(false);
 };
 
 DRAGGABLE.ui.ColorPicker.prototype.activate = function( parent ) {
     var self = this;
     
     var oneTimeCloseFunction = function () { 
-        self.container.setVisible(false); 
+        self.close(); 
         this.removeEventListener('click', oneTimeCloseFunction, false );
     };
     

@@ -154,7 +154,7 @@
 <textarea id="svg_source" class="abc_textarea" spellcheck="false" cols="120" rows="10" style="display: none;" >
 </textarea>
     
-<textarea class="abc_textarea" spellcheck="false" id="abc" cols="120" rows="10"  style="display: none;">
+<textarea id="abc" class="abc_textarea" spellcheck="false" cols="120" rows="10"  style="display: none;">
 X:1006 %isto é um comentario.
 %isto também é um comentario.
 %%barnumbers 1 %isto também é um comentario.
@@ -181,8 +181,6 @@ V:baixo clef=bass
 |: C,2 [C,E,G,]2 C,2 [C,E,G,]2 | G,,2 [G,B,d,]2 G,,2 [G,B,d,]2 |  C,2 [C,E,G,]2 C,2 [C,E,G,]2 | G,,2 [G,B,d,]2 G,,2 [G,B,d,]2 |
 | C,2z2 A,,2z2 | F,,2 [F,A,c,]2 F,,2 [F,A,c,]2 | C,,2 [G,B,d,]2 G,,2 [G,B,d,]2 |  C,2 [C,E,G,]2 C,2 [C,E,G,]2 :|
 V:tab clef=accordionTab
-|: C+92 c+7'1.5 >+80.5 C+6'2 c+81.5 >+7'0.5 | G-7'2 g-5'2 G->2 g-z2 | C+92 c+7'1.5 >+80.5 C+6'2 c+81.5 >+7'0.5 | G-7'2 g->2 G-z2 g-91.5 >-8'0.5 |
-| C+8'2 z-a1.5 z-9'0.5 A-b2 z-9'1.5 z-b0.5 | F-a'2 f-b2 F-z2 f-91.5 >-8'0.5 | C+8'2 g-b1.5 >-9'0.5 G-7'2 g-8'1.5 >-90.5 | C+6'2 c+>2 C+>2 c+z2 :|
 </textarea>
     
 <textarea id="abcd" class="abc_textarea" spellcheck="false" cols="120" rows="10"  style="display: none;">
@@ -441,12 +439,10 @@ V:3 accordionTab
                         ,onchange: editorCallbackOnChange
                         ,gui: false
                     } );
-                    
-                myEditor.setString( document.getElementById("abc").value );
-                myEditor.fireChanged( 0, {force: true} );
-                //myEditor.resize();
-                
-                myEditor.menu.selectItem('menuGaitas', 'Acordeon 2' );
+
+                myEditor.setString( document.getElementById("abc").value )
+                myEditor.fireChanged( 0, {force: true} )
+                myEditor.menu.setSubMenuTitle('menuGaitas', myEditor.menu.selectItem('menuGaitas', 'Acordeon 2' ));
                 
             }
 
@@ -459,7 +455,7 @@ V:3 accordionTab
             function doForceRefresh() {
                 var doc = document.documentElement;
                 window.lastYpos = (window.pageYOffset || doc.scrollTop)  - (doc.clientTop || 0);                
-                myEditor.fireChanged( 0, {force: true} );
+                myEditor.fireChanged( 0, {force: true, showProgress:true} );
             };
 
             function doCheckDebug() {

@@ -212,10 +212,13 @@ window.ABCXJS.parse.Parse = function(transposer_, accordion_) {
                 }
                 break;
         }
-
-        this.handleTie( elem );
-        this.handleSlur( elem, line, xi );
-        tune.appendElement(type, multilineVars.currTexLineNum, xi, xf, elem, multilineVars.currentVoice); // flavio -startOfLine
+        try {
+            this.handleTie( elem );
+            this.handleSlur( elem, line, xi );
+            tune.appendElement(type, multilineVars.currTexLineNum, xi, xf, elem, multilineVars.currentVoice); // flavio -startOfLine
+        } catch(e) {
+             warn("Unknown character ignored", line, xi);
+        }
     };
     
 
@@ -1812,28 +1815,35 @@ window.ABCXJS.parse.Parse = function(transposer_, accordion_) {
         // Take care of whatever line endings come our way
         strTune = window.ABCXJS.parse.gsub(strTune, '\r\n', '\n');
         strTune = window.ABCXJS.parse.gsub(strTune, '\r', '\n');
-        strTune += '\n';	// Tacked on temporarily to make the last line continuation work
+        strTune += strTune.charAt(strTune.length-1) === '\n' ? '' : '\n';
         strTune = strTune.replace(/\n\\.*\n/g, "\n");	// get rid of latex commands.
+        
         var continuationReplacement = function(all, backslash, comment) {
             var spaces = "                                                                                                                                                                                                     ";
             var padding = comment ? spaces.substring(0, comment.length) : "";
             return backslash + " \x12" + padding;
         };
+        
         strTune = strTune.replace(/\\([ \t]*)(%.*)*\n/g, continuationReplacement);	// take care of line continuations right away, but keep the same number of characters
         var lines = strTune.split('\n');
-        // flavio - era só um if
+        
         while( window.ABCXJS.parse.last(lines).length === 0 )	// remove the blank lines at the end.
             lines.pop();
+        
         return lines;
+
     };
     
-    this.appendString = function(newLines) {
+    this.appendString = function(original, newLines) {
         //retira \n ao final  
-        var t = strTune;
+        var t = original;
         while( t.charAt(t.length-1) === '\n' ) {
             t = t.substr(0,t.length-1);
         }
-        return t + newLines;
+        while( newLines.charAt(newLines.length-1) === '\n' ) {
+            newLines = newLines.substr(0,newLines.length-1);
+        }
+        return t + newLines + '\n';
     };
     
 
@@ -1858,7 +1868,7 @@ window.ABCXJS.parse.Parse = function(transposer_, accordion_) {
         header.reset(tokenizer, warn, multilineVars, tune);
 
         var lines = this.strTuneHouseKeeping();
-        //try {
+        try {
             for (var lineNumber = 0; lineNumber < lines.length; lineNumber++) {
                 multilineVars.currTexLineNum = lineNumber;
                 var line = lines[lineNumber];
@@ -1917,7 +1927,7 @@ window.ABCXJS.parse.Parse = function(transposer_, accordion_) {
                         this.accordion.inferTablature(tune, multilineVars, addWarning );
                         
                         // obtem possiveis linhas inferidas para tablatura
-                        strTune = this.appendString( this.accordion.updateEditor() );
+                        strTune = this.appendString( strTune, this.accordion.updateEditor() );
                         
                     } else {
                         addWarning("Impossível inferir a tablatura: acordeon não definido!");
@@ -1945,20 +1955,12 @@ window.ABCXJS.parse.Parse = function(transposer_, accordion_) {
             tune.cleanUp();
             
             if( this.transposer && this.transposer.offSet !== 0 ) {
-                strTune = this.transposer.updateEditor( lines );
+                strTune = this.appendString( strTune, this.transposer.updateEditor( lines ) ) ;
             }
             
-            //remover linhas vazias ao final
-            var end = strTune.indexOf('\n\n');
-            while(end >= 0) {
-                strTune = strTune.substring(0, end);
-                end = strTune.indexOf('\n\n');
-            }
-    
-            
-        //} catch (err) {
-        //    if (err !== "normal_abort")
-        //        throw err;
-        //}
+        } catch (err) {
+            if (err !== "normal_abort")
+                throw err;
+        }
     };
 };

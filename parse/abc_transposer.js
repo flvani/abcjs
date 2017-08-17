@@ -381,6 +381,7 @@ window.ABCXJS.parse.Transposer.prototype.deleteTabLine = function ( n ) {
 };
 
 window.ABCXJS.parse.Transposer.prototype.updateEditor = function ( lines ) {
+    
     for( i = 0; i < this.changedLines.length; i++ ){
         lines[this.changedLines[i].line] = this.changedLines[i].text;
     }

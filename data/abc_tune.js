@@ -326,6 +326,9 @@ window.ABCXJS.data.Tune = function() {
                     vozes[r].el = 0; // sempre recomeçar a varredura dos elementos em cada nova linha
                 }
 
+                // talvez por conta da auto atualização isso acconteca - verificar problemas mais adiante
+                if(!this.lines[i].staffs[v0.sf] || !this.lines[i].staffs[vn.sf] ) continue;
+                
                 this.lines[i].staffs[v0.sf].voices[v0.vc].firstVoice = true;
                 this.lines[i].staffs[vn.sf].voices[vn.vc].lastVoice = true;
                 
