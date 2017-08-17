@@ -101,42 +101,31 @@ ABCXJS.Editor = function (params) {
     this.keyboardWindow = new DRAGGABLE.ui.Window( 
           null 
         , [ 'move|Mover', 'rotate|Rotacionar', 'zoom|Zoom','globe|Mudar Notação']
-        , {title: 'Keyb', translate: false, statusBar: false, top: "100px", left: "300px", zIndex: 100} 
+        , {title: 'Keyb', translate: false, statusbar: false, top: "100px", left: "300px", zIndex: 100} 
         , {listener: this, method: 'keyboardCallback'}
     );
                 
     this.studio = new DRAGGABLE.ui.Window(
             params.studio_id
             , null
-            , {translate: false, statusBar: false, draggable: false, top: "3px", left: "1px", width: '100%', height: "100%", title: 'Estúdio ABCX'}
+            , {translate: false, statusbar: false, draggable: false, top: "3px", left: "1px", width: '100%', height: "100%", title: 'Estúdio ABCX'}
             , {listener: this, method: 'studioCallback'}
     );
     
     this.studio.dataDiv.className += ' customScrollBar';
     this.studio.setVisible(true);
 
-    this.editareaFixa = new ABCXJS.edit.EditArea(
+    this.editarea = new ABCXJS.edit.EditArea(
           this.studio.dataDiv
         , {listener : this, method: 'editorCallback' }
-        , {draggable:false, toolbar: false, translate:false, width: "100%", height: "200px"
+        , {draggable:false, toolbar: true, statusbar:true, translate:false, width: "100%", height: "200px"
             , compileOnChange: true
             , title: 'Editor ABCX' }
     );
 
-    this.editareaMovel = new ABCXJS.edit.EditArea(
-          this.studio.dataDiv
-        , {listener: this, method: 'editorCallback' }
-        , { toolbar: true, statusBar:true, translate:false, left:"100px", top:"100px", width: "700px", height: "480px"
-            , compileOnChange: false
-            , title: 'Editor ABCX' } 
-    );
-    
-    this.editareaMovel.setVisible(false);
-
-    this.editarea = this.editareaFixa;
-
     this.editarea.setVisible(true);
     this.editarea.setToolBarVisible(false);
+    this.editarea.setStatusBarVisible(false);
     
     this.controldiv = document.createElement("DIV");
     this.controldiv.setAttribute("id", 'internalControlDiv');
@@ -485,7 +474,7 @@ ABCXJS.Editor.prototype.parseABC = function (transpose, force) {
 
         if (this.transposer && this.keySelector) {
             this.keySelector.populate(this.transposer.keyToNumber(this.transposer.getKeyVoice(0)));
-            this.editareaMovel.keySelector.populate(this.transposer.keyToNumber(this.transposer.getKeyVoice(0)));
+            this.editarea.keySelector.populate(this.transposer.keyToNumber(this.transposer.getKeyVoice(0)));
         }
 
         var warnings = abcParser.getWarnings() || [];
@@ -699,23 +688,26 @@ ABCXJS.Editor.prototype.editorCallback = function (action, elem) {
             }
             break;
         case 'POPIN':
-            this.editarea.setVisible(false);
-            this.editarea = this.editareaFixa;
-            this.editarea.setString(this.editareaMovel.getString());
-            this.editarea.setVisible(true);
+            this.editarea.dockWindow(true);
+            this.editarea.setToolBarVisible(false);
+            this.editarea.setStatusBarVisible(false);
+            this.editarea.container.move(0,0);
+            this.editarea.container.setSize("calc(100% -5px)","200px");
+            this.editarea.resize();
             break;
         case 'POPOUT':
-            this.editarea.setVisible(false);
-            this.editarea = this.editareaMovel;
-            this.editarea.setString(this.editareaFixa.getString());
-            this.editarea.setVisible(true);
+            this.editarea.dockWindow(false);
+            this.editarea.setToolBarVisible(true);
+            this.editarea.setStatusBarVisible(true);
+            this.editarea.container.move(100,100);
+            this.editarea.container.setSize("700px","480px");
             this.editarea.resize();
             break;
         case 'RESIZE':
-            alert(action);
+            //alert(action);
             break;
         case 'MOVE':
-            alert(action);
+            //alert(action);
             break;
         case 'CLOSE':
             this.editarea.setVisible(false);
@@ -765,7 +757,7 @@ ABCXJS.Editor.prototype.showSettings = function() {
         this.settingsWindow = new DRAGGABLE.ui.Window( 
               null 
             , null
-            , {title: 'Preferências', translate: false, statusBar: false, top: "300px", left: "500px", height:'400px',  width:'600px', zIndex: 50} 
+            , {title: 'Preferências', translate: false, statusbar: false, top: "300px", left: "500px", height:'400px',  width:'600px', zIndex: 50} 
             , {listener: this, method: 'settingsCallback'}
         );
 

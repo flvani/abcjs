@@ -51,7 +51,7 @@ ABCXJS.edit.EditArea = function (editor_id, callback, options ) {
     ] ;
     
     options.draggable = typeof( options.draggable ) === 'undefined'? true: options.draggable;
-    
+    this.draggagle = options.draggable;
     this.compileOnChange = typeof( options.compileOnChange ) === 'undefined'? false: options.compileOnChange;
     
     var topDiv;
@@ -65,28 +65,22 @@ ABCXJS.edit.EditArea = function (editor_id, callback, options ) {
         alert( 'this.container: elemento "'+editor_id+'" não encontrado.');
     }
     
-    if(! options.draggable ) {
-        this.container = new DRAGGABLE.ui.Window( 
-              topDiv
-            , [ 'popout|Janela flutuante' ]
-            , options
-            , this.callback
-            , aToolBotoes
-        );
-    } else {
-        this.container = new DRAGGABLE.ui.Window( 
-              topDiv
-            , [ 'move|Mover', 'popin|Janela fixa' , 'maximize|Maximizar janela' ]
-            , options
-            , this.callback
-            , aToolBotoes
-        );
-
-        this.keySelector = new ABCXJS.edit.KeySelector( 
-                'selKey', this.container.menu['selKey'], this.callback );
+    this.container = new DRAGGABLE.ui.Window( 
+          topDiv
+        , [ 'move|Mover', 'popin|Janela fixa', 'popout|Janela flutuante' , 'maximize|Maximizar janela']
+        , options
+        , this.callback
+        , aToolBotoes
+    );
+    
+    this.keySelector = new ABCXJS.edit.KeySelector( 
+        'selKey', this.container.menu['selKey'], this.callback );
         
-    }
-   
+    this.container.setButtonVisible( 'popout', !this.draggable);
+    this.container.setButtonVisible( 'popin', this.draggable );
+    this.container.setButtonVisible( 'maximize', this.draggable);
+    this.container.setButtonVisible( 'move', this.draggable );
+    
     this.currrentFontSize = '15px';
     this.aceEditor = ace.edit(this.container.dataDiv);
     this.aceEditor.setOptions( {highlightActiveLine: true, selectionStyle: "text", cursorStyle: "smooth"/*, maxLines: Infinity*/ } );
@@ -108,6 +102,18 @@ ABCXJS.edit.EditArea = function (editor_id, callback, options ) {
 
 ABCXJS.edit.EditArea.prototype.setCompileOnChange = function ( value ) {
     this.compileOnChange = value;
+};
+
+ABCXJS.edit.EditArea.prototype.dockWindow = function ( value ) {
+    this.draggable = ! value;
+    
+    this.container.setButtonVisible( 'popout', !this.draggable);
+    this.container.setButtonVisible( 'popin', this.draggable );
+    this.container.setButtonVisible( 'maximize', this.draggable);
+    this.container.setButtonVisible( 'move', this.draggable );
+    
+    this.container.dockWindow(value);
+    
 };
 
 ABCXJS.edit.EditArea.prototype.editareaCallback = function ( action, elem, searchTerm, replaceTerm ) {
@@ -235,10 +241,14 @@ ABCXJS.edit.EditArea.prototype.setSyntaxHighLight = function (visible) {
     this.aceEditor.getSession().setMode( this.syntaxHighLightVisible?'ace/mode/abcx':'ace/mode/text');
 };
 
+ABCXJS.edit.EditArea.prototype.setStatusBarVisible = function (visible) {
+    this.container.setStatusBarVisible(visible);
+    this.resize();
+};
+
 ABCXJS.edit.EditArea.prototype.setToolBarVisible = function (visible) {
-    this.toolBarVisible = visible;
-    this.container.toolBar.style.display = this.toolBarVisible ? 'block' : 'none';
-    this.resize(true);
+    this.container.setToolBarVisible(visible);
+    this.resize();
 };
 
 ABCXJS.edit.EditArea.prototype.setVisible = function (visible) {
