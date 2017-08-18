@@ -83,7 +83,7 @@ ABCXJS.Editor = function (params) {
             {title: 'Repertório', ddmId: 'menuRepertorio',
                 itens: [
                     'Restaurar o original',
-                    'Carregar do drive local',
+                    'Carregar do drive local|LOADLOC',
                     'Exportar para drive local',
                     'Partitura <i class="ico-play" /> Tablatura',
                     'Tablatura <i class="ico-play" /> Partitura'
@@ -680,12 +680,10 @@ ABCXJS.Editor.prototype.editorCallback = function (action, elem) {
            this.fireChanged(-12, {force: true} );
            break;
         case 'MAXIMIZE': 
-            if( elem.innerHTML.indexOf('ico-full' ) > 0 ) {
-                elem.innerHTML = '<a href="" title="Restaurar janela"><i class="ico-restore"></i></a>';
-                this.fullEditarea();
-            } else {
-                elem.innerHTML = '<a href="" title="Maximizar janela"><i class="ico-full-screen"></i></a>';
-            }
+            this.editarea.setMaximized(true);
+            break;
+        case 'RESTORE': 
+            this.editarea.setMaximized(false);
             break;
         case 'POPIN':
             this.editarea.dockWindow(true);

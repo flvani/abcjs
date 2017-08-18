@@ -53,6 +53,7 @@ ABCXJS.edit.EditArea = function (editor_id, callback, options ) {
     options.draggable = typeof( options.draggable ) === 'undefined'? true: options.draggable;
     this.draggagle = options.draggable;
     this.compileOnChange = typeof( options.compileOnChange ) === 'undefined'? false: options.compileOnChange;
+    this.maximized = typeof( options.maximized ) === 'undefined'? false: options.maximized;
     
     var topDiv;
     
@@ -67,7 +68,7 @@ ABCXJS.edit.EditArea = function (editor_id, callback, options ) {
     
     this.container = new DRAGGABLE.ui.Window( 
           topDiv
-        , [ 'move|Mover', 'popin|Janela fixa', 'popout|Janela flutuante' , 'maximize|Maximizar janela']
+        , [ 'move|Mover', 'popin|Janela fixa', 'popout|Janela flutuante' , 'restore|Restaurar janela', 'maximize|Maximizar janela' ]
         , options
         , this.callback
         , aToolBotoes
@@ -78,7 +79,8 @@ ABCXJS.edit.EditArea = function (editor_id, callback, options ) {
         
     this.container.setButtonVisible( 'popout', !this.draggable);
     this.container.setButtonVisible( 'popin', this.draggable );
-    this.container.setButtonVisible( 'maximize', this.draggable);
+    this.container.setButtonVisible( 'maximize', this.draggable && !this.maximized);
+    this.container.setButtonVisible( 'restore', this.draggable && this.maximized);
     this.container.setButtonVisible( 'move', this.draggable );
     
     this.currrentFontSize = '15px';
@@ -104,12 +106,20 @@ ABCXJS.edit.EditArea.prototype.setCompileOnChange = function ( value ) {
     this.compileOnChange = value;
 };
 
+ABCXJS.edit.EditArea.prototype.setMaximized = function ( value ) {
+    this.maximized = value;
+    this.container.draggable = ! value;
+    this.container.setButtonVisible( 'maximize', this.draggable && !this.maximized);
+    this.container.setButtonVisible( 'restore', this.draggable && this.maximized);
+};
+
 ABCXJS.edit.EditArea.prototype.dockWindow = function ( value ) {
     this.draggable = ! value;
     
     this.container.setButtonVisible( 'popout', !this.draggable);
     this.container.setButtonVisible( 'popin', this.draggable );
-    this.container.setButtonVisible( 'maximize', this.draggable);
+    this.container.setButtonVisible( 'maximize', this.draggable && !this.maximized);
+    this.container.setButtonVisible( 'restore', this.draggable && this.maximized);
     this.container.setButtonVisible( 'move', this.draggable );
     
     this.container.dockWindow(value);

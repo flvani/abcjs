@@ -440,9 +440,11 @@ V:3 accordionTab
                         ,gui: false
                     } );
 
-                myEditor.setString( document.getElementById("abc").value )
-                myEditor.fireChanged( 0, {force: true} )
+                myEditor.setString( document.getElementById("abc").value );
+                myEditor.fireChanged( 0, {force: true} );
                 myEditor.menu.setSubMenuTitle('menuGaitas', myEditor.menu.selectItem('menuGaitas', 'Acordeon 2' ));
+                
+                myEditor.menu.disableSubItem('menuRepertorio', 'LOADLOC' );
                 
             }
 

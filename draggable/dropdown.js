@@ -75,12 +75,59 @@ DRAGGABLE.ui.DropdownMenu = function (topDiv, options, menu) {
     }
 };
 
-DRAGGABLE.ui.DropdownMenu.prototype.disableSubMenu = function (ddm) {
-    
+DRAGGABLE.ui.DropdownMenu.prototype.getSubMenu = function (ddm) {
     if( ! this.headers[ddm] ) {
         console.log( 'Menu não encontrado!' );
-        return;
+        return false;
     }
+    return this.headers[ddm];
+};
+
+DRAGGABLE.ui.DropdownMenu.prototype.getSubItem = function (ddm, item) {
+    
+    if( ! this.getSubMenu(ddm) ) {
+        return false;
+    }
+    
+    var toSel = item;
+    if(  typeof item === "string" ) {
+        toSel = this.headers[ddm].actionList[item];
+    } 
+    
+    return (toSel ?  toSel: false );
+};
+
+DRAGGABLE.ui.DropdownMenu.prototype.disableSubItem = function (ddm, action) {
+    var item = this.getSubItem(ddm,action);
+    
+    if( ! item ) {
+        return false;
+    }
+    
+    item.style.pointerEvents = 'none';
+    item.style.opacity = '0.5';
+    
+};
+
+DRAGGABLE.ui.DropdownMenu.prototype.enableSubItem = function (ddm, action) {
+    
+    var item = this.getSubItem(ddm,action);
+    
+    if( ! item ) {
+        return false;
+    }
+    
+    item.style.pointerEvents = '';
+    item.style.opacity = '';
+    
+};
+
+DRAGGABLE.ui.DropdownMenu.prototype.disableSubMenu = function (ddm) {
+    
+    if( ! this.getSubMenu(ddm) ) {
+        return false;
+    }
+    
     this.headers[ddm].chk.checked = false;
     this.headers[ddm].btn.style.pointerEvents = 'none';
     this.headers[ddm].btn.style.opacity = '0.5';
@@ -89,10 +136,10 @@ DRAGGABLE.ui.DropdownMenu.prototype.disableSubMenu = function (ddm) {
 
 DRAGGABLE.ui.DropdownMenu.prototype.enableSubMenu = function (ddm) {
     
-    if( ! this.headers[ddm] ) {
-        console.log( 'Menu não encontrado!' );
-        return;
+    if( ! this.getSubMenu(ddm) ) {
+        return false;
     }
+    
     this.headers[ddm].chk.checked = false;
     this.headers[ddm].btn.style.pointerEvents = '';
     this.headers[ddm].btn.style.opacity = '';
@@ -101,9 +148,8 @@ DRAGGABLE.ui.DropdownMenu.prototype.enableSubMenu = function (ddm) {
 
 DRAGGABLE.ui.DropdownMenu.prototype.emptySubMenu = function (ddm) {
     
-    if( ! this.headers[ddm] ) {
-        console.log( 'Menu não encontrado!' );
-        return;
+    if( ! this.getSubMenu(ddm) ) {
+        return false;
     }
     
     this.headers[ddm].list.innerHTML = "";
