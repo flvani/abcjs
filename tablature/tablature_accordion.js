@@ -218,9 +218,9 @@ ABCXJS.tablature.Accordion.prototype.setTabLine = function (line) {
     this.tabLines[this.tabLines.length] = line.trim();
 };
 
-ABCXJS.tablature.Accordion.prototype.updateEditor = function () {
-    var ret = "\n";
-    if(this.tabLines.length === 0) return "";
+ABCXJS.tablature.Accordion.prototype.getTabLines = function () {
+    var ret = "";
+    if(this.tabLines.length === 0) return ret;
     for(var l = 0; l < this.tabLines.length; l ++ ) {
         if(this.tabLines[l].length>0){
             ret += this.tabLines[l]+"\n";

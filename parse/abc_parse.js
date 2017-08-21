@@ -1834,17 +1834,15 @@ window.ABCXJS.parse.Parse = function(transposer_, accordion_) {
 
     };
     
-    this.appendString = function(original, newLines) {
-        //retira \n ao final  
-        var t = original;
-        while( t.charAt(t.length-1) === '\n' ) {
-            t = t.substr(0,t.length-1);
-        }
-        while( newLines.charAt(newLines.length-1) === '\n' ) {
-            newLines = newLines.substr(0,newLines.length-1);
-        }
-        return t + newLines + '\n';
-    };
+//    this.joinStrings = function(original, newLines) {
+//        while( original.charAt(original.length-1) === '\n' ) {
+//            original = original.substr(0,original.length-1);
+//        }
+//        while( newLines.charAt(newLines.length-1) === '\n' ) {
+//            newLines = newLines.substr(0,newLines.length-1);
+//        }
+//        return original + newLines + '\n';
+//    };
     
 
     this.parse = function(tuneTxt, switches) {
@@ -1907,6 +1905,11 @@ window.ABCXJS.parse.Parse = function(transposer_, accordion_) {
                 multilineVars.iChar += line.length + 1;
             }
             
+            if( this.transposer && this.transposer.offSet !== 0 ) {
+                // substitui strTune com os valores transpostos
+                strTune = this.transposer.updateEditor( lines );
+            }
+            
             if (tune.hasTablature) {
                 // necessário inferir a tablatura
                 if (tune.lines[0].staffs[tune.tabStaffPos].voices[0].length === 0) {
@@ -1927,7 +1930,7 @@ window.ABCXJS.parse.Parse = function(transposer_, accordion_) {
                         this.accordion.inferTablature(tune, multilineVars, addWarning );
                         
                         // obtem possiveis linhas inferidas para tablatura
-                        strTune = this.appendString( strTune, this.accordion.updateEditor() );
+                        strTune += this.accordion.getTabLines();
                         
                     } else {
                         addWarning("Impossível inferir a tablatura: acordeon não definido!");
@@ -1953,10 +1956,6 @@ window.ABCXJS.parse.Parse = function(transposer_, accordion_) {
             tune.checkJumpMarkers(addWarning);
 
             tune.cleanUp();
-            
-            if( this.transposer && this.transposer.offSet !== 0 ) {
-                strTune = this.appendString( strTune, this.transposer.updateEditor( lines ) ) ;
-            }
             
         } catch (err) {
             if (err !== "normal_abort")

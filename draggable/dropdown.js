@@ -75,6 +75,14 @@ DRAGGABLE.ui.DropdownMenu = function (topDiv, options, menu) {
     }
 };
 
+DRAGGABLE.ui.DropdownMenu.prototype.dispatchAction = function( ddm, action ) {
+    this.headers[ddm].actionList[action].getElementsByTagName('a')[0].click();
+};
+
+DRAGGABLE.ui.DropdownMenu.prototype.setVisible = function (visible) {
+    this.container.style.display = visible? '' : 'none' ;
+};
+
 DRAGGABLE.ui.DropdownMenu.prototype.getSubMenu = function (ddm) {
     if( ! this.headers[ddm] ) {
         console.log( 'Menu não encontrado!' );

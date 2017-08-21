@@ -395,7 +395,7 @@ window.ABCXJS.parse.Transposer.prototype.updateEditor = function ( lines ) {
     }
     this.deletedLines = [];
     this.changedLines = [];
-    return newStr;
+    return newStr+'\n';
 };
 
 window.ABCXJS.parse.Transposer.prototype.getKeyVoice = function ( idx ) {

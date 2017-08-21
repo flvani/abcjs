@@ -81,6 +81,10 @@ ABCXJS.edit.KeySelector = function(id, divId, callBack ) {
     }
 };
 
+ABCXJS.edit.KeySelector.prototype.setVisible = function (visible) {
+    this.menu.setVisible(visible);
+};
+
 ABCXJS.edit.KeySelector.prototype.populate = function(offSet) {
     var cromaticSize = 12;
     this.menu.emptySubMenu( this.ddmId );    

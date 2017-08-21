@@ -228,13 +228,13 @@ DRAGGABLE.ui.Window = function( parent, aButtons, options, callback, aToolBarBut
 };
 
 DRAGGABLE.ui.Window.prototype.move = function( left, top ) {
-    this.topDiv.style.left = ( parseInt(left) ? parseInt(left) + 'px' : left );
-    this.topDiv.style.top = ( parseInt(top) ? parseInt(top) + 'px' : top );
+    this.topDiv.style.left = ( left !== ''+parseInt(left) ? left : parseInt(left) + 'px' );
+    this.topDiv.style.top = ( top !== ''+parseInt(top) ? top : parseInt(top) + 'px' );
 };
 
 DRAGGABLE.ui.Window.prototype.setSize = function( width, height ) {
-    this.topDiv.style.width = ( parseInt(width) ? parseInt(width) + 'px' : width );
-    this.topDiv.style.height = ( parseInt(height) ? parseInt(height) + 'px' : height );
+    this.topDiv.style.width = ( width !== ''+parseInt(width) ? width : parseInt(width) + 'px' );
+    this.topDiv.style.height = ( height !== ''+parseInt(height) ? height : parseInt(height) + 'px' );
 };
 
 DRAGGABLE.ui.Window.prototype.setToolBarVisible = function (visible) {
@@ -266,8 +266,8 @@ DRAGGABLE.ui.Window.prototype.setVisible = function (visible) {
     }
 };
 
-DRAGGABLE.ui.Window.prototype.dockWindow = function (dock) {
-    this.draggable = !dock;
+DRAGGABLE.ui.Window.prototype.setFloating = function (floating) {
+    this.draggable = floating;
 
     if( this.draggable ) {
         this.topDiv.className = "draggableWindow";
@@ -277,7 +277,6 @@ DRAGGABLE.ui.Window.prototype.dockWindow = function (dock) {
         this.minTop = 1;
         this.minLeft = 1;
     } else {
-        //this.bottomBar.style.display = 'none';
         this.topDiv.className = "draggableWindow noShadow";
         this.topDiv.style.position = "relative";
         this.topDiv.style.margin = "1px";
@@ -285,18 +284,13 @@ DRAGGABLE.ui.Window.prototype.dockWindow = function (dock) {
 };
 
 DRAGGABLE.ui.Window.prototype.resize = function() {
-    
     var h = this.topDiv.clientHeight 
             - (this.menuDiv ? this.menuDiv.clientHeight : 0 ) 
             - (this.toolBar && this.toolBar.style.display !== 'none' ? this.toolBar.clientHeight : 0 ) 
             - (this.bottomBar && this.bottomBar.style.display !== 'none' ? this.bottomBar.clientHeight : 0 );
     
     this.dataDiv.style.height =  (h-2) + 'px';
-    
-    if(this.parent && !this.draggable) {
-        this.topDiv.style.width =  (this.parent.clientWidth-5) + 'px';
-        //this.topDiv.style.width =  "(100% -15px)";
-    }
+    this.dataDiv.style.width = "100%";
 };
 
 DRAGGABLE.ui.Window.prototype.defineCallback = function( cb ) {
@@ -351,7 +345,7 @@ DRAGGABLE.ui.Window.prototype.addButtons = function( id,  aButtons ) {
     var defaultButtons = ['close|Fechar'];
     var self = this;
     
-    var buttonMap = { CLOSE: 'close', MOVE: 'move', ROTATE: 'rotate', GLOBE: 'world', ZOOM:'zoom-in', 
+    var buttonMap = { CLOSE: 'close', MOVE: 'move', ROTATE: 'rotate', GLOBE: 'world', ZOOM:'zoom-in', HELP:'circle-question', 
                         POPIN: 'popin', POPOUT: 'popout', RESTORE:'restore', MAXIMIZE:'full-screen', APPLY:'tick'  };
     
     if(aButtons)

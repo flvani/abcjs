@@ -76,12 +76,8 @@ ABCXJS.edit.EditArea = function (editor_id, callback, options ) {
     
     this.keySelector = new ABCXJS.edit.KeySelector( 
         'selKey', this.container.menu['selKey'], this.callback );
-        
-    this.container.setButtonVisible( 'popout', !this.draggable);
-    this.container.setButtonVisible( 'popin', this.draggable );
-    this.container.setButtonVisible( 'maximize', this.draggable && !this.maximized);
-    this.container.setButtonVisible( 'restore', this.draggable && this.maximized);
-    this.container.setButtonVisible( 'move', this.draggable );
+
+    this.setFloating(this.draggable);
     
     this.currrentFontSize = '15px';
     this.aceEditor = ace.edit(this.container.dataDiv);
@@ -113,8 +109,8 @@ ABCXJS.edit.EditArea.prototype.setMaximized = function ( value ) {
     this.container.setButtonVisible( 'restore', this.draggable && this.maximized);
 };
 
-ABCXJS.edit.EditArea.prototype.dockWindow = function ( value ) {
-    this.draggable = ! value;
+ABCXJS.edit.EditArea.prototype.setFloating = function ( floating ) {
+    this.draggable = floating;
     
     this.container.setButtonVisible( 'popout', !this.draggable);
     this.container.setButtonVisible( 'popin', this.draggable );
@@ -122,7 +118,7 @@ ABCXJS.edit.EditArea.prototype.dockWindow = function ( value ) {
     this.container.setButtonVisible( 'restore', this.draggable && this.maximized);
     this.container.setButtonVisible( 'move', this.draggable );
     
-    this.container.dockWindow(value);
+    this.container.setFloating(floating);
     
 };
 
@@ -373,3 +369,62 @@ ABCXJS.edit.EditArea.prototype.clearSelection = function (abcelem) {
         this.aceEditor.selection.clearRange(range); 
     }
 };
+
+ABCXJS.edit.EditArea.prototype.clearSelection = function (abcelem) {
+    if (abcelem && abcelem.position) {
+        
+        var range = new this.Range(
+            abcelem.position.anchor.line, abcelem.position.anchor.ch, 
+            abcelem.position.head.line, abcelem.position.head.ch
+        );
+
+        this.aceEditor.selection.clearRange(range); 
+    }
+};
+
+ABCXJS.edit.EditArea.prototype.maximizeWindow = function( maximize, props ) {
+
+    this.setMaximized(maximize);
+    props.maximized = maximize;
+    
+    if( maximize ) {
+        this.container.move(0,0);
+        this.container.setSize( "100%", "calc( 100% - 7px)" );
+    } else {
+        var k = this.container.topDiv.style;
+        k.left = props.left;
+        k.top = props.top;
+        k.width = props.width;
+        k.height = props.height;
+    }
+    this.resize();
+};
+
+ABCXJS.edit.EditArea.prototype.dockWindow = function(dock, props, x, y, w, h ) {
+    
+    props.floating = !dock;
+    this.setFloating(props.floating);
+    this.setToolBarVisible(props.floating);
+    this.setStatusBarVisible(props.floating);
+        
+    if( props.floating ) {
+        this.maximizeWindow(props.maximized, props);
+    } else {
+        this.container.move(x,y);
+        this.container.setSize( w, h);
+        this.resize();
+    } 
+};
+
+ABCXJS.edit.EditArea.prototype.retrieveProps = function( props ) {
+    if(props.floating && !props.maximized){
+        var k = this.container.topDiv.style;
+        props.left = k.left;
+        props.top = k.top;
+        props.width = k.width;
+        props.height = k.height;
+    }
+};
+
+    
+    

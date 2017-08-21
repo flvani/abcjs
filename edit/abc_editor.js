@@ -686,7 +686,7 @@ ABCXJS.Editor.prototype.editorCallback = function (action, elem) {
             this.editarea.setMaximized(false);
             break;
         case 'POPIN':
-            this.editarea.dockWindow(true);
+            this.editarea.setFloating(false);
             this.editarea.setToolBarVisible(false);
             this.editarea.setStatusBarVisible(false);
             this.editarea.container.move(0,0);
@@ -694,7 +694,7 @@ ABCXJS.Editor.prototype.editorCallback = function (action, elem) {
             this.editarea.resize();
             break;
         case 'POPOUT':
-            this.editarea.dockWindow(false);
+            this.editarea.setFloating(true);
             this.editarea.setToolBarVisible(true);
             this.editarea.setStatusBarVisible(true);
             this.editarea.container.move(100,100);
