@@ -26,6 +26,7 @@ DRAGGABLE.ui.Window = function( parent, aButtons, options, callback, aToolBarBut
     this.minHeight = opts.minHeight ||  48;
     this.hasStatusBar = opts.statusbar || false;
     this.translate = opts.translate || false;
+    this.zIndex  = opts.zIndex? opts.zIndex : 100;
     this.draggable = typeof opts.draggable !== 'undefined' ? opts.draggable : true;
     
     //this.minTop = opts.minTop ||  1;
@@ -36,9 +37,7 @@ DRAGGABLE.ui.Window = function( parent, aButtons, options, callback, aToolBarBut
     div.setAttribute("class", "draggableWindow" + (this.draggable? "" : " noShadow") ); 
     this.topDiv = div;
     
-    if( opts.zIndex ) {
-        this.topDiv.style.zIndex = opts.zIndex;
-    }
+    this.topDiv.style.zIndex = this.zIndex;
     
     if(!parent) {
         document.body.appendChild(this.topDiv);
@@ -268,14 +267,16 @@ DRAGGABLE.ui.Window.prototype.setVisible = function (visible) {
 
 DRAGGABLE.ui.Window.prototype.setFloating = function (floating) {
     this.draggable = floating;
+    
+    this.topDiv.style.zIndex = this.draggable? this.zIndex+1: this.zIndex;
 
     if( this.draggable ) {
         this.topDiv.className = "draggableWindow";
         if(this.parent) {
             this.topDiv.style.position = "absolute";
         }
-        this.minTop = 1;
-        this.minLeft = 1;
+        this.minTop = 1; // ver isso
+        this.minLeft = 1; // ver isso
     } else {
         this.topDiv.className = "draggableWindow noShadow";
         this.topDiv.style.position = "relative";
@@ -760,3 +761,4 @@ DRAGGABLE.ui.ReplaceDialog.prototype.dialogCallback = function ( action, elem ) 
             this.parentCallback.listener[this.parentCallback.method]('DO-'+action, elem, this.searchTerm.value, this.replaceTerm.value);
     }
 };
+

@@ -10,5 +10,4 @@ V:bass
 K:Am bass
 |: C,3/2[CEG] 1/2  C,[CEG] | C,3/2[CEG] 1/2 C,[CEG] \
 |G,,3/2[G,B,d,] 1/2 G,,[G,B,d,] | G,,3/2[G,B,d,] 1/2 G,,[G,B,d,] :|
-V:tab
-K:none accordionTab
+V:tab accordionTab

@@ -1,4 +1,4 @@
-X:2
+X:4003
 T:Ré maior
 C:Acordes Hohner G/C
 Q:100
@@ -7,5 +7,4 @@ M:4/4
 V:melo name="Ré maior"
 K:C
 | "Ré "D ^F A [D^FA] 2 | "Ré - 1ª inversão"^F A d [^FAd] 2 | "Ré - 2ª inversão "A d ^f[Ad^f] 2 |
-V:tab
-K:none accordionTab
+V:tab accordionTab
