@@ -44,11 +44,8 @@ DRAGGABLE.ui.DropdownMenu = function (topDiv, options, menu) {
         e2 = document.createElement("button");
         e2.setAttribute( "data-state", ddmId );
         e2.innerHTML = (menu[m].title || '' ) +'&#160;'+'<i class="ico-open-down" data-toggle="toggle"></i>';
-        e2.addEventListener( 'click', function(e) {
-           e.stopPropagation(); 
-           e.preventDefault(); 
-           self.eventsCentral(this.getAttribute("data-state"));
-        }, false);
+        e2.addEventListener( 'click', function(e) { e.stopPropagation(); e.preventDefault(); self.eventsCentral(this.getAttribute("data-state")); }, false);
+        e2.addEventListener( 'touchstart', function(e) { e.stopPropagation(); e.preventDefault(); self.eventsCentral(this.getAttribute("data-state")); }, false);
         e1.appendChild(e2);
         this.headers[ddmId].btn = e2;
         e2 = document.createElement("div");
@@ -222,17 +219,11 @@ DRAGGABLE.ui.DropdownMenu.prototype.addItemSubMenu = function (ddm, newItem, pos
         
         var e5 = document.createElement("a");
         e5.innerHTML = tags[0];
-        e5.setAttribute( "data-state", ddm );
-        e5.setAttribute( "data-value", action );
-        e5.addEventListener( 'click', function(e) {
-           e.stopPropagation(); 
-           e.preventDefault(); 
-           self.eventsCentral(this.getAttribute("data-state"), this.getAttribute("data-value") );
-        }, false);
         e4.appendChild(e5);
+        
+        this.addAction( ddm, action, e4, this);
+        
     }
-    
-    self.headers[ddm].actionList[action]=e4;
     
     if(pos>=0) {
         self.headers[ddm].list.insertBefore(e4, self.headers[ddm].list.children[pos]);
@@ -280,6 +271,24 @@ DRAGGABLE.ui.DropdownMenu.prototype.eventsCentral = function (state, event) {
     }
 };
 
+DRAGGABLE.ui.DropdownMenu.prototype.addAction = function( ddm, action, div, self ) {
+    
+    self.headers[ddm].actionList[action]=div; 
+    
+    var f = function(e) {
+       e.preventDefault(); 
+       e.stopPropagation(); 
+       self.eventsCentral(this.getAttribute("data-state"), this.getAttribute("data-value") );
+    };
+    
+    div.setAttribute( "data-state", ddm );
+    div.setAttribute( "data-value", action );
+    
+    div.addEventListener( 'click', f, false);
+    div.addEventListener( 'touchstart', f, false);
+    div.addEventListener( 'mousedown', function(e) { e.preventDefault(); e.stopPropagation(); }, false);
+    
+};
 
 //DRAGGABLE.ui.DropdownMenu.prototype.closeMenu = function (state) {
 //    var e = document.getElementById(state);

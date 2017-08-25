@@ -355,29 +355,8 @@ ABCXJS.Editor.prototype.resize = function( ) {
   
 };
 
-ABCXJS.Editor.prototype.fullEditarea = function( ) {
-    
-    // redimensiona a workspace
-    var winH = window.innerHeight
-                || document.documentElement.clientHeight
-                || document.body.clientHeight;
-
-    var winW = window.innerWidth
-            || document.documentElement.clientWidth
-            || daocument.body.clientWidth;
-
-    // -paddingTop 75
-    var h = (winH -75 - 10 ); 
-    var w = (winW - 10 ); 
-    
-    this.editarea.container.topDiv.style.zIndex = 99;
-    this.editarea.container.topDiv.style.left = "3px";
-    this.editarea.container.topDiv.style.top = "78px";
-    this.editarea.container.topDiv.style.height = Math.max(h,200) +"px";
-    this.editarea.container.topDiv.style.width = Math.max(w,400) +"px";
-    this.editarea.container.dataDiv.style.height = "100%";
-    this.editarea.resize();
-  
+ABCXJS.Editor.prototype.menuCallback = function( action ) {
+  console.log(action);
 };
 
 ABCXJS.Editor.prototype.getString = function() {
@@ -722,6 +701,19 @@ ABCXJS.Editor.prototype.settingsCallback = function(action, elem ) {
             break;
         case 'CLOSE': 
         case 'CANCEL':
+/*            
+            this.settingsWindow.move( 100, 100);
+            alert( '100 100');
+            this.settingsWindow.move( '200', '200');
+            alert( '200 aspas ');
+            this.settingsWindow.move( '400px', '400px');
+            alert( '400px');
+            this.settingsWindow.move( 0, 0 );
+            this.settingsWindow.setSize( '100%', '100%');
+            alert( '100%');
+            this.settingsWindow.setSize( 'calc(100% - 100px)', 'calc(100% - 100px)');
+            alert( 'calc(100% - 100px)');
+*/            
             this.settingsWindow.setVisible(false);
             break;
         case 'APPLY':
