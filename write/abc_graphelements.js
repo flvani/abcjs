@@ -562,24 +562,26 @@ for (var x = 0; x < 5000; x += 50) {
 
 ABCXJS.write.AbsoluteElement.prototype.setMouse = function(printer) {
     var self = this;
+    this.svgElem = document.getElementById(self.gid);
     
-    try {
-        var svgns = "http://www.w3.org/2000/svg";
-        this.svgElem = document.getElementById(self.gid);
+    if(ABCXJS.write.color.useTransparency) {
+        try {
+            var svgns = "http://www.w3.org/2000/svg";
 
-        var bounds = this.svgElem.getBBox();
-        var rect = document.createElementNS(svgns, 'rect');
-            rect.setAttributeNS(null, 'x', bounds.x.toFixed(1)-1);
-            rect.setAttributeNS(null, 'y', bounds.y.toFixed(1)-1);
-            rect.setAttributeNS(null, 'height', bounds.height.toFixed(1)+2);
-            rect.setAttributeNS(null, 'width', bounds.width.toFixed(1)+2);
-            rect.setAttributeNS(null, 'fill', 'none' );
+            var bounds = this.svgElem.getBBox();
+            var rect = document.createElementNS(svgns, 'rect');
+                rect.setAttributeNS(null, 'x', bounds.x.toFixed(1)-1);
+                rect.setAttributeNS(null, 'y', bounds.y.toFixed(1)-1);
+                rect.setAttributeNS(null, 'height', bounds.height.toFixed(1)+2);
+                rect.setAttributeNS(null, 'width', bounds.width.toFixed(1)+2);
+                rect.setAttributeNS(null, 'fill', 'none' );
 
-        this.svgElem.appendChild(rect);
-        this.svgArea = rect;
-    } catch( e ) {
-        // Firefox dies if svgElem is not Visible
-    }
+            this.svgElem.appendChild(rect);
+            this.svgArea = rect;
+        } catch( e ) {
+            // Firefox dies if svgElem is not Visible
+        }
+    }    
     
     this.svgElem.onmouseover =  function() {self.highlight(true);};
     this.svgElem.onmouseout =  function() {self.unhighlight(true);};

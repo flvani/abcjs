@@ -34,7 +34,7 @@ ABCXJS.write.color = {};
 ABCXJS.write.color.highLight = "#5151ff";
 ABCXJS.write.color.highLight = "#ff0000";
 ABCXJS.write.color.unhighLight = 'black';
-
+ABCXJS.write.color.useTransparency = true;
 
 //--------------------------------------------------------------------PRINTER
 

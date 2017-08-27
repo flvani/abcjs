@@ -38,15 +38,16 @@ DIATONIC.map.loadAccordionMaps = function ( files, cb )  {
             })
             .always(function() {
                 toLoad --; 
-                if(toLoad === 0 ) {
-                    DIATONIC.map.accordionMaps.sort( function(a,b) { 
-                        return a.menuOrder > b.menuOrder;
-                    });
-                }
-                if( toLoad === 0 && cb ) {
-                    cb();
+                if( toLoad === 0 ) {
+                    DIATONIC.map.sortAccordions();
+                    cb && cb();
                 }
             });
     }
 };
 
+DIATONIC.map.sortAccordions = function () {
+    DIATONIC.map.accordionMaps.sort( function(a,b) { 
+        return parseInt(a.menuOrder) > parseInt(b.menuOrder);
+    });
+};
