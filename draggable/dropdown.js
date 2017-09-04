@@ -56,9 +56,9 @@ DRAGGABLE.ui.DropdownMenu = function (topDiv, options, menu) {
         
         e2.addEventListener( 'transitionend', function(e) {
             if( e2.clientHeight > 0 && e2.clientHeight < e2.scrollHeight ) {
-                e2.style = 'overflow-y: auto;';
+                e2.style.cssText = 'overflow-y: scroll;';
             } else {     
-                e2.style = 'overflow-y: hidden;';
+                e2.style.cssText = 'overflow-y: hidden;';
             }
         }, false);
 
