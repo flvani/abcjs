@@ -48,6 +48,6 @@ DIATONIC.map.loadAccordionMaps = function ( files, cb )  {
 
 DIATONIC.map.sortAccordions = function () {
     DIATONIC.map.accordionMaps.sort( function(a,b) { 
-        return parseInt(a.menuOrder) > parseInt(b.menuOrder);
+        return parseInt(a.menuOrder) - parseInt(b.menuOrder);
     });
 };
