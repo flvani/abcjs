@@ -2,6 +2,8 @@
  * To change this license header, choose License Headers in Project Properties.
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
+ * Implements: 
+*   - DRAGGABLE.ui.DropdownMenu
 */
 
 if (! window.DRAGGABLE )
@@ -20,6 +22,7 @@ DRAGGABLE.ui.DropdownMenu = function (topDiv, options, menu) {
     this.container = ( typeof topDiv === 'object' ) ? topDiv : document.getElementById(topDiv);
     this.listener = opts.listener || null;
     this.method = opts.method || null;
+    this.translate = opts.translate || false;
     
     if (!this.container) {
         console.log('Elemento ' + topDiv + ' não existe!');
@@ -43,7 +46,8 @@ DRAGGABLE.ui.DropdownMenu = function (topDiv, options, menu) {
         
         e2 = document.createElement("button");
         e2.setAttribute( "data-state", ddmId );
-        e2.innerHTML = (menu[m].title || '' ) +'&#160;'+'<i class="ico-open-down" data-toggle="toggle"></i>';
+        var spn = this.translate ? '<span data-translate="'+ddmId+'" >' :'<span>';
+        e2.innerHTML = spn + (menu[m].title || '' ) + '</span>' + '&#160;'+'<i class="ico-open-down" data-toggle="toggle"></i>';
         e2.addEventListener( 'click', function(e) { e.stopPropagation(); e.preventDefault(); self.eventsCentral(this.getAttribute("data-state")); }, false);
         e2.addEventListener( 'touchstart', function(e) { e.stopPropagation(); e.preventDefault(); self.eventsCentral(this.getAttribute("data-state")); }, false);
         e1.appendChild(e2);
@@ -218,7 +222,9 @@ DRAGGABLE.ui.DropdownMenu.prototype.addItemSubMenu = function (ddm, newItem, pos
         e4.setAttribute( "id",  action );
         
         var e5 = document.createElement("a");
-        e5.innerHTML = tags[0];
+        var spn = this.translate ? '<span data-translate="'+action+'" >' :'<span>';
+        
+        e5.innerHTML = spn + tags[0] + '</span>';
         e4.appendChild(e5);
         
         this.addAction( ddm, action, e4, this);

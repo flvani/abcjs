@@ -174,7 +174,7 @@ DIATONIC.map.Keyboard.prototype.print = function ( div, render_opts  ) {
     this.paper.endDoc();
 
     //binds SVG elements
-    this.legenda.setSVG(render_opts.label, 'Abre', 'Fecha');
+    this.legenda.setSVG(render_opts.label, 'PULL', 'PUSH', true );
     for (var j = 0; j < this.keyMap.length; j++) {
         for (var i = 0; i < this.keyMap[j].length; i++) {
             this.keyMap[j][i].setSVG(render_opts.label); 

@@ -28,32 +28,35 @@ if (!ABCXJS.edit)
 
 ABCXJS.edit.EditArea = function (editor_id, callback, options ) {
     
+    options = options? options : {};
+    
     this.parentCallback = callback;
     this.callback = { listener: this, method: 'editareaCallback' };
     
     this.container = {};
     
     var aToolBotoes = [ 
-         'GUTTER|Numeração das Linhas'
-        ,'DOWNLOAD|Salvar Local'
-        ,'UNDOALL|Dezfazer Tudo'
-        ,'UNDO|Dezfazer'
-        ,'REDO|Refazer'
-        ,'REDOALL|Refazer Tudo'
-        ,'REFRESH|Atualizar'
-        ,'SEARCH|Localizar e substituir'
-        ,'FONTSIZE|Tamanho da fonte'
+         'gutter'
+        ,'download'
+        ,'undoall'
+        ,'undo'
+        ,'redo'
+        ,'redoall'
+        ,'refresh'
+        ,'findNreplace'
+        ,'fontSize'
         ,'DROPDOWN|Tom|selKey'
         ,'OCTAVEDOWN|Oitava|Oitava'
         ,'OCTAVEUP|Oitava|Oitava'
-        ,'LIGHTON|Realçar texto'
-        ,'READONLY|Bloquear edição' 
+        ,'lighton'
+        ,'readonly' 
     ] ;
     
     options.draggable = typeof( options.draggable ) === 'undefined'? true: options.draggable;
     this.draggagle = options.draggable;
     this.compileOnChange = typeof( options.compileOnChange ) === 'undefined'? false: options.compileOnChange;
     this.maximized = typeof( options.maximized ) === 'undefined'? false: options.maximized;
+    this.translator = options.translator ? options.translator : null;
     
     var topDiv;
     
@@ -68,7 +71,7 @@ ABCXJS.edit.EditArea = function (editor_id, callback, options ) {
     
     this.container = new DRAGGABLE.ui.Window( 
           topDiv
-        , [ 'move|Mover', 'popin|Janela fixa', 'popout|Janela flutuante' , 'restore|Restaurar janela', 'maximize|Maximizar janela' ]
+        , [ 'move', 'popin', 'popout' , 'restore', 'maximize' ]
         , options
         , this.callback
         , aToolBotoes
@@ -146,6 +149,9 @@ ABCXJS.edit.EditArea.prototype.editareaCallback = function ( action, elem, searc
             }
             this.aceEditor.setOptions( { fontSize: this.currrentFontSize });
             break;
+        case 'FINDNREPLACE': 
+            this.alert = new DRAGGABLE.ui.ReplaceDialog( this.container, {translator: this.translator}  );
+            break;
         case 'DO-SEARCH': 
             this.searchRange = this.aceEditor.find(searchTerm, {
                 wrap: true,
@@ -181,9 +187,6 @@ ABCXJS.edit.EditArea.prototype.editareaCallback = function ( action, elem, searc
                 });
                 this.aceEditor.session.replace(this.searchRange, replaceTerm );
             }
-            break;
-        case 'SEARCH': 
-            this.alert = new DRAGGABLE.ui.ReplaceDialog( this.container );
             break;
         case 'GUTTER': // liga/desliga a numeracao de linhas
             this.setGutter();
@@ -425,6 +428,3 @@ ABCXJS.edit.EditArea.prototype.retrieveProps = function( props ) {
         props.height = k.height;
     }
 };
-
-    
-    

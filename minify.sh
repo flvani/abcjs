@@ -28,7 +28,7 @@ cat midi/midi_common.js  midi/midi_parser.js  midi/midi_player.js > tmp/midi.js
 
 cat svg/svg.js svg/glyphs.js > tmp/svg.js
 
-cat draggable/draggable.js draggable/dropdown.js > tmp/abcjs-windows.js
+cat draggable/draggable.js draggable/dropdown.js draggable/dialogs.js > tmp/abcjs-windows.js
 
 cat api/abc_tunebook.js data/abc_tune.js tmp/parse.js tmp/write.js tmp/svg.js edit/abc_selectors.js edit/abc_editarea.js > tmp/abcjs-nomidi.js
 

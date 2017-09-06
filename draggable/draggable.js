@@ -2,7 +2,10 @@
  * To change this license header, choose License Headers in Project Properties.
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
- */
+  * Implements: 
+*   - DRAGGABLE.ui.Window
+*   - DRAGGABLE.ui.PushButton
+*/
 
 if (! window.DRAGGABLE )
     window.DRAGGABLE  = {};
@@ -25,7 +28,7 @@ DRAGGABLE.ui.Window = function( parent, aButtons, options, callback, aToolBarBut
     this.minWidth = opts.minWidth ||  160;
     this.minHeight = opts.minHeight ||  48;
     this.hasStatusBar = opts.statusbar || false;
-    this.translate = opts.translate || false;
+    this.translator = opts.translator || null;
     this.zIndex  = opts.zIndex? opts.zIndex : 100;
     this.draggable = typeof opts.draggable !== 'undefined' ? opts.draggable : true;
     
@@ -60,12 +63,6 @@ DRAGGABLE.ui.Window = function( parent, aButtons, options, callback, aToolBarBut
     
     if(callback) {
         this.defineCallback(callback);
-    }
-    
-    if( this.translate && DR ) {
-        this.translate = function() {
-        };
-        DR.addAgent(this);
     }
     
     if(this.topDiv.style.top === "" ) this.topDiv.style.top = this.top;
@@ -312,19 +309,18 @@ DRAGGABLE.ui.Window.prototype.setTitle = function( title ) {
 };
 
 DRAGGABLE.ui.Window.prototype.addTitle = function( id, title  ) {
-    var self = this;
+    var self = this, translated_title = title, spn = "";
     
     var div = document.createElement("DIV");
     div.setAttribute("class", "dTitle" ); 
     
-    if( title ) {
-        if( this.translate ) {
-            DR.forcedResource("dSpanTranslatableTitle"+id, title); 
-        }
+    if( title && this.translator ) {
+        translated_title = this.translator.getResource(title);
+        spn = 'data-translate="'+title+'"';
     }
     
-    div.innerHTML = '<span id="dSpanTranslatableTitle'+id+'" style="padding-left: 5px;">'+title+
-                        '</span><span id="dSpanTitle'+id+'" style="padding-left: 5px; white-space: nowrap;"></span>';
+    div.innerHTML = '<span '+spn+'style="padding-left: 5px;">'+translated_title+'</span>'+
+                        '<span id="dSpanTitle'+id+'" style="padding-left: 5px; white-space: nowrap;"></span>';
     
     self.menuDiv.appendChild(div);
     
@@ -337,7 +333,7 @@ DRAGGABLE.ui.Window.prototype.addTitle = function( id, title  ) {
 };
 
 DRAGGABLE.ui.Window.prototype.addButtons = function( id,  aButtons ) {
-    var defaultButtons = ['close|Fechar'];
+    var defaultButtons = ['close'];
     var self = this;
     
     var buttonMap = { CLOSE: 'close', MOVE: 'move', ROTATE: 'rotate', GLOBE: 'world', ZOOM:'zoom-in', HELP:'circle-question', 
@@ -347,24 +343,26 @@ DRAGGABLE.ui.Window.prototype.addButtons = function( id,  aButtons ) {
         defaultButtons = defaultButtons.concat(aButtons);
     
     defaultButtons.forEach( function (label) {
+        
         label = label.split('|');
+        
+        var spn = "";
         var action = label[0].toUpperCase();
         var rotulo = label.length > 1 ? label[1] : "";
-        var icon = 'ico-' + (buttonMap[action] ? buttonMap[action] : action.toLowerCase());
+        var ico = 'ico-' + (buttonMap[action] ? buttonMap[action] : action.toLowerCase());
+        var translateId = label.length > 1 ? label[1] : label[0];
         
-        if( self.translate ) {
-            DR.forcedResource('d'+ action +'ButtonA', rotulo, id, 'd'+ action +'ButtonA'+id); 
+        if( self.translator ) {
+            rotulo = self.translator.getResource(translateId);
+            spn = 'data-translate="'+translateId+'"';
         }
+        
+        var html = '<i class="'+ ico +' ico-white" title="'+ rotulo +'" '+spn+' ></i>';
         
         var div = document.createElement("DIV");
         div.setAttribute("id", 'd'+ action +'Button'+id ); 
         div.setAttribute("class", "dButton" ); 
-        
-        if(action === 'MOVE') {
-            div.innerHTML = '<i class="'+ icon +' ico-white"></i>';
-        } else {
-            div.innerHTML = '<a href="" title="'+ rotulo +'"><i class="'+ icon +' ico-white"></i></a>';
-        }
+        div.innerHTML = action === 'MOVE' ? html : '<a href="">'+html+'</a>' ;
         
         self.addAction( action, div, self );
         self.menuDiv.appendChild(div);
@@ -404,16 +402,22 @@ DRAGGABLE.ui.Window.prototype.addToolButtons = function( id,  aButtons ) {
     var buttonMap = { 
         GUTTER:'list-numbered', REFRESH:'bolt', DOWNLOAD:'download', FONTSIZE: 'fontsize', 
         DROPDOWN:'open-down', OCTAVEDOWN:'octave-down', OCTAVEUP:'octave-up', 
-        SEARCH:'find-and-replace', 
+        FINDNREPLACE:'find-and-replace', 
         UNDO:'undo', UNDOALL:'undo-all', REDO:'redo', REDOALL:'redo-all', LIGHTON:'lightbulb-on', READONLY:'lock-open' };
     
     aButtons.forEach( function (label) {
+        
         label = label.split('|');
+        
+        var spn = "";
         var action = label[0].toUpperCase();
         var rotulo = label.length > 1 ? label[1] : "";
+        var translateId = label.length > 1 ? label[1] : label[0];
         
-        if( self.translate ) {
-            DR.forcedResource('d'+ action +'ButtonA', rotulo, id, 'd'+ action +'ButtonA'+id); 
+        
+        if( self.translator ) {
+            rotulo = self.translator.getResource(translateId);
+            spn = 'data-translate="'+translateId+'"';
         }
         
         var div = document.createElement("DIV");
@@ -421,7 +425,7 @@ DRAGGABLE.ui.Window.prototype.addToolButtons = function( id,  aButtons ) {
         self.toolBar.appendChild(div);
         
         if( action === 'DROPDOWN' ) {
-            
+            // flavio - verificar as implicações de não usar tradução aqui
             div.className = "dButton topMenu";
             
             if( typeof self.menu === "undefined" ) {
@@ -430,22 +434,20 @@ DRAGGABLE.ui.Window.prototype.addToolButtons = function( id,  aButtons ) {
                     
             var ddmId = label[2];
             self.menu[ddmId] = new DRAGGABLE.ui.DropdownMenu(
-                   div
-                ,  self.callback
-                ,  [{title: '...', ddmId: ddmId, itens: []}]
+                 div
+                ,self.callback
+                ,[{title: '...', ddmId: ddmId, itens: []}]
             );
     
         } else {
             
-            div.className = "dButton";
-            
             var icon = 'ico-' + (buttonMap[action] ? buttonMap[action] : action.toLowerCase());
-            div.innerHTML = '<a href="" title="'+ rotulo +'"><i class="'+ icon +' ico-black ico-large"></i></a>';
+            
+            div.className = "dButton";
+            div.innerHTML = '<a href="" ><i class="'+ icon +' ico-black ico-large" title="'+ rotulo +'" '+spn+' ></i></a>';
             self.addAction( action, div, self );
             
         }
-        
-        
     });
 };
 
@@ -457,7 +459,7 @@ DRAGGABLE.ui.Window.prototype.addPushButtons = function( aButtons ) {
         
         var action = part[1].split('-');
 
-        switch( action[action.length-1] ) {
+        switch( action[action.length-1].toUpperCase() ) {
             case 'SEARCH': 
                 ico = 'ico-search';  
                 claz = 'pushbutton';  
@@ -492,261 +494,23 @@ DRAGGABLE.ui.Window.prototype.addPushButtons = function( aButtons ) {
     }
 };
 
-DRAGGABLE.ui.Alert = function( parent, action, text, description, options ) {
-    
-    var x, y, w, h, callback;
-    
-    options = options? options : {};
-    
-    this.callback = { listener: this, method: 'alertCallback' };
-    
-    if(!parent) {
-        
-        this.parentCallback = null;
-        
-        // redimensiona a workspace
-        var winH = window.innerHeight
-                    || document.documentElement.clientHeight
-                    || document.body.clientHeight;
-
-        var winW = window.innerWidth
-                || document.documentElement.clientWidth
-                || document.body.clientWidth;
-        
-        x = winW/2-350;
-        y = winH/2-150;
-        
-    } else {
-        this.parentCallback = parent.callback;
-        x = parent.topDiv.offsetLeft + 50;
-        y = parent.topDiv.offsetTop + 50;
-    }
-    
-    var w = ( action ? "500px" : "700px" );
-    var h = "auto";
-    
-    x = options.x !== undefined ? options.x : x;
-    y = options.y !== undefined ? options.y : y;
-    w = options.w !== undefined ? options.w : w;
-    h = options.h !== undefined ? options.h : h;
-    
-    this.container = new DRAGGABLE.ui.Window(
-          null
-        , null
-        , {title: 'Alerta', translate: false, statusbar: false, top: y+"px", left: x+"px", width: w, height: h, zIndex: 300}
-        , this.callback
-    );
-    
-    this.container.dataDiv.innerHTML = '<div class="dialog" >\n\
-        <div class="flag"><i class="ico-circle-'+(action? 'question' : 'exclamation')+'"></i></div>\n\
-        <div class="text-group'+(action? '' : ' wide')+'">\n\
-            <div class="title">'+text+'</div>\n\
-            <div class="description">'+description+'</div>\n\
-        </div>\n\
-        <div id="pgAlert" class="pushbutton-group" style="right: 0; bottom: 0;" >\
-            <div id="botao1Alert"></div>\n\
-            <div id="botao2Alert"></div>\n\
-        </div>\n\
-    </div>';
-    
-    if( action ) {
-    
-        this.container.addPushButtons([
-            'botao1Alert|'+action+'-YES|Sim',
-            'botao2Alert|'+action+'-NO|Não'
-        ]);
-
-    } else {
-        
-        this.container.addPushButtons([
-            'botao1Alert|CLOSE|Ok'
-        ]);
-        
-    }   
-    this.modalPane = document.getElementById('modalPane');
-    
-    if( ! this.modalPane ) {
-        
-        var div = document.createElement("DIV");
-        div.id = 'modalPane';
-        div.style = "position:absolute; z-index:250; background-color:black; opacity:0.4; top:0; left:0; bottom:0; right:0; pointer-events: block; display:none;";
-        document.body.appendChild(div);
-        this.modalPane = div;
-        
-    }    
-    
-    this.modalPane.style.display = 'block';
-        
-    this.container.setVisible(true);
-
-};
-
-DRAGGABLE.ui.Alert.prototype.close = function( ) {
-    this.modalPane.style.display = 'none';
-    this.container.setVisible(false);
-    this.container.topDiv.remove();
-    this.container = null;
-};
-
-DRAGGABLE.ui.Alert.prototype.alertCallback = function ( action, elem ) {
-    switch(action) {
-        case 'CLOSE': 
-        case 'CANCEL': 
-           this.close();
-           break;
-        default:
-            if( this.parentCallback )
-                this.parentCallback.listener[this.parentCallback.method](action, elem);
-    }
-};
-
 
 DRAGGABLE.ui.PushButton = function( item, claz, ico, act, text, janela) {
+    var spn = "";
+    var translateId = text ? text : act;
     this.item = item;
     this.item.className = claz;
-    this.item.innerHTML = '<i class="'+ico+'" ></i>'+text+'</div>' ;
+    
+    if( janela.translator ) {
+        text = janela.translator.getResource(translateId);
+        spn = 'data-translate="'+translateId+'"';
+    }
+
+    this.item.innerHTML = '<i class="'+ico+'" ></i><span '+spn+'>'+text+'</span></div>' ;
+    
     this.item.addEventListener('click', function(e) {
         e.preventDefault(); 
         e.stopPropagation(); 
-        janela.eventsCentral(act, item);
+        janela.eventsCentral(act.toUpperCase(), item);
     }, false );
 };
-
-DRAGGABLE.ui.ColorPicker = function( itens ) {
-    this.container = new DRAGGABLE.ui.Window( 
-          null
-        , [ 'apply|Selecionar' ]
-        , {translate:false, draggable:true, width: "auto", height: "auto", title: 'Selecionar cor', zIndex:"200" }
-        , {listener : this, method: 'pickerCallBack' }
-    );
-
-    this.container.dataDiv.innerHTML = '\
-<div class="picker-group">\
-    <canvas id="colorPickerCanvas"></canvas><br>\
-    <input id="originalColor"></input>\
-    <input id="newColor"></input>\
-</div>';
-   
-    this.originalColor = document.getElementById( 'originalColor' );
-    this.newColor = document.getElementById( 'newColor' );
-    
-    this.cp = new KellyColorPicker({
-        place : 'colorPickerCanvas', 
-        size : 190, 
-        input : 'newColor'  
-    });
-    
-    var self = this;
-    
-    for( var i = 0; i < itens.length; i++ ) {
-        document.getElementById(itens[i]).addEventListener('click', function( e ) { self.activate(this); e.stopPropagation(); } );
-    }
-};
-
-DRAGGABLE.ui.ColorPicker.prototype.pickerCallBack = function( action, elem ) {
-    switch(action) {
-        case 'MOVE': 
-            break;
-        case 'APPLY': 
-            this.item.style.backgroundColor = this.item.value = this.newColor.value;
-            this.close();
-            break;
-        case 'CLOSE': 
-           this.item.style.backgroundColor = this.item.value = this.originalColor.value;
-           this.close();
-   }
-};
-
-DRAGGABLE.ui.ColorPicker.prototype.close = function( ) {
-    this.container.setVisible(false);
-};
-
-DRAGGABLE.ui.ColorPicker.prototype.activate = function( parent ) {
-    var self = this;
-    
-    var oneTimeCloseFunction = function () { 
-        self.close(); 
-        this.removeEventListener('click', oneTimeCloseFunction, false );
-    };
-    
-    document.addEventListener( 'click', oneTimeCloseFunction  );
-    
-    this.item = parent;
-    this.container.topDiv.addEventListener( 'click', function (e) { e.stopPropagation(); } );
-    
-    this.newColor.value = this.originalColor.value = this.item.value;
-    this.originalColor.style.backgroundColor = this.item.value;
-    this.cp.setColorByHex(this.item.value);
-    
-    var bounds = this.item.getBoundingClientRect();
-    
-    this.container.topDiv.style.top = ( bounds.top + bounds.height/2  -120 ) + "px";
-    this.container.topDiv.style.left = bounds.left + bounds.width + 5 + "px";
-    this.container.setVisible(true);
-};
-
-
-DRAGGABLE.ui.ReplaceDialog = function( parent ) {
-    
-    var x, y;
-    
-    this.parentCallback = parent.callback;
-    this.callback = { listener: this, method: 'dialogCallback' };
-    x = Math.min( parent.dataDiv.clientWidth/2 - 250, 200);
-    y = 20;
-    
-    this.container = new DRAGGABLE.ui.Window(
-          parent.dataDiv
-        , null
-        , {title: 'Procurar e substituir', translate: false, statusbar: false, top: y+"px", left: x+"px", width: "500px", height:"auto", zIndex: 300}
-        , this.callback
-    );
-    
-    this.container.dataDiv.innerHTML = '<div class="dialog" >\n\
-        <div class="flag"><i class="ico-find-and-replace"></i></div>\n\
-        <div class="text-group">\n\
-            <br>Localizar:<input id="searchTerm" type="text" value="nós"></input>\n\
-            <br><br>Substituir por: <input id="replaceTerm" type="text" value="vós"></input>\n\
-        </div>\n\
-        <div id="pgAlert" class="pushbutton-group" style="right: 0; bottom: 0;" >\
-            <div id="botao1Replace"></div>\n\
-            <div id="botao2Replace"></div>\n\
-            <div id="botao3Replace"></div>\n\
-            <div id="botao4Replace"></div>\n\
-        </div>\n\
-    </div>';
-    
-        this.container.addPushButtons([
-            'botao1Replace|SEARCH|Localizar',
-            'botao2Replace|REPLACE|Substituir',
-            'botao3Replace|REPLACEALL|Substituir Tudo',
-            'botao4Replace|CANCEL|Cancelar'
-        ]);
-        
-        this.searchTerm = document.getElementById("searchTerm");
-        this.replaceTerm = document.getElementById("replaceTerm");
-        
-    this.container.setVisible(true);
-
-};
-
-DRAGGABLE.ui.ReplaceDialog.prototype.close = function( ) {
-    //this.modalPane.style.display = 'none';
-    this.container.setVisible(false);
-    this.container.topDiv.remove();
-    this.container = null;
-};
-
-DRAGGABLE.ui.ReplaceDialog.prototype.dialogCallback = function ( action, elem ) {
-    switch(action) {
-        case 'MOVE': 
-           break;
-        case 'CLOSE': 
-        case 'CANCEL': 
-           this.close();
-           break;
-        default:
-            this.parentCallback.listener[this.parentCallback.method]('DO-'+action, elem, this.searchTerm.value, this.replaceTerm.value);
-    }
-};
-

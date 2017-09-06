@@ -16,7 +16,7 @@ copy /b/y write\* tmp\write.js
 copy /b/y midi\* tmp\midi.js
 copy /b/y svg\* tmp\svg.js
 
-copy /b/y draggable\draggable.js+draggable\dropdown.js tmp\abcjs-windows.js
+copy /b/y draggable\draggable.js+draggable\dropdown.js+draggable\dialogs.js tmp\abcjs-windows.js
 
 copy /b/y api\abc_tunebook.js+data\abc_tune.js+tmp\parse.js+tmp\write.js+edit\abc_selectors.js+edit\abc_editarea.js tmp\abcjs-nomidi.js
 
