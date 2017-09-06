@@ -46,8 +46,8 @@ ABCXJS.edit.EditArea = function (editor_id, callback, options ) {
         ,'findNreplace'
         ,'fontSize'
         ,'DROPDOWN|Tom|selKey'
-        ,'OCTAVEDOWN|Oitava|Oitava'
-        ,'OCTAVEUP|Oitava|Oitava'
+        ,'octavedown'
+        ,'octaveup'
         ,'lighton'
         ,'readonly' 
     ] ;
