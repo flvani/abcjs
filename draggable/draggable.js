@@ -216,8 +216,6 @@ DRAGGABLE.ui.Window = function( parent, aButtons, options, callback, aToolBarBut
     this.addToolButtons( this.id, aToolBarButtons );
     this.addTitle( this.id, this.title );
     
-    this.titleSpan = document.getElementById("dSpanTitle"+this.id);
-    
 };
 
 DRAGGABLE.ui.Window.prototype.formatStyleParam = function ( p ) {
@@ -304,12 +302,33 @@ DRAGGABLE.ui.Window.prototype.eventsCentral = function (action, elem) {
     }
 };
 
-DRAGGABLE.ui.Window.prototype.setTitle = function( title ) {
-    this.titleSpan.innerHTML = title;
+DRAGGABLE.ui.Window.prototype.setTitle = function( title, translator ) {
+    var translated_title = "";
+    if( translator && title !== "" ) {
+        translated_title = translator.getResource(title);
+        this.titleSpan.setAttribute('data-translate', title);
+    } else {
+        this.titleSpan.removeAttribute('data-translate');
+        translated_title = (title? title : translated_title);
+    }
+    this.titleSpan.innerHTML = translated_title;
+};
+
+DRAGGABLE.ui.Window.prototype.setSubTitle = function( title, translator ) {
+    var translated_title = "";
+    if( translator && title !== "" ) {
+        var t = translator.getResource(title);
+        translated_title = (t? '- ' + t : translated_title); 
+        this.subTitleSpan.setAttribute('data-translate', title);
+    } else {
+        this.subTitleSpan.removeAttribute('data-translate');
+        translated_title = (title? '- '+title : translated_title);
+    }
+    this.subTitleSpan.innerHTML = translated_title;
 };
 
 DRAGGABLE.ui.Window.prototype.addTitle = function( id, title  ) {
-    var self = this, translated_title = title, spn = "";
+    var self = this, translated_title, spn = "";
     
     var div = document.createElement("DIV");
     div.setAttribute("class", "dTitle" ); 
@@ -319,10 +338,13 @@ DRAGGABLE.ui.Window.prototype.addTitle = function( id, title  ) {
         spn = 'data-translate="'+title+'"';
     }
     
-    div.innerHTML = '<span '+spn+'style="padding-left: 5px;">'+translated_title+'</span>'+
-                        '<span id="dSpanTitle'+id+'" style="padding-left: 5px; white-space: nowrap;"></span>';
+    div.innerHTML = '<span id="dSpanTitle'+id+'" '+spn+' style="padding-left: 8px;">'+(translated_title?translated_title:title)+'</span>'+
+                        '<span id="dSpanSubTitle'+id+'" style="padding-left: 8px; white-space: nowrap;"></span>';
     
     self.menuDiv.appendChild(div);
+    
+    self.titleSpan = document.getElementById("dSpanTitle"+id);
+    self.subTitleSpan = document.getElementById("dSpanSubTitle"+id);
     
     if(self.draggable && self.menuDiv) {
         self.menuDiv.addEventListener( 'mouseover', function() { self.menuDiv.style.cursor='move'; }, false);

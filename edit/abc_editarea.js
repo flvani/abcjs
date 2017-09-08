@@ -91,6 +91,7 @@ ABCXJS.edit.EditArea = function (editor_id, callback, options ) {
     this.aceEditor.$blockScrolling = Infinity;
     this.Range = require("ace/range").Range;
     this.gutterVisible = true;
+    this.readOnly = false;
     this.syntaxHighLightVisible = true;
     this.selectionEnabled = true;
 
@@ -192,20 +193,14 @@ ABCXJS.edit.EditArea.prototype.editareaCallback = function ( action, elem, searc
             this.setGutter();
             break;
         case 'READONLY': // habilita/bloqueia a edição
-            if( elem.innerHTML.indexOf('ico-lock-open' ) > 0 ) {
-                elem.innerHTML = '<a href="" title="Bloquear edição"><i class="ico-lock ico-black ico-large"></i></a>';
-                this.setReadOnly(true);
-            } else {
-                elem.innerHTML = '<a href="" title="Bloquear edição"><i class="ico-lock-open ico-black ico-large"></i></a>';
-                this.setReadOnly(false);
-            }
+            this.setReadOnly();
+            var i = elem.getElementsByTagName("i")[0];
+            i.className = (this.readOnly? "ico-lock ico-black ico-large" : "ico-lock-open ico-black ico-large" );
             break;
         case 'LIGHTON': // liga/desliga realce de sintaxe
-            if( elem.innerHTML.indexOf('ico-lightbulb-on' ) > 0 )
-                elem.innerHTML = '<a href="" title="Realçar texto"><i class="ico-lightbulb-off ico-black ico-large"></i></a>';
-            else 
-                elem.innerHTML = '<a href="" title="Realçar texto"><i class="ico-lightbulb-on ico-black ico-large"></i></a>';
             this.setSyntaxHighLight();
+            var i = elem.getElementsByTagName("i")[0];
+            i.className = (this.syntaxHighLightVisible? "ico-lightbulb-on ico-black ico-large" : "ico-lightbulb-off ico-black ico-large" );
             break;
         case 'RESIZE':
             this.resize();
@@ -241,6 +236,23 @@ ABCXJS.edit.EditArea.prototype.setGutter = function (visible) {
     this.aceEditor.renderer.setShowGutter(this.gutterVisible);
 };
 
+ABCXJS.edit.EditArea.prototype.setReadOnly = function (readOnly) {
+    
+    if(typeof readOnly === 'boolean') {
+        this.readOnly = readOnly;
+    } else {
+        this.readOnly = !this.readOnly;
+    }
+    
+    this.aceEditor.setOptions({
+        readOnly: readOnly,
+        highlightActiveLine: !readOnly,
+        highlightGutterLine: !readOnly
+    });
+    
+    this.aceEditor.textInput.getElement().disabled=readOnly;  
+};
+
 ABCXJS.edit.EditArea.prototype.setSyntaxHighLight = function (visible) {
     if(typeof visible === 'boolean') {
         this.syntaxHighLightVisible = visible;
@@ -262,17 +274,6 @@ ABCXJS.edit.EditArea.prototype.setToolBarVisible = function (visible) {
 
 ABCXJS.edit.EditArea.prototype.setVisible = function (visible) {
     this.container.topDiv.style.display = visible ? 'block' : 'none';
-};
-
-ABCXJS.edit.EditArea.prototype.setReadOnly = function (readOnly) {
-    
-    this.aceEditor.setOptions({
-        readOnly: readOnly,
-        highlightActiveLine: !readOnly,
-        highlightGutterLine: !readOnly
-    });
-    
-    this.aceEditor.textInput.getElement().disabled=readOnly;  
 };
 
 ABCXJS.edit.EditArea.prototype.resize = function () {
