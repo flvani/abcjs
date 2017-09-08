@@ -113,7 +113,7 @@ DIATONIC.map.Keyboard.prototype.setup = function (keyMap) {
     this.legenda = new DIATONIC.map.Button( this, this.limits.maxX-(raio+this.radius), this.limits.minY+raio, { radius: raio, borderWidth: 2 } );
 };
 
-DIATONIC.map.Keyboard.prototype.print = function ( div, render_opts  ) {
+DIATONIC.map.Keyboard.prototype.print = function ( div, render_opts, translator ) {
     
     var sz;
     
@@ -124,14 +124,15 @@ DIATONIC.map.Keyboard.prototype.print = function ( div, render_opts  ) {
     }\n\
     .blegenda,\n\
     .button {\n\
-        font-family: serif;\n\
+        font-family: sans-serif, arial;\n\
         text-anchor: middle;\n\
         font-size: 16px;\n\
         font-weight: bold;\n\
+        text-shadow: 0.5px 0.5px #ddd, -0.5px -0.5px 0 #ddd, 0.5px -0.5px 0 #ddd, -0.5px 0.5px 0 #ddd;\n\
     }\n\
     .blegenda {\n\
         font-weight: normal;\n\
-        font-size: 13px;\n\
+        font-size: 12px;\n\
     }';
 
     var keyboardPane = document.createElement("div");
@@ -174,7 +175,7 @@ DIATONIC.map.Keyboard.prototype.print = function ( div, render_opts  ) {
     this.paper.endDoc();
 
     //binds SVG elements
-    this.legenda.setSVG(render_opts.label, 'PULL', 'PUSH', true );
+    this.legenda.setSVG(render_opts.label, 'Pull', 'Push', translator );
     for (var j = 0; j < this.keyMap.length; j++) {
         for (var i = 0; i < this.keyMap[j].length; i++) {
             this.keyMap[j][i].setSVG(render_opts.label); 

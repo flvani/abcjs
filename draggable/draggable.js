@@ -432,11 +432,11 @@ DRAGGABLE.ui.Window.prototype.addToolButtons = function( id,  aButtons ) {
                 self.menu = {};
             }
                     
-            var ddmId = label[2];
+            var ddmId = label[1];
             self.menu[ddmId] = new DRAGGABLE.ui.DropdownMenu(
                  div
                 ,self.callback
-                ,[{title: '...', ddmId: ddmId, itens: []}]
+                ,[{title: '...', ddmId: ddmId, tip: rotulo, itens: []}]
             );
     
         } else {

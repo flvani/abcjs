@@ -45,6 +45,12 @@ DRAGGABLE.ui.DropdownMenu = function (topDiv, options, menu) {
         this.headers[ddmId] = { div: null, chk: e2, btn: null, list: null, actionList: {} };
         
         e2 = document.createElement("button");
+        
+        if( menu[m].tip ) {
+            e2.setAttribute( "data-translate", ddmId );
+            e2.setAttribute( "title", menu[m].tip );
+        }
+        
         e2.setAttribute( "data-state", ddmId );
         var spn = this.translate ? '<span data-translate="'+ddmId+'" >' :'<span>';
         e2.innerHTML = spn + (menu[m].title || '' ) + '</span>' + '&#160;'+'<i class="ico-open-down" data-toggle="toggle"></i>';

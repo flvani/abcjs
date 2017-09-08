@@ -89,7 +89,7 @@ DIATONIC.map.Button.prototype.setClose = function(delay) {
     this.SVG.closeArc.style.setProperty( 'fill', DIATONIC.map.color.close );
 };
 
-DIATONIC.map.Button.prototype.setSVG = function(showLabel, open, close, translation ) {
+DIATONIC.map.Button.prototype.setSVG = function(showLabel, pull, push, translator ) {
     var b = this.SVG;
     this.SVG.button = document.getElementById(b.gid);
     this.SVG.openArc = document.getElementById(b.gid+'_ao');
@@ -97,12 +97,14 @@ DIATONIC.map.Button.prototype.setSVG = function(showLabel, open, close, translat
     this.SVG.closeArc = document.getElementById(b.gid+'_ac');
     this.SVG.closeText = document.getElementById(b.gid+'_tc');
     
-    if( translation ) {
-        this.SVG.openText.setAttribute( 'data-translate', open );
-        this.SVG.closeText.setAttribute( 'data-translate', close );
+    if( translator ) {
+        this.SVG.openText.setAttribute( 'data-translate', pull );
+        this.SVG.closeText.setAttribute( 'data-translate', push );
+        this.setText(showLabel, translator.getResource(pull), translator.getResource(push) ); 
+} else {
+        this.setText(showLabel, pull, push ); 
     }
     
-    this.setText(showLabel, open, close ); 
 };
 
 DIATONIC.map.Button.prototype.setText = function( showLabel, open, close ) {

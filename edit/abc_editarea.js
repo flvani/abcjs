@@ -45,7 +45,7 @@ ABCXJS.edit.EditArea = function (editor_id, callback, options ) {
         ,'refresh'
         ,'findNreplace'
         ,'fontSize'
-        ,'DROPDOWN|Tom|selKey'
+        ,'DROPDOWN|selKey'
         ,'octavedown'
         ,'octaveup'
         ,'lighton'

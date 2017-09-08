@@ -15,6 +15,7 @@ ABCXJS.tablature.Accordion = function( params ) {
     this.loaded       = undefined;
     this.tabLines     = [];
     this.accordions   = params.accordionMaps || [] ;
+    this.translator   = params.translator || null;
     this.transposer   = new window.ABCXJS.parse.Transposer();
     
     if( this.accordions.length === 0 ) {
@@ -119,7 +120,7 @@ ABCXJS.tablature.Accordion.prototype.printKeyboard = function(div_id, options) {
 
     if( this.render_opts.show ) {
         div.style.display="inline-block";
-        this.loadedKeyboard.print(div,this.render_opts);
+        this.loadedKeyboard.print(div,this.render_opts, this.translator);
     } else {
         div.style.display="none";
     }
