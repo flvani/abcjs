@@ -760,7 +760,7 @@ ABCXJS.Editor.prototype.showSettings = function() {
                 <th colspan="2">Idioma:</th><th><div id="settingsLanguageMenu" class="topMenu"></div></th>\
               </tr>\
               <tr>\
-                <th colspan="2">Acordeon:</th><td><div id="settingsAcordeonsMenu" class="topMenu"></div></td>\
+                <th colspan="2">Acordeão:</th><td><div id="settingsAccordionsMenu" class="topMenu"></div></td>\
               </tr>\
               <tr>\
                 <th colspan="2"><br>Cores:</th><td></td>\
@@ -802,7 +802,7 @@ ABCXJS.Editor.prototype.showSettings = function() {
                 
                 
         var selector = new ABCXJS.edit.AccordionSelector( 
-                'sel2', 'settingsAcordeonsMenu', {listener: this, method: 'settingsCallback'} );
+                'sel2', 'settingsAccordionsMenu', {listener: this, method: 'settingsCallback'} );
         
         selector.populate(true, 'GAITA_HOHNER_CLUB_IIIM_BR');
         
