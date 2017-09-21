@@ -2,7 +2,7 @@
 // the same interface is used, ABCXJS.Editor can use a different type of object.
 //
 // EditArea:
-// - constructor(editor_id, listener)
+// - constructor(editor_id, listener)REA
 //		This contains the id of a textarea control that will be used.
 // - addChangeListener(listener)
 //		A callback class that contains the entry point fireChanged()
@@ -245,12 +245,12 @@ ABCXJS.edit.EditArea.prototype.setReadOnly = function (readOnly) {
     }
     
     this.aceEditor.setOptions({
-        readOnly: readOnly,
-        highlightActiveLine: !readOnly,
-        highlightGutterLine: !readOnly
+        readOnly: this.readOnly,
+        highlightActiveLine: !this.readOnly,
+        highlightGutterLine: !this.readOnly
     });
     
-    this.aceEditor.textInput.getElement().disabled=readOnly;  
+    this.aceEditor.textInput.getElement().disabled=this.readOnly;  
 };
 
 ABCXJS.edit.EditArea.prototype.setSyntaxHighLight = function (visible) {

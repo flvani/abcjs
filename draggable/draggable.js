@@ -322,7 +322,7 @@ DRAGGABLE.ui.Window.prototype.setSubTitle = function( title, translator ) {
         this.subTitleSpan.setAttribute('data-translate', title);
     } else {
         this.subTitleSpan.removeAttribute('data-translate');
-        translated_title = (title? '- '+title : translated_title);
+        translated_title = (title? title : translated_title);
     }
     this.subTitleSpan.innerHTML = translated_title;
 };
