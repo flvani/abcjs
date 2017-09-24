@@ -100,6 +100,12 @@ DRAGGABLE.ui.Window = function( parent, aButtons, options, callback, aToolBarBut
         this.bottomBar = div;
 
         div = document.createElement("DIV");
+        div.setAttribute("id", "draggableStatusMsgLine" + this.id ); 
+        div.setAttribute("class", "draggableStatusMsgLine" ); 
+        this.bottomBar.appendChild( div );
+        this.messageLine = div;
+        
+        div = document.createElement("DIV");
         div.setAttribute("id", "draggableStatusResize" + this.id ); 
         div.setAttribute("class", "draggableStatusResize" ); 
         this.bottomBar.appendChild( div );
@@ -251,6 +257,10 @@ DRAGGABLE.ui.Window.prototype.setStatusBarVisible = function (visible) {
         this.resize();
     }
 };
+
+DRAGGABLE.ui.Window.prototype.setStatusMessage = function (msg) {
+    this.messageLine.innerHTML = msg;
+};        
 
 DRAGGABLE.ui.Window.prototype.setButtonVisible = function( action, visible ) {
     var b = this.actionList[action.toUpperCase()];

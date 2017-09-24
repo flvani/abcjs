@@ -86,12 +86,15 @@ ABCXJS.edit.EditArea = function (editor_id, callback, options ) {
     this.aceEditor = ace.edit(this.container.dataDiv);
     this.aceEditor.setOptions( {highlightActiveLine: true, selectionStyle: "text", cursorStyle: "smooth"/*, maxLines: Infinity*/ } );
     this.aceEditor.setOptions( {fontFamily: "monospace",  fontSize: this.currrentFontSize, fontWeight: "normal" });
+    this.aceEditor.setOptions( {tabSize: 4, useSoftTabs: false  });
+    this.aceEditor.setOption("showInvisibles", false);
     this.aceEditor.renderer.setOptions( {highlightGutterLine: true, showPrintMargin: false, showFoldWidgets: false } );
     this.aceEditor.session.setNewLineMode('unix');
     this.aceEditor.$blockScrolling = Infinity;
     this.Range = require("ace/range").Range;
     this.gutterVisible = true;
     this.readOnly = false;
+    this.showHiddenChar = false;
     this.syntaxHighLightVisible = true;
     this.selectionEnabled = true;
 
@@ -126,7 +129,8 @@ ABCXJS.edit.EditArea.prototype.setFloating = function ( floating ) {
     
 };
 
-ABCXJS.edit.EditArea.prototype.editareaCallback = function ( action, elem, searchTerm, replaceTerm ) {
+ABCXJS.edit.EditArea.prototype.editareaCallback = function ( action, elem, searchTerm, replaceTerm, matchCase, wholeWord ) {
+    this.container.setStatusMessage( "" );
     switch(action) {
         case 'UNDO': 
             this.undoManager.hasUndo() && this.undoManager.undo(false);
@@ -154,39 +158,83 @@ ABCXJS.edit.EditArea.prototype.editareaCallback = function ( action, elem, searc
             this.alert = new DRAGGABLE.ui.ReplaceDialog( this.container, {translator: this.translator}  );
             break;
         case 'DO-SEARCH': 
-            this.searchRange = this.aceEditor.find(searchTerm, {
-                wrap: true,
-                caseSensitive: true, 
-                wholeWord: true,
-                regExp: false,
-                preventScroll: true // do not change selection
-            });
-            this.aceEditor.selection.setRange(this.searchRange);
-            break;
-        case 'DO-REPLACE': 
-            if(this.searchRange) {
-                this.aceEditor.session.replace(this.searchRange, replaceTerm );
+            if( searchTerm === "") {
+                this.container.setStatusMessage( this.translator.getResource( 'search_field_empty' ) );
+                break;
             }
             this.searchRange = this.aceEditor.find(searchTerm, {
                 wrap: true,
-                caseSensitive: true, 
-                wholeWord: true,
+                caseSensitive: matchCase, 
+                wholeWord: wholeWord,
                 regExp: false,
                 preventScroll: true // do not change selection
             });
-            this.aceEditor.selection.setRange(this.searchRange);
+            if(this.searchRange) {
+                this.aceEditor.selection.setRange(this.searchRange);
+            } else {
+                this.container.setStatusMessage( this.translator.getResource( 'not_found' ) );
+            }   
             break;
-        case 'DO-REPLACEALL': 
-            this.searchRange = true;
-            while(this.searchRange) {
+        case 'DO-REPLACE': 
+            if( searchTerm === "") {
+                this.container.setStatusMessage( this.translator.getResource( 'search_field_empty' ) );
+                break;
+            }
+            if( ! this.searchRange ) {
                 this.searchRange = this.aceEditor.find(searchTerm, {
                     wrap: true,
-                    caseSensitive: true, 
-                    wholeWord: true,
+                    caseSensitive: matchCase, 
+                    wholeWord: wholeWord,
                     regExp: false,
                     preventScroll: true // do not change selection
                 });
-                this.aceEditor.session.replace(this.searchRange, replaceTerm );
+                if(this.searchRange) {
+                    this.aceEditor.selection.setRange(this.searchRange);
+                } else {
+                    this.container.setStatusMessage( this.translator.getResource( 'not_found' ) );
+                    break;
+                }   
+            } 
+            this.aceEditor.session.replace(this.searchRange, replaceTerm );
+            
+            this.searchRange = this.aceEditor.find(searchTerm, {
+                wrap: true,
+                caseSensitive: matchCase, 
+                wholeWord: wholeWord,
+                regExp: false,
+                preventScroll: true // do not change selection
+            });
+            
+            if(this.searchRange) {
+                this.aceEditor.selection.setRange(this.searchRange);
+            }    
+            
+            break;
+        case 'DO-REPLACEALL': 
+            if( searchTerm === "") {
+                this.container.setStatusMessage( this.translator.getResource( 'search_field_empty' ) );
+                break;
+            }
+            this.searchRange = true;
+            var c = 0;
+            while(this.searchRange) {
+                this.searchRange = this.aceEditor.find(searchTerm, {
+                    wrap: true,
+                    caseSensitive: matchCase, 
+                    wholeWord: wholeWord,
+                    regExp: false,
+                    preventScroll: true // do not change selection
+                });
+                if(this.searchRange) {
+                    this.aceEditor.session.replace(this.searchRange, replaceTerm );
+                    c ++;
+                } else {
+                    if( c === 0  ) {
+                        this.container.setStatusMessage( this.translator.getResource( 'not_found' ) );
+                    } else {
+                        this.container.setStatusMessage( c + ' ' + this.translator.getResource( 'occurrence_replaced' ) );
+                    }
+                }
             }
             break;
         case 'GUTTER': // liga/desliga a numeracao de linhas
@@ -201,6 +249,9 @@ ABCXJS.edit.EditArea.prototype.editareaCallback = function ( action, elem, searc
             this.setSyntaxHighLight();
             var i = elem.getElementsByTagName("i")[0];
             i.className = (this.syntaxHighLightVisible? "ico-lightbulb-on ico-black ico-large" : "ico-lightbulb-off ico-black ico-large" );
+            break;
+        case 'HIDDENCHAR':
+            this.showHiddenChars();
             break;
         case 'RESIZE':
             this.resize();
@@ -225,6 +276,17 @@ ABCXJS.edit.EditArea.prototype.setEditorHighLightStyle = function () {
 
 ABCXJS.edit.EditArea.prototype.clearEditorHighLightStyle = function () {
     this.style.innerHTML = '.ABCXHighLight { }';
+};
+
+ABCXJS.edit.EditArea.prototype.showHiddenChars = function (showHiddenChar) {
+    if(typeof showHiddenChar === 'boolean') {
+        this.showHiddenChar = showHiddenChar;
+    } else {
+        this.showHiddenChar = !this.showHiddenChar;
+    }
+    
+    
+    this.aceEditor.setOption("showInvisibles", this.showHiddenChar);
 };
 
 ABCXJS.edit.EditArea.prototype.setGutter = function (visible) {

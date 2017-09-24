@@ -126,7 +126,7 @@ DRAGGABLE.ui.Alert.prototype.alertCallback = function ( action, elem ) {
 
 DRAGGABLE.ui.ReplaceDialog = function( parent, options ) {
     
-    var x, y, st = "Localizar:", rt = "Substituir por:";
+    var x, y, st = "Localizar:", rt = "Substituir por:", cs = 'Diferenciar maiúsculas e minúsculas', ww = 'Pesquisar palavras inteiras';
     
     options = options? options : {};
     this.translator = options.translator ? options.translator : null;
@@ -146,12 +146,16 @@ DRAGGABLE.ui.ReplaceDialog = function( parent, options ) {
     if( this.translator ) {
         st = this.translator.getResource( "searchTerm" );
         rt = this.translator.getResource( "replaceTerm" );
+        cs = this.translator.getResource( "match_case" );
+        ww = this.translator.getResource( "whole_word" );
     }
     
     this.container.dataDiv.innerHTML = '<div class="dialog" >\n\
         <div class="flag"><i class="ico-find-and-replace"></i></div>\n\
         <div class="text-group">\n\
             <br><span data-translate="searchTerm">'+st+'</span><br><input id="searchTerm" type="text" value=""></input>\n\
+            <br><input id="chk_match_case" type="checkbox"><span data-translate="match_case">'+cs+'</span>\n\
+            <br><input id="chk_whole_word" type="checkbox"><span data-translate="whole_word">'+ww+'</span>\n\
             <br><br><span data-translate="replaceTerm">'+rt+'</span><br><input id="replaceTerm" type="text" value=""></input>\n\
         </div>\n\
         <div id="pgAlert" class="pushbutton-group" style="right: 0; bottom: 0;" >\
@@ -171,7 +175,9 @@ DRAGGABLE.ui.ReplaceDialog = function( parent, options ) {
 
     this.searchTerm = document.getElementById("searchTerm");
     this.replaceTerm = document.getElementById("replaceTerm");
-        
+    this.chkMatchCase = document.getElementById("chk_match_case");
+    this.chkWholeWord  = document.getElementById("chk_whole_word");       
+    
     this.container.setVisible(true);
 
 };
@@ -192,7 +198,7 @@ DRAGGABLE.ui.ReplaceDialog.prototype.dialogCallback = function ( action, elem ) 
            this.close();
            break;
         default:
-            this.parentCallback.listener[this.parentCallback.method]('DO-'+action, elem, this.searchTerm.value, this.replaceTerm.value);
+            this.parentCallback.listener[this.parentCallback.method]('DO-'+action, elem, this.searchTerm.value, this.replaceTerm.value, this.chkMatchCase.checked, this.chkWholeWord.checked );
     }
 };
 
