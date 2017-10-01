@@ -133,7 +133,7 @@ DIATONIC.map.AccordionMap.prototype.loadABCX = function(pathList, cb ) {
             .fail(function( data, textStatus, error ) {
                 FILEMANAGER.deregister('ABCX', false);
                 var err = textStatus + ", " + error;
-                console.log( "ABCX Load Failed:\nLoading: " + data.responseText.substr(1,40) + '...\nError:\n ' + err );
+                waterbug.log( "ABCX Load Failed:\nLoading: " + data.responseText.substr(1,40) + '...\nError:\n ' + err );
             })
             .always(function() {
                 toLoad --;

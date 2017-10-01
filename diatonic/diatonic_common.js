@@ -34,7 +34,7 @@ DIATONIC.map.loadAccordionMaps = function ( files, cb )  {
             .fail(function( data, textStatus, error ) {
                 FILEMANAGER.deregister('MAP', false);
                 var err = textStatus + ", " + error;
-                console.log( "Accordion Load Failed:\nLoading: " + data.responseText.substr(1,40) + '...\nError:\n ' + err );
+                waterbug.log( "Accordion Load Failed:\nLoading: " + data.responseText.substr(1,40) + '...\nError:\n ' + err );
             })
             .always(function() {
                 toLoad --; 

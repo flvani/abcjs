@@ -120,7 +120,7 @@ ABCXJS.Editor = function (params) {
         , {listener : this, method: 'editorCallback' }
         , {draggable:false, toolbar: true, statusbar:true, translator:SITE.translator, width: "100%", height: "200px"
             , compileOnChange: true
-            , title: 'Editor ABCX' }
+            , title: 'EstudioEditorTitle' }
     );
 
     this.editarea.setVisible(true);
@@ -356,7 +356,7 @@ ABCXJS.Editor.prototype.resize = function( ) {
 };
 
 ABCXJS.Editor.prototype.menuCallback = function( action ) {
-  console.log(action);
+  waterbug.log(action);
 };
 
 ABCXJS.Editor.prototype.getString = function() {
@@ -420,9 +420,6 @@ ABCXJS.Editor.prototype.parseABC = function (transpose, force) {
 
     var text = this.getString();
 
-    this.warnings = [];
-    this.tunes = [];
-
     if (text === "") {
         this.initialText = this.tunes = undefined;
         return true;
@@ -432,6 +429,9 @@ ABCXJS.Editor.prototype.parseABC = function (transpose, force) {
         this.updateSelection();
         return false;
     }
+
+    this.warnings = [];
+    this.tunes = [];
 
     var tunebook = new ABCXJS.TuneBook(text);
 
@@ -551,11 +551,18 @@ ABCXJS.Editor.prototype.onModelChanged = function(loader) {
     if (this.tunes === undefined) {
         this.canvasDiv.innerHTML = "";
         delete this.changing;
+        if( loader ) {
+            loader.stop();
+        }
         return;
     }
 
-    if (this.bReentry)
+    if (this.bReentry) {
+        if( loader ) {
+            loader.stop();
+        }
         return; // TODO is this likely? maybe, if we rewrite abc immediately w/ abc2abc
+    }
     
     this.bReentry = true;
     this.timerId = null;

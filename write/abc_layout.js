@@ -257,6 +257,9 @@ ABCXJS.write.Layout.prototype.printBeam = function() {
     var abselemset = [];
 
     if (this.getElem().startBeam && !this.getElem().endBeam) {
+        
+        // TODO flavio - this.stemdir é o mesmo para indicar a regra para a voz e muda para beam 
+        
         var beamelem = new ABCXJS.write.BeamElem(this.stemdir);
         // PER: need two passes: the first one decides if the stems are up or down.
         // TODO-PER: This could be more efficient.
@@ -320,10 +323,7 @@ ABCXJS.write.Layout.prototype.printNote = function(elem, nostem, dontDraw) { //s
         ;
 
     if (elem.startTriplet) {
-        if (elem.startTriplet === 2)
-            this.tripletmultiplier = 3/2;
-        else
-            this.tripletmultiplier=(elem.startTriplet-1)/elem.startTriplet;
+        this.tripletmultiplier = elem.startTriplet.num === 2 ? 1.5 : (elem.startTriplet.num-1)/elem.startTriplet.num;
     }
 
     var abselem = new ABCXJS.write.AbsoluteElement(elem, duration * this.tripletmultiplier, 1);
@@ -394,16 +394,14 @@ ABCXJS.write.Layout.prototype.printNote = function(elem, nostem, dontDraw) { //s
 
         for (p = 0; p < elem.pitches.length; p++) {
 
-            if (/*!nostem flavio*/ 1 ) { // vou retirar apenas flags
-                if (/*flavio*/ nostem || (dir === "down" && p !== 0) || (dir === "up" && p !== pp - 1)) { // not the stemmed elem of the chord
-                    flag = null;
-                } else {
-                    flag = ABCXJS.write.chartable[(dir === "down") ? "dflags" : "uflags"][-durlog];
-                }
-                c = ABCXJS.write.chartable.note[-durlog];
+            // vou retirar apenas flags
+            if (/*flavio*/ nostem || (dir === "down" && p !== 0) || (dir === "up" && p !== pp - 1)) { // not the stemmed elem of the chord
+                flag = null;
             } else {
-                c = "noteheads.quarter";
+                flag = ABCXJS.write.chartable[(dir === "down") ? "dflags" : "uflags"][-durlog];
             }
+            
+            c = ABCXJS.write.chartable.note[-durlog];
 
             // The highest position for the sake of placing slurs is itself if the slur is internal. It is the highest position possible if the slur is for the whole chord.
             // If the note is the only one in the chord, then any slur it has counts as if it were on the whole chord.
@@ -490,7 +488,6 @@ ABCXJS.write.Layout.prototype.printNote = function(elem, nostem, dontDraw) { //s
         }
 
         for (i = 0; i < elem.gracenotes.length; i++) {
-            //fixme: corrigir escala para gracenotes
             var gracepitch = elem.gracenotes[i].verticalPos;
 
             flag = (gracebeam) ? null : 'grace'+ABCXJS.write.chartable.uflags[(this.isBagpipes) ? 5 : 3];
@@ -587,17 +584,25 @@ ABCXJS.write.Layout.prototype.printNote = function(elem, nostem, dontDraw) { //s
         }
     }
 
-
-    if (elem.startTriplet) {
-        this.triplet = new ABCXJS.write.TripletElem(elem.startTriplet, notehead, null, true); // above is opposite from case of slurs
-        if (!dontDraw)
+    /* flavio - handle triplets only when drawing - else no notehead */
+    if( !dontDraw ) {
+        
+        if( elem.startTriplet ) {
+            this.triplet = new ABCXJS.write.TripletElem( elem.startTriplet, notehead, null, /*this.stemdir*/ 'up' ); 
             this.voice.addOther(this.triplet);
-    }
-
-    if (elem.endTriplet && this.triplet) {
-        this.triplet.anchor2 = notehead;
-        this.triplet = null;
-        this.tripletmultiplier = 1;
+        } 
+        
+        // procura nas notas intermediárias minimos e máximos
+        if ( this.triplet && !elem.endTriplet ) {
+            this.triplet.minPitch = Math.min( this.triplet.minPitch, notehead.parent.abcelem.minpitch );
+            this.triplet.maxPitch = Math.max( this.triplet.maxPitch, notehead.parent.abcelem.maxpitch );
+        }
+        
+        if ( this.triplet && elem.endTriplet ) {
+            this.triplet.anchor2 = notehead;
+            this.triplet = null;
+            this.tripletmultiplier = 1;
+        }
     }
 
     return abselem;

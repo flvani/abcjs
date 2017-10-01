@@ -1540,8 +1540,8 @@ window.ABCXJS.parse.Parse = function(transposer_, accordion_) {
                             if (tripletNotesLeft > 0)
                                 warn("Can't nest triplets", line, i);
                             else {
-                                el.startTriplet = ret.triplet;
                                 tripletNotesLeft = ret.num_notes === undefined ? ret.triplet : ret.num_notes;
+                                el.startTriplet = {num: ret.triplet, notes: tripletNotesLeft};
                             }
                         }
                         i += ret.consumed;

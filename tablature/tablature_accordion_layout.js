@@ -79,13 +79,9 @@ ABCXJS.tablature.Layout.prototype.printTABElement = function() {
 ABCXJS.tablature.Layout.prototype.printTabNote = function(elem) {
     var p, pp;
     
-    if (elem.startTriplet) {
-        if (elem.startTriplet === 2)
-            this.tripletmultiplier = 3/2;
-        else
-            this.tripletmultiplier=(elem.startTriplet-1)/elem.startTriplet;
+    if (elem.startTriplet)  {
+        this.tripletmultiplier = elem.startTriplet.num === 2 ? 1.5 : (elem.startTriplet.num-1)/elem.startTriplet.num;
     }
-    
     
     var duration = ABCXJS.write.getDuration(elem);
     if (duration === 0) {

@@ -25,7 +25,7 @@ DRAGGABLE.ui.DropdownMenu = function (topDiv, options, menu) {
     this.translate = opts.translate || false;
     
     if (!this.container) {
-        console.log('Elemento ' + topDiv + ' não existe!');
+        waterbug.log('Elemento ' + topDiv + ' não existe!');
         return;
     } else {
         this.container.innerHTML = "";
@@ -92,7 +92,7 @@ DRAGGABLE.ui.DropdownMenu.prototype.setVisible = function (visible) {
 
 DRAGGABLE.ui.DropdownMenu.prototype.getSubMenu = function (ddm) {
     if( ! this.headers[ddm] ) {
-        console.log( 'Menu não encontrado!' );
+        waterbug.log( 'Menu não encontrado!' );
         return false;
     }
     return this.headers[ddm];
@@ -192,7 +192,7 @@ DRAGGABLE.ui.DropdownMenu.prototype.selectItem = function (ddm, item) {
 DRAGGABLE.ui.DropdownMenu.prototype.setSubMenuTitle = function (ddm, newTitle) {
     
     if( ! this.headers[ddm] ) {
-        console.log( 'Menu não encontrado!' );
+        waterbug.log( 'Menu não encontrado!' );
         return;
     }
     
@@ -202,7 +202,7 @@ DRAGGABLE.ui.DropdownMenu.prototype.setSubMenuTitle = function (ddm, newTitle) {
     } 
     
     if( ! title ) {
-        console.log( 'Título não encontrado!' );
+        waterbug.log( 'Título não encontrado!' );
         return false;
     }
         
@@ -216,7 +216,7 @@ DRAGGABLE.ui.DropdownMenu.prototype.addItemSubMenu = function (ddm, newItem, pos
     var tags = newItem.split('|'); 
     
     if( ! self.headers[ddm] ) {
-        console.log( 'Menu não encontrado!' );
+        waterbug.log( 'Menu não encontrado!' );
         return;
     }
     

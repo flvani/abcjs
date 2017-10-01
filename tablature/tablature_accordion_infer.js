@@ -205,7 +205,7 @@ ABCXJS.tablature.Infer.prototype.read = function(p_source, item) {
         if( source.wi.startTriplet){
             source.triplet = true;
             this.startTriplet = source.wi.startTriplet;
-            this.multiplier = this.startTriplet===2?1.5:(this.startTriplet-1)/this.startTriplet;
+            this.multiplier = this.startTriplet.num===2?1.5:(this.startTriplet.num-1)/this.startTriplet.num;
         }
         
         this.checkTies(source);
@@ -367,7 +367,7 @@ ABCXJS.tablature.Infer.prototype.addTABChild = function(token, line ) {
     if( this.startTriplet ) {
         child.startTriplet = this.startTriplet;
         this.startTriplet = false;
-        this.registerLine( '(' + child.startTriplet + ' ' );
+        this.registerLine( '(' + child.startTriplet.num + '::' + child.startTriplet.notes + ' ' );
     }
     
     if( this.endTriplet ) {

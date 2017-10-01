@@ -60,7 +60,7 @@ ABCXJS.tablature.Accordion.prototype.loadById = function (id) {
         if (this.accordions[g].id === id) {
             return this.load(g);
         }
-        console.log( 'Accordion not found. Loading the first one.');
+        waterbug.log( 'Accordion not found. Loading the first one.');
         return this.load(0);
 };
 

@@ -163,16 +163,16 @@
     
 <textarea id="abc" class="abc_textarea" spellcheck="false" cols="120" rows="10"  style="display: none;">
 X:1038
+T:Tango Bueno v1
 L:1/8
 Q:1/4=106
 M:C
 K:C
-R:Tango
-V:1 treble
-| (3:2:4 e2f2gg |
+V:1 treble stem=down
+| (3e2e2f2 (3 e2d2c2 | (3 B2B2G2- G4 |
 V:2 bass
-| A,,2 [A,CE]  A,,2 | 
-%V:3 accordionTab
+| A,,2 [A,CE] A,,2 [A,CE] A,,2 | E,,2 [E,^G,B,] E,,2 [E,^G,B,] E,,2 | 
+V:3 accordionTab
 </textarea>
     
 <textarea id="abcd" class="abc_textarea" spellcheck="false" cols="120" rows="10"  style="display: none;">
@@ -322,6 +322,9 @@ V:3 accordionTab
             
             function loadAccordions() {
                 
+                waterbug.log("WATERBUG - console"); 
+                
+                
                 console.log( 
                       '\nChrome: ' + ABCXJS.misc.isChrome() 
                     + '\nCromium: ' + ABCXJS.misc.isChromium() 
@@ -357,10 +360,10 @@ V:3 accordionTab
                             onProgress: function(event) {
                                 if(event.success){
                                     MIDI.widget.setValue(0+Math.round(event.perc*.1));
-                                    console.log('\nPercentual: '+ event.perc + '\nTimeouts: ' + event.timeouts + '\n' + event.success );
+                                    waterbug.log('\nPercentual: '+ event.perc + '\nTimeouts: ' + event.timeouts + '\n' + event.success );
                                 } else {
                                     MIDI.widget.setValue(0+Math.round(event.perc*.1));
-                                    console.log('\nPercentual: '+ event.perc);
+                                    waterbug.log('\nPercentual: '+ event.perc);
                                 }
                             }
                             ,onLoad: loadMIDI 
@@ -375,7 +378,8 @@ V:3 accordionTab
                 
                 MIDI.loadPlugin({
                      soundfontUrl: "./soundfont/"
-                    ,instruments: ["accordion", "acoustic_grand_piano" ] // default
+                    //,instruments: ["accordion", "acoustic_grand_piano" ] 
+                    ,instruments: [ "accordion" ] 
                 ,onprogress: function( total, done, currentPercent ) {
                     var percent = ((done*100)+currentPercent)*90/(total*100);
                     MIDI.widget.setValue(10+Math.round(percent));
@@ -390,8 +394,6 @@ V:3 accordionTab
                 SITE.translator = new SITE.Translator( { language: 'pt_BR', callback: initApp } );
                 
                 SITE.properties.options.showConsole = true;
-                
-                waterbug.log("WATERBUG - console"); 
                 
             }
             

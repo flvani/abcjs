@@ -47,7 +47,7 @@ ABCXJS.write.StaffGroupElement.prototype.layout = function(spacing, printer, deb
     var voiceheaderw = 0;
     for (var i = 0; i < this.voices.length; i++) {
         if (this.voices[i].header) {
-            //fixme: obter a largura real do texto - text.getBBox().width
+            //FLAVIO fixme: obter a largura real do texto - text.getBBox().width
             voiceheaderw = Math.max(voiceheaderw, this.voices[i].header.length *5+10);
         }
     }
@@ -56,7 +56,7 @@ ABCXJS.write.StaffGroupElement.prototype.layout = function(spacing, printer, deb
 
     var currentduration = 0;
     if (debug)
-        console.log("init layout");
+        waterbug.log("init layout");
     for (i = 0; i < this.voices.length; i++) {
         this.voices[i].beginLayout(x);
         for (b = 0; b < this.voices[i].beams.length; b++) {
@@ -68,15 +68,22 @@ ABCXJS.write.StaffGroupElement.prototype.layout = function(spacing, printer, deb
         }
     }
 
+    var c = 0;
     while (!this.finished()) {
+        
+        if( c++ > 1000 ) {
+            alert( 'não termina!' );
+        }
+        
         // find first duration level to be laid out among candidates across voices
+
         currentduration = null; // candidate smallest duration level
         for (i = 0; i < this.voices.length; i++) {
             if (!this.voices[i].layoutEnded() && (!currentduration || this.voices[i].getDurationIndex() < currentduration))
                 currentduration = this.voices[i].getDurationIndex();
         }
         if (debug)
-            console.log("currentduration: ", currentduration);
+            waterbug.log("currentduration: ", currentduration);
 
 
         // isolate voices at current duration level
@@ -85,11 +92,11 @@ ABCXJS.write.StaffGroupElement.prototype.layout = function(spacing, printer, deb
         for (i = 0; i < this.voices.length; i++) {
             if (this.voices[i].getDurationIndex() !== currentduration) {
                 othervoices.push(this.voices[i]);
-                //console.log("out: voice ",i);
+                //waterbug.log("out: voice ",i);
             } else {
                 currentvoices.push(this.voices[i]);
                 if (debug)
-                    console.log("in: voice ", i);
+                    waterbug.log("in: voice ", i);
             }
         }
 
@@ -789,40 +796,76 @@ ABCXJS.write.CrescendoElem.prototype.draw = function(printer, linestartx, lineen
     }
 };
 
-ABCXJS.write.TripletElem = function(number, anchor1, anchor2, above) {
+ABCXJS.write.TripletElem = function(tripletInfo, anchor1, anchor2, stemDir ) {
     this.anchor1 = anchor1; // must have a .x and a .parent property or be null (means starts at the "beginning" of the line - after keysig)
     this.anchor2 = anchor2; // must have a .x property or be null (means ends at the end of the line)
-    this.above = above;
-    this.number = number;
+    this.forceUp = stemDir==='up';
+    this.forceDown = stemDir==='down';
+    this.number = tripletInfo.num;
+    this.qtd_notes = tripletInfo.notes;
+    this.minPitch = 100;
+    this.maxPitch = -100;
 };
 
 ABCXJS.write.TripletElem.prototype.draw = function(printer, linestartx, lineendx, staveInfo) {
-    // TODO end and beginning of line
+    
     if (this.anchor1 && this.anchor2) {
-        var ypos = this.above ? 16 : -1;	// PER: Just bumped this up from 14 to make (3z2B2B2 (3B2B2z2 succeed. There's probably a better way.
+
+        var average = ( (this.maxPitch+this.minPitch)/2 + this.anchor1.parent.abcelem.averagepitch + this.anchor2.parent.abcelem.averagepitch ) / 3;
+        
+        this.asc = ! ( (this.forceUp || average <= 6 ) && (!this.forceDown) ); // hardcoded 6 is B
+        
+        var maxslant = (this.qtd_notes? this.qtd_notes: this.number) / 2;
+        
+        var max = Math.max( Math.max(this.anchor1.parent.abcelem.maxpitch, this.anchor2.parent.abcelem.maxpitch ), this.maxPitch);
+        var min = Math.min( Math.min(this.anchor1.parent.abcelem.minpitch, this.anchor2.parent.abcelem.minpitch ), this.minPitch);
+        var slant = this.anchor1.parent.abcelem.averagepitch - this.anchor2.parent.abcelem.averagepitch;
+        
+        //var isFlat = (this.asc && this.maxPitch >= max  ) || (!this.asc && this.minPitch <= min );
+        //var ypos = (average >= 6 ? Math.max( this.maxPitch +3, 12 ) : Math.max( this.maxPitch +8, 12 ) );
+        
+        var isFlat = true;
+        
+        var ypos = Math.max( this.forceUp ? max+10 : (max >= 10 ? max + 4 : ( min <= 6 ? 15 : 13 )), 13) ;
+                
+        //        Math.max( max + (min <= 6 ? 4: 5 ), 12 );
+
+        if (isFlat ) {
+            slant = 0;
+        } else  {
+            slant = Math.min(slant,maxslant);
+            slant = Math.max(slant,-maxslant);
+        }
+
+        var starty = printer.calcY(ypos + Math.floor(slant / 2));
+        var endy = printer.calcY(ypos + Math.floor(-slant / 2));
+    
 
         if (this.anchor1.parent.beam &&
                 this.anchor1.parent.beam === this.anchor2.parent.beam) {
             var beam = this.anchor1.parent.beam;
-            this.above = beam.asc;
+            this.asc = beam.asc;
             ypos = beam.pos;
         } else {
             var y = printer.calcY(ypos);
-            var linestartx = this.anchor1.x;
+            var linestartx = this.anchor1.x -2;
             var lineendx = this.anchor2.x + this.anchor2.w;
-            printer.paper.printLine(linestartx, y, linestartx, y + 5);
-            printer.paper.printLine(lineendx, y, lineendx, y + 5);
-            printer.paper.printLine(linestartx, y, (linestartx + lineendx) / 2 - 5, y);
-            printer.paper.printLine((linestartx + lineendx) / 2 + 5, y, lineendx, y);
+            printer.paper.printLine(linestartx, starty+ (!this.asc? 0 : -5), linestartx, starty + (!this.asc? 5 : 0) );
+            printer.paper.printLine(lineendx, endy+ (!this.asc? 0 : -5), lineendx, endy + (!this.asc? 5 : 0));
+            //printer.paper.printLine(linestartx, y, (linestartx + lineendx) / 2 - 5, y);
+            printer.paper.printBeam( linestartx, starty, (linestartx + lineendx) / 2 - 5, y, (linestartx + lineendx) / 2 - 5, y+1, linestartx, starty+1 );
+            //printer.paper.printLine((linestartx + lineendx) / 2 + 5, y, lineendx, y);
+            printer.paper.printBeam( (linestartx + lineendx) / 2 + 5, y, lineendx, endy, lineendx, endy+1, (linestartx + lineendx) / 2 + 5, y+1 );
         }
+        
         var xsum = this.anchor1.x + this.anchor2.x;
-        var ydelta = 0;
+        var ydelta = -1;
         if (beam) {
-            if (this.above) {
+            if (this.asc) {
                 xsum += (this.anchor2.w + this.anchor1.w);
                 ydelta = 2;// 4;
             } else {
-                ydelta = -2; //-4;
+                ydelta = -3; //-4;
             }
         } else {
             xsum += this.anchor2.w;
@@ -830,6 +873,8 @@ ABCXJS.write.TripletElem.prototype.draw = function(printer, linestartx, lineendx
 
         printer.printText(xsum / 2, ypos + ydelta, this.number, 'abc_ending', "middle");
 
+    } else {
+        waterbug.log( 'Incomplete triplet' );
     }
 };
 
@@ -890,38 +935,43 @@ ABCXJS.write.BeamElem.prototype.draw = function(printer) {
     var barpos = (this.isgrace) ? 5 : 7;
     this.calcDir();
 
-    var barminpos = this.asc ? 5 : 8;	//PER: I just bumped up the minimum height for notes with descending stems to clear a rest in the middle of them.
+    //PER: I just bumped up the minimum height for notes with descending stems to clear a rest in the middle of them.
+    var barminpos = this.asc ? 5 : 8;	
+    
     this.pos = Math.round(this.asc ? Math.max(average + barpos, this.max + barminpos) : Math.min(average - barpos, this.min - barminpos));
-    var slant = this.elems[0].abcelem.averagepitch - this.elems[this.elems.length - 1].abcelem.averagepitch;
-    if (this.isflat)
-        slant = 0;
+    
     var maxslant = this.elems.length / 2;
+    var slant = this.elems[0].abcelem.averagepitch - this.elems[this.elems.length - 1].abcelem.averagepitch;
+    
+    if (this.isflat ) {
+        slant = 0;
+    } else  {
+        slant = Math.min(slant,maxslant);
+        slant = Math.max(slant,-maxslant);
+    }
 
-    if (slant > maxslant)
-        slant = maxslant;
-    if (slant < -maxslant)
-        slant = -maxslant;
     this.starty = printer.calcY(this.pos + Math.floor(slant / 2));
     this.endy = printer.calcY(this.pos + Math.floor(-slant / 2));
-
    
     var starthead = this.elems[0].heads[(this.asc) ? 0 : this.elems[0].heads.length - 1];
     var endhead = this.elems[this.elems.length - 1].heads[(this.asc) ? 0 : this.elems[this.elems.length - 1].heads.length - 1];
     this.startx = this.elems[0].x;
+    
     if (this.asc)
         this.startx += starthead.w - 0.6;
+    
     this.endx = this.elems[this.elems.length - 1].x;
+    
     if (this.asc)
         this.endx += endhead.w;
 
     // PER: if the notes are too high or too low, make the beam go down to the middle
-    if (this.asc && this.pos < 6) {
-        this.starty = printer.calcY(6);
-        this.endy = printer.calcY(6);
-    } else if (!this.asc && this.pos > 6) {
-        this.starty = printer.calcY(6);
-        this.endy = printer.calcY(6);
+    if ( (this.asc && this.pos < 6) || (!this.asc && this.pos > 6) ){
+        this.pos = 6;
+        this.starty = printer.calcY(this.pos);
+        this.endy = printer.calcY(this.pos);
     }
+    
     printer.paper.printBeam(
         this.startx, this.starty
        ,this.startx, (this.starty + this.dy) 

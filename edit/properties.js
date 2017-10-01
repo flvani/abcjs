@@ -19,7 +19,7 @@ SITE.ga = function ( p1, p2, p3, p4, p5  ){
     if( ga && SITE.getVersion('mainSITE', '' ) !== 'debug' &&  ga && SITE.getVersion('mainSITE', '' ) !== 'unknown'  ) {
         ga( p1, p2, p3, p4, p5 );
     } else {
-        console.log('Funcao ga não definida.');
+        waterbug.log('Funcao ga não definida.');
     }
 };
 

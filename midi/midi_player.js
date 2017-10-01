@@ -208,7 +208,7 @@ ABCXJS.midi.Player.prototype.startDidacticPlay = function(what, type, value, val
                     return (that.initMeasure <= that.currentMeasure) && (that.currentMeasure <= that.endMeasure);
                 };
             } else {
-               console.log('goto-measure or repeat-measure:  measure \''+value+'\' not found!');
+               waterbug.log('goto-measure or repeat-measure:  measure \''+value+'\' not found!');
                this.pausePlay(true);
                return;
             }   
@@ -223,7 +223,7 @@ ABCXJS.midi.Player.prototype.startDidacticPlay = function(what, type, value, val
                     return that.initMeasure === that.currentMeasure;
                 };
             } else {
-               console.log('play-measure: measure \''+value+'\' not found!');
+               waterbug.log('play-measure: measure \''+value+'\' not found!');
                this.pausePlay(true);
                return false;
             }   

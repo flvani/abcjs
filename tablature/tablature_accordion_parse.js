@@ -279,8 +279,11 @@ ABCXJS.tablature.Parse.prototype.getColumn = function() {
     token.bassNote = [];
     
     if(this.line.charAt(this.i) === "(") {
-        token.startTriplet = this.getTripletDef();
-        this.triplet = true;
+        var t = this.getTripletDef();
+        if( t ) {
+            token.startTriplet = t;
+            this.triplet = true;
+        }
     }
     
     while (this.belSyms.indexOf(this.line.charAt(this.i)) < 0 ) {
@@ -322,22 +325,45 @@ ABCXJS.tablature.Parse.prototype.checkBassButton = function( bellows, b ) {
 
 
 ABCXJS.tablature.Parse.prototype.getTripletDef = function() {
-    this.i++;
-    this.parseMultiCharToken( ' \t' );
-    var t =  this.line.charAt(this.i); //espero um único número como indicador de triplet
-    this.i++;
-    this.parseMultiCharToken( ' \t' );
-    return t;    
+    
+    var i = ++this.i;
+    
+    while ( this.i < this.line.length && this.bassNoteSyms.indexOf(this.line.charAt(this.i)) < 0 ) {
+      this.i++;
+    }
+    
+    if( this.i >= this.line.length ) {
+        this.warn( "Triplet definition not found at " + this.line.substr(i) );
+        return null;
+    }
+    
+    var t =  this.line.substr(i, this.i-i).trim();
+    
+    //validate the triplet expression
+    var e = /\[([0-9])(:{1,2}([0-9]){0,1})*\]/;
+    var r = ('['+t+']').match(e);
+    
+    if( ! r[1] ) {
+        this.warn( "Inválide triplet definition at " + this.line.substr(i) );
+        return null;
+    }
+    
+    return { num: r[1], notes: r[3] ? r[3] : r[1] };
+    
 };
 
 ABCXJS.tablature.Parse.prototype.isTripletEnd = function() {
     this.parseMultiCharToken( ' \t' );
     if( this.line.charAt(this.i) === ')' ) {
         this.i++;
-        this.triplet = false;
-        return true;
-    } 
-    
+        if( this.triplet ) {
+            this.triplet = false;
+            return true;
+        } else {
+            this.warn( "Found triplet end with no beginning." + this.line.substr(this.i-1) );
+            return false;
+        }
+    }
     return false;
 };
 

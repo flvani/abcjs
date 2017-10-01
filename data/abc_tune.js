@@ -44,7 +44,7 @@ window.ABCXJS.data.Tune = function() {
     //		lyric: array of { syllable: xxx, divider: one of " -_" }
     //		startTie = true|undefined
     //		endTie = true|undefined
-    //		startTriplet = num <- that is the number to print
+    //		startTriplet = {num <- the number to print, notes <- total elements} 
     //		endTriplet = true|undefined (the last note of the triplet)
     // TODO: actually, decoration should be an array.
     //		decoration: upbow, downbow, accent

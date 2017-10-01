@@ -192,7 +192,7 @@ ABCXJS.midi.Parse.prototype.handleButtons = function(pitches, buttons ) {
     var self = this;
     buttons.forEach( function( item ) {
         if(!item.button.button) {
-            //console.log( 'ABCXJS.midi.Parse.prototype.handleButtons: botão não encontrado.');
+            //waterbug.log( 'ABCXJS.midi.Parse.prototype.handleButtons: botão não encontrado.');
             return;
         }
         if( item.button.closing )  {
@@ -252,7 +252,7 @@ ABCXJS.midi.Parse.prototype.handleButtons = function(pitches, buttons ) {
 ABCXJS.midi.Parse.prototype.writeNote = function(elem) {
     
     if (elem.startTriplet) {
-        this.multiplier = (elem.startTriplet === 2) ? 3 / 2 : (elem.startTriplet - 1) / elem.startTriplet;
+        this.multiplier = (elem.startTriplet.num === 2) ? 3 / 2 : (elem.startTriplet.num - 1) / elem.startTriplet.num;
     }
 
     var mididuration = this.checkMinNote(elem.duration * this.wholeNote * this.multiplier);
@@ -388,7 +388,7 @@ ABCXJS.midi.Parse.prototype.checkMinNote = function(dur) {
 ABCXJS.midi.Parse.prototype.selectButtons = function(elem) {
     
     if (elem.startTriplet) {
-        this.multiplier = (elem.startTriplet === 2) ? 3 / 2 : (elem.startTriplet - 1) / elem.startTriplet;
+        this.multiplier = (elem.startTriplet.num === 2) ? 3 / 2 : (elem.startTriplet.num - 1) / elem.startTriplet.num;
     }
     
     var mididuration = elem.duration * this.wholeNote * this.multiplier;
