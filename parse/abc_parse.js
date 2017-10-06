@@ -405,8 +405,8 @@ window.ABCXJS.parse.Parse = function(transposer_, accordion_) {
                 chord[2] = null;
                 chord[3] = {x: x.value, y: y.value};
             } else {
-                chord[1] = chord[1].replace(/([ABCDEFG])b/g, "$1♭");
-                chord[1] = chord[1].replace(/([ABCDEFG])#/g, "$1♯");
+                chord[1] = chord[1].replace(/([ABCDEFG])b/g, "$1?");
+                chord[1] = chord[1].replace(/([ABCDEFG])#/g, "$1?");
                 chord[2] = 'default';
             }
             return chord;
@@ -1353,6 +1353,7 @@ window.ABCXJS.parse.Parse = function(transposer_, accordion_) {
         else
             multilineVars.start_new_line = false;
         var tripletNotesLeft = 0;
+        var triplet = false;
         //var tripletMultiplier = 0;
 //		var inTie = false;
 //		var inTieChord = {};
@@ -1541,7 +1542,8 @@ window.ABCXJS.parse.Parse = function(transposer_, accordion_) {
                                 warn("Can't nest triplets", line, i);
                             else {
                                 tripletNotesLeft = ret.num_notes === undefined ? ret.triplet : ret.num_notes;
-                                el.startTriplet = {num: ret.triplet, notes: tripletNotesLeft};
+                                triplet = {num: ret.triplet, notes: tripletNotesLeft, avgPitch: 0};
+                                el.startTriplet = triplet;
                             }
                         }
                         i += ret.consumed;
@@ -1606,8 +1608,17 @@ window.ABCXJS.parse.Parse = function(transposer_, accordion_) {
 
                                     if (tripletNotesLeft > 0) {
                                         tripletNotesLeft--;
+                                        var m = 0;
+                                        if( el.pitches ) {
+                                            for(var ii=0; ii < el.pitches.length; ++ii ) m += el.pitches[ii].pitch;
+                                            triplet.avgPitch += (m/el.pitches.length);
+                                        } else {
+                                            triplet.avgPitch += 6.0;
+                                        }
                                         if (tripletNotesLeft === 0) {
                                             el.endTriplet = true;
+                                            triplet.avgPitch = (triplet.avgPitch/triplet.notes);
+                                            triplet = false;
                                         }
                                     }
 
@@ -1749,8 +1760,17 @@ window.ABCXJS.parse.Parse = function(transposer_, accordion_) {
 
                             if (tripletNotesLeft > 0) {
                                 tripletNotesLeft--;
+                                var m = 0;
+                                if( el.pitches ) {
+                                    for(var ii=0; ii < el.pitches.length; ++ii ) m += el.pitches[ii].pitch;
+                                    triplet.avgPitch += (m/el.pitches.length);
+                                } else {
+                                    triplet.avgPitch += 6.0;
+                                }
                                 if (tripletNotesLeft === 0) {
                                     el.endTriplet = true;
+                                    triplet.avgPitch = (triplet.avgPitch/triplet.notes);
+                                    triplet = false;
                                 }
                             }
 
