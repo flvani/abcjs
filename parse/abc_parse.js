@@ -1151,6 +1151,26 @@ window.ABCXJS.parse.Parse = function(transposer_, accordion_) {
                 multilineVars.barNumOnNextNoteVisible = true;
         }
     }
+    
+    var handleTriplet = function ( el, parsingTriplet ) {
+        var m = 0;
+        
+        if( el.pitches ) {
+            for(var ii=0; ii < el.pitches.length; ++ii ) m += el.pitches[ii].pitch;
+            parsingTriplet.triplet.avgPitch += (m/el.pitches.length);
+        } else {
+            parsingTriplet.triplet.avgPitch += 6.0;
+        }
+        
+        parsingTriplet.notesLeft--;
+        
+        if (parsingTriplet.notesLeft === 0) {
+            el.endTriplet = true;
+            parsingTriplet.triplet.avgPitch = (parsingTriplet.triplet.avgPitch/parsingTriplet.triplet.notes);
+            parsingTriplet.triplet = false;
+        }
+    };
+    
 
     var letter_to_grace = function(line, i) {
         // Grace notes are an array of: startslur, note, endslur, space; where note is accidental, pitch, duration
@@ -1345,19 +1365,16 @@ window.ABCXJS.parse.Parse = function(transposer_, accordion_) {
 
         // Start with the standard staff, clef and key symbols on each line
         var delayStartNewLine = multilineVars.start_new_line;
-//			if (multilineVars.start_new_line) {
-//				startNewLine();
-//			}
-        if (multilineVars.continueall === undefined)
-            multilineVars.start_new_line = true;
-        else
-            multilineVars.start_new_line = false;
-        var tripletNotesLeft = 0;
-        var triplet = false;
-        //var tripletMultiplier = 0;
-//		var inTie = false;
-//		var inTieChord = {};
-
+        
+        multilineVars.start_new_line = (multilineVars.continueall === undefined);
+        
+//        if (multilineVars.continueall === undefined)
+//            multilineVars.start_new_line = true;
+//        else
+//            multilineVars.start_new_line = false;
+        
+        var parsingTriplet = { notesLeft:0, triplet: false };
+        
         // See if the line starts with a header field
         var retHeader = header.letter_to_body_header(line, i);
         if (retHeader[0] > 0) {
@@ -1390,7 +1407,8 @@ window.ABCXJS.parse.Parse = function(transposer_, accordion_) {
                 // If there is a grace note either before or after the chord symbols and decorations, then it is definitely a note-group.
                 // If there is a bar marker, it is definitely a bar-marking.
                 // If there is either a core-note or chord, it is definitely a note-group.
-                // So, loop while we find grace-notes, chords-symbols, or decorations. [It is an error to have more than one grace-note group in a row; the others can be multiple]
+                // So, loop while we find grace-notes, chords-symbols, or decorations. 
+                // [It is an error to have more than one grace-note group in a row; the others can be multiple]
                 // Then, if there is a grace-note, we know where to go.
                 // Else see if we have a chord, core-note, slur, triplet, or bar.
 
@@ -1538,12 +1556,12 @@ window.ABCXJS.parse.Parse = function(transposer_, accordion_) {
                         if (ret.startSlur !== undefined) 
                             el.startSlur = ret.startSlur;
                         if (ret.triplet !== undefined) {
-                            if (tripletNotesLeft > 0)
+                            if (parsingTriplet.notesLeft > 0)
                                 warn("Can't nest triplets", line, i);
                             else {
-                                tripletNotesLeft = ret.num_notes === undefined ? ret.triplet : ret.num_notes;
-                                triplet = {num: ret.triplet, notes: tripletNotesLeft, avgPitch: 0};
-                                el.startTriplet = triplet;
+                                parsingTriplet.notesLeft = ret.num_notes === undefined ? ret.triplet : ret.num_notes;
+                                parsingTriplet.triplet = {num: ret.triplet, notes: parsingTriplet.notesLeft, avgPitch: 0};
+                                el.startTriplet = parsingTriplet.triplet;
                             }
                         }
                         i += ret.consumed;
@@ -1606,20 +1624,8 @@ window.ABCXJS.parse.Parse = function(transposer_, accordion_) {
                                         multilineVars.staves[multilineVars.currentVoice.staffNum].inTie[multilineVars.currentVoice.index] = false;
                                     }
 
-                                    if (tripletNotesLeft > 0) {
-                                        tripletNotesLeft--;
-                                        var m = 0;
-                                        if( el.pitches ) {
-                                            for(var ii=0; ii < el.pitches.length; ++ii ) m += el.pitches[ii].pitch;
-                                            triplet.avgPitch += (m/el.pitches.length);
-                                        } else {
-                                            triplet.avgPitch += 6.0;
-                                        }
-                                        if (tripletNotesLeft === 0) {
-                                            el.endTriplet = true;
-                                            triplet.avgPitch = (triplet.avgPitch/triplet.notes);
-                                            triplet = false;
-                                        }
+                                    if (parsingTriplet.notesLeft > 0) {
+                                        handleTriplet( el, parsingTriplet );
                                     }
 
                                     var postChordDone = false;
@@ -1758,22 +1764,10 @@ window.ABCXJS.parse.Parse = function(transposer_, accordion_) {
                             }    
                             i = core.endChar;
 
-                            if (tripletNotesLeft > 0) {
-                                tripletNotesLeft--;
-                                var m = 0;
-                                if( el.pitches ) {
-                                    for(var ii=0; ii < el.pitches.length; ++ii ) m += el.pitches[ii].pitch;
-                                    triplet.avgPitch += (m/el.pitches.length);
-                                } else {
-                                    triplet.avgPitch += 6.0;
-                                }
-                                if (tripletNotesLeft === 0) {
-                                    el.endTriplet = true;
-                                    triplet.avgPitch = (triplet.avgPitch/triplet.notes);
-                                    triplet = false;
-                                }
+                            if (parsingTriplet.notesLeft > 0) {
+                                handleTriplet( el, parsingTriplet );
                             }
-
+                            
                             if (core.end_beam)
                                 addEndBeam(el);
 

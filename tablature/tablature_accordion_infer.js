@@ -278,7 +278,7 @@ ABCXJS.tablature.Infer.prototype.extraiIntervalo = function(voices) {
     
     for( var i = 0; i < voices.length; i ++ ) {
         var elem = voices[i];
-        if( elem.wi.endTriplet){
+        if( elem.wi.endTriplet && voices[i].wi.duration <= 0.0001 ){
             this.endTriplet = true;
             elem.triplet = false;
             this.multiplier = 1;

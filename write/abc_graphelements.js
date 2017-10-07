@@ -308,6 +308,7 @@ ABCXJS.write.VoiceElement = function(voicenumber, staffnumber, abcstaff) {
     this.voicenumber = voicenumber; //number of the voice on a given stave (not staffgroup)
     this.staffnumber = staffnumber; // number of the staff in the staffgroup
     this.voicetotal = abcstaff.voices.length;
+    this.stem = abcstaff.stem;
     this.stave = {
         y: 0
        ,top: 0
@@ -803,33 +804,22 @@ ABCXJS.write.TripletElem = function(tripletInfo, anchor1, anchor2, stemDir ) {
     this.forceDown = stemDir==='down';
     this.number = tripletInfo.num;
     this.qtd_notes = tripletInfo.notes;
+    this.avgPitch = tripletInfo.avgPitch;
     this.minPitch = 100;
     this.maxPitch = -100;
+    this.asc = ! ( (this.forceUp || this.avgPitch <= 6 ) && (!this.forceDown) ); // hardcoded 6 is B
+    this.multiplier = tripletInfo.num === 2 ? 1.5 : (tripletInfo.num-1)/tripletInfo.num;
+    
 };
 
 ABCXJS.write.TripletElem.prototype.draw = function(printer, linestartx, lineendx, staveInfo) {
     
     if (this.anchor1 && this.anchor2) {
 
-        var average = ( (this.maxPitch+this.minPitch)/2 + this.anchor1.parent.abcelem.averagepitch + this.anchor2.parent.abcelem.averagepitch ) / 3;
-        
-        this.asc = ! ( (this.forceUp || average <= 6 ) && (!this.forceDown) ); // hardcoded 6 is B
-        
         var maxslant = (this.qtd_notes? this.qtd_notes: this.number) / 2;
-        
-        var max = Math.max( Math.max(this.anchor1.parent.abcelem.maxpitch, this.anchor2.parent.abcelem.maxpitch ), this.maxPitch);
-        var min = Math.min( Math.min(this.anchor1.parent.abcelem.minpitch, this.anchor2.parent.abcelem.minpitch ), this.minPitch);
         var slant = this.anchor1.parent.abcelem.averagepitch - this.anchor2.parent.abcelem.averagepitch;
-        
-        //var isFlat = (this.asc && this.maxPitch >= max  ) || (!this.asc && this.minPitch <= min );
-        //var ypos = (average >= 6 ? Math.max( this.maxPitch +3, 12 ) : Math.max( this.maxPitch +8, 12 ) );
-        
         var isFlat = true;
         
-        var ypos = Math.max( this.forceUp ? max+10 : (max >= 10 ? max + 4 : ( min <= 6 ? 15 : 13 )), 13) ;
-                
-        //        Math.max( max + (min <= 6 ? 4: 5 ), 12 );
-
         if (isFlat ) {
             slant = 0;
         } else  {
@@ -837,9 +827,9 @@ ABCXJS.write.TripletElem.prototype.draw = function(printer, linestartx, lineendx
             slant = Math.max(slant,-maxslant);
         }
 
+        var ypos = Math.max( this.forceUp ? this.maxPitch+9 : (this.maxPitch >= 10 ? this.maxPitch + 3 : 13), 13) ;
         var starty = printer.calcY(ypos + Math.floor(slant / 2));
         var endy = printer.calcY(ypos + Math.floor(-slant / 2));
-    
 
         if (this.anchor1.parent.beam &&
                 this.anchor1.parent.beam === this.anchor2.parent.beam) {
@@ -850,28 +840,25 @@ ABCXJS.write.TripletElem.prototype.draw = function(printer, linestartx, lineendx
             var y = printer.calcY(ypos);
             var linestartx = this.anchor1.x -2;
             var lineendx = this.anchor2.x + this.anchor2.w;
-            printer.paper.printLine(linestartx, starty+ (!this.asc? 0 : -5), linestartx, starty + (!this.asc? 5 : 0) );
-            printer.paper.printLine(lineendx, endy+ (!this.asc? 0 : -5), lineendx, endy + (!this.asc? 5 : 0));
+            
+            //printer.paper.printLine(linestartx, starty+ (!this.asc? 0 : -5), linestartx, starty + (!this.asc? 5 : 0) );
+            //printer.paper.printLine(lineendx, endy+ (!this.asc? 0 : -5), lineendx, endy + (!this.asc? 5 : 0));
+
+            printer.paper.printLine(linestartx, starty+ (true? 0 : -5), linestartx, starty + (true? 5 : 0) );
+            printer.paper.printLine(lineendx, endy+ (true? 0 : -5), lineendx, endy + (true? 5 : 0));
+            
+            
             //printer.paper.printLine(linestartx, y, (linestartx + lineendx) / 2 - 5, y);
-            printer.paper.printBeam( linestartx, starty, (linestartx + lineendx) / 2 - 5, y, (linestartx + lineendx) / 2 - 5, y+1, linestartx, starty+1 );
             //printer.paper.printLine((linestartx + lineendx) / 2 + 5, y, lineendx, y);
+            
+            printer.paper.printBeam( linestartx, starty, (linestartx + lineendx) / 2 - 5, y, (linestartx + lineendx) / 2 - 5, y+1, linestartx, starty+1 );
             printer.paper.printBeam( (linestartx + lineendx) / 2 + 5, y, lineendx, endy, lineendx, endy+1, (linestartx + lineendx) / 2 + 5, y+1 );
         }
         
-        var xsum = this.anchor1.x + this.anchor2.x;
-        var ydelta = -1;
-        if (beam) {
-            if (this.asc) {
-                xsum += (this.anchor2.w + this.anchor1.w);
-                ydelta = 2;// 4;
-            } else {
-                ydelta = -3; //-4;
-            }
-        } else {
-            xsum += this.anchor2.w;
-        }
-
-        printer.printText(xsum / 2, ypos + ydelta, this.number, 'abc_ending', "middle");
+        var ydelta = ypos + (beam ? ( this.asc ? 2 : -3.5 ) : -1 );
+        var xdelta = ( this.anchor1.x + this.anchor2.x + this.anchor1.w + (beam && this.asc ? this.anchor2.w : 0 ) - 2 ) / 2;
+        
+        printer.printText( xdelta, ydelta, this.number, 'abc_ending', "middle");
 
     } else {
         waterbug.log( 'Incomplete triplet' );

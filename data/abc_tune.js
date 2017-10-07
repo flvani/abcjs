@@ -831,36 +831,29 @@ window.ABCXJS.data.Tune = function() {
         var createVoice = function(params) {
             This.lines[This.lineNum].staffs[This.staffNum].voices[This.voiceNum] = [];
             if (This.isFirstLine(This.lineNum)) {
+                
+                if (params.stem) 
+                    This.lines[This.lineNum].staffs[This.staffNum].stem = params.stem;
+                
                 if (params.name) {
                     if (!This.lines[This.lineNum].staffs[This.staffNum].title)
                         This.lines[This.lineNum].staffs[This.staffNum].title = [];
                     This.lines[This.lineNum].staffs[This.staffNum].title[This.voiceNum] = params.name;
                 }
             } else {
+                
+                This.lines[This.lineNum].staffs[This.staffNum].stem = This.lines[0].staffs[This.staffNum].stem;
+                
                 if (params.subname) {
                     if (!This.lines[This.lineNum].staffs[This.staffNum].title)
                         This.lines[This.lineNum].staffs[This.staffNum].title = [];
                     This.lines[This.lineNum].staffs[This.staffNum].title[This.voiceNum] = params.subname;
                 }
             }
+            
             if (params.style)
                 This.appendElement('style', null, null, null, {head: params.style});
-            if (params.stem)
-                This.appendElement('stem', null, null, null, {direction: params.stem});
-            else if (This.voiceNum > 0) {
-                if (This.lines[This.lineNum].staffs[This.staffNum].voices[0] !== undefined) {
-                    var found = false;
-                    for (var i = 0; i < This.lines[This.lineNum].staffs[This.staffNum].voices[0].length; i++) {
-                        if (This.lines[This.lineNum].staffs[This.staffNum].voices[0].el_type === 'stem')
-                            found = true;
-                    }
-                    if (!found) {
-                        var stem = {el_type: 'stem', direction: 'up'};
-                        This.lines[This.lineNum].staffs[This.staffNum].voices[0].splice(0, 0, stem);
-                    }
-                }
-                This.appendElement('stem', null, null, null, {direction: 'down'});
-            }
+            
             if (params.scale)
                 This.appendElement('scale', null, null, null, {size: params.scale});
         };

@@ -186,7 +186,7 @@ ABCXJS.write.Layout.prototype.layoutStaffGroup = function() {
 
 ABCXJS.write.Layout.prototype.printABCVoice = function() {
   this.popCrossLineElems();
-  this.stemdir = (this.isBagpipes)?"down":null;
+  this.stemdir = (this.isBagpipes)? "down" : this.voice.stem;
   if (this.partstartelem) {
     this.partstartelem = new ABCXJS.write.EndingElem("", null, null);
     this.voice.addOther(this.partstartelem);
@@ -237,7 +237,8 @@ ABCXJS.write.Layout.prototype.printABCElement = function() {
     if (this.voice.duplicate) elemset[0].invisible = true;
     break;
   case "stem":
-    this.stemdir=elem.direction;
+    alert( 'não deveria passar aqui') ;
+    //this.stemdir=elem.direction;
     break;
   case "part":
     var abselem = new ABCXJS.write.AbsoluteElement(elem,0,0);
@@ -257,8 +258,6 @@ ABCXJS.write.Layout.prototype.printBeam = function() {
     var abselemset = [];
 
     if (this.getElem().startBeam && !this.getElem().endBeam) {
-        
-        // TODO flavio - this.stemdir é o mesmo para indicar a regra para a voz e muda para beam 
         
         var beamelem = new ABCXJS.write.BeamElem(this.stemdir);
         // PER: need two passes: the first one decides if the stems are up or down.
@@ -312,10 +311,13 @@ ABCXJS.write.Layout.prototype.printNote = function(elem, nostem, dontDraw) { //s
     var width, p1, p2, dx;
 
     var duration = ABCXJS.write.getDuration(elem);
+    
+    //PER: zero duration will draw a quarter note head.
     if (duration === 0) {
         duration = 0.25;
         nostem = true;
-    }   //PER: zero duration will draw a quarter note head.
+    }   
+    
     var durlog = Math.floor(Math.log(duration) / Math.log(2));  //TODO use getDurlog
     var dot = 0;
 
@@ -323,7 +325,14 @@ ABCXJS.write.Layout.prototype.printNote = function(elem, nostem, dontDraw) { //s
         ;
 
     if (elem.startTriplet) {
-        this.tripletmultiplier = elem.startTriplet.num === 2 ? 1.5 : (elem.startTriplet.num-1)/elem.startTriplet.num;
+        
+        if( ! this.stemdir ) {
+            this.clearStem = true;
+            this.stemdir = elem.startTriplet.avgPitch < 6? 'up' : 'down';
+        }
+            
+        this.triplet = new ABCXJS.write.TripletElem( elem.startTriplet, null, null, this.stemdir ); 
+        this.tripletmultiplier = this.triplet.multiplier;
     }
 
     var abselem = new ABCXJS.write.AbsoluteElement(elem, duration * this.tripletmultiplier, 1);
@@ -588,12 +597,12 @@ ABCXJS.write.Layout.prototype.printNote = function(elem, nostem, dontDraw) { //s
     if( !dontDraw ) {
         
         if( elem.startTriplet ) {
-            this.triplet = new ABCXJS.write.TripletElem( elem.startTriplet, notehead, null, /*this.stemdir*/ 'up' ); 
+            this.triplet.anchor1 = notehead;
             this.voice.addOther(this.triplet);
         } 
         
-        // procura nas notas intermediárias minimos e máximos
-        if ( this.triplet && !elem.endTriplet ) {
+        // procura nas notas minimas e máximas do triplet
+        if ( this.triplet ) {
             this.triplet.minPitch = Math.min( this.triplet.minPitch, notehead.parent.abcelem.minpitch );
             this.triplet.maxPitch = Math.max( this.triplet.maxPitch, notehead.parent.abcelem.maxpitch );
         }
@@ -602,6 +611,10 @@ ABCXJS.write.Layout.prototype.printNote = function(elem, nostem, dontDraw) { //s
             this.triplet.anchor2 = notehead;
             this.triplet = null;
             this.tripletmultiplier = 1;
+            if( this.clearStem ) {
+                this.stemdir = null;
+                delete this.clearStem;
+            }
         }
     }
 

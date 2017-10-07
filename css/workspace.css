@@ -135,3 +135,7 @@ body {
     z-index: 0;
 }
 
+#warningsDiv {
+    max-height: 200px;
+    overflow-y: auto;
+}
