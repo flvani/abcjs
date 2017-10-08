@@ -308,7 +308,7 @@ ABCXJS.write.VoiceElement = function(voicenumber, staffnumber, abcstaff) {
     this.voicenumber = voicenumber; //number of the voice on a given stave (not staffgroup)
     this.staffnumber = staffnumber; // number of the staff in the staffgroup
     this.voicetotal = abcstaff.voices.length;
-    this.stem = abcstaff.stem;
+    this.stem = abcstaff.stem[voicenumber];
     this.stave = {
         y: 0
        ,top: 0

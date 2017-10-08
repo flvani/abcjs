@@ -739,12 +739,15 @@ window.ABCXJS.data.Tune = function() {
 
         // If this is the first item in this staff, then we might have to initialize the staff, first.
         if (this.lines[this.lineNum].staffs.length <= this.staffNum) {
+            waterbug.log( 'o que é isso?');
+            waterbug.show();
             this.lines[this.lineNum].staffs[this.staffNum] = {};
             this.lines[this.lineNum].staffs[this.staffNum].clef = window.ABCXJS.parse.clone(this.lines[this.lineNum].staffs[0].clef);
             this.lines[this.lineNum].staffs[this.staffNum].key = window.ABCXJS.parse.clone(this.lines[this.lineNum].staffs[0].key);
             this.lines[this.lineNum].staffs[this.staffNum].meter = window.ABCXJS.parse.clone(this.lines[this.lineNum].staffs[0].meter);
             this.lines[this.lineNum].staffs[this.staffNum].workingClef = window.ABCXJS.parse.clone(this.lines[this.lineNum].staffs[0].workingClef);
-            this.lines[this.lineNum].staffs[this.staffNum].voices = [[]];
+            this.lines[this.lineNum].staffs[this.staffNum].voices = [];
+            this.lines[this.lineNum].staffs[this.staffNum].stem = [];
         }
 
         // These elements should not be added twice, so if the element exists on this line without a note or bar before it, just replace the staff version.
@@ -824,8 +827,10 @@ window.ABCXJS.data.Tune = function() {
     };
 
     this.startNewLine = function(params) {
-        // If the pointed to line doesn't exist, just create that. If the line does exist, but doesn't have any music on it, just use it.
-        // If it does exist and has music, then increment the line number. If the new element doesn't exist, create it.
+        // If the pointed to line doesn't exist, just create that. 
+        // If the line does exist, but doesn't have any music on it, just use it.
+        // If it does exist and has music, then increment the line number. 
+        // If the new element doesn't exist, create it.
         var This = this;
         this.closeLine();	// Close the previous line.
         var createVoice = function(params) {
@@ -833,7 +838,7 @@ window.ABCXJS.data.Tune = function() {
             if (This.isFirstLine(This.lineNum)) {
                 
                 if (params.stem) 
-                    This.lines[This.lineNum].staffs[This.staffNum].stem = params.stem;
+                    This.lines[This.lineNum].staffs[This.staffNum].stem[This.voiceNum] = params.stem;
                 
                 if (params.name) {
                     if (!This.lines[This.lineNum].staffs[This.staffNum].title)
@@ -842,7 +847,7 @@ window.ABCXJS.data.Tune = function() {
                 }
             } else {
                 
-                This.lines[This.lineNum].staffs[This.staffNum].stem = This.lines[0].staffs[This.staffNum].stem;
+                This.lines[This.lineNum].staffs[This.staffNum].stem[This.voiceNum] = This.lines[0].staffs[This.staffNum].stem[This.voiceNum];
                 
                 if (params.subname) {
                     if (!This.lines[This.lineNum].staffs[This.staffNum].title)
@@ -861,7 +866,7 @@ window.ABCXJS.data.Tune = function() {
             if (params.transpose)
                 params.clef.transpose = params.transpose;
             This.lines[This.lineNum].staffs[This.staffNum] =
-                    {voices: [], clef: params.clef, key: params.key, workingClef: params.clef, subtitle: params.subtitle, lyricsRows: 0};
+                    {voices: [], stem: [], clef: params.clef, key: params.key, workingClef: params.clef, subtitle: params.subtitle, lyricsRows: 0};
             if (params.vocalfont)
                 This.lines[This.lineNum].staffs[This.staffNum].vocalfont = params.vocalfont;
             if (params.bracket)

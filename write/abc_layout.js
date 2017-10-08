@@ -236,10 +236,10 @@ ABCXJS.write.Layout.prototype.printABCElement = function() {
     elemset[0] = this.printKeySignature(elem);
     if (this.voice.duplicate) elemset[0].invisible = true;
     break;
-  case "stem":
-    alert( 'não deveria passar aqui') ;
-    //this.stemdir=elem.direction;
-    break;
+//  case "stem":
+//    alert( 'não deveria passar aqui') ;
+//    //this.stemdir=elem.direction;
+//    break;
   case "part":
     var abselem = new ABCXJS.write.AbsoluteElement(elem,0,0);
     abselem.addChild(new ABCXJS.write.RelativeElement(elem.title, 0, 0, 18.5, {type:"part" })); 

@@ -1353,10 +1353,12 @@ window.ABCXJS.parse.Parse = function(transposer_, accordion_) {
         multilineVars.barAccidentals = [];
         
         header.resolveTempo();
-        //multilineVars.havent_set_length = false;	// To late to set this now.
+        
         multilineVars.is_in_header = false;	// We should have gotten a key header by now, but just in case, this is definitely out of the header.
+
         var i = 0;
         var startOfLine = multilineVars.iChar;
+        
         // see if there is nothing but a comment on this line. If so, just ignore it. A full line comment is optional white space followed by %
         while (tokenizer.isWhiteSpace(line.charAt(i)) && i < line.length)
             i++;
@@ -1367,11 +1369,6 @@ window.ABCXJS.parse.Parse = function(transposer_, accordion_) {
         var delayStartNewLine = multilineVars.start_new_line;
         
         multilineVars.start_new_line = (multilineVars.continueall === undefined);
-        
-//        if (multilineVars.continueall === undefined)
-//            multilineVars.start_new_line = true;
-//        else
-//            multilineVars.start_new_line = false;
         
         var parsingTriplet = { notesLeft:0, triplet: false };
         
@@ -1392,15 +1389,12 @@ window.ABCXJS.parse.Parse = function(transposer_, accordion_) {
             var retInlineHeader = header.letter_to_inline_header(line, i);
             if (retInlineHeader[0] > 0) {
                 i += retInlineHeader[0];
-                // TODO-PER: Handle inline headers
-                //multilineVars.start_new_line = false;
             } else {
                 // Wait until here to actually start the line because we know we're past the inline statements.
                 if (delayStartNewLine) {
                     startNewLine();
                     delayStartNewLine = false;
                 }
-//					var el = { };
 
                 // We need to decide if the following characters are a bar-marking or a note-group.
                 // Unfortunately, that is ambiguous. Both can contain chord symbols and decorations.

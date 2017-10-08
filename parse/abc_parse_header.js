@@ -153,11 +153,11 @@ window.ABCXJS.parse.ParseHeader = function(tokenizer, warn, multilineVars, tune,
 	};
 
 	this.resolveTempo = function() {
-		if (multilineVars.tempo) {	// If there's a tempo waiting to be resolved
-			this.calcTempo(multilineVars.tempo);
-			tune.metaText.tempo = multilineVars.tempo;
-			delete multilineVars.tempo;
-		}
+            if (multilineVars.tempo) {	// If there's a tempo waiting to be resolved
+                this.calcTempo(multilineVars.tempo);
+                tune.metaText.tempo = multilineVars.tempo;
+                delete multilineVars.tempo;
+            }
 	};
 
 	this.addUserDefinition = function(line, start, end) {
