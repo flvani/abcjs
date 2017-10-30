@@ -260,6 +260,8 @@ ABCXJS.edit.EditArea.prototype.editareaCallback = function ( action, elem, searc
         default:
             this.parentCallback.listener[this.parentCallback.method](action, elem);
     }
+    this.aceEditor.focus();
+
 };
 
 // Este css é usado apenas quando o playback da partitura está funcionando

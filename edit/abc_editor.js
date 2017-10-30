@@ -443,32 +443,37 @@ ABCXJS.Editor.prototype.parseABC = function (transpose, force) {
     }
 
     for (var i = 0; i < tunebook.tunes.length; i++) {
-        var abcParser = new ABCXJS.parse.Parse(this.transposer, this.accordion);
-        abcParser.parse(tunebook.tunes[i].abc, this.parserparams); //TODO handle multiple tunes
-        this.tunes[i] = abcParser.getTune();
-        this.initialText = abcParser.getStrTune();
+        
+        try {
+            var abcParser = new ABCXJS.parse.Parse(this.transposer, this.accordion);
+            abcParser.parse(tunebook.tunes[i].abc, this.parserparams); //TODO handle multiple tunes
+            this.tunes[i] = abcParser.getTune();
+            this.initialText = abcParser.getStrTune();
 
-        // transposição e geracao de tablatura podem ter alterado o texto ABC
-        this.setString(abcParser.getStrTune());
+            // transposição e geracao de tablatura podem ter alterado o texto ABC
+            this.setString(abcParser.getStrTune());
 
-        if (this.transposer && this.keySelector) {
-            this.keySelector.populate(this.transposer.keyToNumber(this.transposer.getKeyVoice(0)));
-            this.editarea.keySelector.populate(this.transposer.keyToNumber(this.transposer.getKeyVoice(0)));
-        }
+            if (this.transposer && this.keySelector) {
+                this.keySelector.populate(this.transposer.keyToNumber(this.transposer.getKeyVoice(0)));
+                this.editarea.keySelector.populate(this.transposer.keyToNumber(this.transposer.getKeyVoice(0)));
+            }
 
-        var warnings = abcParser.getWarnings() || [];
-        for (var j = 0; j < warnings.length; j++) {
-            this.warnings.push(warnings[j]);
-        }
-
-        if (this.midiParser) {
-            this.midiParser.parse(this.tunes[i], this.accordion.loadedKeyboard);
-            var warnings = this.midiParser.getWarnings();
+            var warnings = abcParser.getWarnings() || [];
             for (var j = 0; j < warnings.length; j++) {
                 this.warnings.push(warnings[j]);
             }
+            if (this.midiParser) {
+                this.midiParser.parse(this.tunes[i], this.accordion.loadedKeyboard);
+                var warnings = this.midiParser.getWarnings();
+                for (var j = 0; j < warnings.length; j++) {
+                    this.warnings.push(warnings[j]);
+                }
+            }
+        } catch(e) {
+            waterbug.log('Could not parse ABC');
+            waterbug.show();
+            return false;
         }
-
     }
     return true;
 };
@@ -497,8 +502,8 @@ ABCXJS.Editor.prototype.switchMap = function() {
 
 ABCXJS.Editor.prototype.highlight = function(abcelem) {
   try {
-        this.editarea.setSelection(abcelem);
         if(this.accordion.render_opts.show && !this.player.playing) {
+            this.editarea.setSelection(abcelem);
             this.accordion.clearKeyboard(true);
             this.midiParser.setSelection(abcelem);
         }    
