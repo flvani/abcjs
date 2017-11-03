@@ -160,6 +160,7 @@
     line-height: 16px;
 }
 
+.dropdown-menu .hover,
 .dropdown-menu li:hover {
     background: #f6f6f6;
     background: lightblue;

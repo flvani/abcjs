@@ -10,7 +10,7 @@ if (! window.DRAGGABLE )
     window.DRAGGABLE  = {};
 
 if (! window.DRAGGABLE.ui )
-    window.DRAGGABLE.ui  = { windowId: 0, menuId: 0 };
+    window.DRAGGABLE.ui  = { windowId: 0, menuId: 0, oneTimeCloseFunction : null };
         
 DRAGGABLE.ui.DropdownMenu = function (topDiv, options, menu) {
     var self = this;
@@ -54,8 +54,46 @@ DRAGGABLE.ui.DropdownMenu = function (topDiv, options, menu) {
         e2.setAttribute( "data-state", ddmId );
         var spn = this.translate ? '<span data-translate="'+ddmId+'" >' :'<span>';
         e2.innerHTML = spn + (menu[m].title || '' ) + '</span>' + '&#160;'+'<i class="ico-open-down" data-toggle="toggle"></i>';
-        e2.addEventListener( 'click', function(e) { e.stopPropagation(); e.preventDefault(); self.eventsCentral(this.getAttribute("data-state")); }, false);
-        e2.addEventListener( 'touchstart', function(e) { e.stopPropagation(); e.preventDefault(); self.eventsCentral(this.getAttribute("data-state")); }, false);
+        
+        e2.addEventListener( 'click', function(e) { 
+            e.stopPropagation(); 
+            e.preventDefault(); 
+            self.eventsCentral(this.getAttribute("data-state")); 
+        }, false);
+        
+        e2.addEventListener( 'touchstart', function(e) { 
+            e.stopPropagation(); 
+            e.preventDefault(); 
+            self.eventsCentral(this.getAttribute("data-state")); 
+        }, false);
+ 
+        e2.addEventListener("keydown",function(e) {
+            if(e.keyCode===13) {
+                e.stopPropagation(); 
+                e.preventDefault(); 
+            }
+        });
+            
+        e2.addEventListener("keyup",function(e) {
+            var ddm = this.getAttribute("data-state");
+            e.stopPropagation(); 
+            e.preventDefault(); 
+            switch( e.keyCode ) {
+                case 13:
+                    if( self.headers[ddm].highlightItem ) {
+                       //self.selectItem( ddm, self.headers[ddm].actionList[self.headers[ddm].highlightItem] ) ;  
+                       self.eventsCentral( ddm, self.headers[ddm].highlightItem ) ;  
+                    }
+                    break;
+                case 38:
+                    self.highlightItem( ddm, true ) ;  
+                    break;
+                case 40:
+                    self.highlightItem( ddm, false ) ;  
+                    break
+            }
+        });
+        
         e1.appendChild(e2);
         this.headers[ddmId].btn = e2;
         e2 = document.createElement("div");
@@ -172,6 +210,45 @@ DRAGGABLE.ui.DropdownMenu.prototype.emptySubMenu = function (ddm) {
     
 };
 
+DRAGGABLE.ui.DropdownMenu.prototype.highlightItem = function (ddm, up) {
+    
+    var toSel, next = false, prev;
+    for( var item in this.headers[ddm].actionList ) {
+        if(  this.headers[ddm].actionList[item].style.pointerEvents === 'none' ){
+            continue;
+        }
+        if( (! this.headers[ddm].highlightItem) || next ) {
+            toSel = item;
+            break;
+        } else {
+            if( !up && this.headers[ddm].highlightItem && this.headers[ddm].highlightItem === item ) {
+                next = true;
+            } else if (up && prev && this.headers[ddm].highlightItem && this.headers[ddm].highlightItem === item ){
+                toSel = prev;
+                break;
+            }
+        }
+        prev = item;
+    }
+    
+    if( ! toSel ) return false;
+    
+    if( this.headers[ddm].highlightItem && 
+            (!this.headers[ddm].selectedItem || this.headers[ddm].selectedItem !== this.headers[ddm].actionList[this.headers[ddm].highlightItem]) ) {
+        this.headers[ddm].actionList[this.headers[ddm].highlightItem].className = '';
+        delete this.headers[ddm].highlightItem;
+    }
+    
+    if(this.headers[ddm].selectedItem && this.headers[ddm].selectedItem === this.headers[ddm].actionList[toSel] ) {
+        
+    } else {
+        this.headers[ddm].actionList[toSel].className = 'hover';
+    }
+    
+    this.headers[ddm].highlightItem = toSel;
+    return toSel;
+};
+
 DRAGGABLE.ui.DropdownMenu.prototype.selectItem = function (ddm, item) {
     var toSel = item;
     if(  typeof item === "string" ) {
@@ -253,31 +330,37 @@ DRAGGABLE.ui.DropdownMenu.prototype.setListener = function (listener, method) {
 };
 
 DRAGGABLE.ui.DropdownMenu.prototype.eventsCentral = function (state, event) {
-    for( var e in this.headers ) {
-        if( e === state ) {
-            
-            this.headers[e].chk.checked = ! this.headers[e].chk.checked;
-            
-            if( this.headers[e].chk.checked ) {
-                
-                var menu = e;
-                var self = this;
-                var oneTimeCloseFunction = function () { 
-                    self.headers[menu].chk.checked = false; 
-                    this.removeEventListener('click', oneTimeCloseFunction, false );
-                };
-                
-                document.addEventListener( 'click', oneTimeCloseFunction  );
-                
-                if( this.headers[e].selectedItem )
-                     this.headers[e].div.scrollTop = this.headers[e].selectedItem.offsetTop-115;
+    
+    var e = this.headers[state];
+    e.chk.checked = ! e.chk.checked;
+      
+    // close any previously opened menu
+    if(DRAGGABLE.ui.oneTimeCloseFunction) {
+        DRAGGABLE.ui.oneTimeCloseFunction();
+    }
 
+    if( e.chk.checked ) {
+
+        DRAGGABLE.ui.oneTimeCloseFunction = function () { 
+            e.chk.checked = false; 
+            
+            if( e.highlightItem && 
+                    (!e.selectedItem || e.selectedItem !== e.actionList[e.highlightItem]) ) {
+                                e.actionList[e.highlightItem].className =  '';
+                                delete e.highlightItem;
             }
             
-        } else {
-            this.headers[e].chk.checked = false;
-        }
+            document.removeEventListener('click', DRAGGABLE.ui.oneTimeCloseFunction, false );
+            DRAGGABLE.ui.oneTimeCloseFunction = null;
+        };
+
+        document.addEventListener( 'click', DRAGGABLE.ui.oneTimeCloseFunction  );
+
+        if( e.selectedItem )
+             e.div.scrollTop = e.selectedItem.offsetTop-115;
+      
     }
+    
     if(event && this.listener){
         this.listener[this.method](event);
     }
@@ -299,6 +382,15 @@ DRAGGABLE.ui.DropdownMenu.prototype.addAction = function( ddm, action, div, self
     div.addEventListener( 'click', f, false);
     div.addEventListener( 'touchstart', f, false);
     div.addEventListener( 'mousedown', function(e) { e.preventDefault(); e.stopPropagation(); }, false);
+    div.addEventListener( 'mousemove', function(e) { 
+        e.preventDefault(); 
+        e.stopPropagation();
+        if( self.headers[ddm].highlightItem && 
+                (!self.headers[ddm].selectedItem || self.headers[ddm].selectedItem !== self.headers[ddm].actionList[self.headers[ddm].highlightItem]) ) {
+            self.headers[ddm].actionList[self.headers[ddm].highlightItem].className = '';
+            delete self.headers[ddm].highlightItem;
+        }
+    }, false);
     
 };
 
