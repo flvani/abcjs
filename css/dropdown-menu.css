@@ -120,7 +120,6 @@
     margin-top: 1px;
     margin-left: 8px;
     min-width: fit-content;
-    overflow-y: hidden;
     -moz-transition: max-height 0.5s ease-out;
     -o-transition: max-height 0.5s ease-out;
     -webkit-transition: max-height 0.5s ease-out;
@@ -139,9 +138,9 @@
     color: orange;
     color: #dab390;
     background: #2c3e50;
+    overflow-y: hidden;
     /*text-shadow: 0 -1px 0 rgba(255, 255, 255, 0.3);*/
 }
-      
 
 .dropdown-menu ul {
     list-style: none;
@@ -160,13 +159,11 @@
     line-height: 16px;
 }
 
-.dropdown-menu .hover,
-.dropdown-menu li:hover {
+.dropdown-menu .hover {
     background: #f6f6f6;
     background: lightblue;
     background: lavender;
 }
-
 
 .dropdown-menu .selected {
     background:  lavender !important;
@@ -196,7 +193,6 @@
 
 .dropdown > input[type="checkbox"]:checked ~ [data-toggle="toggle-menu"] {
     max-height: 250px;
-    overflow-y: hidden;
     display:  block;
     top:100%;
     left: 6px;

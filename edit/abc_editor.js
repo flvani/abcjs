@@ -86,7 +86,14 @@ ABCXJS.Editor = function (params) {
                     'Carregar do drive local|LOADLOC',
                     'Exportar para drive local',
                     'Partitura <i class="ico-play" /> Tablatura',
-                    'Tablatura <i class="ico-play" /> Partitura'
+                    'Tablatura <i class="ico-play" /> Partitura',
+                    '---',
+                    'Teste 1|T1',
+                    'Teste 2|T2',
+                    'Teste 3|T3',
+                    'Teste 4|T4',
+                    'Teste 5|T5',
+                    'Teste 6|T6'
                 ]},
             {title: 'Informações', ddmId: 'menuInformacoes',
                 itens: [

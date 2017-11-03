@@ -10,7 +10,7 @@ if (! window.DRAGGABLE )
     window.DRAGGABLE  = {};
 
 if (! window.DRAGGABLE.ui )
-    window.DRAGGABLE.ui  = { windowId: 0, menuId: 0, oneTimeCloseFunction : null };
+    window.DRAGGABLE.ui  = { windowId: 0, menuId: 0, oneTimeCloseFunction : null, lastOpen: null };
         
 DRAGGABLE.ui.DropdownMenu = function (topDiv, options, menu) {
     var self = this;
@@ -51,46 +51,53 @@ DRAGGABLE.ui.DropdownMenu = function (topDiv, options, menu) {
             e2.setAttribute( "title", menu[m].tip );
         }
         
-        e2.setAttribute( "data-state", ddmId );
+        e2.setAttribute( "data-ddm", ddmId );
         var spn = this.translate ? '<span data-translate="'+ddmId+'" >' :'<span>';
         e2.innerHTML = spn + (menu[m].title || '' ) + '</span>' + '&#160;'+'<i class="ico-open-down" data-toggle="toggle"></i>';
         
         e2.addEventListener( 'click', function(e) { 
             e.stopPropagation(); 
             e.preventDefault(); 
-            self.eventsCentral(this.getAttribute("data-state")); 
+            self.eventsCentral(this.getAttribute("data-ddm")); 
         }, false);
         
         e2.addEventListener( 'touchstart', function(e) { 
             e.stopPropagation(); 
             e.preventDefault(); 
-            self.eventsCentral(this.getAttribute("data-state")); 
+            self.eventsCentral(this.getAttribute("data-ddm")); 
         }, false);
  
         e2.addEventListener("keydown",function(e) {
-            if(e.keyCode===13) {
-                e.stopPropagation(); 
-                e.preventDefault(); 
-            }
+            e.stopPropagation(); 
+            e.preventDefault(); 
         });
             
         e2.addEventListener("keyup",function(e) {
-            var ddm = this.getAttribute("data-state");
             e.stopPropagation(); 
             e.preventDefault(); 
+            var ddm = this.getAttribute("data-ddm");
             switch( e.keyCode ) {
-                case 13:
-                    if( self.headers[ddm].highlightItem ) {
-                       //self.selectItem( ddm, self.headers[ddm].actionList[self.headers[ddm].highlightItem] ) ;  
-                       self.eventsCentral( ddm, self.headers[ddm].highlightItem ) ;  
+                case 27:
+                    if(DRAGGABLE.ui.oneTimeCloseFunction) {
+                        DRAGGABLE.ui.oneTimeCloseFunction();
                     }
                     break;
-                case 38:
-                    self.highlightItem( ddm, true ) ;  
+                case 13:
+                    if( DRAGGABLE.ui.lastOpen && self.headers[DRAGGABLE.ui.lastOpen].highlightItem ) {
+                       //alert(DRAGGABLE.ui.lastOpen+','+self.headers[DRAGGABLE.ui.lastOpen].highlightItem);
+                       self.eventsCentral( DRAGGABLE.ui.lastOpen, self.headers[DRAGGABLE.ui.lastOpen].highlightItem ) ;  
+                    }
                     break;
-                case 40:
-                    self.highlightItem( ddm, false ) ;  
-                    break
+                case 38: // up
+                case 40: // down
+                    if( DRAGGABLE.ui.lastOpen )
+                        self.highlightItem( DRAGGABLE.ui.lastOpen, e.keyCode === 38 ) ;  
+                    break;
+                case 37: // left
+                case 39: // right
+                    if( DRAGGABLE.ui.lastOpen )
+                        self.openMenu(DRAGGABLE.ui.lastOpen, e.keyCode === 37 ); 
+                    break;
             }
         });
         
@@ -103,10 +110,10 @@ DRAGGABLE.ui.DropdownMenu = function (topDiv, options, menu) {
         this.headers[ddmId].div = e2;
         
         e2.addEventListener( 'transitionend', function(e) {
-            if( e2.clientHeight > 0 && e2.clientHeight < e2.scrollHeight ) {
-                e2.style.cssText = 'overflow-y: scroll;';
+            if( this.clientHeight > 0 && this.clientHeight < this.scrollHeight ) {
+                this.style.cssText = 'overflow-y: scroll;';
             } else {     
-                e2.style.cssText = 'overflow-y: hidden;';
+                this.style.cssText = 'overflow-y: hidden;';
             }
         }, false);
 
@@ -206,47 +213,78 @@ DRAGGABLE.ui.DropdownMenu.prototype.emptySubMenu = function (ddm) {
     }
     
     this.headers[ddm].list.innerHTML = "";
-    //self.setSubMenuTitle(ddm, '...');
     
 };
 
-DRAGGABLE.ui.DropdownMenu.prototype.highlightItem = function (ddm, up) {
-    
+DRAGGABLE.ui.DropdownMenu.prototype.openMenu = function (ddm, previous ) {
     var toSel, next = false, prev;
-    for( var item in this.headers[ddm].actionList ) {
-        if(  this.headers[ddm].actionList[item].style.pointerEvents === 'none' ){
-            continue;
-        }
-        if( (! this.headers[ddm].highlightItem) || next ) {
+    for( var item in this.headers ) {
+        if(next) {
             toSel = item;
             break;
-        } else {
-            if( !up && this.headers[ddm].highlightItem && this.headers[ddm].highlightItem === item ) {
-                next = true;
-            } else if (up && prev && this.headers[ddm].highlightItem && this.headers[ddm].highlightItem === item ){
-                toSel = prev;
-                break;
-            }
+        }
+        if( !previous && item === ddm) {
+            next = true;
+        } else if (previous && prev && item === ddm ){
+            toSel = prev;
+            break;
         }
         prev = item;
     }
-    
     if( ! toSel ) return false;
+    this.eventsCentral(toSel);
     
-    if( this.headers[ddm].highlightItem && 
-            (!this.headers[ddm].selectedItem || this.headers[ddm].selectedItem !== this.headers[ddm].actionList[this.headers[ddm].highlightItem]) ) {
-        this.headers[ddm].actionList[this.headers[ddm].highlightItem].className = '';
-        delete this.headers[ddm].highlightItem;
+};
+
+DRAGGABLE.ui.DropdownMenu.prototype.unhighlightItem = function (menu) {
+    if( menu.highlightItem && (!menu.selectedItem || menu.selectedItem !== menu.actionList[menu.highlightItem]) ) {
+        menu.actionList[menu.highlightItem].className = '';
+        delete menu.highlightItem;
+    }
+};
+
+DRAGGABLE.ui.DropdownMenu.prototype.highlightItem = function (ddm, up) {
+    // up can be true or false (indicating direction) or it can be a string indicating an item
+    var toSel = up, next = false, prev;
+    var menu = this.headers[ddm];
+    var acts = menu.actionList;
+    if( typeof up === "boolean" ) {
+        toSel = false;
+        for( var item in acts ) {
+            if(  acts[item].style.pointerEvents === 'none' ){
+                continue;
+            }
+            if( (! menu.highlightItem) || next ) {
+                toSel = item;
+                break;
+            } else if( !up && menu.highlightItem && menu.highlightItem === item ) {
+                next = true;
+            } else if (up && prev && menu.highlightItem && menu.highlightItem === item ){
+                toSel = prev;
+                break;
+            }
+            prev = item;
+        }
     }
     
-    if(this.headers[ddm].selectedItem && this.headers[ddm].selectedItem === this.headers[ddm].actionList[toSel] ) {
+    if(!toSel) return false;
+    
+    // sempre limpa e registra o item que seria destacado, mesmo que não veja a marcar (item já selecionado).
+    this.unhighlightItem( menu );
+    menu.highlightItem = toSel;
+    
+    if( !menu.selectedItem || menu.selectedItem !== acts[menu.highlightItem] ) {
+        acts[toSel].className = 'hover';
         
-    } else {
-        this.headers[ddm].actionList[toSel].className = 'hover';
+        if( acts[toSel].offsetTop+acts[toSel].clientHeight >  menu.div.scrollTop + menu.div.clientHeight ) {
+            menu.div.scrollTop = acts[toSel].offsetTop+acts[toSel].clientHeight-menu.div.clientHeight;
+        }
+        if( acts[toSel].offsetTop <  menu.div.scrollTop ) {
+            menu.div.scrollTop = acts[toSel].offsetTop;
+        }
+        return toSel;
     }
-    
-    this.headers[ddm].highlightItem = toSel;
-    return toSel;
+    return false;
 };
 
 DRAGGABLE.ui.DropdownMenu.prototype.selectItem = function (ddm, item) {
@@ -329,9 +367,9 @@ DRAGGABLE.ui.DropdownMenu.prototype.setListener = function (listener, method) {
     this.method = method || 'callback';
 };
 
-DRAGGABLE.ui.DropdownMenu.prototype.eventsCentral = function (state, event) {
-    
-    var e = this.headers[state];
+DRAGGABLE.ui.DropdownMenu.prototype.eventsCentral = function (ddm, event) {
+    var self = this;
+    var e = this.headers[ddm];
     e.chk.checked = ! e.chk.checked;
       
     // close any previously opened menu
@@ -340,25 +378,19 @@ DRAGGABLE.ui.DropdownMenu.prototype.eventsCentral = function (state, event) {
     }
 
     if( e.chk.checked ) {
-
         DRAGGABLE.ui.oneTimeCloseFunction = function () { 
             e.chk.checked = false; 
-            
-            if( e.highlightItem && 
-                    (!e.selectedItem || e.selectedItem !== e.actionList[e.highlightItem]) ) {
-                                e.actionList[e.highlightItem].className =  '';
-                                delete e.highlightItem;
-            }
-            
+            DRAGGABLE.ui.lastOpen = null;
+            self.unhighlightItem( e );
             document.removeEventListener('click', DRAGGABLE.ui.oneTimeCloseFunction, false );
             DRAGGABLE.ui.oneTimeCloseFunction = null;
         };
 
         document.addEventListener( 'click', DRAGGABLE.ui.oneTimeCloseFunction  );
+        DRAGGABLE.ui.lastOpen = ddm;
 
         if( e.selectedItem )
              e.div.scrollTop = e.selectedItem.offsetTop-115;
-      
     }
     
     if(event && this.listener){
@@ -370,31 +402,29 @@ DRAGGABLE.ui.DropdownMenu.prototype.addAction = function( ddm, action, div, self
     
     self.headers[ddm].actionList[action]=div; 
     
-    var f = function(e) {
+    var clique = function(e) {
        e.preventDefault(); 
        e.stopPropagation(); 
-       self.eventsCentral(this.getAttribute("data-state"), this.getAttribute("data-value") );
+       self.eventsCentral(this.getAttribute("data-ddm"), this.getAttribute("data-value") );
     };
     
-    div.setAttribute( "data-state", ddm );
+    div.setAttribute( "data-ddm", ddm );
     div.setAttribute( "data-value", action );
     
-    div.addEventListener( 'click', f, false);
-    div.addEventListener( 'touchstart', f, false);
+    div.addEventListener( 'click', clique, false);
+    div.addEventListener( 'touchstart', clique, false);
     div.addEventListener( 'mousedown', function(e) { e.preventDefault(); e.stopPropagation(); }, false);
-    div.addEventListener( 'mousemove', function(e) { 
+    div.addEventListener( 'mouseout', function(e)  { e.preventDefault(); e.stopPropagation(); }, false); 
+    
+    div.addEventListener( 'mouseover', function(e) { 
         e.preventDefault(); 
-        e.stopPropagation();
-        if( self.headers[ddm].highlightItem && 
-                (!self.headers[ddm].selectedItem || self.headers[ddm].selectedItem !== self.headers[ddm].actionList[self.headers[ddm].highlightItem]) ) {
-            self.headers[ddm].actionList[self.headers[ddm].highlightItem].className = '';
-            delete self.headers[ddm].highlightItem;
-        }
+        e.stopPropagation(); 
+        self.highlightItem(this.getAttribute("data-ddm"), this.getAttribute("data-value") );
     }, false);
     
 };
 
-//DRAGGABLE.ui.DropdownMenu.prototype.closeMenu = function (state) {
-//    var e = document.getElementById(state);
+//DRAGGABLE.ui.DropdownMenu.prototype.closeMenu = function (ddm) {
+//    var e = document.getElementById(ddm);
 //    e.checked=false;
 //};
