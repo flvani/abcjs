@@ -1664,9 +1664,12 @@ window.ABCXJS.parse.Parse = function(transposer_, accordion_) {
                                                 var fraction = tokenizer.getFraction(line, i);
                                                 chordDuration = fraction.value;
                                                 i = fraction.index;
-                                                if (line.charAt(i) === '-' || line.charAt(i) === ')')
+                                                // flavio - garantindo que o final do acorde seja bem tratado
+                                                if( line.charAt(i).match(/[-\s\)]/g) )
                                                     i--; // Subtracting one because one is automatically added below
-                                                else
+                                                //if (line.charAt(i) === '-' || line.charAt(i) === ')')
+                                                //    i--; // Subtracting one because one is automatically added below
+                                                 else 
                                                     postChordDone = true;
                                                 break;
                                             default:
