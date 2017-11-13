@@ -200,9 +200,16 @@ DRAGGABLE.ui.Window = function( parent, aButtons, options, callback, aToolBarBut
     };
     
     this.mouseMove = function (e) {
-        e.preventDefault();
-        e.stopPropagation();
-        if(!self.draggable) return;
+//        e.preventDefault();
+//        e.stopPropagation();
+//        if(!self.draggable) return;
+
+        if(!self.draggable) {
+            e.preventDefault();
+            e.stopPropagation();
+            return;
+        }
+       
         self.dataDiv.style.pointerEvents = "none";
         window.addEventListener('mouseup', self.mouseEndMove, false);
         window.addEventListener('touchend', self.mouseEndMove, false);
