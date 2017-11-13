@@ -28,6 +28,8 @@ if (!ABCXJS.edit)
 
 ABCXJS.edit.EditArea = function (editor_id, callback, options ) {
     
+    var self = this;
+    
     options = options? options : {};
     
     this.parentCallback = callback;
@@ -101,6 +103,16 @@ ABCXJS.edit.EditArea = function (editor_id, callback, options ) {
     this.restartUndoManager();
     this.createStyleSheet();
     
+    this.aceEditor.on("focus", function() { 
+        self.aceEditor.focus(); 
+        self.container.focus(); 
+    });
+    
+    this.aceEditor.on("blur", function() { 
+        self.aceEditor.blur(); 
+        self.container.blur(); 
+    });
+
     if(callback.listener)
         this.addChangeListener(callback.listener);
 };
@@ -337,7 +349,7 @@ ABCXJS.edit.EditArea.prototype.setToolBarVisible = function (visible) {
 };
 
 ABCXJS.edit.EditArea.prototype.setVisible = function (visible) {
-    this.container.topDiv.style.display = visible ? 'block' : 'none';
+    this.container.setVisible(visible);
 };
 
 ABCXJS.edit.EditArea.prototype.resize = function () {

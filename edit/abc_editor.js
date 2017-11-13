@@ -105,13 +105,6 @@ ABCXJS.Editor = function (params) {
         ]
     );
 
-    this.keyboardWindow = new DRAGGABLE.ui.Window( 
-          null 
-        , [ 'move|Mover', 'rotate|Rotacionar', 'zoom|Zoom','globe|Mudar Notação']
-        , {title: 'Keyb', translate: false, statusbar: false, top: "100px", left: "300px", zIndex: 100} 
-        , {listener: this, method: 'keyboardCallback'}
-    );
-                
     this.studio = new DRAGGABLE.ui.Window(
             params.studio_id
             , null
@@ -129,6 +122,14 @@ ABCXJS.Editor = function (params) {
             , compileOnChange: true
             , title: 'EstudioEditorTitle' }
     );
+
+    this.keyboardWindow = new DRAGGABLE.ui.Window( 
+          this.studio.dataDiv
+        , [ 'move|Mover', 'rotate|Rotacionar', 'zoom|Zoom','globe|Mudar Notação']
+        , {title: 'Keyb', translate: false, statusbar: false, top: "100px", left: "300px" } 
+        , {listener: this, method: 'keyboardCallback'}
+    );
+                
 
     this.editarea.setVisible(true);
     this.editarea.setToolBarVisible(false);
