@@ -387,8 +387,8 @@ DRAGGABLE.ui.Window.prototype.addTitle = function( id, title  ) {
         spn = 'data-translate="'+title+'"';
     }
     
-    div.innerHTML = '<span id="dSpanTitle'+id+'" '+spn+' style="padding-left: 8px;">'+(translated_title?translated_title:title)+'</span>'+
-                        '<span id="dSpanSubTitle'+id+'" style="padding-left: 8px; white-space: nowrap;"></span>';
+    div.innerHTML = '<span id="dSpanTitle'+id+'" '+spn+' style="padding-left: 6px; float:left; white-space: nowrap;">'+(translated_title?translated_title:title)+'</span>'+
+                        '<span id="dSpanSubTitle'+id+'" style="padding-left: 6px; float:left; white-space: nowrap;"></span>';
     
     self.menuDiv.appendChild(div);
     
