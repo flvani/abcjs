@@ -26,8 +26,9 @@ DRAGGABLE.ui.Window = function( parent, aButtons, options, callback, aToolBarBut
     this.width = opts.width || '';
     this.height = opts.height || '';
     this.minWidth = opts.minWidth ||  160;
-    this.minHeight = opts.minHeight ||  48;
+    this.minHeight = opts.minHeight ||  (24+(aToolBarButtons?76:0));
     this.hasStatusBar = opts.statusbar || false;
+    this.alternativeResize = opts.alternativeResize || false;
     this.translator = opts.translator || null;
     this.zIndex  = opts.zIndex? opts.zIndex : 100;
     this.draggable = typeof opts.draggable !== 'undefined' ? opts.draggable : true;
@@ -90,7 +91,17 @@ DRAGGABLE.ui.Window = function( parent, aButtons, options, callback, aToolBarBut
     this.topDiv.appendChild( div );
     this.dataDiv = div;
     
-    if( this.hasStatusBar ) {
+    if(this.alternativeResize) {
+        this.hasStatusBar = false;
+        this.topDiv.style.overflow = 'visible';
+        div = document.createElement("DIV");
+        div.setAttribute("id", "draggableStatusResize" + this.id ); 
+        div.setAttribute("class", "draggableAlternativeResize" ); 
+        this.topDiv.appendChild( div );
+        this.resizeCorner = div;
+        this.resizeCorner.innerHTML = '<img src="images/corner_resize.gif">';
+
+    } else if( this.hasStatusBar ) {
         
         this.dataDiv.setAttribute("class", "draggableData withStatusBar" ); ;
         div = document.createElement("DIV");
@@ -104,14 +115,25 @@ DRAGGABLE.ui.Window = function( parent, aButtons, options, callback, aToolBarBut
         div.setAttribute("class", "draggableStatusMsgLine" ); 
         this.bottomBar.appendChild( div );
         this.messageLine = div;
-        
+
         div = document.createElement("DIV");
         div.setAttribute("id", "draggableStatusResize" + this.id ); 
         div.setAttribute("class", "draggableStatusResize" ); 
         this.bottomBar.appendChild( div );
         this.resizeCorner = div;
         this.resizeCorner.innerHTML = '<img src="images/statusbar_resize.gif">';
-        
+    }
+    
+    this.calcMinHeight = function () {
+        this.minHeight = (this.menuDiv ? this.menuDiv.clientHeight : 0 ) 
+           + (this.toolBar && this.toolBar.style.display !== 'none' ? this.toolBar.clientHeight : 0 ) 
+           + (this.bottomBar && this.bottomBar.style.display !== 'none' ? this.bottomBar.clientHeight : 0 );
+    };
+    
+//    this.calcMinHeight();
+
+    if( this.alternativeResize || this.hasStatusBar ) {
+
         this.divResize = function (e) {
             e.stopPropagation();
             e.preventDefault();
@@ -124,6 +146,9 @@ DRAGGABLE.ui.Window = function( parent, aButtons, options, callback, aToolBarBut
                 p.y = touches[l].clientY;
             }
             e.preventDefault();
+            
+            self.calcMinHeight();
+            
             var w = (self.topDiv.clientWidth + p.x - self.x);
             var h = (self.topDiv.clientHeight + p.y - self.y);
             self.topDiv.style.width = ( w < self.minWidth ? self.minWidth : w ) + 'px';
@@ -244,7 +269,6 @@ DRAGGABLE.ui.Window = function( parent, aButtons, options, callback, aToolBarBut
     
     this.topDiv.tabIndex = this.id;
 
-
     this.topDiv.addEventListener( 'focus', function (e) {
         e.stopPropagation();
         e.preventDefault();
@@ -296,7 +320,8 @@ DRAGGABLE.ui.Window.prototype.setStatusBarVisible = function (visible) {
 };
 
 DRAGGABLE.ui.Window.prototype.setStatusMessage = function (msg) {
-    this.messageLine.innerHTML = msg;
+    if(this.messageLine)
+        this.messageLine.innerHTML = msg;
 };        
 
 DRAGGABLE.ui.Window.prototype.setButtonVisible = function( action, visible ) {
@@ -309,9 +334,10 @@ DRAGGABLE.ui.Window.prototype.setButtonVisible = function( action, visible ) {
 DRAGGABLE.ui.Window.prototype.setFloating = function (floating) {
     this.draggable = floating;
     
-    //this.topDiv.style.zIndex = this.draggable? this.zIndex+1: this.zIndex;
-
     if( this.draggable ) {
+        if( this.alternativeResize )
+            this.resizeCorner.style.display = 'block';
+        
         this.topDiv.className = "draggableWindow";
         if(this.parent) {
             this.topDiv.style.position = "absolute";
@@ -320,6 +346,9 @@ DRAGGABLE.ui.Window.prototype.setFloating = function (floating) {
         this.minLeft = 1; // ver isso
         this.focus();
     } else {
+        if( this.alternativeResize )
+            this.resizeCorner.style.display='none';
+        
         this.topDiv.className = "draggableWindow noShadow";
         this.topDiv.style.position = "relative";
         this.topDiv.style.margin = "1px";
@@ -328,13 +357,8 @@ DRAGGABLE.ui.Window.prototype.setFloating = function (floating) {
 };
 
 DRAGGABLE.ui.Window.prototype.resize = function() {
-    var h = this.topDiv.clientHeight 
-            - (this.menuDiv ? this.menuDiv.clientHeight : 0 ) 
-            - (this.toolBar && this.toolBar.style.display !== 'none' ? this.toolBar.clientHeight : 0 ) 
-            - (this.bottomBar && this.bottomBar.style.display !== 'none' ? this.bottomBar.clientHeight : 0 );
-    
-    this.dataDiv.style.height =  (h-2) + 'px';
-    this.dataDiv.style.width = "100%";
+    this.calcMinHeight();
+    this.dataDiv.style.height =  (this.topDiv.clientHeight - this.minHeight) + 'px';
 };
 
 DRAGGABLE.ui.Window.prototype.defineCallback = function( cb ) {

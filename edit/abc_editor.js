@@ -118,7 +118,7 @@ ABCXJS.Editor = function (params) {
     this.editarea = new ABCXJS.edit.EditArea(
           this.studio.dataDiv
         , {listener : this, method: 'editorCallback' }
-        , {draggable:false, toolbar: true, statusbar:true, translator:SITE.translator, width: "100%", height: "200px"
+        , {draggable:false, toolbar: true, alternativeResize:true, translator:SITE.translator, width: "100%", height: "200px"
             , compileOnChange: true
             , title: 'EstudioEditorTitle' }
     );
