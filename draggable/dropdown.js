@@ -452,6 +452,8 @@ DRAGGABLE.ui.DropdownMenu.prototype.addAction = function( ddm, action, div, self
             e.preventDefault(); 
             e.stopPropagation(); 
             self.eventsCentral(this.getAttribute("data-ddm"), this.getAttribute("data-value") );
+        } else {
+            alert( 'moveu' );
         }
         
     }, false);
