@@ -417,7 +417,8 @@ DRAGGABLE.ui.DropdownMenu.prototype.addAction = function( ddm, action, div, self
         var newY = e.changedTouches[0].pageY;
         var delta = self.startY - newY;
         
-        var m = self.headers[this.getAttribute("data-ddm")].div;
+        //var m = self.headers[this.getAttribute("data-ddm")].div;
+        var m = self.headers[ddm].div; // será que pega o ddm correto?
         
         if( m.style.overflowY === 'scroll' && Math.abs(delta) > 10) {
            var v = m.scrollTop + delta;
@@ -436,8 +437,8 @@ DRAGGABLE.ui.DropdownMenu.prototype.addAction = function( ddm, action, div, self
     div.addEventListener( 'touchstart', function (e) {
        self.startY = e.changedTouches[0].pageY;
        this.moved = false;
-        div.addEventListener( 'touchmove', swiping, false );
-        e.preventDefault(); 
+       div.addEventListener( 'touchmove', swiping, false );
+       e.preventDefault(); 
        e.stopPropagation(); 
     }, false);
     
