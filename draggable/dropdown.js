@@ -411,14 +411,12 @@ DRAGGABLE.ui.DropdownMenu.prototype.addAction = function( ddm, action, div, self
        self.eventsCentral(this.getAttribute("data-ddm"), this.getAttribute("data-value") );
     }, false);
     
-    div.addEventListener( 'touchstart', function (e) {
-       self.startY = e.changedTouches[0].pageY;
-       e.preventDefault(); 
-       e.stopPropagation(); 
-    }, false);
-    
-    div.addEventListener( 'touchend', function (e) {
-        var delta = self.startY - e.changedTouches[0].pageY;
+    var swiping = function(e) {
+        e.preventDefault(); 
+        e.stopPropagation(); 
+        var newY = e.changedTouches[0].pageY;
+        var delta = self.startY - newY;
+        
         var m = self.headers[this.getAttribute("data-ddm")].div;
         
         if( m.style.overflowY === 'scroll' && Math.abs(delta) > 10) {
@@ -430,11 +428,31 @@ DRAGGABLE.ui.DropdownMenu.prototype.addAction = function( ddm, action, div, self
            } else {
                m.scrollTop = v;
            }
-       } else {
+           self.startY = newY;
+           self.moved = true;
+        }
+    };
+    
+    div.addEventListener( 'touchstart', function (e) {
+       self.startY = e.changedTouches[0].pageY;
+       this.moved = false;
+        div.addEventListener( 'touchmove', swiping, false );
+        e.preventDefault(); 
+       e.stopPropagation(); 
+    }, false);
+    
+    div.addEventListener( 'touchend', function (e) {
+        
+        div.removeEventListener( 'touchmove', swiping, false );
+        
+        swiping(e);
+        
+        if(! self.moved ) {
             e.preventDefault(); 
             e.stopPropagation(); 
             self.eventsCentral(this.getAttribute("data-ddm"), this.getAttribute("data-value") );
         }
+        
     }, false);
     
     div.addEventListener( 'mousedown', function(e) { e.preventDefault(); e.stopPropagation(); }, false);
