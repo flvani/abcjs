@@ -436,7 +436,7 @@ DRAGGABLE.ui.DropdownMenu.prototype.addAction = function( ddm, action, div, self
     
     div.addEventListener( 'touchstart', function (e) {
        self.startY = e.changedTouches[0].pageY;
-       this.moved = false;
+       self.moved = false;
        div.addEventListener( 'touchmove', swiping, false );
        e.preventDefault(); 
        e.stopPropagation(); 
@@ -452,8 +452,6 @@ DRAGGABLE.ui.DropdownMenu.prototype.addAction = function( ddm, action, div, self
             e.preventDefault(); 
             e.stopPropagation(); 
             self.eventsCentral(this.getAttribute("data-ddm"), this.getAttribute("data-value") );
-        } else {
-            alert( 'moveu' );
         }
         
     }, false);
