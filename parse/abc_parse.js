@@ -790,8 +790,9 @@ window.ABCXJS.parse.Parse = function(transposer_, accordion_) {
     };
 
     // TODO-PER: make this a method in el.
+    // Flavio - 0.25 inclusive.
     var addEndBeam = function(el) {
-        if (el.duration !== undefined && el.duration < 0.25)
+        if (el.duration !== undefined && el.duration <= 0.25)
             el.end_beam = true;
         return el;
     };

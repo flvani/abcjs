@@ -582,7 +582,7 @@ ABCXJS.midi.Parse.prototype.handleBar = function (elem) {
                 break;
             case "dacoda":
                 if( this.codaPoint ){
-                    if(this.daCodaFlagged){
+                    if(pass >= this.maxPass && this.daCodaFlagged){
                         this.next = this.codaPoint;
                         this.daCodaFlagged = false;
                         this.resetPass();

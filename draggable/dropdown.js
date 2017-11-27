@@ -402,17 +402,41 @@ DRAGGABLE.ui.DropdownMenu.prototype.addAction = function( ddm, action, div, self
     
     self.headers[ddm].actionList[action]=div; 
     
-    var clique = function(e) {
-       e.preventDefault(); 
-       e.stopPropagation(); 
-       self.eventsCentral(this.getAttribute("data-ddm"), this.getAttribute("data-value") );
-    };
-    
     div.setAttribute( "data-ddm", ddm );
     div.setAttribute( "data-value", action );
     
-    div.addEventListener( 'click', clique, false);
-    div.addEventListener( 'touchstart', clique, false);
+    div.addEventListener( 'click', function (e) {
+       e.preventDefault(); 
+       e.stopPropagation(); 
+       self.eventsCentral(this.getAttribute("data-ddm"), this.getAttribute("data-value") );
+    }, false);
+    
+    div.addEventListener( 'touchstart', function (e) {
+       self.startY = e.changedTouches[0].pageY;
+       e.preventDefault(); 
+       e.stopPropagation(); 
+    }, false);
+    
+    div.addEventListener( 'touchend', function (e) {
+        var delta = self.startY - e.changedTouches[0].pageY;
+        var m = self.headers[this.getAttribute("data-ddm")].div;
+        
+        if( m.style.overflowY === 'scroll' && Math.abs(delta) > 10) {
+           var v = m.scrollTop + delta;
+           if( v < 0 )
+               m.scrollTop = 0;
+           else if ( v > ( m.scrollHeight - m.ClientHeight ) ) {
+               m.scrollTop = ( m.scrollHeight - m.ClientHeight );
+           } else {
+               m.scrollTop = v;
+           }
+       } else {
+            e.preventDefault(); 
+            e.stopPropagation(); 
+            self.eventsCentral(this.getAttribute("data-ddm"), this.getAttribute("data-value") );
+        }
+    }, false);
+    
     div.addEventListener( 'mousedown', function(e) { e.preventDefault(); e.stopPropagation(); }, false);
     div.addEventListener( 'mouseout', function(e)  { e.preventDefault(); e.stopPropagation(); }, false); 
     
