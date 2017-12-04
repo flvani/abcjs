@@ -418,7 +418,8 @@ window.ABCXJS.parse.ParseHeader = function(tokenizer, warn, multilineVars, tune,
 		R: 'rhythm',
 		S: 'source',
 		W: 'unalignedWords',
-		Z: 'transcription'
+		Z: 'transcription',
+                X: 'pieceId'
 	};
 
 	this.parseHeader = function(line, lineNumber ) {
@@ -498,8 +499,6 @@ window.ABCXJS.parse.ParseHeader = function(tokenizer, warn, multilineVars, tune,
 							return {symbols: true};
 						case  'w':
 							return {words: true};
-						case 'X':
-							break;
 						case 'E':
 						case 'm':
 							warn("Ignored header", line, 0);

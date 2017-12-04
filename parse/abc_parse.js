@@ -1816,7 +1816,7 @@ window.ABCXJS.parse.Parse = function(transposer_, accordion_) {
         if (ret.newline && multilineVars.continueall === undefined)
             startNewLine();
         if (ret.words)
-        addWords(tune.getCurrentStaff(), tune.getCurrentVoice(), line.substring(2));
+            addWords(tune.getCurrentStaff(), tune.getCurrentVoice(), line.substring(2));
         if (ret.symbols)
             addSymbols(tune.getCurrentVoice(), line.substring(2));
         if (ret.recurse)
