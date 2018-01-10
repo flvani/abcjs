@@ -405,8 +405,9 @@ window.ABCXJS.parse.Parse = function(transposer_, accordion_) {
                 chord[2] = null;
                 chord[3] = {x: x.value, y: y.value};
             } else {
-                chord[1] = chord[1].replace(/([ABCDEFG])b/g, "$1?");
-                chord[1] = chord[1].replace(/([ABCDEFG])#/g, "$1?");
+                //chord[1] = chord[1].replace(/([ABCDEFG])b/g, "$1?");
+                //chord[1] = chord[1].replace(/([ABCDEFG])#/g, "$1?");
+                chord[1] = ABCXJS.parse.normalizeAcc(chord[1]);
                 chord[2] = 'default';
             }
             return chord;
