@@ -71,6 +71,14 @@ ABCXJS.TuneBook = function(book) {
 		} else
 			tune.title = "";
 
+		// for the user's convenience, parse and store the title separately. The title is between the first T: and the next \n
+		var comps = tune.pure.split("C:");
+                tune.composer = "";
+                for( var c = 1; c <  comps.length; c ++ ) {
+                    var aux = comps[c].split("\n");
+                    tune.composer += (c>1?'<br>':'') + aux[0].replace(/^\s+|\s+$/g, '');
+		} 
+
 		// for the user's convenience, parse and store the id separately. The id is between the first X: and the next \n
 		var id = tune.pure.substring(2,tune.pure.indexOf("\n"));
 		tune.id = id.replace(/^\s+|\s+$/g, '');
