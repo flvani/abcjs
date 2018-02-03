@@ -15,22 +15,22 @@ SVG.Glyphs = function () {
     var abc_glyphs = new ABCXJS.write.Glyphs();
 
     var glyphs = { // the @@ will be replaced by the abc_glyph contents.
-       "0": '<path id="0" transform="scale(0.95)" \nd="@@"/>'
-      ,"1": '<path id="1" transform="scale(0.95)" \nd="@@"/>'
-      ,"2": '<path id="2" transform="scale(0.95)" \nd="@@"/>'
-      ,"3": '<path id="3" transform="scale(0.95)" \nd="@@"/>'
-      ,"4": '<path id="4" transform="scale(0.95)" \nd="@@"/>'
-      ,"5": '<path id="5" transform="scale(0.95)" \nd="@@"/>'
-      ,"6": '<path id="6" transform="scale(0.95)" \nd="@@"/>'
-      ,"7": '<path id="7" transform="scale(0.95)" \nd="@@"/>'
-      ,"8": '<path id="8" transform="scale(0.95)" \nd="@@"/>'
-      ,"9": '<path id="9" transform="scale(0.95)" \nd="@@"/>'
-      ,"f": '<path id="f" transform="scale(0.95)" \nd="@@"/>'
-      ,"m": '<path id="m" transform="scale(0.95)" \nd="@@"/>'
-      ,"p": '<path id="p" transform="scale(0.95)" \nd="@@"/>'
-      ,"r": '<path id="r" transform="scale(0.95)" \nd="@@"/>'
-      ,"s": '<path id="s" transform="scale(0.95)" \nd="@@"/>'
-      ,"z": '<path id="z" transform="scale(0.95)" \nd="@@"/>'
+       "n.0": '<path id="n.0" transform="scale(0.95)" \nd="@@"/>'
+      ,"n.1": '<path id="n.1" transform="scale(0.95)" \nd="@@"/>'
+      ,"n.2": '<path id="n.2" transform="scale(0.95)" \nd="@@"/>'
+      ,"n.3": '<path id="n.3" transform="scale(0.95)" \nd="@@"/>'
+      ,"n.4": '<path id="n.4" transform="scale(0.95)" \nd="@@"/>'
+      ,"n.5": '<path id="n.5" transform="scale(0.95)" \nd="@@"/>'
+      ,"n.6": '<path id="n.6" transform="scale(0.95)" \nd="@@"/>'
+      ,"n.7": '<path id="n.7" transform="scale(0.95)" \nd="@@"/>'
+      ,"n.8": '<path id="n.8" transform="scale(0.95)" \nd="@@"/>'
+      ,"n.9": '<path id="n.9" transform="scale(0.95)" \nd="@@"/>'
+      ,"f": '<path id="n.f" transform="scale(0.95)" \nd="@@"/>'
+      ,"m": '<path id="n.m" transform="scale(0.95)" \nd="@@"/>'
+      ,"p": '<path id="n.p" transform="scale(0.95)" \nd="@@"/>'
+      ,"r": '<path id="n.r" transform="scale(0.95)" \nd="@@"/>'
+      ,"s": '<path id="n.s" transform="scale(0.95)" \nd="@@"/>'
+      ,"z": '<path id="n.z" transform="scale(0.95)" \nd="@@"/>'
       ,"+": '<path id="+" transform="scale(0.95)" \nd="@@"/>'
       ,",": '<path id="," transform="scale(0.95)" \nd="@@"/>'
       ,"-": '<path id="-" transform="scale(0.95)" \nd="@@"/>'
@@ -95,6 +95,7 @@ SVG.Glyphs = function () {
       ,"scripts.prall": '<path id="scripts.prall" \nd="@@"/>'
       ,"scripts.mordent": '<path id="scripts.mordent" \nd="@@"/>'
       ,"timesig.common": '<path id="timesig.common" \nd="@@"/>'
+      ,"timesig.cut": '<path id="timesig.cut" \nd="@@"/>'
       ,"it.punto": '<path id="it.punto" \nd="@@"/>'
       ,"it.l": '<path id="it.l" \nd="@@"/>'
       ,"it.f": '<path id="it.f" \nd="@@"/>'
@@ -135,7 +136,7 @@ SVG.Glyphs = function () {
         }
         
         // expande path se houver, buscando a definicao do original do ABCJS.
-        g = g.replace('@@', abc_glyphs.getTextSymbol(gl) );
+        g = g.replace('@@', abc_glyphs.getSymbolPathTxt(gl) );
         
         var i = 0, j = 0;
 

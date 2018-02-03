@@ -1121,12 +1121,14 @@ ABCXJS.write.Layout.prototype.printTimeSignature= function(elem) {
     //TODO make the alignment for time signatures centered
     for (var i = 0; i < elem.value.length; i++) {
       if (i !== 0)
-        abselem.addRight(new ABCXJS.write.RelativeElement('+', i*20-9, this.glyphs.getSymbolWidth("+"), 7));
+        abselem.addRight(new ABCXJS.write.RelativeElement("+", i*20-9, this.glyphs.getSymbolWidth("+"), 7));
+      var num = "n."+ elem.value[i].num;
       if (elem.value[i].den) {
-        abselem.addRight(new ABCXJS.write.RelativeElement(elem.value[i].num, i*20, this.glyphs.getSymbolWidth(elem.value[i].num.charAt(0))*elem.value[i].num.length, 9));
-        abselem.addRight(new ABCXJS.write.RelativeElement(elem.value[i].den, i*20, this.glyphs.getSymbolWidth(elem.value[i].den.charAt(0))*elem.value[i].den.length, 5));
+        var den = "n."+ elem.value[i].den;
+        abselem.addRight(new ABCXJS.write.RelativeElement(num, i*20, this.glyphs.getSymbolWidth(num)*num.length, 6));
+        abselem.addRight(new ABCXJS.write.RelativeElement(den, i*20, this.glyphs.getSymbolWidth(den)*den.length, 2));
       } else {
-        abselem.addRight(new ABCXJS.write.RelativeElement(elem.value[i].num, i*20, this.glyphs.getSymbolWidth(elem.value[i].num.charAt(0))*elem.value[i].num.length, 7));
+        abselem.addRight(new ABCXJS.write.RelativeElement(num, i*20, this.glyphs.getSymbolWidth(num)*num.length, 4));
       }
     }
   } else if (elem.type === "common_time") {

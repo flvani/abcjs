@@ -335,7 +335,7 @@ SVG.Printer.prototype.text = function( x, y, str, clss, anch ) {
     } else {
        this.svg_pages[this.currentPage] += '<text text-anchor="'+anch+'" x="0" y="0">\n';
        for(var i = 0; i < t.length; i++ )
-           this.svg_pages[this.currentPage] += '<tspan x="0" dy="1.2em" >'+t[i]+'</tspan>\n';
+           this.svg_pages[this.currentPage] += '<tspan x="0" dy="1.2em" >'+(t[i].length===0 ? '&nbsp;' : t[i])+'</tspan>\n';
        this.svg_pages[this.currentPage] += '</text>\n';
     }
     this.svg_pages[this.currentPage] += '</g>\n';
