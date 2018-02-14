@@ -163,15 +163,21 @@
     
 <textarea id="abc" class="abc_textarea" spellcheck="false" cols="120" rows="10"  style="display: none;">
 %%barnumbers 1
-T:As Andorinhas
+%%papersize A4
+T:Vira virou (quase pronta)
+C:Kleyton & Kledir
 Z:Flávio Vani
-M:4/4
+F:https://www.youtube-nocookie.com/embed/ntWDtNmsnvg
+N:Mapa para Acordeões Diatônicos powered by ABCXJS.
+M:3/4
 L:1/8
-Q:110
-K:G
+Q:70
+K:C
 V:1 treble
-| z DGB | [Ge]2 [Ec]2 | dc [ce][Bd] +dacoda+ |
-| [GB] DGB |: z [Bd][Bd][Bd] |1 [Ec]2 [Ec][Ec] | [DB]4- | [DB]4 :|2 [Ec]2 [Ec][Ec] | [B,G]4- |  +dcalcoda+ [B,G]4 +coda+ | [GB]4 |
+| g3 | fed | c3 | Ace | d3- | d3 | c3 :|
+w: Ah, gi-ra, gi-rou, nes-ta ga-le- * ra!
+%V:2 bass
+%| F,, [F,A,C] [F,A,C] | E,, [E,^G,B,] [E,G,B,] | A,, [A,CE] [A,CE] | G,, [A,CE] [A,CE] | F,, [F,A,C] [F,A,C] | G,, [G,B,D] [G,B,D] | C,, [C,E,G,] [C,E,G,] :|
 </textarea>
     
 <textarea id="abcd" class="abc_textarea" spellcheck="false" cols="120" rows="10"  style="display: none;">
@@ -379,6 +385,7 @@ V:3 accordionTab
                      soundfontUrl: "./soundfont/"
                     //,instruments: ["accordion", "acoustic_grand_piano" ] 
                     ,instruments: [ "accordion" ] 
+                    //,instruments: [ "acoustic_grand_piano" ] 
                 ,onprogress: function( total, done, currentPercent ) {
                     var percent = ((done*100)+currentPercent)*90/(total*100);
                     MIDI.widget.setValue(10+Math.round(percent));
@@ -391,6 +398,7 @@ V:3 accordionTab
             function preLoad() {
                 
                 var setInstrument = function (piano) {
+                    //var instrumentId = 0;//= piano? 0: 21; // accordion
                     var instrumentId = piano? 0: 21; // accordion
                     MIDI.programChange( 0, instrumentId );
                     MIDI.programChange( 1, instrumentId );

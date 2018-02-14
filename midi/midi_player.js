@@ -305,7 +305,7 @@ ABCXJS.midi.Player.prototype.executa = function(pl) {
                 
                 if(  self.playClef( elem.midipitch.clef.charAt(0) ) ) {
                     MIDI.noteOn(elem.midipitch.channel, elem.midipitch.midipitch, loudness, delay);
-                    var k = 2.2, t = k, resto = self.calcTempo( elem.midipitch.mididuration ) - k;
+                    var k = 2.38, t = k, resto = self.calcTempo( elem.midipitch.mididuration ) - k;
 
                     // a nota midi dura k segundos (k), então notas mais longas são reiniciadas quantas vezes forem necessárias
                     while( resto > 0 ) {
