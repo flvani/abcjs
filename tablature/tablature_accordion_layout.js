@@ -114,7 +114,7 @@ ABCXJS.tablature.Layout.prototype.printTabNote = function(elem) {
                 rel.c = '';
             }
         } else {
-            rel.c = curr.c;
+            rel.c = curr.c.replace('m', '-');
             rel.note = curr.note;
             rel.type = curr.type;
         }

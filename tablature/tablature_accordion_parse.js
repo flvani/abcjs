@@ -56,7 +56,7 @@ ABCXJS.tablature.Parse = function( accordion, str, vars ) {
     this.durSyms = "0123456789/.";
     this.belSyms = "+-";
     this.barSyms = ":]|[";
-    this.accSyms = "♭♯";
+    this.accSyms = "♭♯m"; // neste caso, "m" representa o acorde-baixo-menor
     this.i = 0;
     this.xi = 0;
     this.offset = 8.9;
@@ -309,7 +309,10 @@ ABCXJS.tablature.Parse.prototype.checkBassButton = function( bellows, b ) {
     
     if( !kb  || b === undefined || ('.>.x.z.').indexOf(b) > 0 ) return true;
     
-    var nota = kb.parseNote(b, true );
+    // há uma pequena conversão: na tablatura registramos os acordes menores com "m"
+    // no mapeamento da gaita, escrevemos a1:m, por exemplo.
+    // então trocar "m" por ":m"
+    var nota = kb.parseNote(b.replace( "m", ":m" ), true );
     for( var j = kb.keyMap.length; j > kb.keyMap.length - 2; j-- ) {
       for( var i = 0; i < kb.keyMap[j-1].length; i++ ) {
           var tecla = kb.keyMap[j-1][i];
