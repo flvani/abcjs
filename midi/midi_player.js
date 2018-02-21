@@ -404,7 +404,14 @@ ABCXJS.midi.Player.prototype.getTime = function() {
         return n.length >= width ? n : new Array(width - n.length + 1).join(z) + n;
     };
     
-    var time = this.playlist[this.i].time*this.tempo*(1/this.currentAndamento);
+    var time = 0;
+    
+    if( this.playlist && this.playlist[this.i] ) {
+        time = this.playlist[this.i].time*this.tempo*(1/this.currentAndamento);
+    } else {
+        this.addWarning( 'PlayList['+this.i+'] não existe. DebugPoint: midi.Player.getTime' );
+    }
+    
     var secs  = Math.floor(time/1000);
     var ms    = Math.floor((time - secs*1000)/10);
     var mins  = Math.floor(secs/60);

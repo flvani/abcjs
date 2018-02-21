@@ -331,7 +331,7 @@ ABCXJS.tablature.Parse.prototype.getTripletDef = function() {
     
     var i = ++this.i;
     
-    while ( this.i < this.line.length && this.bassNoteSyms.indexOf(this.line.charAt(this.i)) < 0 ) {
+    while ( this.i < this.line.length && this.bassNoteSyms.indexOf(this.line.charAt(this.i)) < 0  && this.belSyms.indexOf(this.line.charAt(this.i)) < 0 ) {
       this.i++;
     }
     
@@ -346,8 +346,8 @@ ABCXJS.tablature.Parse.prototype.getTripletDef = function() {
     var e = /\[([0-9])(:{1,2}([0-9]){0,1})*\]/;
     var r = ('['+t+']').match(e);
     
-    if( ! r[1] ) {
-        this.warn( "Inválide triplet definition at " + this.line.substr(i) );
+   if( !r || !r[1] ) {
+        this.warn( "Invalid triplet definition at " + this.line.substr(i) );
         return null;
     }
     
