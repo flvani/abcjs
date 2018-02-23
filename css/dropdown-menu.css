@@ -138,8 +138,8 @@
     color: orange;
     color: #dab390;
     background: #2c3e50;
-    overflow-y: hidden;
-    /*text-shadow: 0 -1px 0 rgba(255, 255, 255, 0.3);*/
+    overflow: hidden;
+    overflow: auto;
 }
 
 .dropdown-menu ul {

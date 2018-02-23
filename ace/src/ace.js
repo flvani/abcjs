@@ -1111,7 +1111,7 @@ exports.scrollbarWidth = function(document) {
     style.overflow = "scroll";
     var withScrollbar = inner.offsetWidth;
 
-    if (noScrollbar == withScrollbar) {
+    if (noScrollbar === withScrollbar) {
         withScrollbar = outer.clientWidth;
     }
 
@@ -1120,7 +1120,7 @@ exports.scrollbarWidth = function(document) {
     return noScrollbar-withScrollbar;
 };
 
-if (typeof document == "undefined") {
+if (typeof document === "undefined") {
     exports.importCssString = function() {};
     return;
 }
@@ -11989,6 +11989,7 @@ var Editor = function(renderer, session) {
     };
     this.resize = function(force) {
         this.renderer.onResize(force);
+        (this.sbar) && this.sbar.update();
     };
     this.setTheme = function(theme, cb) {
         this.renderer.setTheme(theme, cb);
@@ -14809,12 +14810,20 @@ var MAX_SCROLL_H = 0x8000;
 var ScrollBar = function(parent) {
     this.element = dom.createElement("div");
     this.element.className = "customScrollBar ace_scrollbar ace_scrollbar" + this.classSuffix;
-
+   
     this.inner = dom.createElement("div");
     this.inner.className = "ace_scrollbar-inner";
     this.element.appendChild(this.inner);
 
     parent.appendChild(this.element);
+    
+    this.sbar = new PerfectScrollbar( this.element, {
+        wheelSpeed: 1,
+        wheelPropagation: false,
+        minScrollbarLength: 20,
+        swipeEasing: true,
+        scrollingThreshold: 0
+    });
 
     this.setVisible(false);
     this.skipEvent = false;

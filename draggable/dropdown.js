@@ -67,59 +67,78 @@ DRAGGABLE.ui.DropdownMenu = function (topDiv, options, menu) {
             self.eventsCentral(this.getAttribute("data-ddm")); 
         }, false);
  
-        e2.addEventListener("keydown",function(e) {
-            e.stopPropagation(); 
-            e.preventDefault(); 
-        });
-            
-        e2.addEventListener("keyup",function(e) {
-            e.stopPropagation(); 
-            e.preventDefault(); 
-            var ddm = this.getAttribute("data-ddm");
-            switch( e.keyCode ) {
-                case 27:
-                    if(DRAGGABLE.ui.oneTimeCloseFunction) {
-                        DRAGGABLE.ui.oneTimeCloseFunction();
-                    }
-                    break;
-                case 13:
-                    if( DRAGGABLE.ui.lastOpen && self.headers[DRAGGABLE.ui.lastOpen].highlightItem ) {
-                       //alert(DRAGGABLE.ui.lastOpen+','+self.headers[DRAGGABLE.ui.lastOpen].highlightItem);
-                       self.eventsCentral( DRAGGABLE.ui.lastOpen, self.headers[DRAGGABLE.ui.lastOpen].highlightItem ) ;  
-                    }
-                    break;
-                case 38: // up
-                case 40: // down
-                    if( DRAGGABLE.ui.lastOpen )
-                        self.highlightItem( DRAGGABLE.ui.lastOpen, e.keyCode === 38 ) ;  
-                    break;
-                case 37: // left
-                case 39: // right
-                    if( DRAGGABLE.ui.lastOpen )
-                        self.openMenu(DRAGGABLE.ui.lastOpen, e.keyCode === 37 ); 
-                    break;
-            }
-        });
+//        e2.addEventListener("keydown",function(e) {
+//            e.stopPropagation(); 
+//            e.preventDefault(); 
+//        });
+//            
+//        e2.addEventListener("keyup",function(e) {
+//            e.stopPropagation(); 
+//            e.preventDefault(); 
+//            var ddm = this.getAttribute("data-ddm");
+//            switch( e.keyCode ) {
+//                case 27:
+//                    if(DRAGGABLE.ui.oneTimeCloseFunction) {
+//                        DRAGGABLE.ui.oneTimeCloseFunction();
+//                    }
+//                    break;
+//                case 13:
+//                    if( DRAGGABLE.ui.lastOpen && self.headers[DRAGGABLE.ui.lastOpen].highlightItem ) {
+//                       //alert(DRAGGABLE.ui.lastOpen+','+self.headers[DRAGGABLE.ui.lastOpen].highlightItem);
+//                       self.eventsCentral( DRAGGABLE.ui.lastOpen, self.headers[DRAGGABLE.ui.lastOpen].highlightItem ) ;  
+//                    }
+//                    break;
+//                case 33: // PgUp
+//                case 34: // PgDn
+//                case 35: // End
+//                case 36: // Home
+//                    break;
+//                case 38: // Up
+//                case 40: // Down
+//                    if( DRAGGABLE.ui.lastOpen )
+//                        self.highlightItem( DRAGGABLE.ui.lastOpen, e.keyCode === 38 ) ;  
+//                    break;
+//                case 37: // Left
+//                case 39: // Right
+//                    if( DRAGGABLE.ui.lastOpen )
+//                        self.openMenu(DRAGGABLE.ui.lastOpen, e.keyCode === 37 ); 
+//                    break;
+//            }
+//        });
         
         e1.appendChild(e2);
         this.headers[ddmId].btn = e2;
-        e2 = document.createElement("div");
-        e2.setAttribute( "class", "dropdown-menu customScrollBar" );
-        e2.setAttribute( "data-toggle", "toggle-menu" );
-        e1.appendChild(e2);
-        this.headers[ddmId].div = e2;
         
-        e2.addEventListener( 'transitionend', function(e) {
-            if( this.clientHeight > 0 && this.clientHeight < this.scrollHeight ) {
-                this.style.cssText = 'overflow-y: scroll;';
-            } else {     
-                this.style.cssText = 'overflow-y: hidden;';
-            }
+        var e3 = document.createElement("div");
+        e3.setAttribute( "class", "dropdown-menu" );
+        e3.setAttribute( "data-toggle", "toggle-menu" );
+        e1.appendChild(e3);
+
+        this.sbar = new PerfectScrollbar( e3, {
+            wheelSpeed: 1,
+            wheelPropagation: false,
+            //suppressScrollX: true,
+            minScrollbarLength: 20,
+            swipeEasing: true,
+            scrollingThreshold: 0
+        });
+        
+        this.headers[ddmId].div = e3;
+        
+        e3.addEventListener( 'transitionend', function(e) {
+            self.sbar.update(this);
+            self.sbar.element.className += ' ps--focus';
+
+//            if( this.clientHeight > 0 && this.clientHeight < this.scrollHeight ) {
+//                this.style.cssText = 'overflow-y: scroll;';
+//            } else {     
+//                this.style.cssText = 'overflow-y: hidden;';
+//            }
         }, false);
 
-        var e3 = document.createElement("ul");
-        e2.appendChild(e3);
-        this.headers[ddmId].list = e3;
+        var e4 = document.createElement("ul");
+        e3.appendChild(e4);
+        this.headers[ddmId].list = e4;
         
         for ( var i = 0; i < menu[m].itens.length; i++ ) {
             this.addItemSubMenu(ddmId, menu[m].itens[i]);
@@ -179,7 +198,6 @@ DRAGGABLE.ui.DropdownMenu.prototype.enableSubItem = function (ddm, action) {
     
     item.style.pointerEvents = '';
     item.style.opacity = '';
-    
 };
 
 DRAGGABLE.ui.DropdownMenu.prototype.disableSubMenu = function (ddm) {
@@ -211,7 +229,6 @@ DRAGGABLE.ui.DropdownMenu.prototype.emptySubMenu = function (ddm) {
     if( ! this.getSubMenu(ddm) ) {
         return false;
     }
-    
     this.headers[ddm].list.innerHTML = "";
     
 };
@@ -327,7 +344,7 @@ DRAGGABLE.ui.DropdownMenu.prototype.setSubMenuTitle = function (ddm, newTitle) {
     
 DRAGGABLE.ui.DropdownMenu.prototype.addItemSubMenu = function (ddm, newItem, pos) {
     
-    var self = this;
+    var self = this, e4;
     var tags = newItem.split('|'); 
     
     if( ! self.headers[ddm] ) {
@@ -336,9 +353,9 @@ DRAGGABLE.ui.DropdownMenu.prototype.addItemSubMenu = function (ddm, newItem, pos
     }
     
     if( tags[0].substring(0, 3) ===  '---' ) {
-        var e4 = document.createElement("hr");
+        e4 = document.createElement("hr");
     } else {
-        var e4 = document.createElement("li"); 
+        e4 = document.createElement("li"); 
         var action = tags.length > 1 ? tags[1] : tags[0];
         e4.setAttribute( "id",  action );
         
@@ -358,7 +375,7 @@ DRAGGABLE.ui.DropdownMenu.prototype.addItemSubMenu = function (ddm, newItem, pos
         self.headers[ddm].list.appendChild(e4);
     }  
     
-    // added li element
+    // added element
     return e4;
 };
 
@@ -417,8 +434,7 @@ DRAGGABLE.ui.DropdownMenu.prototype.addAction = function( ddm, action, div, self
         var newY = e.changedTouches[0].pageY;
         var delta = self.startY - newY;
         
-        //var m = self.headers[this.getAttribute("data-ddm")].div;
-        var m = self.headers[ddm].div; // será que pega o ddm correto?
+        var m = self.headers[ddm].div; 
         
         if( m.style.overflowY === 'scroll' && Math.abs(delta) > 10) {
            var v = m.scrollTop + delta;
@@ -466,8 +482,3 @@ DRAGGABLE.ui.DropdownMenu.prototype.addAction = function( ddm, action, div, self
     }, false);
     
 };
-
-//DRAGGABLE.ui.DropdownMenu.prototype.closeMenu = function (ddm) {
-//    var e = document.getElementById(ddm);
-//    e.checked=false;
-//};

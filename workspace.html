@@ -15,6 +15,35 @@
         
         <link rel="stylesheet" href="css/workspace.css" />
         
+        <link rel="stylesheet" href="css/perfect-scrollbar.css">        
+        
+	<noscript>
+		<style>
+			/**
+			* Reinstate scrolling for non-JS clients
+			*
+			* You coud do this in a regular stylesheet, but be aware that
+			* even in JS-enabled clients the browser scrollbars may be visible
+			* briefly until JS kicks in. This is especially noticeable in IE.
+			* Wrapping these rules in a noscript tag ensures that never happens.
+			*/
+			[data-simplebar] {
+                            overflow: hidden;
+			}
+		</style>
+	</noscript>        
+        
+        <style>
+            ::-webkit-scrollbar { /* for Mac OS X support */
+                width: 0;
+            }
+            
+            .ps__rail-x,
+            .ps__rail-y {
+              opacity: 0.6;
+            }
+          </style>        
+        
             <!-- 
           MAIN DATA STRUCTURES
         
@@ -87,6 +116,8 @@
         
         <!-- color picker -->
         <script type="text/javascript" src="jslib/html5kellycolorpicker.js"></script>
+        
+        <script type="text/javascript" src="jslib/perfect-scrollbar.js"></script>
         
         <!-- suporte a MIDI -->
         <script type="text/javascript" src="jslib/MIDI.js"></script>
@@ -330,7 +361,6 @@ V:3 accordionTab
                 
                 waterbug.log("WATERBUG - console"); 
                 
-                
                 console.log( 
                       '\nChrome: ' + ABCXJS.misc.isChrome() 
                     + '\nCromium: ' + ABCXJS.misc.isChromium() 
@@ -478,7 +508,6 @@ V:3 accordionTab
                 
                 myEditor.menu.disableSubItem('menuRepertorio', 'LOADLOC' );
                 
-            
 //                window.setTimeout( function() { 
 //                }, 1000 );
                 
