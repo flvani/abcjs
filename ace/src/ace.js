@@ -11989,7 +11989,6 @@ var Editor = function(renderer, session) {
     };
     this.resize = function(force) {
         this.renderer.onResize(force);
-        (this.sbar) && this.sbar.update();
     };
     this.setTheme = function(theme, cb) {
         this.renderer.setTheme(theme, cb);
@@ -14817,14 +14816,6 @@ var ScrollBar = function(parent) {
 
     parent.appendChild(this.element);
     
-    this.sbar = new PerfectScrollbar( this.element, {
-        wheelSpeed: 1,
-        wheelPropagation: false,
-        minScrollbarLength: 20,
-        swipeEasing: true,
-        scrollingThreshold: 0
-    });
-
     this.setVisible(false);
     this.skipEvent = false;
 
@@ -15246,11 +15237,13 @@ top: 0;\
 overflow-x: hidden;\
 overflow-y: scroll;\
 top: 0;\
+width: 10px;\
 }\
 .ace_scrollbar-h {\
 overflow-x: scroll;\
 overflow-y: hidden;\
 left: 0;\
+height: 10px;\
 }\
 .ace_print-margin {\
 position: absolute;\
@@ -15539,7 +15532,7 @@ var VirtualRenderer = function(container, theme) {
     this.scroller = dom.createElement("div");
     this.scroller.className = "ace_scroller";
     this.container.appendChild(this.scroller);
-
+    
     this.content = dom.createElement("div");
     this.content.className = "ace_content";
     this.scroller.appendChild(this.content);
@@ -15572,6 +15565,15 @@ var VirtualRenderer = function(container, theme) {
 
     this.scrollTop = 0;
     this.scrollLeft = 0;
+
+//    this.sbar = new PerfectScrollbar( this.content, {
+//        wheelSpeed: 1,
+//        wheelPropagation: false,
+//        minScrollbarLength: 20,
+//        swipeEasing: true,
+//        scrollingThreshold: 0
+//    });
+
 
     this.cursorPos = {
         row : 0,
@@ -15768,6 +15770,17 @@ var VirtualRenderer = function(container, theme) {
         if (this.resizing)
             this.resizing = 0;
         this.scrollBarV.scrollLeft = this.scrollBarV.scrollTop = null;
+        
+//        if(this.sbar) {
+//            var v = el.scrollTop;
+//            var h = el.scrollLeft;
+//            el.scrollTop = 10000;
+//            el.scrollLeft = 10000;
+//            el.scrollTop = v;
+//            el.scrollLeft = h;
+//            this.sbar.update();
+//        }
+
     };
     
     this.$updateCachedSize = function(force, gutterWidth, width, height) {

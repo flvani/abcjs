@@ -123,8 +123,8 @@
     -o-box-shadow: 5px 5px 5px -3px rgba(0,0,0,0.7);
 }
 
-.tv-content,
-.tv-content-always {
+.tv-container,
+.tv-container-always {
     clear: both;
     float: left;
     background: #e9edf0;
@@ -139,32 +139,28 @@
     -moz-box-shadow: 5px 5px 5px -3px rgba(0,0,0,0.7);
     -ms-box-shadow: 5px 5px 5px -3px rgba(0,0,0,0.7);
     -o-box-shadow: 5px 5px 5px -3px rgba(0,0,0,0.7);
+    overflow: hidden;
 }
 
-.tv-content {
+.tv-container {
     min-width: 1024px;
     min-height: 400px;
     width: inherit;
     height: inherit;
-    overflow: hidden;
-    overflow-y: auto;
 }
 
-.tv-content > div {
+.tv-container > div {
     display:none;
     opacity: 0;
     z-index: 1;
-}
-
-.tv-content > div {
     margin: 4px;
     top: 0;
     left: 0;
  }
  
-.tabs input.tab-selector-1:checked ~ .tv-content .tv-content-1 ,
-.tabs input.tab-selector-2:checked ~ .tv-content .tv-content-2 ,
-.tabs input.tab-selector-3:checked ~ .tv-content .tv-content-3 {
+.tabs input.tab-selector-1:checked ~ .tv-container .tv-selector-1 ,
+.tabs input.tab-selector-2:checked ~ .tv-container .tv-selector-2 ,
+.tabs input.tab-selector-3:checked ~ .tv-container .tv-selector-3 {
     opacity: 1;
     display:block;
     z-index: 100;
@@ -172,4 +168,13 @@
     filter: alpha(opacity=100);
     width: auto;
     height: auto;
+}
+
+.tv-content {
+    position: relative;
+    margin: 0px auto;
+    padding: 0px;
+    width: 600px;
+    height: 400px;
+    overflow: auto;
 }

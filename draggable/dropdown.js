@@ -67,73 +67,74 @@ DRAGGABLE.ui.DropdownMenu = function (topDiv, options, menu) {
             self.eventsCentral(this.getAttribute("data-ddm")); 
         }, false);
  
-//        e2.addEventListener("keydown",function(e) {
-//            e.stopPropagation(); 
-//            e.preventDefault(); 
-//        });
-//            
-//        e2.addEventListener("keyup",function(e) {
-//            e.stopPropagation(); 
-//            e.preventDefault(); 
-//            var ddm = this.getAttribute("data-ddm");
-//            switch( e.keyCode ) {
-//                case 27:
-//                    if(DRAGGABLE.ui.oneTimeCloseFunction) {
-//                        DRAGGABLE.ui.oneTimeCloseFunction();
-//                    }
-//                    break;
-//                case 13:
-//                    if( DRAGGABLE.ui.lastOpen && self.headers[DRAGGABLE.ui.lastOpen].highlightItem ) {
-//                       //alert(DRAGGABLE.ui.lastOpen+','+self.headers[DRAGGABLE.ui.lastOpen].highlightItem);
-//                       self.eventsCentral( DRAGGABLE.ui.lastOpen, self.headers[DRAGGABLE.ui.lastOpen].highlightItem ) ;  
-//                    }
-//                    break;
-//                case 33: // PgUp
-//                case 34: // PgDn
-//                case 35: // End
-//                case 36: // Home
-//                    break;
-//                case 38: // Up
-//                case 40: // Down
-//                    if( DRAGGABLE.ui.lastOpen )
-//                        self.highlightItem( DRAGGABLE.ui.lastOpen, e.keyCode === 38 ) ;  
-//                    break;
-//                case 37: // Left
-//                case 39: // Right
-//                    if( DRAGGABLE.ui.lastOpen )
-//                        self.openMenu(DRAGGABLE.ui.lastOpen, e.keyCode === 37 ); 
-//                    break;
-//            }
-//        });
+        e2.addEventListener("keydown",function(e) {
+            e.stopPropagation(); 
+            e.preventDefault(); 
+        });
+            
+        e2.addEventListener("keyup",function(e) {
+            e.stopPropagation(); 
+            e.preventDefault(); 
+            var ddm = this.getAttribute("data-ddm");
+            switch( e.keyCode ) {
+                case 27:
+                    if(DRAGGABLE.ui.oneTimeCloseFunction) {
+                        DRAGGABLE.ui.oneTimeCloseFunction();
+                    }
+                    break;
+                case 13:
+                    if( DRAGGABLE.ui.lastOpen && self.headers[DRAGGABLE.ui.lastOpen].highlightItem ) {
+                       //alert(DRAGGABLE.ui.lastOpen+','+self.headers[DRAGGABLE.ui.lastOpen].highlightItem);
+                       self.eventsCentral( DRAGGABLE.ui.lastOpen, self.headers[DRAGGABLE.ui.lastOpen].highlightItem ) ;  
+                    }
+                    break;
+                case 33: // PgUp
+                case 34: // PgDn
+                    var cnt = 7;
+                    while( self.highlightItem( DRAGGABLE.ui.lastOpen, e.keyCode === 33 ) && cnt > 0 )  cnt --;  
+                    break;
+                case 36: // Home
+                case 35: // End
+                    while( self.highlightItem( DRAGGABLE.ui.lastOpen, e.keyCode === 36 ) ) ;  
+                    break;
+                case 38: // Up
+                case 40: // Down
+                    if( DRAGGABLE.ui.lastOpen )
+                        self.highlightItem( DRAGGABLE.ui.lastOpen, e.keyCode === 38 ) ;  
+                    break;
+                case 37: // Left
+                case 39: // Right
+                    if( DRAGGABLE.ui.lastOpen )
+                        self.openMenu(DRAGGABLE.ui.lastOpen, e.keyCode === 37 ); 
+                    break;
+            }
+        });
         
         e1.appendChild(e2);
         this.headers[ddmId].btn = e2;
         
         var e3 = document.createElement("div");
-        e3.setAttribute( "class", "dropdown-menu" );
+        e3.setAttribute( "class", "dropdown-menu ps--active-y" );
         e3.setAttribute( "data-toggle", "toggle-menu" );
         e1.appendChild(e3);
 
         this.sbar = new PerfectScrollbar( e3, {
+            handlers: ['click-rail', 'drag-thumb', 'keyboard', 'wheel', 'touch'],
             wheelSpeed: 1,
             wheelPropagation: false,
-            //suppressScrollX: true,
-            minScrollbarLength: 20,
+            suppressScrollX: true,
+            minScrollbarLength: 100,
             swipeEasing: true,
-            scrollingThreshold: 0
+            scrollingThreshold: 500
         });
         
         this.headers[ddmId].div = e3;
         
         e3.addEventListener( 'transitionend', function(e) {
-            self.sbar.update(this);
-            self.sbar.element.className += ' ps--focus';
-
-//            if( this.clientHeight > 0 && this.clientHeight < this.scrollHeight ) {
-//                this.style.cssText = 'overflow-y: scroll;';
-//            } else {     
-//                this.style.cssText = 'overflow-y: hidden;';
-//            }
+            var v = this.scrollTop;
+            this.scrollTop=10000;
+            this.scrollTop=v;
+            self.sbar.update();
         }, false);
 
         var e4 = document.createElement("ul");
@@ -301,7 +302,7 @@ DRAGGABLE.ui.DropdownMenu.prototype.highlightItem = function (ddm, up) {
         }
         return toSel;
     }
-    return false;
+    return true;
 };
 
 DRAGGABLE.ui.DropdownMenu.prototype.selectItem = function (ddm, item) {
@@ -436,7 +437,7 @@ DRAGGABLE.ui.DropdownMenu.prototype.addAction = function( ddm, action, div, self
         
         var m = self.headers[ddm].div; 
         
-        if( m.style.overflowY === 'scroll' && Math.abs(delta) > 10) {
+        if( Math.abs(delta) > 10) {
            var v = m.scrollTop + delta;
            if( v < 0 )
                m.scrollTop = 0;

@@ -10,7 +10,7 @@ echo "Concatenating all files..."
 
 cat ace/src/ace.js ace/src/mode-abcx.js ace/src/theme-abcx.js > tmp/ace4abcx.js
 
-cat css/menu-group.css css/dropdown-menu.css css/tabbed-view.css css/draggable.css > tmp/styles4abcx.css
+cat css/perfect-scrollbar.css css/menu-group.css css/dropdown-menu.css css/tabbed-view.css css/draggable.css > tmp/styles4abcx.css
 
 cat diatonic/diatonic_common.js diatonic/diatonic_accordion_map.js \
         diatonic/diatonic_keyboard.js diatonic/diatonic_button.js > tmp/diatonic.js
@@ -28,7 +28,7 @@ cat midi/midi_common.js  midi/midi_parser.js  midi/midi_player.js > tmp/midi.js
 
 cat svg/svg.js svg/glyphs.js > tmp/svg.js
 
-cat draggable/draggable.js draggable/dropdown.js draggable/dialogs.js > tmp/abcjs-windows.js
+cat jslib/perfect-scrollbar.js draggable/draggable.js draggable/dropdown.js draggable/dialogs.js > tmp/abcjs-windows.js
 
 cat api/abc_tunebook.js data/abc_tune.js tmp/parse.js tmp/write.js tmp/svg.js edit/abc_selectors.js edit/abc_editarea.js > tmp/abcjs-nomidi.js
 

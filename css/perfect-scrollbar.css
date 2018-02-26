@@ -1,6 +1,7 @@
 /*
  * Container style
  */
+
 .ps {
   overflow: hidden !important;
   overflow-anchor: none;
@@ -12,28 +13,29 @@
 /*
  * Scrollbar rail styles
  */
-.ps__rail-x {
-  display: none;
-  opacity: 0;
-  transition: background-color .2s linear, opacity .2s linear;
-  -webkit-transition: background-color .2s linear, opacity .2s linear;
-  height: 10px;
-  /* there must be 'bottom' or 'top' for ps__rail-x */
-  bottom: 0px;
+
+.ps__rail-x,
+.ps__rail-y {
   /* please don't change 'position' */
   position: absolute;
+  display: none;
+  opacity: 0.3; /* always visible, if active */
+  transition: background-color .2s linear, opacity .2s linear;
+  -webkit-transition: background-color .2s linear, opacity .2s linear;
+  border-radius: 6px;
+}  
+
+    
+.ps__rail-x {
+  /* there must be 'bottom' or 'top' for ps__rail-x */
+  bottom: 0;
+  height: 12px;
 }
 
 .ps__rail-y {
-  display: none;
-  opacity: 0;
-  transition: background-color .2s linear, opacity .2s linear;
-  -webkit-transition: background-color .2s linear, opacity .2s linear;
-  width: 10px;
   /* there must be 'right' or 'left' for ps__rail-y */
   right: 0;
-  /* please don't change 'position' */
-  position: absolute;
+  width: 12px;
 }
 
 .ps--active-x > .ps__rail-x,
@@ -57,53 +59,41 @@
 .ps .ps__rail-y:focus,
 .ps .ps__rail-x.ps--clicking,
 .ps .ps__rail-y.ps--clicking {
-  background-color: #eee;
-  opacity: 0.9;
+  opacity: 1;
 }
 
 /*
  * Scrollbar thumb styles
  */
-.ps__thumb-x {
-  background-color: #aaa;
-  background-color: rgba(255, 153, 34, 0.8);
+.ps__thumb-x, 
+.ps__thumb-y {
+  /* please don't change 'position' */
+  position: absolute;
+  background-color: rgb(255, 153, 34);
   border-radius: 6px;
   transition: background-color .2s linear, height .2s ease-in-out;
   -webkit-transition: background-color .2s linear, height .2s ease-in-out;
-  height: 7px;
+}
+
+.ps__thumb-x {
   /* there must be 'bottom' for ps__thumb-x */
-  bottom: 2px;
-  /* please don't change 'position' */
-  position: absolute;
+  bottom: 1px;
+  height: 10px;
 }
 
 .ps__thumb-y {
-  background-color: #aaa;
-  background-color: rgba(255, 153, 34, 0.8);
-  border-radius: 6px;
-  transition: background-color .2s linear, width .2s ease-in-out;
-  -webkit-transition: background-color .2s linear, width .2s ease-in-out;
-  width: 7px;
   /* there must be 'right' for ps__thumb-y */
-  right: 2px;
-  /* please don't change 'position' */
-  position: absolute;
+  right: 1px;
+  width: 10px;
 }
 
 .ps__rail-x:hover > .ps__thumb-x,
-.ps__rail-x:focus > .ps__thumb-x,
-.ps__rail-x.ps--clicking .ps__thumb-x {
-  background-color: #999;
-  background-color: rgba(255, 153, 34, 1);
-  height: 7px;
-}
-
 .ps__rail-y:hover > .ps__thumb-y,
+.ps__rail-x:focus > .ps__thumb-x,
 .ps__rail-y:focus > .ps__thumb-y,
+.ps__rail-x.ps--clicking .ps__thumb-x, 
 .ps__rail-y.ps--clicking .ps__thumb-y {
-  background-color: #999;
-  background-color: rgba(255, 153, 34, 1);
-  width: 7px;
+  opacity: 1;
 }
 
 @media screen and (-ms-high-contrast: active), (-ms-high-contrast: none) {

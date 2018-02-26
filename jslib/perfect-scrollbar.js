@@ -317,7 +317,7 @@ var env = {
     typeof navigator !== 'undefined' && navigator.msMaxTouchPoints,
   isChrome:
     typeof navigator !== 'undefined' &&
-    /Chrome/i.test(navigator && navigator.userAgent),
+    /Chrome/i.test(navigator && navigator.userAgent)
 };
 
 var updateGeometry = function(i) {
@@ -1101,7 +1101,7 @@ var defaultSettings = function () { return ({
   swipeEasing: true,
   useBothWheelAxes: false,
   wheelPropagation: false,
-  wheelSpeed: 1,
+  wheelSpeed: 1
 }); };
 
 var handlers = {
@@ -1109,7 +1109,7 @@ var handlers = {
   'drag-thumb': dragThumb,
   keyboard: keyboard,
   wheel: wheel,
-  touch: touch,
+  touch: touch
 };
 
 var PerfectScrollbar = function PerfectScrollbar(element, userSettings) {
@@ -1237,15 +1237,10 @@ var PerfectScrollbar = function PerfectScrollbar(element, userSettings) {
   updateGeometry(this);
 };
 
-PerfectScrollbar.prototype.update = function update (force) {
+PerfectScrollbar.prototype.update = function update () {
 
   if (!this.isAlive) {
     return;
-  }
-  
-  if(force) {
-    this.element.scrollTop = -100;
-    this.element.scrollLeft = -100;
   }
 
   // Recalcuate negative scrollLeft adjustment
