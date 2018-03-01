@@ -119,13 +119,14 @@ DRAGGABLE.ui.DropdownMenu = function (topDiv, options, menu) {
         e1.appendChild(e3);
 
         this.sbar = new PerfectScrollbar( e3, {
-            handlers: ['click-rail', 'drag-thumb', 'keyboard', 'wheel', 'touch'],
-            wheelSpeed: 1,
-            wheelPropagation: false,
-            suppressScrollX: true,
-            minScrollbarLength: 100,
-            swipeEasing: true,
-            scrollingThreshold: 500
+             handlers: ['click-rail', 'drag-thumb', 'keyboard', 'wheel', 'touch']
+            ,wheelSpeed: 1
+            ,wheelPropagation: false
+            ,suppressScrollX: true
+            ,minScrollbarLength: 100
+            ,swipeEasing: true
+            ,scrollingThreshold: 500
+            ,margin: "4px 0 2px 0"
         });
         
         this.headers[ddmId].div = e3;

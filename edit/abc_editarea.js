@@ -353,10 +353,8 @@ ABCXJS.edit.EditArea.prototype.setVisible = function (visible) {
 };
 
 ABCXJS.edit.EditArea.prototype.resize = function () {
-    
     this.container.resize();
     this.aceEditor.resize();
-    
 };
 
 ABCXJS.edit.EditArea.prototype.setOptions = function (editorOptions, rendererOptions ) {

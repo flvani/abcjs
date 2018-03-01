@@ -127,11 +127,9 @@ DRAGGABLE.ui.Window = function( parent, aButtons, options, callback, aToolBarBut
     this.calcMinHeight = function () {
         this.minHeight = (this.menuDiv ? this.menuDiv.clientHeight : 0 ) 
            + (this.toolBar && this.toolBar.style.display !== 'none' ? this.toolBar.clientHeight : 0 ) 
-           + (this.bottomBar && this.bottomBar.style.display !== 'none' ? this.bottomBar.clientHeight : 0 );
+           + (this.bottomBar && this.bottomBar.style.display !== 'none' ? this.bottomBar.clientHeight+3 : 0 );
     };
     
-//    this.calcMinHeight();
-
     if( this.alternativeResize || this.hasStatusBar ) {
 
         this.divResize = function (e) {

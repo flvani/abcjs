@@ -117,7 +117,6 @@ ABCXJS.Editor = function (params) {
             , {listener: this, method: 'studioCallback'}
     );
     
-    this.studio.dataDiv.className += ' customScrollBar';
     this.studio.setVisible(true);
 
     this.editarea = new ABCXJS.edit.EditArea(
@@ -165,7 +164,7 @@ ABCXJS.Editor = function (params) {
 
     this.canvasContainer = document.createElement("DIV");
     this.canvasContainer.id = 'canvasContainer';
-    this.canvasContainer.className =  'canvas customScrollBar';
+    this.canvasContainer.className =  'canvas';
     
     this.canvasDiv = document.createElement("DIV");
     this.canvasDiv.id = canvas_id;

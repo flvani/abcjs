@@ -9,39 +9,14 @@ define("ace/mode/abcx_highlight_rules",["require","exports","module","ace/lib/oo
         this.$rules = {
             start: [
                 {
-                    token: ['directive', 'directive'],
-                    regex: '(%%)([^%\\\\]*)',
-                    comment: 'ABCX Directive'
+                    token: 'compiler.directive',
+                    regex: '(%%[^%]*)',
+                    comment: 'ABCX directive'
                 },
                 {
                     token: 'comment.italic',
-                    regex: '%.*',
-                    comment: 'ABCX Comment'
-                },
-                {
-                    token: ['information.lyrics.strong', 'information.lyrics'],
-                    regex: '^([Ww]:)([^%\\\\]*)',
-                    comment: 'Lyrics lines'
-                },
-                {
-                    token: ['keyword', 'information.variable'],
-                    regex: '^(V:)([^\\s\\\\]*)',
-                    comment: 'Voice lines'
-                },
-                {
-                    token: ['barline.text', 'keyword', 'information.variable', 'barline.text'],
-                    regex: '(\\[)([A-Z]:)(.*?)(\\])',
-                    comment: 'Inline fields'
-                },
-                {
-                    token: ['keyword', 'information.variable'],
-                    regex: '^([A-Za-z]:)([^%\\\\]*)',
-                    comment: 'Header fileds'
-                },
-                {
-                    token: 'barline.operator.strong',
-                    regex: '[\\[:]*[|:][|\\]:]*(?:\\[?[0-9]+)?|\\[[0-9]+',
-                    comment: 'Bar lines'
+                    regex: '(%.*)',
+                    comment: 'ABCX comment'
                 },
                 {
                     token: 'string.strong',
@@ -49,24 +24,54 @@ define("ace/mode/abcx_highlight_rules",["require","exports","module","ace/lib/oo
                     comment: 'ABCX annotation'
                 },
                 {
-                    token: ['attribute.attribute','information.variable'],
-                    regex: '([\\s].*?[\\=])([^\\s\\\\]*)',
-                    comment: 'ABCX attribute'
-                },
-                {
-                    token: ['accent.constant', 'pitch.constant', 'duration.constant.numeric'],
-                    regex: '([\\^=_]*)([A-Ga-gzx>][,\']*)([0-9]*[\./]*[0-9]*)',
-                    comment: 'Notes'
-                },
-                {
-                    token: ['bass.constant', 'bellows.constant.bellows', 'buttons.constant', 'duration.constant.numeric'],
-                    regex: '([A-Ga-gzxZX>]*[♭♯]*[,\']*)([+-])([0-9abc>xz][\']*)([0-9]*[\.\/><0-9]*)',
-                    comment: 'ABCX tablature elements'
-                },
-                {
                     token: 'decoration.strong',
-                    regex: '([!\\+].*?[!\\+])',
+                    regex: '(!\\S+!|\\+\\S+\\+)',
                     comment: 'ABCX decoration'
+                },
+                {
+                    token: 'delimiters.string.strong',
+                    regex: '(\\-|\\+|\\(|\\))',
+                    comment: 'ABCX delimiters 1'
+                },
+                {
+                    token: ['barline.text', 'keyword.strong', 'information.variable', 'barline.text'],
+                    regex: '(\\[)([A-Z]\\:)(.*?)(\\])',
+                    comment: 'ABCX inline fields'
+                },
+                {
+                    token: 'delimiters.variable.strong',
+                    regex: '(\\[|\\])',
+                    comment: 'ABCX delimiters 2'
+                },
+                {
+                    token: 'barline.operator.strong',
+                    regex: '(\\[\\||\\|\\]|\\:\\||\\|)\\:?[0-9]?',
+                    comment: 'ABCX bar lines'
+                },
+                {
+                    token: ['keyword.strong', 'information.variable'],
+                    regex: '^(V:)([\\S])',
+                    comment: 'ABCX voice lines'
+                },
+                {
+                    token: ['', 'attribute.attribute','information.variable'],
+                    regex: '(V:\\S.*?:)?([A-Za-z]+\=)(\\"*.?\\S*.?\\".*?|\\S*.?)',
+                    comment: 'ABCX attribute variable'
+                },
+                    {
+                    token: ['information.lyrics.strong', 'information.lyrics'],
+                    regex: '^([Ww]:)([^%]*)',
+                    comment: 'ABCX lyrics lines'
+                },
+                {
+                    token: ['keyword.strong', 'information.variable'],
+                    regex: '^([A-Za-z]:)([^%]*)',
+                    comment: 'ABCX header fields'
+                },
+                {
+                    token: ['accent.modifier', 'pitch.constant', 'pitch.constant','accent.modifier', 'duration.constant.numeric'],
+                    regex: '(?:([\\^=_])?([0-9A-Ga-gzx>])([♭♯m]?)([,\']*)([0-9][\\/\\.]?[0-9]?)?)',
+                    comment: 'ABCX musical notes'
                 }
             ]
         };

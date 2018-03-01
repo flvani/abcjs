@@ -70,8 +70,8 @@ color: darkblue;\
 .ace-abcx .ace_constant.ace_numeric {\
 color: rgb(6, 150, 14);\
 }\
-.ace-abcx .ace_constant.ace_bellows {\
-color: red;\
+.ace-abcx .ace_modifier {\
+color: #994400;\
 }\
 .ace-abcx .ace_string {\
 color: #ff0000 \
@@ -88,6 +88,7 @@ color: #708 \
 .ace-abcx .ace_lyrics {\
 color: #994400;\
 }";
+    
 
 exports.cssClass = "ace-abcx";
 
