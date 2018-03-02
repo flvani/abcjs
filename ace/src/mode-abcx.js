@@ -45,7 +45,7 @@ define("ace/mode/abcx_highlight_rules",["require","exports","module","ace/lib/oo
                 },
                 {
                     token: 'barline.operator.strong',
-                    regex: '(\\[\\||\\|\\]|\\:\\||\\|)\\:?[0-9]?',
+                    regex: '(\\[\\||\\|\\]|\\:\\||\\||/)\\:?[0-9]?',
                     comment: 'ABCX bar lines'
                 },
                 {
@@ -70,7 +70,7 @@ define("ace/mode/abcx_highlight_rules",["require","exports","module","ace/lib/oo
                 },
                 {
                     token: ['accent.modifier', 'pitch.constant', 'pitch.constant','accent.modifier', 'duration.constant.numeric'],
-                    regex: '(?:([\\^=_])?([0-9A-Ga-gzx>])([♭♯m]?)([,\']*)([0-9][\\/\\.]?[0-9]?)?)',
+                    regex: '(?:([\\^=_])?([0-9A-Ga-gzx>])([♭♯m]?)([,\']*)([0-9\\/\\.][\\/\\.]?[0-9]?)?)',
                     comment: 'ABCX musical notes'
                 }
             ]
