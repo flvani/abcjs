@@ -127,9 +127,16 @@ DIATONIC.map.AccordionMap.prototype.loadABCX = function(pathList, cb ) {
                 var tunebook = new ABCXJS.TuneBook(data);
                 for (var t = 0; t < tunebook.tunes.length; t ++)  {
                     var tune = tunebook.tunes[t];
-                    objRet.ids[tune.id] = tune.title;
+                    var id = tune.id;
+                    var hidden = false;
+                    if( id.toLowerCase().charAt(0) === 'h' ) {
+                        id = id.substr(1);
+                        hidden = true;
+                    }
+                    
+                    objRet.ids[id] = tune.title;
                     objRet.items[tune.title] = tune.abc;
-                    objRet.details[tune.title] = { composer: tune.composer, id: tune.id };
+                    objRet.details[tune.title] = { composer: tune.composer, id: id, hidden: hidden  };
                     objRet.sortedIndex.push( tune.title );
                 }    
             })
