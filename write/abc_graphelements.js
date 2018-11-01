@@ -641,6 +641,9 @@ ABCXJS.write.RelativeElement.prototype.draw = function(printer, x, staveInfo ) {
         case "debug":
             this.graphelem = printer.printDebugMsg(this.x, staveInfo.highest+2, this.c);
             break;
+        case "fingering":
+            this.graphelem = printer.printFingering(this.x, staveInfo, this.c);
+            break;
         case "lyrics":
             this.graphelem = printer.printLyrics(this.x, staveInfo, this.c);
             break;

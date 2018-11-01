@@ -466,7 +466,6 @@ ABCXJS.write.Layout.prototype.printNote = function(elem, nostem, dontDraw) { //s
             width = (dir === "down") ? 1 : -1;
             abselem.addExtra(new ABCXJS.write.RelativeElement(null, dx, 0, p1, {"type": "stem", "pitch2": p2, linewidth: width}));
         }
-
     }
 
     if (elem.lyric !== undefined) {
@@ -476,8 +475,20 @@ ABCXJS.write.Layout.prototype.printNote = function(elem, nostem, dontDraw) { //s
             lyricStr += "\n" + ly.syllable + ly.divider ;
             maxLen = Math.max( maxLen, (ly.syllable + ly.divider).length );
         });
-        lyricStr = lyricStr.substr(1); // remove the first linefeed
+        if (elem.fingering === undefined || this.tune.formatting.hideFingering) 
+            lyricStr = lyricStr.substr(1); // remove the first linefeed
         abselem.addRight(new ABCXJS.write.RelativeElement(lyricStr, 0, maxLen * 5, 0, {type: "lyrics"}));
+    }
+    
+    if (elem.fingering !== undefined  && !this.tune.formatting.hideFingering) {
+        var lyricStr = "";
+        var maxLen = 0;
+        window.ABCXJS.parse.each(elem.fingering, function(ly) {
+            lyricStr += "\n" + ly.syllable + ly.divider ;
+            maxLen = Math.max( maxLen, (ly.syllable + ly.divider).length );
+        });
+        lyricStr = lyricStr.substr(1); // remove the first linefeed
+        abselem.addRight(new ABCXJS.write.RelativeElement(lyricStr, 0, maxLen * 5, 0, {type: "fingering"}));
     }
 
     if (!dontDraw && elem.gracenotes !== undefined) {

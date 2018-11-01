@@ -65,7 +65,7 @@ define("ace/mode/abcx_highlight_rules",["require","exports","module","ace/lib/oo
                 },
                     {
                     token: ['information.lyrics.strong', 'information.lyrics'],
-                    regex: '^([Ww]:)([^%]*)',
+                    regex: '^([Wwf]:)([^%]*)',
                     comment: 'ABCX lyrics lines'
                 },
                 {

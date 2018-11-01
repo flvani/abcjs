@@ -126,6 +126,7 @@ window.ABCXJS.data.Tune = function() {
         if (!this.formatting.staffwidth)        this.formatting.staffwidth = this.formatting.usablewidth;
         if (!this.formatting.tabInferenceOpts ) this.formatting.tabInferenceOpts = +1.0;
         if (!this.formatting.restsInTab )       this.formatting.restsInTab = false;
+        if (!this.formatting.hideFingering )    this.formatting.hideFingering = false;
         
     };
     

@@ -452,6 +452,15 @@ ABCXJS.write.Printer.prototype.printLyrics = function(x, staveInfo, msg) {
     
 };
 
+ABCXJS.write.Printer.prototype.printFingering = function(x, staveInfo, msg) {
+    var y = this.calcY(staveInfo.lowest);
+    try {
+        this.paper.printSymbol(x-3, y-3, 'cn.'+msg.trim());
+    } catch(e){
+        this.paper.text(x, y+12, msg.trim(), 'abc_lyrics', 'start');        
+    }
+};
+
 ABCXJS.write.Printer.prototype.addSelectListener = function (listener) {
   this.listeners[this.listeners.length] = listener;
 };

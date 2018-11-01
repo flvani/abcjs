@@ -594,11 +594,12 @@ window.ABCXJS.parse.Parse = function(transposer_, accordion_) {
         return ret;
     };
 
-    var addWords = function(staff, line, words) {
-        if (!line) {
-            warn("Can't add words before the first line of music", line, 0);
-            return;
-        }
+    var addWords = function(staff, line, words, fingers) {
+//        este bloco parece não fazer sentido        
+//        if (!line) {
+//            warn("Can't add words before the first line of music", words, 0);
+//            return;
+//        }
         words = window.ABCXJS.parse.strip(words);
         if (words.charAt(words.length - 1) !== '-')
             words = words + ' ';	// Just makes it easier to parse below, since every word has a divider after it.
@@ -609,6 +610,11 @@ window.ABCXJS.parse.Parse = function(transposer_, accordion_) {
         var replace = false;
         var addWord = function(i) {
             var word = window.ABCXJS.parse.strip(words.substring(last_divider, i));
+            
+            if( fingers && "12345*".indexOf(word) < 0 ) {
+                warn( "Alien fingering detected", words, i-1 );
+            }
+            
             last_divider = i + 1;
             if (word.length > 0) {
                 if (replace)
@@ -672,11 +678,19 @@ window.ABCXJS.parse.Parse = function(transposer_, accordion_) {
                     }
                 } else {
                     if (el.el_type === 'note' && el.rest === undefined && !inSlur) {
-                        var lyric = word_list.shift();
-                        if (el.lyric === undefined)
-                            el.lyric = [lyric];
-                        else
-                            el.lyric.push(lyric);
+                        var word = word_list.shift();
+                        if( fingers ) {
+                            if (el.fingering === undefined)
+                                el.fingering = [word];
+                            else
+                                el.fingering.push(word);
+                        } else {
+                            if (el.lyric === undefined)
+                                el.lyric = [word];
+                            else
+                                el.lyric.push(word);
+                            
+                        }
                     }
                 }
             }
@@ -1816,8 +1830,10 @@ window.ABCXJS.parse.Parse = function(transposer_, accordion_) {
         }
         if (ret.newline && multilineVars.continueall === undefined)
             startNewLine();
+        if (ret.fingering)
+            addWords(tune.getCurrentStaff(), tune.getCurrentVoice(), line.substring(2), true);
         if (ret.words)
-            addWords(tune.getCurrentStaff(), tune.getCurrentVoice(), line.substring(2));
+            addWords(tune.getCurrentStaff(), tune.getCurrentVoice(), line.substring(2), false);
         if (ret.symbols)
             addSymbols(tune.getCurrentVoice(), line.substring(2));
         if (ret.recurse)

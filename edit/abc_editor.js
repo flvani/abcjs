@@ -123,7 +123,7 @@ ABCXJS.Editor = function (params) {
           this.studio.dataDiv
         , {listener : this, method: 'editorCallback' }
         , {draggable:false, toolbar: true, alternativeResize:true, translator:SITE.translator, width: "100%", height: "200px"
-            , compileOnChange: true
+            , compileOnChange: false
             , title: 'EstudioEditorTitle' }
     );
 
