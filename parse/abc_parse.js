@@ -611,8 +611,8 @@ window.ABCXJS.parse.Parse = function(transposer_, accordion_) {
         var addWord = function(i) {
             var word = window.ABCXJS.parse.strip(words.substring(last_divider, i));
             
-            if( fingers && "12345*".indexOf(word) < 0 ) {
-                warn( "Alien fingering detected", words, i-1 );
+            if( fingers && word.trim() !== "" && ".1.2.3.4.5.23.24.25.34.35.45.234.345.2345.*.".indexOf("."+word.trim()+".") < 0 ) {
+                warn( "Alien fingering detected", words, i-word.trim().length );
             }
             
             last_divider = i + 1;

@@ -260,6 +260,14 @@ window.ABCXJS.data.Tune = function() {
                                         var section2 = cp.staffs[ss].voices[vv].splice(1);
                                         joinBar(section1[section1.length-1], cp.staffs[ss].voices[vv][0] );
                                         this.lines[i].staffs[ss].voices[vv] = section1.concat(section2);
+                                        
+                                        //trata lyricsRows, garantido que a maior quantidade prevaleça na linha previa
+                                        try {
+                                            var mlr = Math.max( this.lines[i].staffs[ss].lyricsRows, this.lines[nextline].staffs[ss].lyricsRows );
+                                            this.lines[i].staffs[ss].lyricsRows = mlr;
+                                        }catch(e){
+                                          
+                                        }
                                     }
                                 }
                             }
@@ -287,6 +295,10 @@ window.ABCXJS.data.Tune = function() {
 
                             this.lines[i].staffs[s].voices[v] = section1;
                             this.lines[nextline].staffs[s].voices[v] = section2.concat(section3);
+                            
+                            //trata lyricsRows, garantido que a maior quantidade prevaleça na nova linha
+                            var mlr = Math.max( this.lines[i].staffs[s].lyricsRows, this.lines[nextline].staffs[s].lyricsRows );
+                            this.lines[nextline].staffs[s].lyricsRows = mlr;
 
                         }
                     }

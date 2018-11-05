@@ -485,7 +485,7 @@ ABCXJS.write.Layout.prototype.printNote = function(elem, nostem, dontDraw) { //s
         var maxLen = 0;
         window.ABCXJS.parse.each(elem.fingering, function(ly) {
             lyricStr += "\n" + ly.syllable + ly.divider ;
-            maxLen = Math.max( maxLen, (ly.syllable + ly.divider).length );
+            maxLen = Math.max( maxLen, (ly.syllable + ly.divider).length*1.3 );
         });
         lyricStr = lyricStr.substr(1); // remove the first linefeed
         abselem.addRight(new ABCXJS.write.RelativeElement(lyricStr, 0, maxLen * 5, 0, {type: "fingering"}));
