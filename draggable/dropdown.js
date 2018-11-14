@@ -10,7 +10,7 @@ if (! window.DRAGGABLE )
     window.DRAGGABLE  = {};
 
 if (! window.DRAGGABLE.ui )
-    window.DRAGGABLE.ui  = { windowId: 0, menuId: 0, oneTimeCloseFunction : null, lastOpen: null };
+    window.DRAGGABLE.ui  = { windowId: 0, menuId: 0, slideId: 0, oneTimeCloseFunction : null, lastOpen: null };
         
 DRAGGABLE.ui.DropdownMenu = function (topDiv, options, menu) {
     var self = this;

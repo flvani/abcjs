@@ -133,8 +133,7 @@ ABCXJS.Editor = function (params) {
         , {title: 'Keyb', translate: false, statusbar: false, top: "100px", left: "300px" } 
         , {listener: this, method: 'keyboardCallback'}
     );
-                
-
+    
     this.editarea.setVisible(true);
     this.editarea.setToolBarVisible(false);
     this.editarea.setStatusBarVisible(false);
@@ -144,6 +143,11 @@ ABCXJS.Editor = function (params) {
     this.studio.dataDiv.appendChild(this.controldiv);
     this.controldiv.innerHTML = document.getElementById(params.control_id).innerHTML;
     document.getElementById(params.control_id).innerHTML = "";
+
+    this.slider = new DRAGGABLE.ui.Slider( 'slider01', 10, 200, 100, 5, '#FF6B6B', '#FFAFAF', 
+        function(v) { 
+            self.player.setAndamento(v); 
+        } );
 
     if (params.generate_warnings) {
         var warnings_id = 'warningsDiv';
@@ -233,6 +237,9 @@ ABCXJS.Editor = function (params) {
     switchSourceButton = document.getElementById("switch_source");
     cpt = document.getElementById("currentPlayTimeLabel");
 
+
+
+
     switchSourceButton.addEventListener("click", function () {
         self.showingABC =  ! self.showingABC;
         if( self.showingABC )
@@ -267,6 +274,7 @@ ABCXJS.Editor = function (params) {
         document.body.classList.add("home");
         
         self.editarea.setEditorHighLightStyle();
+        self.slider.disable();
         self.player.startPlay(self.tunes[0].midi);
         
         //self.player.startDidacticPlay(myEditor.tunes[0].midi, 'note');
@@ -278,6 +286,7 @@ ABCXJS.Editor = function (params) {
         e.preventDefault();
         self.editarea.clearEditorHighLightStyle();
         self.player.pausePlay();
+        self.slider.enable();
     }, false);
     
     stopButton.addEventListener("click", function (e) {
@@ -286,6 +295,7 @@ ABCXJS.Editor = function (params) {
         self.editarea.setReadOnly(false);
         self.editarea.clearEditorHighLightStyle();
         self.player.stopPlay();
+        self.slider.enable();
     }, false);
     
     showMapButton.addEventListener("click", function (e) {

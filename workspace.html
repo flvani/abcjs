@@ -14,6 +14,7 @@
         <link rel="stylesheet" href="css/dropdown-menu.css" />
         <link rel="stylesheet" href="css/tabbed-view.css" />
         <link rel="stylesheet" href="css/draggable.css" >
+        <link rel="stylesheet" href="css/slider.css" />
         
         <link rel="stylesheet" href="css/workspace.css" />
         
@@ -108,6 +109,7 @@
         <script type="text/javascript" src="draggable/draggable.js"></script>
         <script type="text/javascript" src="draggable/dialogs.js"></script>
         <script type="text/javascript" src="draggable/dropdown.js"></script>
+        <script type="text/javascript" src="draggable/slider.js"></script>
         
         <script type="text/javascript" src="file/filemanager.js" ></script>
 
@@ -339,17 +341,22 @@ V:3 accordionTab
             <button id="buttonPlay" ><i class="ico-play"></i></button>
             <button id="buttonPause" ><i class="ico-pause"></i></button>
             <button id="buttonStop" ><i class="ico-stop"></i></button>
-            <!--input type="text" id="roBt" value="Ir..." />
-            <input type="checkbox" id="chkAutoRefresh" />Auto refresh--> 
-            <input type="checkbox" id="chkDebug" onclick="javascript:doCheckDebug();" />Debug
-            <label id="currentPlayTimeLabel" >00:00:00</label>
+            <label id="currentPlayTimeLabel" style="width:90px;">00:00:00</label>
+            <div id="slider01"></div>
+            <div class="checkboxGroup" >
+                <!--input type="text" id="roBt" value="Ir..." />
+                <input type="checkbox" id="chkAutoRefresh" />Auto refresh--> 
+                <input type="checkbox" id="chkDebug" onclick="javascript:doCheckDebug();" />Debug
+            </div>
         </div>
-    </div>
+        </div>
+</div>
     </div> <!-- editorDiv -->
 </div>        
         <script type="text/javascript">
             
             var myEditor;
+            
             window.addEventListener('load', loadAccordions, false);
             
             window.onresize = function()
@@ -469,6 +476,7 @@ V:3 accordionTab
                 editorCallbackOnChange = function ( editor ) {
                     window.scrollTo( 0, window.lastYpos );
                 };
+                
                 
                 myEditor = new ABCXJS.Editor(
                     {

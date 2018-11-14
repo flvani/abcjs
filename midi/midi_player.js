@@ -100,23 +100,32 @@ ABCXJS.midi.Player.prototype.resetAndamento = function(mode) {
     }
 };
 
-ABCXJS.midi.Player.prototype.adjustAndamento = function() {
-    switch(this.currentAndamento) {
-        case 1:
-            this.currentAndamento = 0.5;
-            this.currentTime = this.currentTime * 2;
-            break;
-        case 0.5:
-            this.currentTime = this.currentTime * 2;
-            this.currentAndamento = 0.25;
-            break;
-        case 0.25:
-            this.currentAndamento = 1;
-            this.currentTime = this.currentTime/4;
-            break;
-    }
-    return this.currentAndamento;
+ABCXJS.midi.Player.prototype.setAndamento = function(value) {
+    // aceita valores entre 10% e 200% do valor original
+    if(value < 10 ) value = 10;
+    if(value > 200 ) value = 200;
+    
+    this.currentAndamento = value/100.0; 
+    this.currentTime = this.currentTime * (1/this.currentAndamento);
 };
+
+//ABCXJS.midi.Player.prototype.adjustAndamento = function() {
+//    switch(this.currentAndamento) {
+//        case 1:
+//            this.currentAndamento = 0.5;
+//            this.currentTime = this.currentTime * 2;
+//            break;
+//        case 0.5:
+//            this.currentTime = this.currentTime * 2;
+//            this.currentAndamento = 0.25;
+//            break;
+//        case 0.25:
+//            this.currentAndamento = 1;
+//            this.currentTime = this.currentTime/4;
+//            break;
+//    }
+//    return this.currentAndamento;
+//};
 
 ABCXJS.midi.Player.prototype.stopPlay = function() {
     this.i = 0;
@@ -258,7 +267,7 @@ ABCXJS.midi.Player.prototype.doPlay = function() {
     }
     
     while (!this.onError && this.playlist[this.i] &&
-           this.playlist[this.i].time <= this.currentTime) {
+           (this.playlist[this.i].time*(1/this.currentAndamento)) <= this.currentTime) {
         this.executa(this.playlist[this.i]);
         this.i++;
         this.handleBar();
