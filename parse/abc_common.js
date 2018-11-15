@@ -59,8 +59,8 @@ window.ABCXJS.misc.isSafari = function() { // Safari 3.0+
 
 window.ABCXJS.misc.isIE = function() {
     
-    if( /*@cc_on!@*/false || !!document.documentMode  ) { // Internet Explorer 6-11
-      return true;
+    if( /* @ cc_on ! @ */ false || !! document.documentMode ) { // Internet Explorer 6-11
+      return true; 
     }
 
     if( navigator.appName.indexOf("Internet Explorer")!==-1 ){ // Yeah, he's using IE

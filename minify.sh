@@ -10,7 +10,7 @@ echo "Concatenating all files..."
 
 cat ace/src/ace.js ace/src/mode-abcx.js ace/src/theme-abcx.js > tmp/ace4abcx.js
 
-cat css/perfect-scrollbar.css css/help.css css/menu-group.css css/dropdown-menu.css css/tabbed-view.css css/draggable.css > tmp/styles4abcx.css
+cat css/perfect-scrollbar.css css/help.css css/menu-group.css css/dropdown-menu.css css/tabbed-view.css css/draggable.css css/slider.css > tmp/styles4abcx.css
 cat css/perfect-scrollbar.css css/help.css > tmp/styles4help.css
 
 cat diatonic/diatonic_common.js diatonic/diatonic_accordion_map.js \
@@ -29,7 +29,7 @@ cat midi/midi_common.js  midi/midi_parser.js  midi/midi_player.js > tmp/midi.js
 
 cat svg/svg.js svg/glyphs.js > tmp/svg.js
 
-cat scroll/perfect-scrollbar.js draggable/draggable.js draggable/dropdown.js draggable/dialogs.js > tmp/abcjs-windows.js
+cat scroll/perfect-scrollbar.js draggable/draggable.js draggable/dropdown.js draggable/dialogs.js draggable/slider.js > tmp/abcjs-windows.js
 cat scroll/perfect-scrollbar.js help/help.js > tmp/abcx-help.js
 
 cat api/abc_tunebook.js data/abc_tune.js tmp/parse.js tmp/write.js tmp/svg.js edit/abc_selectors.js edit/abc_editarea.js > tmp/abcjs-nomidi.js
@@ -44,23 +44,23 @@ cat tmp/abcjs-nomidi.js tmp/tablature.js > tmp/abcxjs-nomidi.js
 
 
 echo "Compressing STYLES4ABCX css ..."
-java -jar yuicompressor-2.4.2.jar  --line-break 7000 -o bin/styles4abcx_$1-min.css tmp/styles4abcx.css
-java -jar yuicompressor-2.4.2.jar  --line-break 7000 -o bin/styles4help-min.css tmp/styles4help.css
+java -jar yuicompressor-2.4.8.jar  --line-break 7000 -o bin/styles4abcx_$1-min.css tmp/styles4abcx.css
+java -jar yuicompressor-2.4.8.jar  --line-break 7000 -o bin/styles4help-min.css tmp/styles4help.css
 
 echo "Compressing ACE4ABCX lib ..."
-java -jar yuicompressor-2.4.2.jar  --line-break 7000 -o bin/ace4abcx_$1-min.js tmp/ace4abcx.js
+java -jar yuicompressor-2.4.8.jar  --line-break 7000 -o bin/ace4abcx_$1-min.js tmp/ace4abcx.js
 
 echo "Compressing ABCX lib ..."
-java -jar yuicompressor-2.4.2.jar  --line-break 7000 -o bin/abcxjs_$1-min.js tmp/abcxjs.js
+java -jar yuicompressor-2.4.8.jar --line-break 7000 -o bin/abcxjs_$1-min.js tmp/abcxjs.js
 
 echo "Compressing ABCX help lib ..."
-java -jar yuicompressor-2.4.2.jar  --line-break 7000 -o bin/abcx-help-min.js tmp/abcx-help.js
+java -jar yuicompressor-2.4.8.jar  --line-break 7000 -o bin/abcx-help-min.js tmp/abcx-help.js
 
 echo "Compressing diatonic-map lib..."
-java -jar yuicompressor-2.4.2.jar  --line-break 7000 -o bin/diatonic_$1-min.js tmp/diatonic.js
+java -jar yuicompressor-2.4.8.jar  --line-break 7000 -o bin/diatonic_$1-min.js tmp/diatonic.js
 
 echo "Compressing file manager lib..."
-java -jar yuicompressor-2.4.2.jar  --line-break 7000 -o bin/filemanager_$1-min.js file/filemanager.js
+java -jar yuicompressor-2.4.8.jar  --line-break 7000 -o bin/filemanager_$1-min.js file/filemanager.js
 
 cp tmp/abcx-help.js jslib/
 cp bin/abcx-help-min.js jslib/

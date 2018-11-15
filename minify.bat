@@ -7,7 +7,7 @@
 
 copy /b/y ace\src\ace.js+ace\src\mode-abcx.js+ace\src\theme-abcx.js tmp\ace4abcx.js
 
-copy /b/y css\perfect-scrollbar.css+css\help.+css\menu-group.css+css\dropdown-menu.css+css\tabbed-view.css+css\draggable.css tmp\styles4abcx.css
+copy /b/y css\perfect-scrollbar.css+css\help.+css\menu-group.css+css\dropdown-menu.css+css\tabbed-view.css+css\draggable.css+css\slider.css tmp\styles4abcx.css
 copy /b/y css\perfect-scrollbar.css+css\help.css tmp\styles4help.css
 
 copy /b/y diatonic\* tmp\diatonic.js
@@ -17,7 +17,7 @@ copy /b/y write\* tmp\write.js
 copy /b/y midi\* tmp\midi.js
 copy /b/y svg\* tmp\svg.js
 
-copy /b/y scroll\perfect-scrollbar.js+draggable\draggable.js+draggable\dropdown.js+draggable\dialogs.js tmp\abcjs-windows.js
+copy /b/y scroll\perfect-scrollbar.js+draggable\draggable.js+draggable\dropdown.js+draggable\dialogs.js+draggable\slider.js tmp\abcjs-windows.js
 copy /b/y scroll\perfect-scrollbar.js+help\help.js tmp\abcx-help.js
 
 copy /b/y api\abc_tunebook.js+data\abc_tune.js+tmp\parse.js+tmp\write.js+edit\abc_selectors.js+edit\abc_editarea.js tmp\abcjs-nomidi.js
@@ -33,23 +33,23 @@ copy /b/y tmp\abcjs-nomidi.js+tmp\tablature.js tmp\abcxjs-nomidi.js
 @set versao=%1
 
 @echo "Compressing STYLES4ABCX css ..."
-java -Dfile.encoding=utf-8 -jar yuicompressor-2.4.2.jar  --line-break 7000 -o bin\styles4abcx_%versao%-min.css tmp\styles4abcx.css
-java -Dfile.encoding=utf-8 -jar yuicompressor-2.4.2.jar  --line-break 7000 -o bin\styles4help-min.css tmp\styles4help.css
+java -Dfile.encoding=utf-8 -jar yuicompressor-2.4.8.jar  --line-break 7000 -o bin\styles4abcx_%versao%-min.css tmp\styles4abcx.css
+java -Dfile.encoding=utf-8 -jar yuicompressor-2.4.8.jar  --line-break 7000 -o bin\styles4help-min.css tmp\styles4help.css
 
 @echo "Compressing ACE4ABCX lib ..."
-java -Dfile.encoding=utf-8 -jar yuicompressor-2.4.2.jar  --line-break 7000 -o bin\ace4abcx_%versao%-min.js tmp\ace4abcx.js
+java -Dfile.encoding=utf-8 -jar yuicompressor-2.4.8.jar  --line-break 7000 -o bin\ace4abcx_%versao%-min.js tmp\ace4abcx.js
 
 @echo "Compressing ABCX %versao%  lib ..."
-java -Dfile.encoding=utf-8 -jar yuicompressor-2.4.2.jar  --line-break 7000 -o bin\abcxjs_%versao%-min.js tmp\abcxjs.js
+java -Dfile.encoding=utf-8 -jar yuicompressor-2.4.8.jar  --line-break 7000 -o bin\abcxjs_%versao%-min.js tmp\abcxjs.js
 
 @echo "Compressing ABCX help %versao% lib ..."
-java -Dfile.encoding=utf-8 -jar yuicompressor-2.4.2.jar  --line-break 7000 -o bin\abcx-help-min.js tmp\abcx-help.js
+java -Dfile.encoding=utf-8 -jar yuicompressor-2.4.8.jar  --line-break 7000 -o bin\abcx-help-min.js tmp\abcx-help.js
 
 @echo "Compressing diatonic-map lib..."
-java -Dfile.encoding=utf-8 -jar yuicompressor-2.4.2.jar  --line-break 7000 -o bin\diatonic_%versao%-min.js tmp\diatonic.js
+java -Dfile.encoding=utf-8 -jar yuicompressor-2.4.8.jar  --line-break 7000 -o bin\diatonic_%versao%-min.js tmp\diatonic.js
 
 @echo "Compressing file manager lib..."
-java -Dfile.encoding=utf-8 -jar yuicompressor-2.4.2.jar  --line-break 7000 -o bin\filemanager_%versao%-min.js file\filemanager.js
+java -Dfile.encoding=utf-8 -jar yuicompressor-2.4.8.jar  --line-break 7000 -o bin\filemanager_%versao%-min.js file\filemanager.js
 
 copy /b/y tmp\abcx-help.js  jslib\
 copy /b/y bin\abcx-help-min.js  jslib\

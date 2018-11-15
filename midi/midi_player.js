@@ -4,20 +4,6 @@
  * and open the template in the editor.
  */
 
-/* TODO: 
- *      - Acertar as chamadas de callBack no Mapa - midplayer
- *      - Acertar chamada de posicionamento de scroll do editor - workspace
- *      - Verificar os impactos da alteração do textarea.appendstring - abc_editor
- *      - Verificar os impactos da mudança em - abc_graphelements
- *      - Verificar se é possível manter um pequeno delay antes de selecionar um botão para que seja
- *          perceptivel que o mesmo foi pressionado mais de uma vez
- *        NOTA: para isso é necessário na tablatura tenha informação de quanto tempo o botão ficará pressionado  
- *      - ok Modificar a execução nota a nota (antes estava melhor) ou verificar se é possível manter 
- *          os botões selecionados alem de verificar a questão do start/stop na play list
- *          NOTA: voltei ao padrão anterior
- *      - ok Enviar para o editor o sinal de  end of music (para mudar o label do botão play)
-*/
-
 if (!window.ABCXJS)
     window.ABCXJS = {};
 
@@ -93,11 +79,10 @@ ABCXJS.midi.Player.prototype.defineCallbackOnChangeBar = function( cb ) {
 };
 
 ABCXJS.midi.Player.prototype.resetAndamento = function(mode) {
-    if( mode==="normal" ){
-        this.currentTime = this.currentTime * this.currentAndamento;
-    } else {
-        this.currentTime = this.currentTime * (1/this.currentAndamento);
-    }
+    try{
+        this.currentTime = this.playlist[this.i].time*(1/this.currentAndamento);
+    } catch(e){
+    };
 };
 
 ABCXJS.midi.Player.prototype.setAndamento = function(value) {
@@ -106,26 +91,8 @@ ABCXJS.midi.Player.prototype.setAndamento = function(value) {
     if(value > 200 ) value = 200;
     
     this.currentAndamento = value/100.0; 
-    this.currentTime = this.currentTime * (1/this.currentAndamento);
+    this.resetAndamento();
 };
-
-//ABCXJS.midi.Player.prototype.adjustAndamento = function() {
-//    switch(this.currentAndamento) {
-//        case 1:
-//            this.currentAndamento = 0.5;
-//            this.currentTime = this.currentTime * 2;
-//            break;
-//        case 0.5:
-//            this.currentTime = this.currentTime * 2;
-//            this.currentAndamento = 0.25;
-//            break;
-//        case 0.25:
-//            this.currentAndamento = 1;
-//            this.currentTime = this.currentTime/4;
-//            break;
-//    }
-//    return this.currentAndamento;
-//};
 
 ABCXJS.midi.Player.prototype.stopPlay = function() {
     this.i = 0;
@@ -337,13 +304,12 @@ ABCXJS.midi.Player.prototype.executa = function(pl) {
                     }
                     aqui=2;
                     if( self.type !== 'note' ) {
-                        //o andamento é considerado somente para o modo didatico
-                        var andamento = self.type?(1/self.currentAndamento):1;
-
-                        //limpa o botão uma fração de tempo antes do fim da nota - para dar ideia visual de botão pressionado/liberado antes da proxima nota
-                        var d = (elem.midipitch.mididuration * 0.1) > 0.5 ? (elem.midipitch.mididuration * 0.1) : 0.5;
                         
-                        elem.button.button.clear( self.calcTempo( (elem.midipitch.mididuration-d)*andamento ) + delay );
+                        var andamento = (1/self.currentAndamento);
+                        //limpa o botão uma fração de tempo antes do fim da nota para dar ideia visual de botão pressionado/liberado antes da proxima nota
+                        var delta = Math.max(elem.midipitch.mididuration * 0.1, 0.5);
+                        
+                        elem.button.button.clear( self.calcTempo( (elem.midipitch.mididuration-delta)*andamento ) + delay );
                     }    
                     aqui=3;
                }

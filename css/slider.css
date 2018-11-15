@@ -9,9 +9,10 @@ and open the template in the editor.
 */
 .slidecontainer {
     float: left;
-    height: 25px;
+    height: 23px;
     width: 134px; 
     margin-top: 1px;
+    border-radius: 3px;
 }
 
 .slidecontainer > .layer1 {

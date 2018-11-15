@@ -11,25 +11,31 @@ if (! window.DRAGGABLE )
 if (! window.DRAGGABLE.ui )
     window.DRAGGABLE.ui  = { windowId: 0, menuId: 0, slideId: 0, oneTimeCloseFunction : null, lastOpen: null };
         
-DRAGGABLE.ui.Slider = function (topDiv, min, max, start, step, pcolor, pbgcolor, callback ) {
+DRAGGABLE.ui.Slider = function (topDiv, opts ) {
+
+   //min, max, start, step, pcolor, pbgcolor, callback ) {
     
+    var self = this;
+    var leftInterval, rightInterval;
     var mozStyle, webkStyle, btStyle;
-    var color = pcolor || 'black';
-    var bgcolor = pbgcolor || 'gray';
+    var color = opts.color || 'black';
+    var bgcolor = opts.bgcolor || 'gray';
+    var speed = opts.speed || 100;
+    var callback = opts.callback;
     
-    for (let {cssRules} of document.styleSheets) {
-      for (let {selectorText, style} of cssRules) {
-        if (selectorText === ".slidebuttonDiv:hover") {
-          btStyle = style;
+    // identifica elementos de CSS padrão que podem ser alterados
+    for( let i in document.styleSheets ) {
+        var rules=document.styleSheets[i].cssRules? document.styleSheets[i].cssRules: document.styleSheets[i].rules;
+        
+        for (var r=0; rules &&r<rules.length; r++){
+            if(rules[r].selectorText===".slidebuttonDiv:hover") 
+                btStyle=rules[r].style;
+            if(rules[r].selectorText===".slider::-webkit-slider-thumb") 
+                webkStyle=rules[r].style;
+            if(rules[r].selectorText===".slider::-moz-range-thumb") 
+                mozStyle=rules[r].style;
         }
-        if (selectorText === ".slider::-webkit-slider-thumb") {
-          webkStyle = style;
-        }
-        if (selectorText === ".slider::-moz-range-thumb") {
-          mozStyle = style;
-        }
-      }
-    }    
+    }
     
     if(btStyle) 
         btStyle.backgroundColor = color;
@@ -40,9 +46,8 @@ DRAGGABLE.ui.Slider = function (topDiv, min, max, start, step, pcolor, pbgcolor,
     if( mozStyle )
         mozStyle.backgroundColor = color;
     
-    var self = this;
-    var leftInterval, rightInterval, speed=100;
-    this.step = step || 5;
+    
+    this.step = opts.step || 1;
     this.id = ++ DRAGGABLE.ui.slideId;
     this.container = ( typeof topDiv === 'object' ) ? topDiv : document.getElementById(topDiv);
     this.container.className = "slidecontainer";
@@ -85,22 +90,21 @@ DRAGGABLE.ui.Slider = function (topDiv, min, max, start, step, pcolor, pbgcolor,
     
     this.slider.type="range";
     this.slider.className = "slider";
-    this.slider.min = min || 0;
-    this.slider.max = max || 100;
-    this.slider.value = start || 100;
+    this.slider.min = opts.min || 0;
+    this.slider.max = opts.max || 100;
+    this.slider.value = opts.start || 100;
     this.slider.step = 1;
-    self.label.innerHTML = (start || 100) + '%';
+    self.label.innerHTML = (opts.start || 100) + '%';
     
     var setV = function (v) {
         self.slider.value = v;
         self.label.innerHTML = self.slider.value+"%";
-        callback(v);
+        (callback) && callback(v);
     };
     
     this.slider.oninput = function(e) {
         self.slider.step = self.step;
         setV(parseInt(this.value));
-        //self.label.innerHTML = this.value+"%";
         e.stopPropagation();
         e.preventDefault();
         self.slider.step = 1;
@@ -140,8 +144,16 @@ DRAGGABLE.ui.Slider = function (topDiv, min, max, start, step, pcolor, pbgcolor,
 
 DRAGGABLE.ui.Slider.prototype.enable = function( ) {
     this.container.style.pointerEvents = 'all';
+    this.container.style.backgroundColor = 'transparent';
+    this.container.style.opacity = '1';
 };
 
 DRAGGABLE.ui.Slider.prototype.disable = function( ) {
     this.container.style.pointerEvents = 'none';
+    this.container.style.backgroundColor = 'gray';
+    this.container.style.opacity = '0.3';
+};
+
+DRAGGABLE.ui.Slider.prototype.getValue = function( ) {
+    return this.slider.value;
 };

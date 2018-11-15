@@ -108,6 +108,7 @@ SITE.Translator.prototype.translate = function(container) {
                         item.value = vlr.val;
                     }
                     break;
+                case 'DIV': 
                 case 'BUTTON': 
                 case 'I': 
                     item.title = vlr; 
