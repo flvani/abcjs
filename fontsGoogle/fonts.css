@@ -1,11 +1,21 @@
-@font-face { font-family: 'titleFont';          src: url('./RockSalt.ttf') format('truetype'); }
-@font-face { font-family: 'menuFont';           src: url('./Milonga-Regular.ttf') format('truetype'); }
+@font-face { font-family: 'RockSalt';          src: url('./RockSalt.ttf') format('truetype'); }
+@font-face { font-family: 'Milonga';           src: url('./Milonga-Regular.ttf') format('truetype'); }
 
-@font-face { font-family: 'subMenuFont';              src: url('./Coda-Regular.ttf') format('truetype'); }
-@font-face { font-family: 'subMenuFont2';              src: url('./Righteous-Regular.ttf') format('truetype'); }
+@font-face { font-family: 'AllertaStencil';   src: url('./AllertaStencil-Regular.ttf') format('truetype'); }
+@font-face { font-family: 'Righteous';        src: url('./Righteous-Regular.ttf') format('truetype'); }
+@font-face { font-family: 'Merienda';         src: url('./Merienda-Regular.ttf') format('truetype'); }
 
-@font-face { font-family: 'abcFont';              src: url('./Merienda-Regular.ttf') format('truetype'); }
+@font-face { font-family: 'Hack';             src: url('./Hack-Regular.ttf') format('truetype'); }
+@font-face { font-family: 'DejaVuSansMono';              src: url('./DejaVuSansMono.ttf') format('truetype'); }
 
+@font-face { font-family: 'abcEditor';              src: url('./DejaVuSansMono.ttf') format('truetype'); }
+@font-face { font-family: 'abcEditor';              src: url('./EMLATIN6.ttf') format('truetype'); }
+@font-face { font-family: 'abcEditor';              src: url('./Lekton-Regular.ttf') format('truetype'); }
+@font-face { font-family: 'abcEditor';              src: url('./mplus-1m-regular.ttf') format('truetype'); }
+@font-face { font-family: 'abcEditor';              src: url('./saxmono.ttf') format('truetype'); }
+@font-face { font-family: 'abcEditor';              src: url('./Pragmata Pro Mono Regular.otf') format('truetype'); }
+
+@font-face { font-family: 'abcEditor';              src: url('./FreeMono.otf') format('truetype'); }
 
 @font-face { font-family: 'atual01';              src: url('./Neucha.ttf') format('truetype'); }
 @font-face { font-family: 'atual02';              src: url('./Spirax-Regular.ttf') format('truetype'); }

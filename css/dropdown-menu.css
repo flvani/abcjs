@@ -19,7 +19,7 @@
     float:left;
     text-align: left;
     vertical-align: middle;
-    font-family: 'menuFont','Arial';
+    font-family: 'Milonga','Arial';
     font-weight: normal;
     font-size: 20px;
     line-height: 16px;
@@ -130,7 +130,7 @@
     -moz-box-shadow: 6px 6px 6px -3px rgba(0,0,0,0.7);
     -ms-box-shadow: 6px 6px 6px -3px rgba(0,0,0,0.7);
     -o-box-shadow: 6px 6px 6px -3px rgba(0,0,0,0.7);
-    font-family: "subMenuFont", "arial";
+    font-family: "AllertaStencil", "arial";
     font-weight: normal;
     font-size: 18px;
     font-style: italic;

@@ -86,7 +86,7 @@ and open the template in the editor.
     float:left;
     text-align: left;
     vertical-align: middle;
-    font-family: menuFont, Arial;
+    font-family: Milonga, Arial;
     font-weight: normal;
     font-size: 28px;
     line-height: 24px;
@@ -120,7 +120,7 @@ and open the template in the editor.
   padding: 0; 
   height: auto;
   text-align: left;
-  font-family: subMenuFont, sans-serif;
+  font-family: AllertaStencil, sans-serif;
   font-size: 16px;
   font-weight: bold;
   pointer-events: none;
@@ -247,7 +247,7 @@ and open the template in the editor.
 .picker-group > input { 
     width: 93px;
     height: 30px;
-    font-family: "menuFont";
+    font-family: "Milonga";
     font-weight: bold;
     border: none;
     text-align: center;
