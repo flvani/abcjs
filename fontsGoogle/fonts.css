@@ -1,13 +1,9 @@
-@font-face { font-family: 'RockSalt';          src: url('./RockSalt.ttf') format('truetype'); }
-@font-face { font-family: 'Milonga';           src: url('./Milonga-Regular.ttf') format('truetype'); }
+@font-face { font-family: 'RockSalt';       src: url('./RockSalt.ttf') format('truetype'); }
+@font-face { font-family: 'Milonga';        src: url('./Milonga-Regular.ttf') format('truetype'); }
+@font-face { font-family: 'AllertaStencil'; src: url('./AllertaStencil-Regular.ttf') format('truetype'); }
+@font-face { font-family: 'Merienda';       src: url('./Merienda-Regular.ttf') format('truetype'); }
 
-@font-face { font-family: 'AllertaStencil';   src: url('./AllertaStencil-Regular.ttf') format('truetype'); }
-@font-face { font-family: 'Righteous';        src: url('./Righteous-Regular.ttf') format('truetype'); }
-@font-face { font-family: 'Merienda';         src: url('./Merienda-Regular.ttf') format('truetype'); }
-
-@font-face { font-family: 'Hack';             src: url('./Hack-Regular.ttf') format('truetype'); }
-@font-face { font-family: 'DejaVuSansMono';              src: url('./DejaVuSansMono.ttf') format('truetype'); }
-
+/*
 @font-face { font-family: 'abcEditor';              src: url('./DejaVuSansMono.ttf') format('truetype'); }
 @font-face { font-family: 'abcEditor';              src: url('./EMLATIN6.ttf') format('truetype'); }
 @font-face { font-family: 'abcEditor';              src: url('./Lekton-Regular.ttf') format('truetype'); }
@@ -74,3 +70,4 @@
 @font-face { font-family: 'atual55';              src: url('./VastShadow-Regular.ttf') format('truetype'); }
 @font-face { font-family: 'atual56';           src: url('./AllertaStencil-Regular.ttf') format('truetype'); }
 @font-face { font-family: 'atual57';          src: url('./RockSalt.ttf') format('truetype'); }
+*/
