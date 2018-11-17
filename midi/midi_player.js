@@ -78,20 +78,22 @@ ABCXJS.midi.Player.prototype.defineCallbackOnChangeBar = function( cb ) {
     this.callbackOnChangeBar = cb;
 };
 
-ABCXJS.midi.Player.prototype.resetAndamento = function(mode) {
-    try{
-        this.currentTime = this.playlist[this.i].time*(1/this.currentAndamento);
-    } catch(e){
-    };
-};
-
 ABCXJS.midi.Player.prototype.setAndamento = function(value) {
+    var that = this;
     // aceita valores entre 10% e 200% do valor original
     if(value < 10 ) value = 10;
     if(value > 200 ) value = 200;
     
-    this.currentAndamento = value/100.0; 
-    this.resetAndamento();
+    if( this.playing ) {
+        // newAndamento funciona como um flag para a rotina que 
+        this.newAndamento = value/100.0; 
+    } else {
+        try{
+            that.currentAndamento = value/100.0; 
+            that.currentTime = that.playlist[that.i].time*(1/that.currentAndamento);
+        } catch(e){
+        };
+    }
 };
 
 ABCXJS.midi.Player.prototype.stopPlay = function() {
@@ -275,6 +277,16 @@ ABCXJS.midi.Player.prototype.executa = function(pl) {
     var aqui;
 
     try {
+        
+        if( this.newAndamento ) {
+            try{
+                this.currentAndamento = this.newAndamento; 
+                this.currentTime = this.playlist[this.i].time*(1/this.currentAndamento);
+                delete this.newAndamento;
+            } catch(e){
+            };
+        }
+        
         if( pl.start ) {
             
             pl.item.pitches.forEach( function( elem ) {
