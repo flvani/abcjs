@@ -86,7 +86,7 @@ and open the template in the editor.
     float:left;
     text-align: left;
     vertical-align: middle;
-    font-family: Milonga, Arial;
+    font-family: 'Milonga','Arial';
     font-weight: normal;
     font-size: 28px;
     line-height: 24px;
@@ -247,7 +247,7 @@ and open the template in the editor.
 .picker-group > input { 
     width: 93px;
     height: 30px;
-    font-family: "Milonga";
+    font-family: 'Milonga','Arial';
     font-weight: bold;
     border: none;
     text-align: center;

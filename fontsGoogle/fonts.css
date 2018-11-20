@@ -2,6 +2,7 @@
 @font-face { font-family: 'Milonga';        src: url('./Milonga-Regular.ttf') format('truetype'); }
 @font-face { font-family: 'AllertaStencil'; src: url('./AllertaStencil-Regular.ttf') format('truetype'); }
 @font-face { font-family: 'Merienda';       src: url('./Merienda-Regular.ttf') format('truetype'); }
+@font-face { font-family: 'DejaVuSansMono'; src: url('./DejaVuSansMono.ttf') format('truetype'); }
 
 /*
 @font-face { font-family: 'abcEditor';              src: url('./DejaVuSansMono.ttf') format('truetype'); }
