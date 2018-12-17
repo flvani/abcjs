@@ -24,7 +24,7 @@ DRAGGABLE.ui.Slider = function (topDiv, opts ) {
     var callback = opts.callback;
     
     // identifica elementos de CSS padrão que podem ser alterados
-    for( let i in document.styleSheets ) {
+    for( var i in document.styleSheets ) {
         var rules=document.styleSheets[i].cssRules? document.styleSheets[i].cssRules: document.styleSheets[i].rules;
         
         for (var r=0; rules &&r<rules.length; r++){
@@ -78,7 +78,7 @@ DRAGGABLE.ui.Slider = function (topDiv, opts ) {
     
     var l = document.createElement('div');
     l.appendChild(this.slider);
-    d2.append(l);
+    d2.appendChild(l);
     
     this.rightButton = document.createElement('div');
     var rlabel = document.createElement('label');
