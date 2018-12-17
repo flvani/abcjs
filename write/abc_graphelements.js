@@ -402,7 +402,9 @@ ABCXJS.write.VoiceElement.prototype.layoutOneItem = function(x, spacing) {
 
 // call when spacingduration has been updated
 ABCXJS.write.VoiceElement.prototype.updateNextX = function(x, spacing) {
-    this.nextx = x + (spacing * Math.sqrt(this.spacingduration * 8));
+    var temp = x + (spacing * Math.sqrt(this.spacingduration * 8));
+    // isso resolve um problema que apareceu no chrome 71.0.3578.98, mas não sei o impacto de retornar 0.
+    this.nextx = isNaN(temp)? 0: temp;
 };
 
 ABCXJS.write.VoiceElement.prototype.shiftRight = function(dx) {
