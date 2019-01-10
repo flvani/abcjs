@@ -106,8 +106,10 @@ ABCXJS.write.StaffGroupElement.prototype.layout = function(spacing, printer, deb
         for (i = 0; i < currentvoices.length; i++) {
             if (currentvoices[i].getNextX() > x) {
                 x = currentvoices[i].getNextX();
+                var sd = currentvoices[i].spacingduration;
                 spacingunit = currentvoices[i].getSpacingUnits();
-                spacingduration = currentvoices[i].spacingduration;
+                // arredonda para zero os numeros muito pequenos - evita erros de NaN em operações posteriores
+                spacingduration = Math.abs(sd) < 0.001 ? Math.round(sd) : sd;
             }
         }
         this.spacingunits += spacingunit;
