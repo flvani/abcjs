@@ -163,8 +163,9 @@ ABCXJS.midi.Player.prototype.startDidacticPlay = function(what, type, value, val
     this.playlist = what.playlist;
     this.tempo    = what.tempo;
     this.printer  = what.printer;
+    this.measures = what.measures;
     this.type     = type;
-
+    
     this.playing  = true;
     this.onError  = null;
     
@@ -186,8 +187,9 @@ ABCXJS.midi.Player.prototype.startDidacticPlay = function(what, type, value, val
             that.currentMeasure = parseInt(value)? parseInt(value): that.currentMeasure;
             that.endMeasure = parseInt(valueF)? parseInt(valueF): that.currentMeasure;
             that.initMeasure = that.currentMeasure;
-            if(what.measures[that.currentMeasure] !== undefined ) {
-                that.i = that.currentMeasure === 1 ? 0 : what.measures[that.currentMeasure];
+            if(that.measures[that.currentMeasure] !== undefined ) {
+                //flavio - era assim that.i = that.currentMeasure === 1 ? 0 : that.measures[that.currentMeasure];
+                that.i = that.measures[that.currentMeasure];
                 that.currentTime = that.playlist[that.i].time*(1/that.currentAndamento);
                 criteria = function () { 
                     return (that.initMeasure <= that.currentMeasure) && (that.currentMeasure <= that.endMeasure);
@@ -201,8 +203,9 @@ ABCXJS.midi.Player.prototype.startDidacticPlay = function(what, type, value, val
         case 'measure': // play-measure
             that.currentMeasure = parseInt(value)? parseInt(value): that.currentMeasure;
             that.initMeasure = that.currentMeasure;
-            if(what.measures[that.currentMeasure] !== undefined ) {
-                that.i = that.currentMeasure === 1 ? 0 : what.measures[that.currentMeasure];
+            if(that.measures[that.currentMeasure] !== undefined ) {
+                //flavio - era assim that.i = that.currentMeasure === 1 ? 0 : that.measures[that.currentMeasure];
+                that.i = that.measures[that.currentMeasure];
                 that.currentTime = that.playlist[that.i].time*(1/that.currentAndamento);
                 criteria = function () { 
                     return that.initMeasure === that.currentMeasure;
@@ -215,7 +218,6 @@ ABCXJS.midi.Player.prototype.startDidacticPlay = function(what, type, value, val
             break;
     }
   
-    //this.doDidacticPlay(criteria);
     this.playInterval = window.setInterval(function() { that.doDidacticPlay(criteria); }, this.tempo);
     return true;
 };
@@ -249,16 +251,22 @@ ABCXJS.midi.Player.prototype.doPlay = function() {
 };
 
 ABCXJS.midi.Player.prototype.doDidacticPlay = function(criteria) {
+    var that = this;
     
     if( this.callbackOnPlay ) {
         this.callbackOnPlay(this);
     }
-    
+
     while (!this.onError && this.playlist[this.i] && criteria() &&
-            (this.playlist[this.i].time*(1/this.currentAndamento)) < this.currentTime ) {
+    (this.playlist[this.i].time*(1/this.currentAndamento)) < this.currentTime ) {
         this.executa(this.playlist[this.i]);
         this.i++;
         this.handleBar();
+        if(this.type === 'repeat' && ! criteria() ) { // continua repetindo ate um evento externo interromper
+            this.currentMeasure = this.initMeasure;
+            this.i = this.measures[this.currentMeasure];
+            this.currentTime = this.playlist[this.i].time*(1/this.currentAndamento);
+        }
     }
     if(this.onError) {
         this.stopPlay();
