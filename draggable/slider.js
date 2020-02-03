@@ -22,19 +22,23 @@ DRAGGABLE.ui.Slider = function (topDiv, opts ) {
     var bgcolor = opts.bgcolor || 'gray';
     var speed = opts.speed || 100;
     var callback = opts.callback;
+    var rules = [];
     
     // identifica elementos de CSS padrão que podem ser alterados
     for( var i in document.styleSheets ) {
-        var rules=document.styleSheets[i].cssRules? document.styleSheets[i].cssRules: document.styleSheets[i].rules;
-        
-        for (var r=0; rules &&r<rules.length; r++){
-            if(rules[r].selectorText===".slidebuttonDiv:hover") 
-                btStyle=rules[r].style;
-            if(rules[r].selectorText===".slider::-webkit-slider-thumb") 
-                webkStyle=rules[r].style;
-            if(rules[r].selectorText===".slider::-moz-range-thumb") 
-                mozStyle=rules[r].style;
+        if(document.styleSheets[i].href.includes('styles4abcx')){
+            rules=document.styleSheets[i].cssRules? document.styleSheets[i].cssRules: document.styleSheets[i].rules;
+            break;
         }
+    }
+
+    for (var r=0; r < rules.length; r++){
+        if(rules[r].selectorText===".slidebuttonDiv:hover") 
+            btStyle=rules[r].style;
+        if(rules[r].selectorText===".slider::-webkit-slider-thumb") 
+            webkStyle=rules[r].style;
+        if(rules[r].selectorText===".slider::-moz-range-thumb") 
+            mozStyle=rules[r].style;
     }
     
     if(btStyle) 
