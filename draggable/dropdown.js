@@ -42,7 +42,7 @@ DRAGGABLE.ui.DropdownMenu = function (topDiv, options, menu) {
         var e2 = document.createElement("input");
         e2.setAttribute( "type", "checkbox" );
         e1.appendChild(e2);
-        this.headers[ddmId] = { div: null, chk: e2, btn: null, list: null, actionList: {} };
+        this.headers[ddmId] = { div: null, chk: e2, btn: null, list: null, actionList: {}, labelList: {} };
         
         e2 = document.createElement("button");
         
@@ -107,6 +107,11 @@ DRAGGABLE.ui.DropdownMenu = function (topDiv, options, menu) {
                     if( DRAGGABLE.ui.lastOpen )
                         self.openMenu(DRAGGABLE.ui.lastOpen, e.keyCode === 37 ); 
                     break;
+                default:
+                    if(e.keyCode >=65 && e.keyCode <=122  ) {
+                        self.searchInMenu(DRAGGABLE.ui.lastOpen, e.keyCode ); 
+                    }
+                    break;    
             }
         });
         
@@ -255,7 +260,32 @@ DRAGGABLE.ui.DropdownMenu.prototype.openMenu = function (ddm, previous ) {
     
 };
 
+DRAGGABLE.ui.DropdownMenu.prototype.searchInMenu = function (ddm, key ) {
+
+    if( this.headers[ddm] === undefined ) return;
+
+    var toSel;
+    var acts = this.headers[ddm].labelList;
+    var chr = String.fromCharCode(key);
+
+    for( var item in acts ) {
+         if( item.startsWith(chr) ){
+            toSel = item;
+            break;
+        }
+    }
+    this.highlightItem(ddm, this.headers[ddm].labelList[toSel]);
+    
+};
+
+
 DRAGGABLE.ui.DropdownMenu.prototype.unhighlightItem = function (menu) {
+    var acts = menu.actionlList;
+
+    for( var item in acts ) {
+         menu.actionList[item].className = '';
+    }
+
     if( menu.highlightItem && (!menu.selectedItem || menu.selectedItem !== menu.actionList[menu.highlightItem]) ) {
         menu.actionList[menu.highlightItem].className = '';
         delete menu.highlightItem;
@@ -294,20 +324,24 @@ DRAGGABLE.ui.DropdownMenu.prototype.highlightItem = function (ddm, up) {
     
     if( !menu.selectedItem || menu.selectedItem !== acts[menu.highlightItem] ) {
         acts[toSel].className = 'hover';
-        
-        if( acts[toSel].offsetTop+acts[toSel].clientHeight >  menu.div.scrollTop + menu.div.clientHeight ) {
-            menu.div.scrollTop = acts[toSel].offsetTop+acts[toSel].clientHeight-menu.div.clientHeight;
-        }
-        if( acts[toSel].offsetTop <  menu.div.scrollTop ) {
-            menu.div.scrollTop = acts[toSel].offsetTop;
-        }
-        return toSel;
     }
+        
+    if( acts[toSel].offsetTop+acts[toSel].clientHeight >  menu.div.scrollTop + menu.div.clientHeight ) {
+        menu.div.scrollTop = acts[toSel].offsetTop+acts[toSel].clientHeight-menu.div.clientHeight;
+    }
+    if( acts[toSel].offsetTop <  menu.div.scrollTop ) {
+        menu.div.scrollTop = acts[toSel].offsetTop;
+        //return toSel;
+    }    
     return true;
 };
 
 DRAGGABLE.ui.DropdownMenu.prototype.selectItem = function (ddm, item) {
     var toSel = item;
+
+    var menu = this.headers[ddm];
+    this.unhighlightItem( menu );
+
     if(  typeof item === "string" ) {
         toSel = this.headers[ddm].actionList[item];
     } 
@@ -367,7 +401,7 @@ DRAGGABLE.ui.DropdownMenu.prototype.addItemSubMenu = function (ddm, newItem, pos
         e5.innerHTML = spn + tags[0] + '</span>';
         e4.appendChild(e5);
         
-        this.addAction( ddm, action, e4, this);
+        this.addAction( ddm, action, e4, this, tags[0]);
         
     }
     
@@ -417,9 +451,10 @@ DRAGGABLE.ui.DropdownMenu.prototype.eventsCentral = function (ddm, event) {
     }
 };
 
-DRAGGABLE.ui.DropdownMenu.prototype.addAction = function( ddm, action, div, self ) {
+DRAGGABLE.ui.DropdownMenu.prototype.addAction = function( ddm, action, div, self, label ) {
     
     self.headers[ddm].actionList[action]=div; 
+    self.headers[ddm].labelList[label]=action; 
     
     div.setAttribute( "data-ddm", ddm );
     div.setAttribute( "data-value", action );
@@ -433,6 +468,7 @@ DRAGGABLE.ui.DropdownMenu.prototype.addAction = function( ddm, action, div, self
     var swiping = function(e) {
         e.preventDefault(); 
         e.stopPropagation(); 
+        self.mouseMovido = true;
         var newY = e.changedTouches[0].pageY;
         var delta = self.startY - newY;
         
@@ -480,7 +516,9 @@ DRAGGABLE.ui.DropdownMenu.prototype.addAction = function( ddm, action, div, self
     div.addEventListener( 'mouseover', function(e) { 
         e.preventDefault(); 
         e.stopPropagation(); 
-        self.highlightItem(this.getAttribute("data-ddm"), this.getAttribute("data-value") );
+        if( self.mouseMovido ) 
+           self.highlightItem(this.getAttribute("data-ddm"), this.getAttribute("data-value") );
+        self.mouseMovido = false;
     }, false);
     
 };

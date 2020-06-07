@@ -98,7 +98,7 @@ ABCXJS.Editor = function (params) {
                     'Teste 3|T3',
                     'Teste 4|T4',
                     'Teste 5|T5',
-                    'Teste 6|T6'
+                    'X-TEST 6|T6'
                 ]},
             {title: 'Informações', ddmId: 'menuInformacoes',
                 itens: [

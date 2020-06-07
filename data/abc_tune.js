@@ -90,9 +90,14 @@ window.ABCXJS.data.Tune = function() {
             case "letter":
                 ph = 11 * dpi;
                 pw = 8.5 * dpi;
+                break;
             case "legal":
                 ph = 14 * dpi;
                 pw = 8.5 * dpi;
+                break;
+            case "screen":
+                ph = 16 * dpi;
+                pw = 8 * dpi;
                 break;
             case "a4":
             default:    

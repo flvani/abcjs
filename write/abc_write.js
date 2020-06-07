@@ -74,6 +74,8 @@ ABCXJS.write.Printer.prototype.printABC = function (abctunes, options) {
 ABCXJS.write.Printer.prototype.printTune = function(abctune, options) {
     
     if( abctune.lines.length === 0 ) return;
+
+    this.currentTune = abctune; // substituir toda ocorrencia de abctune por this.currentTune
     
     options = options || {};
     options.color = options.color ||'black';
@@ -292,7 +294,7 @@ ABCXJS.write.Printer.prototype.printTune = function(abctune, options) {
     
     this.paper.endDoc(abctune);
     
-    this.formatPage(abctune);
+    this.formatPage();
     
     //binds SVG elements
     var lines = abctune.lines;
@@ -559,7 +561,10 @@ ABCXJS.write.Printer.prototype.calcY = function(ofs) {
 };
 
 ABCXJS.write.Printer.prototype.calcPageLength = function() {
-    this.estimatedPageLength = ((this.maxwidth+this.paddingright)*this.pageratio - this.paddingbottom)/this.scale;
+    if( this.currentTune.formatting.papersize === 'screen' ) 
+        this.estimatedPageLength =  1e6; // no page breaks
+    else
+        this.estimatedPageLength = ((this.maxwidth+this.paddingright)*this.pageratio - this.paddingbottom)/this.scale;
 };
 
 ABCXJS.write.Printer.prototype.printPageNumber = function() {
@@ -589,14 +594,14 @@ ABCXJS.write.Printer.prototype.skipPage = function(lastPage) {
     }
 };
 
-ABCXJS.write.Printer.prototype.formatPage = function(tune) {
+ABCXJS.write.Printer.prototype.formatPage = function() {
     //prepara a página para impressão de acordo com os parâmetros da canção.
-    var orientation = tune.formatting.landscape?'landscape':'portrait';
+    var orientation = this.currentTune.formatting.landscape?'landscape':'portrait';
     var style = document.getElementById('page_format');
     
     var formato = 
 '   @page {\n\
-        margin: '+tune.formatting.defaultMargin+'; size: '+tune.formatting.papersize+' ' + orientation + ';\n\
+        margin: '+this.currentTune.formatting.defaultMargin+'; size: '+this.currentTune.formatting.papersize+' ' + orientation + ';\n\
     }\n' ; //+ pgnumber;
     
     if( ! style ) {
