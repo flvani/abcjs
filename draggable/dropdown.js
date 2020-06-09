@@ -19,6 +19,8 @@ DRAGGABLE.ui.DropdownMenu = function (topDiv, options, menu) {
     
     this.id = ++ DRAGGABLE.ui.menuId;
     
+    this.Lastkey = { time: 0, key: 0, label: "" }; // controla última pesquisa feita no menu.
+
     this.container = ( typeof topDiv === 'object' ) ? topDiv : document.getElementById(topDiv);
     this.listener = opts.listener || null;
     this.method = opts.method || null;
@@ -264,18 +266,54 @@ DRAGGABLE.ui.DropdownMenu.prototype.searchInMenu = function (ddm, key ) {
 
     if( this.headers[ddm] === undefined ) return;
 
-    var toSel;
+    var toSel = "";
     var acts = this.headers[ddm].labelList;
-    var chr = String.fromCharCode(key);
+    var chr = String.fromCharCode(key).toUpperCase();
+    var agora = new Date().getTime();
+    var validade  = 3000; // 3 segundos
 
-    for( var item in acts ) {
-         if( item.startsWith(chr) ){
-            toSel = item;
-            break;
+    // tecla repetida, dentro da validade, então busque o próximo da mesma letra inicial
+    var findNext = ( this.Lastkey.key === key && this.Lastkey.time > ( agora - validade ) );
+
+    if( findNext ) {
+        var next = false;
+        for( var item in acts ) {
+            if(  next ) {
+                if( item.startsWith(chr) ) {
+                    toSel = item;
+                    break;
+                }
+            } else if( this.headers[ddm].highlightItem && item === this.Lastkey.label ) {
+                next = true;
+            }
+        }
+    } else {
+        var previo = "";
+        //tenta encontrar um que comece com a letra procurada
+        for( var item in acts ) {
+            if( previo === "" ) previo = item; // registra o primeiro item para usar abaixo
+            if( item.startsWith(chr) ){
+               toSel = item;
+               break;
+            }
+        }
+        //se não encontrar, para no último menor que a letra procurada
+        if( toSel === "" ) {
+            for( var item in acts ) {
+                if( item.charAt(0) >= chr ){
+                    toSel = previo;
+                    break;
+                }
+                previo = item;
+            }
         }
     }
-    this.highlightItem(ddm, this.headers[ddm].labelList[toSel]);
-    
+
+    if( toSel !== "" ) {
+        this.highlightItem(ddm, this.headers[ddm].labelList[toSel]);
+        this.Lastkey = { time: agora, key: key, label: toSel }
+    }
+
 };
 
 
@@ -326,12 +364,11 @@ DRAGGABLE.ui.DropdownMenu.prototype.highlightItem = function (ddm, up) {
         acts[toSel].className = 'hover';
     }
         
-    if( acts[toSel].offsetTop+acts[toSel].clientHeight >  menu.div.scrollTop + menu.div.clientHeight ) {
-        menu.div.scrollTop = acts[toSel].offsetTop+acts[toSel].clientHeight-menu.div.clientHeight;
+    if( acts[toSel].offsetTop+acts[toSel].clientHeight >=  menu.div.scrollTop + menu.div.clientHeight ) {
+        menu.div.scrollTop = acts[toSel].offsetTop+(1.9*acts[toSel].clientHeight)-menu.div.clientHeight;
     }
     if( acts[toSel].offsetTop <  menu.div.scrollTop ) {
         menu.div.scrollTop = acts[toSel].offsetTop;
-        //return toSel;
     }    
     return true;
 };

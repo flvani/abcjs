@@ -88,25 +88,37 @@ ABCXJS.Editor = function (params) {
                     'Partitura <i class="ico-play" /> Tablatura',
                     'Tablatura <i class="ico-play" /> Partitura',
                     '---',
-                    'Teste 10|T10',
-                    'Teste 20|T20',
-                    'Teste 30|T30',
-                    'Teste 40|T40',
-                    'Teste 50|T50',
-                    'Teste 1|T1',
-                    'Teste 2|T2',
-                    'Teste 3|T3',
-                    'Teste 4|T4',
-                    'Teste 5|T5',
-                    'X-TEST 6|T6'
+                    'A canoa virou|T10',
+                    'Boi Barroso|T20',
+                    'Bugiu da Serra|T30',
+                    'Xote 1|T40',
+                    'Xote 2|T50',
+                    'Xote Laranjeira|T1',
+                    'Zyliana|T2',
                 ]},
-            {title: 'Informações', ddmId: 'menuInformacoes',
-                itens: [
-                 'Tutoriais&#160;&#160;<img src="images/novo.png" />|TUTORIAL',
-                 'Partitura&#160;&#160;<i class="ico-open-right"></i>&#160;Tablatura|PART2TAB',
-                 'Tablatura&#160;&#160;<i class="ico-open-right"></i>&#160;Partitura|TAB2PART',
-                 'Sobre|ABOUT'
-            ]}
+                {title: 'Informações', ddmId: 'menuInformacoes',
+                    itens: [
+                     'Tutoriais&#160;&#160;<img src="images/novo.png" />|TUTORIAL',
+                     'Partitura&#160;&#160;<i class="ico-open-right"></i>&#160;Tablatura|PART2TAB',
+                     'Tablatura&#160;&#160;<i class="ico-open-right"></i>&#160;Partitura|TAB2PART',
+                     'Sobre|ABOUT'
+                ]},
+                {title: 'Teste', ddmId: 'menuTeste',
+                    itens: [
+                        'A canoa virou|T10',
+                        'Boi Barroso|T20',
+                        '---',
+                        'Bugiu da Serra|T30',
+                        'Cenoura',
+                        'Couve-flor',
+                        'Melao',
+                        'Pepino',
+                        '---',
+                        'Xote 1|T40',
+                        'Xote 2|T50',
+                        'Xote Laranjeira|T1',
+                        'Zyliana|T2'
+                    ]}
         ]
     );
 

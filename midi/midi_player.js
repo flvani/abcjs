@@ -110,23 +110,27 @@ ABCXJS.midi.Player.prototype.pausePlay = function(nonStop) {
     this.playing = false;
 };
 
+ABCXJS.midi.Player.prototype.doResume = function(nonStop) {
+    MIDI.stopAllNotes();
+    // to be compliant with autoplay-policy-changes #webaudio
+    MIDI.resume();
+    // não pergunte pq: no IOS tenho que tocar uma nota para garantir que não começe com pausa.
+    MIDI.noteOn(0, 40, 1, 0);
+    MIDI.noteOff(0, 40, 0.01);
+    MIDI.noteOn(1, 40, 1, 0);
+    MIDI.noteOff(1, 40, 0.01);
+    MIDI.noteOn(2, 40, 1, 0);
+    MIDI.noteOff(2, 40, 0.01);
+};
+
 ABCXJS.midi.Player.prototype.startPlay = function(what) {
 
     if(this.playing || !what ) return false;
     
-    //flavio - pq no IOS tenho que tocar uma nota antes de qualquer pausa
     if(this.currentTime === 0 ) {
-        MIDI.stopAllNotes();
-        // flavio - to be compliant with autoplay-policy-changes #webaudio
-        MIDI.resume();
-        MIDI.noteOn(0, 40, 1, 0);
-        MIDI.noteOff(0, 40, 0.01);
-        MIDI.noteOn(1, 40, 1, 0);
-        MIDI.noteOff(1, 40, 0.01);
-        MIDI.noteOn(2, 40, 1, 0);
-        MIDI.noteOff(2, 40, 0.01);
+        this.doResume();
     }
-    
+     
     this.playlist = what.playlist;
     this.tempo    = what.tempo;
     this.printer  = what.printer;
@@ -155,11 +159,9 @@ ABCXJS.midi.Player.prototype.startDidacticPlay = function(what, type, value, val
     if(this.playing) return false;
 
     if(this.currentTime === 0 ) {
-        //flavio - pq no IOS tenho que tocar uma nota antes de qualquer pausa
-        MIDI.noteOn(0, 21, 0, 0);
-        MIDI.noteOff(0, 21, 0.01);
+        this.doResume();
     }
-    
+     
     this.playlist = what.playlist;
     this.tempo    = what.tempo;
     this.printer  = what.printer;
