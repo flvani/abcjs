@@ -113,6 +113,102 @@ window.ABCXJS.parse.clone = function(obj) {
     throw new Error("Unable to copy obj! Its type isn't supported.");
 };
 
+
+window.ABCXJS.parse.getBarLine = function(line, i) {
+    var ii = i;
+    var dd = 2; // conta repeticoes ao acrescentar múltiplos ":" à esquerda da barra
+    switch (line.charAt(i)) {
+        case ']':
+            ++i;
+            switch (line.charAt(i)) {
+                case '|': return {len: 2, token: "bar_thick_thin"};
+                case '[':
+                    ++i;
+                    if ((line.charAt(i) >= '1' && line.charAt(i) <= '9') || line.charAt(i) === '"')
+                        return {len: 2, token: "bar_invisible"};
+                    return {len: 1, warn: "Unknown bar symbol"};
+                default:
+                    return {len: 1, token: "bar_invisible"};
+            }
+            break;
+        case ':':
+            ++i;
+            while(line.charAt(i)===':') {++i; dd++;}
+            switch (line.charAt(i)) {
+                case '|':	// :|
+                    ++i;
+                    switch (line.charAt(i)) {
+                        case ']':	// :|]
+                            ++i;
+                            switch (line.charAt(i)) {
+                                case '|':	// :|]|
+                                    ++i;
+                                    if (line.charAt(i) === ':') {
+                                        while(line.charAt(i)===':') {++i;}
+                                        return {len: i-ii, token: "bar_dbl_repeat", repeat: dd};
+                                    }
+                                    return {len: i-ii, token: "bar_right_repeat", repeat: dd};
+                                default:
+                                    return {len: i-ii, token: "bar_right_repeat", repeat: dd};
+                            }
+                            break;
+                        case ':':	// :|:
+                            while(line.charAt(i)===':') {++i;}
+                            return {len: i-ii, token: "bar_dbl_repeat", repeat: dd };
+                        case '|':	// :||
+                            ++i;
+                            if (line.charAt(i) === ':') { //:||:
+                                while(line.charAt(i)===':') {++i;}
+                                return {len: i-ii, token: "bar_dbl_repeat", repeat: dd};
+                            }
+                            return {len: i-ii, token: "bar_right_repeat", repeat: dd};
+                        default:
+                            return {len: i-ii, token: "bar_right_repeat", repeat: dd };
+                    }
+                    break;
+                default:
+                    return {len: i-ii, token: "bar_dbl_repeat"};
+            }
+            break;
+        case '[':	// [
+            ++i;
+            if (line.charAt(i) === '|') {	// [|
+                ++i;
+                switch (line.charAt(i)) {
+                    case ':': // [|:
+                       while(line.charAt(i)===':') {++i;}
+                       return {len: i-ii, token: "bar_left_repeat"};
+                    case ']': return {len: 3, token: "bar_invisible"};
+                    default: return {len: 2, token: "bar_thick_thin"};
+                }
+            } else {
+                if ((line.charAt(i) >= '1' && line.charAt(i) <= '9') || line.charAt(i) === '"')
+                    return {len: 1, token: "bar_invisible"};
+                return {len: 0};
+            }
+            break;
+        case '|':	// |
+            ++i;
+            switch (line.charAt(i)) {
+                case ']': return {len: 2, token: "bar_thin_thick"};
+                case '|': // ||
+                    ++i;
+                    if (line.charAt(i) === ':') { // ||:
+                        while(line.charAt(i)===':') {++i;}
+                        return {len: i-ii, token: "bar_left_repeat"};
+                    }
+                    return {len: 2, token: "bar_thin_thin"};
+                case ':':	// |:
+                    while(line.charAt(i)===':') {++i;}
+                    return { len: i-ii, token: "bar_left_repeat"};
+                default: return {len: 1, token: "bar_thin"};
+            }
+            break;
+    }
+    return {len: 0};
+};
+
+
 window.ABCXJS.parse.normalizeAcc = function ( cKey ) {
     return cKey.replace(/([ABCDEFG])#/g,'$1♯').replace(/([ABCDEFG])b/g,'$1♭');
 };

@@ -166,7 +166,20 @@ window.ABCXJS.parse.tokenizer = function() {
 
 	// This returns one of the legal bar lines
 	// This is called alot and there is no obvious tokenable items, so this is broken apart.
-	this.getBarLine = function(line, i) {
+    this.getBarLine = function(line, i ){
+		//var bn = this.getBarLine_original(line, i);
+		var bn = ABCXJS.parse.getBarLine(line, i);  
+
+		// originalmente não havia informação sobre quantidade de repeticoes
+		if( ! bn.repeat ) {
+           bn.repeat = 1;
+		}
+
+		return bn;
+
+	}
+/*
+	this.getBarLine_original = function(line, i) {
 		switch (line.charAt(i)) {
 			case ']':
 				++i;
@@ -246,6 +259,7 @@ window.ABCXJS.parse.tokenizer = function() {
 		}
 		return {len: 0};
 	};
+*/
 
 	// this returns all the characters in the string that match one of the characters in the legalChars string
 	this.getTokenOf = function(str, legalChars) {

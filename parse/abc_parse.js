@@ -534,13 +534,13 @@ window.ABCXJS.parse.Parse = function(transposer_, accordion_) {
         // It can also be a quoted string. It is unclear whether that construct requires '[', but it seems like it would. otherwise it would be confused with a regular chord.
         if (line.charAt(curr_pos + ret.len) === '"' && line.charAt(curr_pos + ret.len - 1) === '[') {
             var ending = tokenizer.getBrackettedSubstring(line, curr_pos + ret.len, 5);
-            return [ret.len + ending[0], ret.token, ending[1]];
+            return [ret.len + ending[0], ret.token, ret.repeat, ending[1]];
         }
         var retRep = tokenizer.getTokenOf(line.substring(curr_pos + ret.len), "1234567890-,");
         if (retRep.len === 0 || retRep.token[0] === '-')
-            return [orig_bar_len, ret.token];
+            return [orig_bar_len, ret.token,ret.repeat];
 
-        return [ret.len + retRep.len, ret.token, retRep.token];
+        return [ret.len + retRep.len, ret.token, ,ret.repeat, retRep.token];
     };
 
     var letter_to_open_slurs_and_triplets = function(line, i) {
@@ -1512,7 +1512,7 @@ window.ABCXJS.parse.Parse = function(transposer_, accordion_) {
                         this.addTuneElement('note', startOfLine, i, i + ret[0], el);
                         el = {};
                     }
-                    var bar = {type: ret[1]};
+                    var bar = {type: ret[1], repeat: ret[2]};
                     if (bar.type.length === 0)
                         warn("Unknown bar type", line, i);
                     else {
@@ -1523,8 +1523,8 @@ window.ABCXJS.parse.Parse = function(transposer_, accordion_) {
                                 multilineVars.staves[multilineVars.currentVoice.staffNum].inEnding[multilineVars.currentVoice.index] = false;
                             }
                         }
-                        if (ret[2]) {
-                            bar.startEnding = ret[2];
+                        if (ret[3]) {
+                            bar.startEnding = ret[3];
                             if (multilineVars.staves[multilineVars.currentVoice.staffNum].inEnding[multilineVars.currentVoice.index]) {
                                 bar.endDrawEnding = true;
                                 bar.endEnding = true;
