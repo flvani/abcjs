@@ -538,9 +538,9 @@ window.ABCXJS.parse.Parse = function(transposer_, accordion_) {
         }
         var retRep = tokenizer.getTokenOf(line.substring(curr_pos + ret.len), "1234567890-,");
         if (retRep.len === 0 || retRep.token[0] === '-')
-            return [orig_bar_len, ret.token,ret.repeat];
+            return [orig_bar_len, ret.token, ret.repeat];
 
-        return [ret.len + retRep.len, ret.token, ,ret.repeat, retRep.token];
+        return [ret.len + retRep.len, ret.token, ret.repeat, retRep.token];
     };
 
     var letter_to_open_slurs_and_triplets = function(line, i) {
