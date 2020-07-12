@@ -998,6 +998,8 @@ ABCXJS.write.Layout.prototype.printBarLine = function (elem) {
     var secondthin = (elem.type === "bar_left_repeat" || elem.type === "bar_thick_thin" || elem.type === "bar_thin_thin" || elem.type === "bar_dbl_repeat");
     var seconddots = (elem.type === "bar_left_repeat" || elem.type === "bar_dbl_repeat");
 
+    var anyJumpDecoUpper = false; // indica a presença de decorações na parte superior - inibe a impressão do barnumber
+
     // limit positioning of slurs
     if (firstdots || seconddots) {
         for (var slur in this.slurs) {
@@ -1017,6 +1019,10 @@ ABCXJS.write.Layout.prototype.printBarLine = function (elem) {
     if (firstthin) {
         anchor = new ABCXJS.write.RelativeElement(null, dx, 1, 2, {"type": "bar", "pitch2": topbar, linewidth: 0.6});
         abselem.addRight(anchor);
+        if( elem.repeat > 2 && this.tuneCurrVoice == 0) {
+            abselem.addChild(new ABCXJS.write.RelativeElement(elem.repeat+"x", 0, -5, 12, {type: "part"}));
+            anyJumpDecoUpper = true;
+        }
     }
 
     if (elem.type === "bar_invisible") {
@@ -1035,7 +1041,6 @@ ABCXJS.write.Layout.prototype.printBarLine = function (elem) {
         dx += 5;
     }
 
-    var anyJumpDecoUpper = false;
     if (elem.jumpDecoration) {
         for(var j=0; j< elem.jumpDecoration.length; j++ ) {
             if(( elem.jumpDecoration[j].upper && this.isFirstVoice() ) || ( !elem.jumpDecoration[j].upper && this.isLastVoice() ) ) {
