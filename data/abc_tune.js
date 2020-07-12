@@ -383,11 +383,12 @@ window.ABCXJS.data.Tune = function() {
                             var bari = ai[vi.el];
                             vi.el++;
 
-                            if( bar.type !== bari.type )  {
+                            if( bar.type !== bari.type  || bar.repeat !== bari.repeat )  {
                                 addWarning('Line: '+(i+1)+', Staff: '+(vi.sf+1)+' - Ajustando tipo de barra de compasso '+bar.barNumber+'.');
                                 bari.type = bar.type;
+                                bari.repeat = bar.repeat;
                             }
-                            
+
                             if( bar.startEnding && bar.startEnding !== bari.startEnding )  {
                                 addWarning('Line: '+(i+1)+', Staff: '+(vi.sf+1)+' - Ajustando ending do compasso '+bar.barNumber+'.');
                                 bari.startEnding = bar.startEnding;

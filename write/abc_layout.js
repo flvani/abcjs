@@ -1019,7 +1019,7 @@ ABCXJS.write.Layout.prototype.printBarLine = function (elem) {
     if (firstthin) {
         anchor = new ABCXJS.write.RelativeElement(null, dx, 1, 2, {"type": "bar", "pitch2": topbar, linewidth: 0.6});
         abselem.addRight(anchor);
-        if( elem.repeat > 2 && this.tuneCurrVoice == 0) {
+        if( elem.repeat > 2 && this.tuneCurrStaff == 0) {
             abselem.addChild(new ABCXJS.write.RelativeElement(elem.repeat+"x", 0, -5, 12, {type: "part"}));
             anyJumpDecoUpper = true;
         }

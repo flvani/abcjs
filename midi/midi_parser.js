@@ -450,6 +450,8 @@ ABCXJS.midi.Parse.prototype.handleBar = function (elem) {
       return false;
     }
     
+    this.maxPass = elem.repeat;
+
     if( elem.barNumber ) {
         this.addBarNumber = elem.barNumber; 
     }
