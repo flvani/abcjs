@@ -247,9 +247,15 @@ ABCXJS.tablature.Parse.prototype.getBarLine = function() {
   
   token.token = this.line.substr( p, this.i-p );
   this.finished =  this.i >= this.line.length;
-  
-  // validar o tipo de barra
-  token.type = validBars[token.token];
+
+  //tratar multiplos ":" -- para efeito de tipo de barra, somente um ":" de cada lado é considerado
+  var i = 0; f = token.token.length;
+  while( token.token.charAt(i) === ':') ++i;
+  while( token.token.charAt(f-1) === ':') --f;
+
+  token.repeat = (i>f) ? 2 : i + 1;
+  token.type = validBars[(i>f)?token.token:token.token.substring(i-1,f+1)];
+
   this.invalid = !token.type;
 
   if(! this.invalid) {

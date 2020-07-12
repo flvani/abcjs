@@ -384,7 +384,7 @@ ABCXJS.tablature.Infer.prototype.addTABChild = function(token, line ) {
     if (token.el_type !== "note") {
         var xf = 0;
         if( this.barTypes[token.type] ){
-            xf = this.registerLine(this.barTypes[token.type] + 
+            xf = this.registerLine((token.repeat>2?":".repeat(token.repeat-2):"")+this.barTypes[token.type] + 
                     (token.startEnding?token.startEnding:"") + " ");
         } else {
             throw new Error( 'ABCXJS.tablature.Infer.prototype.addTABChild(token_type): ' + token.type );
