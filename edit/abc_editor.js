@@ -71,7 +71,7 @@ ABCXJS.Editor = function (params) {
 
     this.menu = new DRAGGABLE.ui.DropdownMenu(
          params.menu_id
-        ,{ listener:this, method:'menuCallback' }
+        ,{ listener:this, method:'menuCallback', label:'Menu' }
         ,[{title: 'Acordeons', ddmId: 'menuGaitas',
                 itens: [
                     'Acordeon 1',
@@ -201,7 +201,7 @@ ABCXJS.Editor = function (params) {
             if (params.accordionSelector_id) {
                 this.accordionSelector = new ABCXJS.edit.AccordionSelector( 
                         'sel1', params.accordionSelector_id, 
-                        { listener:this, method: 'studioCallback' }, 
+                        { listener:this, method: 'studioCallback', label:"Gaititas" }, 
                         [
                             '---',
                             'Salvar mapa corrente|SAVEMAP',
