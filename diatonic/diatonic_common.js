@@ -16,7 +16,7 @@ DIATONIC.map.color.background = 'none';
 DIATONIC.map.color.open = '#00ff00';
 DIATONIC.map.color.close = '#00b2ee';
 
-DIATONIC.map.loadAccordionMaps = function ( files, cb )  {
+DIATONIC.map.loadAccordionMaps = function ( files, opts, cb )  {
     
     if( ! DIATONIC.map.accordionMaps )
         DIATONIC.map.accordionMaps = [];
@@ -29,7 +29,7 @@ DIATONIC.map.loadAccordionMaps = function ( files, cb )  {
         $.getJSON( files[f], {  format: "json"  })
             .done(function( data ) {
                 FILEMANAGER.deregister('MAP', true);
-                DIATONIC.map.accordionMaps.push( new DIATONIC.map.AccordionMap(data) );
+                DIATONIC.map.accordionMaps.push( new DIATONIC.map.AccordionMap(data, false, opts) );
             })
             .fail(function( data, textStatus, error ) {
                 FILEMANAGER.deregister('MAP', false);

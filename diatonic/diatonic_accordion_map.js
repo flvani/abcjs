@@ -10,14 +10,14 @@ if (!window.DIATONIC)
 if (!window.DIATONIC.map)
     window.DIATONIC.map = {};
 
-DIATONIC.map.AccordionMap = function (res, local) {
+DIATONIC.map.AccordionMap = function (res, local, opts) {
     this.id = res.id;
     this.menuOrder = res.menuOrder;
     this.model = res.model;
     this.tuning = res.tuning;
     this.buttons = res.buttons;
     this.image = res.image || 'img/accordion.default.gif';
-    this.keyboard = new DIATONIC.map.Keyboard( res.keyboard, res.pedal );
+    this.keyboard = new DIATONIC.map.Keyboard( res.keyboard, res.pedal, opts );
     this.songPathList = res.songPathList;
     this.practicePathList = res.practicePathList;
     this.chordPathList = res.chordPathList;

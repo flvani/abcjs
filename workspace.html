@@ -398,6 +398,7 @@ V:3 accordionTab
                       ,'accordions/hohner.cf.club.br.accordion'
                       ,'accordions/leticce.cf.ne.accordion'
                     ]
+                    ,{ isApp: true }
                     , function () { // call back after loading
                         FILEMANAGER.waitResources( { 
                             onProgress: function(event) {
@@ -411,7 +412,7 @@ V:3 accordionTab
                             }
                             ,onLoad: loadMIDI 
                         });
-                    } 
+                    }
                 );
             }
             
