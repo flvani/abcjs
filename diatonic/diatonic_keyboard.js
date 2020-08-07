@@ -53,7 +53,7 @@ DIATONIC.map.Keyboard.prototype.setup = function (keyMap) {
         this.keyMap[i] = new Array(keyMap.basses.open[i - nIlheiras].length);
     }
     if( this.opts.isApp )
-        this.width = (nIlheiras + nIlheirasBaixo ) * (this.size) + 15 + 3; // printApp
+        this.width = (nIlheiras + nIlheirasBaixo ) * (this.size) + 21 + 3; // printApp
     else  
         this.width = (nIlheiras + nIlheirasBaixo ) * (this.size) + this.size + 3;
 
@@ -74,7 +74,7 @@ DIATONIC.map.Keyboard.prototype.setup = function (keyMap) {
             bass = false;
         } else {
             if( this.opts.isApp )
-                x = (j + 0.5) * (this.size) + 15; // printApp
+                x = (j + 0.5) * (this.size) + 21; // printApp
             else   
                 x = (j + 0.5) * (this.size) + this.size; 
             yi = bassY;
@@ -112,7 +112,7 @@ DIATONIC.map.Keyboard.prototype.setup = function (keyMap) {
     }
     // posiciona linha decorativa
     if( this.opts.isApp )
-        x = (nIlheiras) * (this.size) + 9 //printApp
+        x = (nIlheiras) * (this.size) + 12 //printApp
     else    
         x = (nIlheiras) * (this.size) + this.size/2;
 
@@ -161,7 +161,7 @@ DIATONIC.map.Keyboard.prototype.print = function ( div, render_opts, translator 
     legenda_opts.kls = 'blegenda';
     this.legenda.draw( 'l00', this.paper, this.limits, legenda_opts );
     
-    var delta = this.opts.isApp ? 5: 10;
+    var delta = this.opts.isApp ? 7: 10;
 
     if(render_opts.transpose) {
         sz = {w:this.height, h:this.width};

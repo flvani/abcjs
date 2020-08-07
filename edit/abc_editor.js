@@ -142,7 +142,7 @@ ABCXJS.Editor = function (params) {
     this.keyboardWindow = new DRAGGABLE.ui.Window( 
           this.studio.dataDiv
         , [ 'move|Mover', 'rotate|Rotacionar', 'zoom|Zoom','globe|Mudar Notação']
-        , {title: 'Keyb', translate: false, statusbar: false, top: "100px", left: "300px" } 
+        , {title: 'Keyb', draggable: false, translate: false, statusbar: false, top: "100px", left: "300px" } 
         , {listener: this, method: 'keyboardCallback'}
     );
     
@@ -379,6 +379,8 @@ ABCXJS.Editor.prototype.resize = function( ) {
     var h = Math.max((winH -75 -10 ),200); 
     var w =  Math.max((winW - 6 ),400); 
     
+    this.studio.topDiv.style.left = "1px";
+    this.studio.topDiv.style.top = "70px";
     this.studio.topDiv.style.height = h +"px";
     this.studio.topDiv.style.width = w +"px";
     

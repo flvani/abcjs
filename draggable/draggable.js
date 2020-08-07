@@ -51,10 +51,12 @@ DRAGGABLE.ui.Window = function( parent, aButtons, options, callback, aToolBarBut
         this.parent.appendChild(this.topDiv);
     }
     
-    if( ! this.draggable ) {
-        this.topDiv.style.position = "relative";
-        this.topDiv.style.margin = "1px";
+/*     if( ! this.draggable ) {
+        //this.topDiv.style.position = "relative";  // pq assume isso quando nao dragavel?
+        //this.topDiv.style.margin = "1px";
     } else {
+ */ 
+    if( this.draggable ) {       
         if(this.parent) {
             this.topDiv.style.position = "absolute";
         }
@@ -348,7 +350,7 @@ DRAGGABLE.ui.Window.prototype.setFloating = function (floating) {
             this.resizeCorner.style.display='none';
         
         this.topDiv.className = "draggableWindow noShadow";
-        this.topDiv.style.position = "relative";
+        this.topDiv.style.position = "relative"; // pq assume isso quando nao dragavel?
         this.topDiv.style.margin = "1px";
         this.blur();
     }

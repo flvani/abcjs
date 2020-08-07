@@ -27,7 +27,10 @@ DRAGGABLE.ui.Slider = function (topDiv, opts ) {
     // identifica elementos de CSS padrão que podem ser alterados
     for( var i in document.styleSheets ) {
         if(document.styleSheets[i].href && document.styleSheets[i].href.includes('styles4abcx')){
-            rules=document.styleSheets[i].cssRules? document.styleSheets[i].cssRules: document.styleSheets[i].rules;
+            try {
+                rules=document.styleSheets[i].cssRules? document.styleSheets[i].cssRules: document.styleSheets[i].rules;
+            } catch {
+            }
             break;
         }
     }
