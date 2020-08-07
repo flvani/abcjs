@@ -29,7 +29,7 @@ DRAGGABLE.ui.Slider = function (topDiv, opts ) {
         if(document.styleSheets[i].href && document.styleSheets[i].href.includes('styles4abcx')){
             try {
                 rules=document.styleSheets[i].cssRules? document.styleSheets[i].cssRules: document.styleSheets[i].rules;
-            } catch {
+            } catch (e) {
             }
             break;
         }
