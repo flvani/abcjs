@@ -48,6 +48,7 @@ DRAGGABLE.ui.DropdownMenu = function (topDiv, options, menu) {
         //assumo por hora que, se tem label, tem borda
         if( this.menuLabel ) {
             var h = document.createElement("H1");
+            h.setAttribute( "data-translate", this.menuLabel );
             h.appendChild(document.createTextNode(this.menuLabel));
             e1.appendChild(h);
             this.menuBorder = true;

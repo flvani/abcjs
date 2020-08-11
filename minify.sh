@@ -62,6 +62,10 @@ java -jar yuicompressor-2.4.8.jar  --line-break 7000 -o bin/diatonic_$1-min.js t
 echo "Compressing file manager lib..."
 java -jar yuicompressor-2.4.8.jar  --line-break 7000 -o bin/filemanager_$1-min.js file/filemanager.js
 
+echo "Compressing file kellycollorpicker lib..."
+java -jar yuicompressor-2.4.8.jar  --line-break 7000 -o jslib/html5kellycolorpicker.min.js jslib/html5kellycolorpicker.js
+
+
 cp tmp/abcx-help.js jslib/
 cp bin/abcx-help-min.js jslib/
 

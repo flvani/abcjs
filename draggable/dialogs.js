@@ -214,12 +214,17 @@ DRAGGABLE.ui.ColorPicker = function( itens, options ) {
         , {listener : this, method: 'pickerCallBack' }
     );
 
+    var txtRO = ""
+    if(options.readonly) {
+        txtRO='readonly'
+    }
+
     this.container.dataDiv.innerHTML = '\
 <div class="picker-group">\
     <canvas id="colorPickerCanvas"></canvas><br>\
-    <input id="originalColor"></input>\
-    <input id="newColor"></input>\
-</div>';
+    <input id="originalColor" '+txtRO+' ></input>\
+    <input id="newColor" '+txtRO+' ></input>\
+</div>'; 
    
     this.originalColor = document.getElementById( 'originalColor' );
     this.newColor = document.getElementById( 'newColor' );
