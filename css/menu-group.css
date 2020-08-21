@@ -79,3 +79,31 @@ and open the template in the editor.
     top: -4px;
     height:20px;
 }    
+
+.checkbox-group {
+    display: inline-block;
+    margin-left: 10px;
+    margin-top: 2px;
+    height: 25px;
+    padding: 2px;
+    vertical-align: top;
+}
+
+.others-group {
+    display: inline-block;
+    vertical-align: top;
+    height: 25px;
+}
+
+.playtime-label {
+    display: inline-block !important;
+    width:90px !important;
+    text-align: right !important;
+    padding: 4px !important;
+    font-family: "Milonga", "Lucida Grande","Lucida Sans Unicode", Tahoma, Sans-Serif !important;
+    font-size: 16px !important;
+    margin: 2px 5px 1px 5px!important;
+}
+  
+    
+  
