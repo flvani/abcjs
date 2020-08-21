@@ -71,7 +71,7 @@ ABCXJS.Editor = function (params) {
 
     this.menu = new DRAGGABLE.ui.DropdownMenu(
          params.menu_id
-        ,{ listener:this, method:'menuCallback', label:'Menu' }
+        ,{ listener:this, method:'menuCallback' /*, label:'Menu'*/ }
         ,[{title: 'Acordeons', ddmId: 'menuGaitas',
                 itens: [
                     'Acordeon 1',
@@ -156,9 +156,9 @@ ABCXJS.Editor = function (params) {
     this.controldiv.innerHTML = document.getElementById(params.control_id).innerHTML;
     document.getElementById(params.control_id).innerHTML = "";
 
-    this.slider = new DRAGGABLE.ui.Slider( 'slider01',
+   this.slider = new DRAGGABLE.ui.Slider( 'slider01',
         {
-            min: 10, max: 200, start:100, step:5, color: '#FF6B6B', bgcolor:'#FFAFAF', 
+            min: 25, max: 200, start:100, step:25, speed:100, color: 'white', bgcolor:'black', size:{w:150, h:23, tw:48},
             callback: function(v) { self.player.setAndamento(v); } 
         } 
     );
@@ -380,7 +380,7 @@ ABCXJS.Editor.prototype.resize = function( ) {
     var w =  Math.max((winW - 6 ),400); 
     
     this.studio.topDiv.style.left = "1px";
-    this.studio.topDiv.style.top = "70px";
+    this.studio.topDiv.style.top = "75px";
     this.studio.topDiv.style.height = h +"px";
     this.studio.topDiv.style.width = w +"px";
     
