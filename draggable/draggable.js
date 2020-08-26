@@ -127,7 +127,7 @@ DRAGGABLE.ui.Window = function( parent, aButtons, options, callback, aToolBarBut
     }
     
     this.calcMinHeight = function () {
-        this.minHeight = (this.menuDiv ? this.menuDiv.clientHeight : 0 ) 
+        this.minHeight = (this.menuDiv && this.menuDiv.style.display !== 'none' ? this.menuDiv.clientHeight : 0 ) 
            + (this.toolBar && this.toolBar.style.display !== 'none' ? this.toolBar.clientHeight : 0 ) 
            + (this.bottomBar && this.bottomBar.style.display !== 'none' ? this.bottomBar.clientHeight+3 : 0 );
     };
@@ -302,8 +302,12 @@ DRAGGABLE.ui.Window.prototype.setSize = function( width, height ) {
 DRAGGABLE.ui.Window.prototype.setVisible = function( visible ) {
     this.topDiv.style.display=(visible? 'block':'none');
     (visible) && this.focus();
-
 };
+
+DRAGGABLE.ui.Window.prototype.setMenuVisible = function( visible ) {
+    this.menuDiv.style.display=(visible? 'block':'none');
+    (visible) && this.focus();
+}
 
 DRAGGABLE.ui.Window.prototype.setToolBarVisible = function (visible) {
     if( this.toolBar ) {
