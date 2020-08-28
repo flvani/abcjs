@@ -17,6 +17,7 @@ and open the template in the editor.
 	font-size: 12px;
   font-weight: bolder;
   text-align: center;
+  vertical-align: middle;
 }
 
 .slide-tracker {
