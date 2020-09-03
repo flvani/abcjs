@@ -11,7 +11,8 @@ and open the template in the editor.
 .slide-container {
   position: relative;
   display: inline-block;
-  margin: 3px 5px 1px 5px;
+  margin: 0;
+  margin-top: -2px;
   border-radius: 3px;
   font-family: "Milonga", "Lucida Grande","Lucida Sans Unicode", Tahoma, Sans-Serif !important;
 	font-size: 12px;

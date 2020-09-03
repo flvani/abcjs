@@ -11,7 +11,11 @@
     margin-left: 5px;
 }
 
-.btn-group label,
+.btn-subgroup {
+    display: inline-block;
+    float: left;
+}
+
 .btn-group button,
 .dropdown-group button {
     position: relative;
@@ -48,13 +52,6 @@
     color: orange;
     text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
     background-color: transparent;
-}
-
-.btn-group label {
-    text-align: left;
-    padding-top: 6px;
-    height: 16px;
-    font-size: 16px;
 }
 
 .btn-group input[type="text"] {
